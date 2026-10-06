@@ -18,8 +18,8 @@ const registerHooks = (nodeModule as unknown as {
 const taken = (exp: unknown): string => (typeof exp === 'string' ? exp : exp && typeof exp === 'object' && 'default' in exp && typeof (exp as { default: unknown }).default === 'string' ? (exp as { default: string }).default : '');
 
 /**
- * Where a named package or world lies: `dep/<name>` for a library the instrument installs, `uses/<name>` for a world
- * pinned by its GitHub release. Both are the digest, laid. Nothing here spells a path.
+ * Resolve declared library bytes for this host. A library's shape may select an
+ * archive coordinate; world selection remains the standing contract.
  */
 export function pinPlace(name: string): string {
   const lock = ownLock();
@@ -27,7 +27,7 @@ export function pinPlace(name: string): string {
     ?? lock.find((one) => fieldOf(one, 'scope') === `uses/${name}`);
   if (line === undefined) return '';
   const digest = fieldOf(line, 'value');
-  return digest ? runtimeTreeAt(ownStore(), ownRoot(), digest, ownStore()) ?? '' : '';
+  return digest ? runtimeTreeAt(ownStore(), ownRoot(), digest, ownStore(), fieldOf(line, 'role') === 'reads' ? fieldOf(line, 'shape') : '') ?? '' : '';
 }
 
 export function pinExport(name: string, sub: string): string {

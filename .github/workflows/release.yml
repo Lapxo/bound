@@ -13,6 +13,8 @@ jobs:
       contents: write
     outputs:
       tag: ${{ steps.version.outputs.tag }}
+      asset: ${{ steps.archive.outputs.asset }}
+      sha256: ${{ steps.archive.outputs.sha256 }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,12 +39,15 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: node dist/cli/verb.js fold --check
-      - env:
+      - id: archive
+        env:
           GH_TOKEN: ${{ github.token }}
         run: |
           version="${{ steps.version.outputs.tag }}"
-          asset="$(npm pack --silent)"
+          asset="$(npm pack --ignore-scripts --silent)"
+          echo "asset=$asset" >> "$GITHUB_OUTPUT"
           expected="$(sha256sum "$asset" | cut -d ' ' -f 1)"
+          echo "sha256=$expected" >> "$GITHUB_OUTPUT"
           if ! gh release view "$version" >/dev/null 2>&1; then
             gh release create "$version" "$asset" --title "$version" --notes "$(git log -1 --format=%B)"
           fi
@@ -64,10 +69,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm ci
-      - run: npm run build
-      - run: npm test
       - run: npm install --global npm@'12.1.0'
-      - run: |
-          npm view "$(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")" version >/dev/null 2>&1 && exit 0
-          npm stage publish
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release.outputs.tag }}
+          ASSET: ${{ needs.release.outputs.asset }}
+          EXPECTED: ${{ needs.release.outputs.sha256 }}
+        run: |
+          mkdir candidate
+          gh release download "$TAG" --pattern "$ASSET" --dir candidate
+          actual="$(sha256sum "candidate/$ASSET" | cut -d ' ' -f 1)"
+          test "$EXPECTED" = "$actual"
+          npm stage publish "./candidate/$ASSET" --access public --ignore-scripts

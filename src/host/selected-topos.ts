@@ -62,3 +62,22 @@ export function selectedWireList(local:readonly string[],epoch:number,pins:reado
     throw Error(`REFUSE·wire wire/${list} has conflicting contracts · ${contracts.map(one=>one.name).join(' · ')}`);
   return first.words;
 }
+
+/** Complete an admission snapshot from the selected standing. Local declarations
+ * govern their own lists; independent selected contracts cannot choose by order. */
+export function selectedWireAt(local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=toposAt):ReturnType<typeof wireAt> {
+  const own=wireAt(local,epoch);
+  const worlds=selectedTopoi(pins,resolve).map(({digest,topos})=>({digest,parts:topos.parts,wire:wireAt(topos.parts,Number.MAX_SAFE_INTEGER)}));
+  const key=(scope:string):string|undefined=>scope.startsWith('wire/')?scope.slice(5):scope.startsWith('audit/wire/')?scope.slice(11):undefined;
+  const declared=new Set(local.filter(f=>Number(f.epoch??0)<=epoch).map(f=>key(f.scope??'')).filter((k):k is string=>k!==undefined));
+  const selected=new Map<string,{value:string;fields:Readonly<Record<string,string>>;digest:string}>();
+  for(const world of worlds) for(const f of world.parts){
+    const name=key(f.scope??'');if(name===undefined||declared.has(name))continue;
+    const list=world.wire?.lists.get(name);
+    const value=list?[...list].sort().join('|'):f.value??'';
+    const previous=selected.get(name);
+    if(previous&&previous.value!==value)throw Error(`REFUSE·wire wire/${name} has conflicting selected contracts · ${previous.digest} · ${world.digest}`);
+    if(!previous)selected.set(name,{value,fields:f,digest:world.digest});
+  }
+  return selected.size?wireAt([...selected.values()].map(one=>one.fields).concat(local),epoch):own;
+}

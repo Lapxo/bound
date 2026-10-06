@@ -1,5 +1,7 @@
 ## How Bound reads a project
 
+Bound reads a project's admitted statements and observations through its selected Topos, then renders the declared views and records their inputs in receipts. The example below explains the object; a file-fold alone does not calculate its intervals.
+
 ## A meeting everyone can understand
 
 Ana is available from 10 to 14, Luis from 12 to 16, and the room from 10 to 13. Their common availability is 12 to 13. A boss available from 18 to 20 makes the encounter incompatible. Withdrawing that exact reading restores the overlap; Ana, Luis and the room remain.
@@ -10,7 +12,7 @@ The same pattern applies to a delivery window, a sensor's allowed range, or an a
 
 ## See how information holds together
 
-![Cells, travelling bounds and a local join](docs/readme-assets/atlas.svg)
+![Cells, travelling bounds and a local join](https://raw.githubusercontent.com/Lapxo/bound/2053bb6d6188f04538114eae6a0add5166944ed3/docs/readme-assets/atlas.svg)
 
 A travelling ceiling on B reaches C and G through their declared rest. A local join widens B alone. D is independent. The figure shows those relations; point size and camera distance do not measure information.
 
@@ -25,7 +27,7 @@ Bounds are checked before origins and claims. A receipt is evidence of a reading
 
 ## Change a project without erasing evidence
 
-Work in the project's directory. Use an existing admitted key identifier and its matching private key stored outside every repository. Your public key and coverage belong to the authority contract; possession of a private key alone does not authorize a scope.
+Work in the project's directory. Use an existing admitted key identifier and its matching private key stored outside every repository. The admitted key also names its signer with `keys/<who> measure=signer value=file`; `signer/timeout` and `signer/response-bytes` declare its limits. Your public key and coverage belong to the authority contract; possession of a private key alone does not authorize a scope.
 
 ```sh
 export BOUND_KEY_ID='your-admitted-key-id'
@@ -36,18 +38,18 @@ lot_dir="$(mktemp -d)"
 Have the selected view produce a proposal at `$lot_dir/proposal.bound`, or prepare the project's permitted lines there for review. Unsigned proposals use `by=target`, without a preassigned epoch or `sig`. Lots stay outside the repository; the committed bound files are only `TARGET.bound` and `receipts.bound`.
 
 ```sh
-npx @lapxo/bound@0.1.0 sign "$lot_dir/proposal.bound" \
+npx @lapxo/bound@0.1.1 sign "$lot_dir/proposal.bound" \
   --key "$BOUND_KEY_ID" --key-file "$BOUND_KEY_FILE" \
   > "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.0 land "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.0 fold
+npx @lapxo/bound@0.1.1 land "$lot_dir/signed.bound" &&
+npx @lapxo/bound@0.1.1 fold
 ```
 
 `sign` assigns the admitted epoch and writes the signed lot to stdout. `land` validates the whole lot before admission. A refusal is evidence to inspect; it is not success. Do not proceed after a failed signature or admission. The key file is a PKCS8 private key matching the admitted public key; do not put it in the lot, source tree, package or CI artifacts.
 
 For typed object withdrawals, `takes` names the exact claim or mark id. Removing a local join leaves the travelling sign live. For untyped configuration, use the wire's exact withdrawal selectors; do not combine withdrawal and replacement with identical selectors in one lot. Wire alphabet updates supersede by epoch.
 
-[Authority, withdrawals, receipts and PR review](docs/usage.md).
+[Authority, withdrawals, receipts and PR review](https://github.com/Lapxo/bound/blob/2053bb6d6188f04538114eae6a0add5166944ed3/docs/usage.md).
 
 ## Select a topos by what it declares
 
@@ -71,7 +73,7 @@ Commit `TARGET.bound`, `receipts.bound` and the outputs the forge reads. Ignore 
 
 The lock is the project's own contract and pins. Read a dependency's declarations from its selected standing; do not copy its lines into your lock. README, package metadata and workflows must be renders of admitted declarations. A scan is an observation, not permission to lower a ceiling.
 
-A PR proposes lines and the leaf changes they render. The judge uses the team's accepted contract independently of the proposed revision. Preserve refusals, conflicting origins and unpaid demands. [Repository and contribution rules](docs/usage.md#repository-and-pr-review).
+A PR proposes lines and the leaf changes they render. The judge uses the team's accepted contract independently of the proposed revision. Preserve refusals, conflicting origins and unpaid demands. [Repository and contribution rules](https://github.com/Lapxo/bound/blob/2053bb6d6188f04538114eae6a0add5166944ed3/docs/usage.md#repository-and-pr-review).
 
 ## An atlas you can question
 

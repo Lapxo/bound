@@ -1,7 +1,7 @@
 import { relative, sep } from 'node:path';
 import { observeText } from '../observe/files.ts';
 import { sourceOf } from '../observe/runner.ts';
-import { PROTOCOL } from '@lapxo/topos/wire';
+import { PROTOCOL, parse } from '@lapxo/topos/wire';
 import { FLAGS, VALUED } from './names.ts';
 
 export { VALUED };
@@ -36,5 +36,11 @@ export const placesOfFile = (file: string): readonly string[] => (observeText(fi
   .filter((line) => line.startsWith('# place ')).map((line) => line.slice('# place '.length).trim().replace(/\/$/, '')).filter(Boolean);
 
 export function claimLinesIn(file: string): string[] {
-  return (observeText(file) ?? '').split('\n').map((line) => line.trim()).filter((line) => line.startsWith(PROTOCOL));
+  const lines = (observeText(file) ?? '').split('\n').map(line => line.trim())
+    .filter(line => line.startsWith(`${PROTOCOL.split('/')[0]}/`));
+  for (const line of lines) {
+    const got = parse(line);
+    if (got.kind !== 'fact') throw new Error(`REFUSE·wire batch ${got.why} · nothing signed or landed`);
+  }
+  return lines;
 }

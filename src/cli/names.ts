@@ -3,8 +3,8 @@ export const VERB_NAMES = ['fold', 'land', 'sign'] as const;
 export type VerbName = (typeof VERB_NAMES)[number];
 
 /** Every flag the CLI reads, spelled once; a valued flag takes the argument after it. */
-export const FLAGS = { as: '--as', check: '--check', key: '--key', keyFile: '--key-file', out: '--out', place: '--place' } as const;
-export const VALUED: readonly string[] = [FLAGS.keyFile, FLAGS.key, FLAGS.out, FLAGS.as, FLAGS.place];
+export const FLAGS = { as: '--as', check: '--check', key: '--key', keyFile: '--key-file', signer: '--signer', place: '--place' } as const;
+export const VALUED: readonly string[] = [FLAGS.keyFile, FLAGS.key, FLAGS.signer, FLAGS.as, FLAGS.place];
 
 /** Views the CLI renders from these names, never from a handwritten usage string. */
 export const NAMED_VIEWS = { help: 'help', lines: 'lines', because: 'because' } as const;

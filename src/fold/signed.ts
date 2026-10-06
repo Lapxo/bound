@@ -6,7 +6,7 @@ import { signaturesOf } from './digests.ts';
 import { lockLines, lockStanding } from './keys.ts';
 import { wordOf } from './wire.ts';
 import { authorityFor, rootSigner } from './signers.ts';
-import { shardLines, storeOf } from '../land/ledger.ts';
+import { ledgerLines, shardLines, storeOf } from '../land/ledger.ts';
 import { verifiesFields } from '../land/sign.ts';
 import { observeText } from '../observe/files.ts';
 
@@ -24,13 +24,15 @@ function verified(root: string, place: string): Verified {
   const hasAuthority = lock.some(line => fieldOf(line, 'sig') !== '');
   const algorithms = hasAuthority ? signaturesOf(store).admitted : [];
   const signers = algorithms.length ? authorityFor(lock, rootSigner(root), algorithms).admitted : [];
-  const history = signers.flatMap(signer => shardLines(store, signer.id, `${place}/${LOCK}`));
+  const history = signers.flatMap(signer => place ? shardLines(store, signer.id, `${place}/${LOCK}`) : ledgerLines(store, signer.id)).filter(line => fieldOf(line, 'sig') !== '');
   const text = [publicText, ...history, ...(told.get(place) ?? [])].join('\n');
   const key = `${root} ${place}`;
   const last = held.get(key);
   if (last !== undefined && last.text === text && last.lock === lock) return last;
   const lines = [...new Set(text.split('\n').filter(isWire))];
-  const family = signers.length ? wordOf(lockStanding(store), 'families', 'region') : '';
+  // Unrestricted coverage does not construct a region coordinate. Restricted
+  // coverage still requires the lock's declared namespace before comparison.
+  const family = signers.some(signer => !signer.coverage.includes('*')) ? wordOf(lockStanding(store), 'families', 'region') : '';
   const stands = (line: string): boolean => {
     const got = parse(line);
     if (got.kind !== 'fact' || got.value.fields['sig'] === undefined) return false;

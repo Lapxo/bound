@@ -1,6 +1,7 @@
 import * as topos from '@lapxo/topos/wire';
 import type { RoleClaim } from '@lapxo/topos/wire';
 import { fieldOf, selfName } from './claims.ts';
+import { selectedWireList } from '../host/selected-topos.ts';
 
 export type CoordinateRole = 'source' | 'derived' | 'observed' | 'foreign';
 const spoken = topos as unknown as Readonly<Record<string, unknown>>;
@@ -24,7 +25,11 @@ export function wordsOf(standing: readonly string[], list: string): readonly str
  * refusal. The older `audit/wire/` prefix is one era of `wire/`, not a fall-back to another lock.
  */
 export function wordOf(standing: readonly string[], list: string, name: string | readonly string[]): string {
-  const held = wordsOf(standing, list);
+  const local = wordsOf(standing, list);
+  const pins = standing.filter(line => fieldOf(line, 'scope').startsWith('uses/') && fieldOf(line, 'value') !== 'withdraw');
+  // A required word may come from selected standing without copying foreign claims.
+  const held = wireLine(standing, list) === undefined && pins.length
+    ? selectedWireList(standing, Number.MAX_SAFE_INTEGER, pins, list) : local;
   const eras = typeof name === 'string' ? [name] : name;
   const found = eras.find((one) => held.includes(one));
   if (found !== undefined) return found;

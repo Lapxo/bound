@@ -15,7 +15,10 @@ export interface ContentPort {
 export async function resolveSelectedContent(lines:readonly string[],port:ContentPort):Promise<readonly string[]> {
  const fields=lines.flatMap(line=>{const p=parse(line);return p.kind==='fact'&&p.value.fields.value!=='withdraw'?[p.value.fields]:[];});
  const selectionIndex=(scope:string):number=>{const match=/(^|\/)uses\//.exec(scope);return match===null?-1:match.index+match[1].length;};
- const bindings=fields.filter(f=>selectionIndex(f.scope??'')>=0 || f.scope?.startsWith('dep/'));
+ // A dependency constraint is not a content binding. Historical artifact records
+ // use measure=id; explicit digest records still validate even when malformed.
+ const bindings=fields.filter(f=>selectionIndex(f.scope??'')>=0 ||
+  (f.scope?.startsWith('dep/')&&(f.measure==='digest'||/^[a-zA-Z][a-zA-Z0-9-]*:[a-f0-9]+$/.test(f.value??''))));
  const locations=new Map<string,string[]>();
  for(const binding of bindings){
   const scope=binding.scope??'';const index=selectionIndex(scope);

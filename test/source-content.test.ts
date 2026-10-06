@@ -32,6 +32,13 @@ test('a coordinate containing the letters uses does not select a world',async()=
  const port={algorithms:new Set(['sha256']),read:()=>undefined,write:()=>{throw Error('must not write');},fetch:async()=>{throw Error('must not fetch');}};
  assert.deepEqual(await resolveSelectedContent([line('refuses/world',pin),line('resources/world','https://example.test/standing')],port),[]);
 });
+test('dependency constraints are not pins; explicitly declared malformed digests refuse',async()=>{
+ const port={algorithms:new Set(['sha256']),read:()=>undefined,write:()=>{throw Error('must not write');},fetch:async()=>{throw Error('must not fetch');}};
+ const constraint=canonical({scope:'dep/source/**',value:'library',by:'target',role:'reads',form:'alphabet',measure:'id',at:'policy:constraint'});
+ assert.deepEqual(await resolveSelectedContent([constraint],port),[]);
+ const malformed=canonical({scope:'dep/artifact',value:'library',by:'target',role:'reads',form:'alphabet',measure:'digest',at:'policy:artifact'});
+ await assert.rejects(resolveSelectedContent([malformed],port),/not admitted/);
+});
 test('a declared host dependency is verified as bytes, never decoded as a standing',async()=>{
  const cache=new Map<string,Uint8Array>();let calls=0;
  const port={algorithms:new Set(['sha256']),read:(d:string)=>cache.get(d),write:(d:string,b:Uint8Array)=>{cache.set(d,b);},fetch:async()=>{calls++;return artifact;}};

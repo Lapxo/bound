@@ -17,6 +17,9 @@ function sandbox(change: 'valid' | 'wrong-key' | 'no-digest' | 'no-signature' | 
   const fact = (scope: string, measure: string, value: string): string => canonical({ scope, role: 'writes', form: 'alphabet', measure, value, at: 'policy:fixture', by: 'target' });
   const lines = [
     fact('keys/root', 'class', 'authorize'),
+    fact('keys/root', 'signer', 'file'),
+    canonical({scope:'signer/timeout',measure:'milliseconds',value:'1000..1000',form:'interval',role:'writes',at:'policy:fixture',by:'target'}),
+    canonical({scope:'signer/response-bytes',measure:'bytes',value:'65536..65536',form:'interval',role:'writes',at:'policy:fixture',by:'target'}),
     fact('keys/root', 'public-key', pair.publicKey.export({ type: 'spki', format: 'der' }).toString('base64')),
     ...(change === 'no-coverage' ? [] : [fact('keys/root', 'coverage', change === 'restricted-coverage' ? 'meeting/**' : '*')]),
     ...(change === 'no-digest' ? [] : [fact('wire/digest-algorithms', 'id', 'sha256')]),
@@ -34,7 +37,7 @@ for (const variant of ['wrong-key', 'no-digest', 'no-signature', 'no-coverage', 
     try {
       const run = spawnSync(process.execPath, [verb, 'land', '--key-file', join(dir, 'key.pem')], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
       strictEqual(run.status, 1, run.stderr);
-      const expected = { 'wrong-key': /signature does not hold/, 'no-digest': /names no digest algorithm/, 'no-signature': /names no signature algorithm/, 'no-coverage': /must declare one coverage/, 'restricted-coverage': /does not cover/ }[variant];
+      const expected = { 'wrong-key': /signature does not verify/, 'no-digest': /names no digest algorithm/, 'no-signature': /names no signature algorithm/, 'no-coverage': /must declare one coverage/, 'restricted-coverage': /does not cover/ }[variant];
       match(run.stderr, expected);
       strictEqual(run.stdout, '');
       strictEqual(readFileSync(join(dir, 'TARGET.bound'), 'utf8'), original);
@@ -47,7 +50,7 @@ test('first land admits a valid ephemeral root and reports no failed signatures'
   try {
     const run = spawnSync(process.execPath, [verb, 'land', '--key-file', join(dir, 'key.pem')], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
     strictEqual(run.status, 0, run.stderr);
-    match(run.stdout, /FACT     landed 6 unique lines from 6 in TARGET · 0 of 6 signed lines fail admission by declared authority/);
+    match(run.stdout, /FACT     landed 9 unique lines from 9 in TARGET · 0 of 9 signed lines fail admission by declared authority/);
     match(readFileSync(join(dir, '.bound', 'ledger', 'root.bound'), 'utf8'), /sig=/);
     const ledger = readFileSync(join(dir, '.bound', 'ledger', 'root.bound'), 'utf8');
     const blobs = readdirSync(join(dir, '.bound', 'cas', 'blobs')).sort();
@@ -77,8 +80,8 @@ test('concurrent first lands commit one bootstrap and retain one signed owner le
       deepStrictEqual(result.map((one) => one.status).sort(), [0, 1], JSON.stringify(result));
       strictEqual(result.filter((one) => one.output.includes('FACT     landed')).length, 1);
       const ledger = readFileSync(join(dir, '.bound', 'ledger', 'root.bound'), 'utf8').trim().split('\n');
-      strictEqual(ledger.length, 6);
-      strictEqual(new Set(ledger).size, 6);
+      strictEqual(ledger.length, 9);
+      strictEqual(new Set(ledger).size, 9);
       strictEqual(readFileSync(join(dir, '.bound', 'ledger', 'land.bound'), 'utf8').trim().split('\n').length, 1);
     } finally { rmSync(dir, { recursive: true, force: true }); }
   }
