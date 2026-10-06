@@ -348,6 +348,14 @@ bound-lock/1 at=policy:bound/views by=target form=alphabet measure=id role=deman
 bound-lock/1 at=policy:instrument/cryptography by=target form=alphabet measure=id role=reads scope=wire/digest-algorithms value=sha256:era1
 bound-lock/1 at=policy:instrument/cryptography by=target form=alphabet measure=id role=reads scope=wire/era value=era1
 bound-lock/1 at=policy:instrument/cryptography by=target form=alphabet measure=id role=reads scope=wire/signature-algorithms value=ed25519|sha256:58f1f0983fe65f062bebefd0a6ffc901049c67525ef12dd86ed4dbb7a184b834|ed25519:era1
+bound-lock/1 at=policy:release/process-captures by=target form=alphabet measure=coordinates role=reads scope=region/captures value=src/**|test/**|vectors/process/**|dist/**|package.json|TARGET.bound
+bound-lock/1 at=policy:release/process-inputs by=target form=alphabet measure=coordinates role=reads scope=region/vectors value=src/**|test/**|vectors/process/**|dist/**|package.json|TARGET.bound
 bound-lock/1 at=policy:rendering by=target form=alphabet measure=digest role=writes scope=uses/rendering value=sha256:0f7653b659f372fd7bc1b140d0103606ebd8814dee8ef3be30949c6647b482a3
 bound-lock/1 at=policy:selected-wire by=target form=alphabet measure=digest role=writes scope=uses/wire value=sha256:a717c60945add1facfd822b3ee2da73a8fa2f781dd0aa2de9be778e66b8f3591
+bound-lock/1 at=policy:source/coordinates by=target form=alphabet measure=coordinates role=reads scope=region/source value=src/**
+bound-lock/1 at=policy:source/parser by=target form=alphabet measure=digest needs=node_modules/typescript role=reads scope=dep/typescript value=sha256:9dc6ee1f8dec9598cbecff5e2fcf2b916d04294c0615588dd424448a5a3afce5
 bound-lock/1 at=witness:explicit-executable-candidate by=target form=alphabet measure=id role=writes scope=dep/topos-doc/born shape=dist/index.js value=sha256:2c507e7fe764e55d08fc27b01567d462060fe50d1896d19866f831a823852ae5
+bound-lock/1 at=witness:process-captures-reader by=target form=alphabet measure=digest role=writes scope=dep/process-readings shape=dist/regions/vectors.js value=sha256:b22d161e8ae7c96789c7fb038b1d755fa149203c7e035c6d2fa5f2a164fecb54
+bound-lock/1 at=witness:process-captures-selection by=target form=alphabet measure=digest role=writes scope=uses/process-readings value=sha256:a55f6849b39e77b6fcd89b2a2ba8fa286a7c8626193bbfe14aef30bef6b29458
+bound-lock/1 at=witness:source-reader by=target form=alphabet measure=digest role=writes scope=dep/source-readings shape=dist/regions/source.js value=sha256:5ccae33a9e99f6acba690d9664e22cfe818205841e4e9d3083d4b24fb68d7075
+bound-lock/1 at=witness:source-selection by=target form=alphabet measure=digest role=writes scope=uses/source-readings value=sha256:4129c469d3296a1fcda640f59e0d7c37f255b1e88c2f8e2447cd1359a514f356

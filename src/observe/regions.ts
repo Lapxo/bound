@@ -1,4 +1,6 @@
 import { selectedCapsules } from '../host/selected-capsules.ts';
+import { selectionLines } from '../fold/reach.ts';
+export { selectionLines } from '../fold/reach.ts';
 import { createHash } from 'node:crypto';
 import { basename, dirname, join, relative } from 'node:path';
 import { CAPSULE, LOCK, canonical, matches, PROTOCOL } from '@lapxo/topos/wire';
@@ -7,7 +9,7 @@ import type { Declaration } from '@lapxo/topos/capsule';
 import type { Request } from '@lapxo/topos/contract';
 import { STATES } from '@lapxo/obligations';
 import { foldCeilings } from '../fold/ceilings.ts';
-import { fieldOf } from '../fold/claims.ts';
+import { fieldOf, wireLinesOf as linesOf } from '../fold/claims.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { keyFor } from '../fold/keys.ts';
 import { casesHeld, placedReadings } from '../fold/observed.ts';
@@ -30,7 +32,6 @@ type Asking = { readonly name: string; readonly at: number };
 type Placed = Pick<PlaceFold, 'root' | 'store' | 'standing' | 'observed'> & { readonly under?: string; readonly second?: PlaceFold['second'] };
 type Row = { readonly scope: string; readonly measure: string; readonly role: string; readonly bound: { readonly kind: string; readonly values?: readonly string[]; readonly lo?: number; readonly hi?: number } };
 
-const linesOf = (text: string | undefined): readonly string[] => (text ?? '').split('\n').filter((line) => line.startsWith(PROTOCOL));
 const fact = (scope: string, value: string, form = 'alphabet', measure = 'fact'): string => canonical({ scope, role: 'writes', form, measure, value, by: 'fold', at: 'place:fold' });
 const described = (local: readonly string[] = []): readonly string[] => {
   const lock = ownLock();
@@ -132,11 +133,6 @@ function regionOf(fold: Placed, name: string, lines: readonly string[], facts: (
 }
 
 /** A local selection belongs to its own lock; tree-qualified selections retain their explicit owner. */
-export const selectionLines = (fold: Pick<Placed, 'root' | 'standing' | 'under'>): readonly string[] => {
-  const local = fold.under ? ownLockOf(fold.root, fold.under.replace(/\/$/, '')).filter((line) => fieldOf(line, 'scope').startsWith('uses/')) : [];
-  const qualified = fold.standing.filter((line) => fieldOf(line, 'scope').startsWith(`${fold.under ?? ''}uses/`));
-  return [...new Set([...local, ...qualified])].filter((line) => fieldOf(line, 'value') !== 'withdraw');
-};
 const heldCapsules = new WeakMap<Placed, readonly Capsule[]>();
 /** Execution is supplied only by explicit capsule offers of the selected standing. */
 export function capsulesOf(fold: Placed): readonly Capsule[] {

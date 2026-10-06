@@ -53,7 +53,7 @@ export function namingTheirPlace(root: string): number {
  */
 export function zoomedOutsideThePlace(root: string, standing: readonly string[]): number {
   const places = standing.filter((line) => /^publish\/[^/]+\/bootstrap$/.test(fieldOf(line, 'scope')) && fieldOf(line, 'value') !== 'withdraw')
-    .map((line) => fieldOf(line, 'scope').slice('publish/'.length, -'/bootstrap'.length));
+    .map((line) => fieldOf(line, 'scope').split('/')[1]!);
   const lost = (before: string, after: string, place: string): boolean => {
     if (after === before) return false;
     if (before === `${place}/`) return after !== './';

@@ -6,6 +6,7 @@ import { spoken, worldsIn } from './places.ts';
 import { wordOf, wordsOf } from './wire.ts';
 import type { Capsule } from '../host/capsule.ts';
 import { ownLock, ownRoot } from '../observe/runner.ts';
+import { ownLockOf } from './signed.ts';
 
 const ROOT = '.';
 const WORLD = '\0';
@@ -50,8 +51,15 @@ export function touchedBy(root: string, places: readonly string[], lines: readon
 }
 
 /** A selected world can execute only its explicit capsule offers. Dependency aliases are host projections, not selections. */
-export function capsulesFor(standing: readonly string[], place: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
+export const selectionLines = (fold: { readonly root: string; readonly standing: readonly string[]; readonly under?: string }): readonly string[] => {
+  const local = fold.under ? ownLockOf(fold.root, fold.under.replace(/\/$/, '')).filter((line) => fieldOf(line, 'scope').startsWith('uses/')) : [];
+  const qualified = fold.standing.filter((line) => fieldOf(line, 'scope').startsWith(`${fold.under ?? ''}uses/`));
+  return [...new Set([...local, ...qualified])].filter((line) => fieldOf(line, 'value') !== 'withdraw');
+};
+
+export function capsulesFor(standing: readonly string[], place: string, root?: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
   const prefix = place ? `${place}/` : '';
-  const pins = standing.filter(line => fieldOf(line, 'scope').startsWith(`${prefix}uses/`) && fieldOf(line, 'value') !== 'withdraw');
+  const pins = root === undefined ? standing.filter(line => fieldOf(line, 'scope').startsWith(`${prefix}uses/`) && fieldOf(line, 'value') !== 'withdraw')
+    : selectionLines({ root, standing, ...(prefix ? { under: prefix } : {}) });
   return selectedCapsules(pins);
 }

@@ -95,8 +95,3 @@ A pin names standing, not a download URL or runtime entry. Its declared artifact
 Use Bound where independently attributed observations must be judged against an accepted contract: compatibility between components, operational limits, or a team's project requirements. The selected topos must supply the actual measurements; a digest identifies the evidence without declaring it true.
 
 [Contribute a counterexample or a proposed lot](CONTRIBUTING.md).
-
-## What is open
-
-- `bound/door/unreceipted` reads `door/unreceipted=8`, outside its ceiling
-- `door/unreceipted` reads `8`, outside its ceiling

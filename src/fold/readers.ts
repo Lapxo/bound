@@ -68,7 +68,7 @@ export function capsuleReadersOf(root: string, store: string, standing: readonly
     const own = ownLockOf(root, place).filter((line) => fieldOf(line, 'scope').startsWith('region/') && measures.includes(fieldOf(line, 'measure')) && fieldOf(line, 'value') !== 'withdraw');
     const offered = [...own, ...(capsuleAt(root, place) ? world.filter((line) => !own.some((one) => fieldOf(one, 'scope') === fieldOf(line, 'scope'))) : [])];
     if (!offered.length) continue;
-    const capsules = resolve(standing, place);
+    const capsules = resolve(standing, place, root);
     for (const line of offered) {
       const region = fieldOf(line, 'scope').slice('region/'.length);
       const by = capsules.find(({ capsule }) => capsule.lines.some((one) => fieldOf(one, 'scope') === `region/${region}` && fieldOf(one, 'measure') === 'writes'));

@@ -8,7 +8,7 @@ import { storeOf } from './ledger.ts';
 const retracts = (withdraw: Readonly<Record<string, string>>, line: Readonly<Record<string, string>>): boolean =>
   Object.keys(withdraw).filter((key) => !ENVELOPE.has(key) && key !== 'value').every((key) => line[key] === withdraw[key]);
 
-const pinScope = (scope: string): boolean => scope === 'uses' || scope.startsWith('uses/') || scope.includes('/uses/');
+const pinScope = (scope: string): boolean => scope === 'uses' || scope.startsWith('uses/') || scope.split('/').slice(1, -1).includes('uses');
 
 const aliasWithdraw = (line: string): boolean =>
   fieldOf(line, 'value') === 'withdraw' && fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') !== 'reads';

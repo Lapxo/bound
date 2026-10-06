@@ -1,3 +1,4 @@
+import { timing } from '../host/timing.ts';
 import { basename, existsSync, relative, resolve } from '../host/io.ts';
 import { EXTENSION, matches } from '@lapxo/topos/wire';
 import { fieldOf, isWire } from './claims.ts';
@@ -180,7 +181,7 @@ export function ownReadings(input: {
 }): Readonly<Record<string, number>> {
   const { root, store, entry, roleOf, standing, observed, under } = input;
   const spent: string[] = [];
-  const took = <T>(what: string, fn: () => T): T => { const at = Date.now(); const got = fn(); spent.push(`${what} ${Date.now() - at}`); return got; };
+  const took = timing(spent);
   const instrument = under === undefined || under === `${basename(ownRoot())}/`;
   const tree = <T>(fn: () => T): T | undefined => (under ? undefined : fn());
   const imported = tree(() => took('imports', () => [...instrumentCoordinates(store, resolve(root, entry), standing, root, ownLock()).keys()]

@@ -1,3 +1,4 @@
+import { timing } from '../host/timing.ts';
 import {admittedObjects} from '../host/objects.ts';
 import { existsSync, rmdirSync, rmSync } from 'node:fs';
 import { dirname, join, basename } from 'node:path';
@@ -175,12 +176,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const waited = Date.now() - asked;
   if (waited > 60_000) process.stdout.write(`RED      wait ${Math.round(waited / 1000)} s for the lock before the act · a wait over a minute is a red\n`);
   const spent: string[] = [`sign ${asked - started}`, `wait ${waited}`];
-  const took = <T>(what: string, fn: () => T): T => {
-    const at = Date.now();
-    const got = fn();
-    spent.push(`${what} ${Date.now() - at}`);
-    return got;
-  };
+  const took = timing(spent);
   const { signed, epoch } = batch;
   const store = storeOf(root);
   if(signed.some(line=>!isConfig(line))) {
@@ -286,7 +282,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     land(store, 'judge', late);
     for (const line of late) if (fieldOf(line, 'measure') !== 'cone') process.stdout.write(`LATE     ${fieldOf(line, 'scope')} · answered from the landed cone\n`);
   }
-  if (signed.some((line) => fieldOf(line, 'scope').startsWith(`${basename(ownRoot())}/`) && !fieldOf(line, 'scope').includes('/uses/'))) {
+  if (signed.some((line) => fieldOf(line, 'scope').startsWith(`${basename(ownRoot())}/`) && !fieldOf(line, 'scope').split('/').slice(1, -1).includes('uses'))) {
     const code = instrumentOf(store, entryOf(root), told.standing, root, ownLock());
     if (instrumentKept(store) !== code) {
       const open = await closeReceipts(root, store);

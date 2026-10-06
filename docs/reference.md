@@ -4,6 +4,8 @@
 |---|---|
 | pin | wire |
 | pin | rendering |
+| pin | process-readings |
+| pin | source-readings |
 
 - [README](../README.md)
 - [reference](reference.md)

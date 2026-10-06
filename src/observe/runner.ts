@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { sha } from '../host/hash.ts';
 import { existsSync, mkdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -57,7 +57,6 @@ export function bundleOf(module: string): string | undefined {
   const bundler = named && existsSync(join(tree, named)) ? join(tree, named) : '';
   if (!bundler) return undefined;
   const store = join(tree, EXTENSION);
-  const sha = (text: string | Uint8Array): string => createHash('sha256').update(text).digest('hex');
   const stamp = (coordinate: string): string => ((at) => (at === undefined ? '' : `${at.mtimeMs} ${at.size}`))(statSync(join(tree, coordinate), { throwIfNoEntry: false }));
   const index = join(store, 'cas', 'built', sha(`bundle ${module}`));
   const held = JSON.parse(observeText(index) ?? 'null') as { readonly blob: string; readonly inputs: readonly (readonly [string, string])[] } | null;
