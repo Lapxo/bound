@@ -99,3 +99,4 @@ Use Bound where independently attributed observations must be judged against an 
 ## What is open
 
 - `bound/door/unreceipted` reads `door/unreceipted=8`, outside its ceiling
+- `door/unreceipted` reads `8`, outside its ceiling
