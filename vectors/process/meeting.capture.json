@@ -8,7 +8,7 @@
       "args": [
         "vectors/process/meeting-case.mjs"
       ],
-      "cwd": "bound",
+      "cwd": ".",
       "timeoutMs": 10000,
       "maxBytes": 100000,
       "exit": 0,
@@ -27,8 +27,8 @@
         }
       ],
       "inputs": [
-        "bound/vectors/process/meeting-case.mjs",
-        "bound/package.json"
+        "vectors/process/meeting-case.mjs",
+        "package.json"
       ]
     }
   ]

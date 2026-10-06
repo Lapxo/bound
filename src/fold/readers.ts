@@ -9,6 +9,7 @@ import { capsuleAt, placesIn } from './places.ts';
 import { capsulesFor } from './reach.ts';
 import { ownLockOf } from './signed.ts';
 import { ownLock } from '../observe/runner.ts';
+import { selectedWireList } from '../host/selected-topos.ts';
 import { entriesIn, coordinatesUnder, observeFile, stampOf } from '../observe/files.ts';
 import type { Kind } from '../observe/run.ts';
 
@@ -60,7 +61,10 @@ const reachOfLine = (module: string, where: readonly string[]): readonly string[
  */
 export function capsuleReadersOf(root: string, store: string, standing: readonly string[], lines: readonly ReaderClaim[], resolve: typeof capsulesFor = capsulesFor): readonly ReaderClaim[] {
   const reaching = new Set(lines.flatMap((reader) => reachOfLine(reader.module, reader.where)));
-  const measures = wordsOf(standing, 'region-measures');
+  const localMeasures = wordsOf(standing, 'region-measures');
+  const pins = standing.filter(line => fieldOf(line, 'scope').startsWith('uses/') && fieldOf(line, 'value') !== 'withdraw');
+  const measures = localMeasures.length || !pins.length ? localMeasures
+    : selectedWireList(standing, Number.MAX_SAFE_INTEGER, pins, 'region-measures');
   const world = fields(fieldOf(wireLine(standing, 'offers/world') ?? '', 'value')).map(([region, globs]) => canonical({ scope: `region/${region}`, measure: wordOn(standing, 'region-coordinate', ownLock()), value: globs }));
   const groups = new Map<string, { module: string; digest: string; entry: string; region: string; reads: readonly string[]; globs: Map<string, readonly string[]> }>();
   for (const place of ['', ...placesIn(root)]) {

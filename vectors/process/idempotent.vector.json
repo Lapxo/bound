@@ -10,7 +10,7 @@
         "--test-name-pattern=first land admits a valid ephemeral root",
         "test/bootstrap.test.ts"
       ],
-      "cwd": "bound",
+      "cwd": ".",
       "timeoutMs": 70000,
       "maxBytes": 4194304,
       "exit": 0,
@@ -25,11 +25,11 @@
         }
       ],
       "inputs": [
-        "bound/vectors/process/source-tests.mjs",
-        "bound/src/cli/verb.ts",
-        "bound/TARGET.bound",
-        "bound/package.json",
-        "bound/test/bootstrap.test.ts"
+        "vectors/process/source-tests.mjs",
+        "src/cli/verb.ts",
+        "TARGET.bound",
+        "package.json",
+        "test/bootstrap.test.ts"
       ]
     }
   ]

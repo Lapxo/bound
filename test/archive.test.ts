@@ -24,6 +24,25 @@ const sha = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update
 const save = (store: string, digest: string, bytes: Uint8Array): void => { const at = blobAt(store, digest); mkdirSync(join(store, 'cas', 'blobs'), { recursive: true }); writeFileSync(at, bytes); };
 const scope = (digest: string): string => canonical({ scope: 'dep/example', role: 'reads', form: 'alphabet', measure: 'digest', value: digest, needs: 'layout', by: 'fixture', at: 'policy:fixture' });
 
+test('declared archive roots mount exact verified members without guessing or dropping siblings', () => {
+ const root=mkdtempSync(join(tmpdir(),'archive-root-')),store=join(root,'.bound');
+ const claim=(digest:string,shape:string)=>canonical({scope:'dep/library',role:'reads',form:'alphabet',measure:'digest',value:digest,needs:'layout',shape,by:'fixture',at:'policy:mount'});
+ try {
+  const bytes=tar(record('distribution/lib.js','export const value=1;'));const digest=sha(bytes);save(store,digest,bytes);
+  assert.equal(layReleases(store,root,[claim(digest,'distribution')],store),1);
+  assert.equal(readFileSync(join(root,'layout/lib.js'),'utf8'),'export const value=1;');
+  assert.equal(resolvedOf(store,root,[claim(digest,'distribution')],store).length,1);
+  const runtime=runtimeTreeAt(store,root,digest,store,'distribution');
+  assert.equal(readFileSync(join(runtime!,'lib.js'),'utf8'),'export const value=1;');
+  assert.throws(()=>runtimeTreeAt(store,root,digest,store,'absent'),/archive root/);
+  assert.equal(layReleases(store,root,[claim(digest,'distribution')],store),0);
+  assert.throws(()=>layReleases(store,root,[claim(digest,'absent')],store),/archive root/);
+  const mixed=tar(record('distribution/lib.js','different'),record('outside','not dropped'));const other=sha(mixed);save(store,other,mixed);
+  assert.throws(()=>layReleases(store,root,[claim(other,'distribution')],store),/every member/);
+  assert.equal(readFileSync(join(root,'layout/lib.js'),'utf8'),'export const value=1;');
+ } finally {rmSync(root,{recursive:true,force:true});}
+});
+
 for (const [label, bytes] of [
   ['checksum', (() => { const r = record('a', 'x'); r[0] = 98; return tar(r); })()],
   ['truncated payload', gzipSync(record('a', 'x').subarray(0, 513))],

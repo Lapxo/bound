@@ -1,17 +1,19 @@
+import {selectedWireAt} from '../host/selected-topos.ts';
 import { timing } from '../host/timing.ts';
 import {admittedObjects} from '../host/objects.ts';
 import { existsSync, rmdirSync, rmSync } from 'node:fs';
 import { dirname, join, basename } from 'node:path';
 import { closeReceipts, instrumentKeep, instrumentKept } from '../fold/closed.ts';
 import { bytesDigest, fullDigest, instrumentOf, signaturesOf } from '../fold/digests.ts';
-import { canonical, fromLine, LOCK, parse, wireAt } from '@lapxo/topos/wire';
+import { canonical, fromLine, LOCK, parse } from '@lapxo/topos/wire';
 import { fieldOf, isConfig, foldClaims, sayingOf, selfName } from '../fold/claims.ts';
 import { isReaderLock } from '../fold/observed.ts';
 import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signers.ts';
 import { lockLines, lockStanding } from '../fold/keys.ts';
 import { keepVerdict, keptVerdict, land, landBlob, storeOf } from '../land/ledger.ts';
-import { signConsentLine, verifiesOwnerLine } from '../land/sign.ts';
-import { appliedIn } from '../fold/signed.ts';
+import { signConsentLot, verifiesOwnerLine } from '../land/sign.ts';
+import { signerFor } from '../host/signing.ts';
+import { appliedIn, ownLockOf } from '../fold/signed.ts';
 import { wordOf } from '../fold/wire.ts';
 import { hasVouchedTree, landCoordinates, locationsOf, vouchedCoordinates } from '../land/vouched.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
@@ -80,39 +82,47 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   }
   const keyFile = valueOf(args, FLAGS.keyFile);
   const keyId = valueOf(args, FLAGS.key) ?? ownerOf(store);
-  if (drafted.length && (!keyFile || !existsSync(keyFile))) {
-    process.stderr.write(`${selfName()}: a drafted batch is signed with --key-file (PKCS8 PEM)\n`);
-    return { kind: 'exit', code: 2 };
-  }
   const publicKey = drafted.length ? publicKeyOf(root, keyId) : undefined;
   if (drafted.length && !publicKey) {
     process.stderr.write(`${selfName()}: unknown key ${keyId} — name it in ${selfName()}.keys\n`);
     return { kind: 'exit', code: 2 };
   }
-  const privateKeyPem = keyFile ? observeText(keyFile) ?? '' : '';
-  const signed: string[] = proposed.filter((line) => fieldOf(line, 'sig'));
-  for (const line of drafted) {
-    const got = signConsentLine(line, privateKeyPem, { epoch, by: keyId, algorithm: signaturesOf(store).era });
+  let signed: string[] = proposed.filter((line) => fieldOf(line, 'sig'));
+  if (drafted.length) {
+    let invoke;
+    try { invoke = signerFor([...lockStanding(store), ...destinations.flatMap(place => ownLockOf(root, place))],
+      keyId, valueOf(args, FLAGS.signer), keyFile); }
+    catch (error) {
+      process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : 'REFUSE·signer unavailable'}\n`);
+      return { kind: 'exit', code: 1 };
+    }
+    const got = await signConsentLot(drafted, { epoch, by: keyId, algorithm: signaturesOf(store).era },
+      publicKey!, signaturesOf(store).admitted, invoke);
     if (got.kind === 'refuse') {
       process.stderr.write(`${selfName()}: ${got.why}\n`);
       return { kind: 'exit', code: 1 };
     }
-    if (!verifiesOwnerLine(got.line, publicKey!, signaturesOf(store).admitted)) {
-      process.stderr.write(`${selfName()}: REFUSE·accept the signature does not hold for ${keyId}\n`);
-      return { kind: 'exit', code: 1 };
-    }
-    signed.push(got.line);
+    let index = 0;
+    signed = proposed.map(line => fieldOf(line, 'sig') ? line : got.lines[index++]!);
   }
   const wireLines = [...signedOwnerLines(store), ...signed].flatMap((line) => {
     const got = parse(line);
     return got.kind === 'fact' ? [got.value.fields] : [];
   });
   for (const line of signed) {
-    const got = fromLine(line, wireAt(wireLines,Number(fieldOf(line, 'epoch'))));
+    const got = fromLine(line, selectedWireAt(wireLines,Number(fieldOf(line, 'epoch')), foldClaims(signedOwnerLines(store)).standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw')));
     if (got.kind !== 'fact') {
       process.stderr.write(`${selfName()}: REFUSE·wire ${fieldOf(line, 'scope')} · ${got.why} · nothing landed\n`);
       return { kind: 'exit', code: 1 };
     }
+  }
+  const authority = authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted);
+  const ownership = ownedOf(root, signed, line => authority.of(line).kind === 'admitted',
+    by => authority.admitted.find(one => one.id === by)?.coverage ?? [], named,
+    line => { const heads = byFile.flatMap(([heads, lines]) => lines.some(draft => sayingOf(draft) === sayingOf(line)) ? heads : []); return heads.length ? heads : undefined; });
+  if (ownership.nowhere.length) {
+    for (const line of ownership.nowhere) process.stderr.write(`${selfName()}: REFUSE·signer ${keyId} uncovered ${fieldOf(line, 'scope')} · nothing signed for delivery\n`);
+    return { kind: 'exit', code: 1 };
   }
   if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>process.stdout.write(text+'\n'));}catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
   return { kind: 'signed', signed, epoch, ...(drafted.length ? { keyId } : {}) };

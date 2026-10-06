@@ -19,6 +19,14 @@ const snapshotOf = (text: string): readonly (readonly [string, string])[] =>
   text.split('\n').filter(isWire).filter((line) => fieldOf(line, 'measure') === 'digest' && fieldOf(line, 'scope').startsWith('file/'))
     .map((line) => [fieldOf(line, 'scope').slice('file/'.length), fieldOf(line, 'value')] as const);
 
+/** Mount an explicitly declared archive coordinate; never infer a package root. */
+function mountedFiles(files: readonly (readonly [string, string])[], root: string): readonly (readonly [string, string])[] {
+  if (!root) return files;
+  const prefix = archiveCoordinate(root) + '/';
+  if (!files.length || files.some(([name]) => !name.startsWith(prefix))) throw new Error(`REFUSE·release archive root ${root} does not contain every member`);
+  return files.map(([name, digest]) => [archiveCoordinate(name.slice(prefix.length)), digest] as const);
+}
+
 function snapshotLines(files: readonly (readonly [string, string])[]): string {
   return files.map(([coord, digest]) => canonical({
     scope: `file/${coord}`, role: 'writes', form: 'alphabet', measure: 'digest', value: digest, at: `place:${digest}`, by: 'target',
@@ -126,24 +134,26 @@ export function layReleases(store: string, own: string, lock: readonly string[],
     if (bytes === undefined && !dir && current === undefined) throw new Error(`REFUSE·release ${fieldOf(line, 'scope')} has no available archive or snapshot`);
     const needs = fieldOf(line, 'needs');
     if (!needs) continue;
+    const root = fieldOf(line, 'shape');
     const place = join(own, archiveCoordinate(needs));
     const link = lstatSync(place, { throwIfNoEntry: false });
     if (link?.isSymbolicLink() && !realpathSync(place).includes(`${sep}cas${sep}laid${sep}`)) continue;
     if (dir) {
-      const files = bytes === undefined ? undefined : members(bytes).map((one) => [one.name, digestOf(one.bytes)] as const);
+      const files = bytes === undefined ? undefined : mountedFiles(members(bytes).map((one) => [one.name, digestOf(one.bytes)] as const), root);
       if (!lstatSync(place, { throwIfNoEntry: false })?.isSymbolicLink() && observeText(join(place, laidMark)) === digest && files !== undefined && layoutMatches(place, files)) continue;
       const next = nextPlace(place);
-      try { layDir(at, next); swapPlace(place, next, digest); }
+      try { layDir(root ? join(at, archiveCoordinate(root)) : at, next); swapPlace(place, next, digest); }
       catch (error) { rmSync(next, { recursive: true, force: true }); throw error; }
       laid += 1;
       continue;
     }
     const snap = observeText(at);
     if (snap === undefined) throw new Error(`REFUSE·release ${fieldOf(line, 'scope')} has no available snapshot`);
-    if (!lstatSync(place, { throwIfNoEntry: false })?.isSymbolicLink() && observeText(join(place, laidMark)) === digest && layoutMatches(place, snapshotOf(snap))) continue;
+    const mounted = mountedFiles(snapshotOf(snap), root);
+    if (!lstatSync(place, { throwIfNoEntry: false })?.isSymbolicLink() && observeText(join(place, laidMark)) === digest && layoutMatches(place, mounted)) continue;
     const next = nextPlace(place);
     try {
-      layFiles(store, contentStore, snapshotOf(snap), next);
+      layFiles(store, contentStore, mounted, next);
       swapPlace(place, next, digest);
     } catch (error) {
       rmSync(next, { recursive: true, force: true });
@@ -168,24 +178,26 @@ export const resolvedOf = (store: string, own: string, lock: readonly string[], 
   const historicalDirectory = lstatSync(at, { throwIfNoEntry: false })?.isDirectory() === true;
   const snapshot = observeText(at);
   const complete = expected !== undefined && (needs
-    ? layoutMatches(place, expected)
+    ? layoutMatches(place, mountedFiles(expected, fieldOf(line, 'shape')))
     : historicalDirectory ? layoutMatches(at, expected) : snapshot !== undefined && sameSnapshot(snapshotOf(snapshot), expected));
   return ok && laid && complete ? [canonical({ scope: `resolved/${fieldOf(line, 'scope').slice('dep/'.length)}`, role: 'writes', form: 'alphabet', measure: 'digest', value: digest, at: `place:${digest}`, by: 'target' })] : [];
 });
 
 /** A host loads verified release bytes from a runtime tree, never interprets a snapshot file as a directory. */
-export function runtimeTreeAt(store: string, own: string, digest: string, contentStore: string = own): string | undefined {
+export function runtimeTreeAt(store: string, own: string, digest: string, contentStore: string = own, root: string = ''): string | undefined {
   const named = /^([a-zA-Z0-9-]+):([a-fA-F0-9]+)$/.exec(digest);
   if (named === null) throw new Error(`REFUSE·release invalid digest ${digest}`);
   const bytes = observeFile(blobAt(contentStore, digest));
   if (bytes === undefined) return undefined;
   if (!hashed(digest, bytes)) throw new Error(`REFUSE·release ${digest} does not name its available bytes`);
   const files = members(bytes).map((one) => [one.name, digestOf(one.bytes)] as const);
+  mountedFiles(files, root); // Validate the same declared projection used for installation.
   const place = storeAt(store, 'cas', 'runtime', named[1]!, named[2]!);
-  if (observeText(join(place, laidMark)) === digest && layoutMatches(place, files)) return place;
+  const selected = root ? join(place, archiveCoordinate(root)) : place;
+  if (observeText(join(place, laidMark)) === digest && layoutMatches(place, files)) return selected;
   for (const member of members(bytes)) landBlob(store, digestOf(member.bytes), member.bytes);
   const next = nextPlace(place);
   try { layFiles(store, own, files, next); swapPlace(place, next, digest); }
   catch (error) { rmSync(next, { recursive: true, force: true }); throw error; }
-  return place;
+  return selected;
 }

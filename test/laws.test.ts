@@ -1,9 +1,10 @@
+import { signBytes } from '../src/host/adapters/keys/ed25519.ts';
 import { generateKeyPairSync } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { canonical } from '@lapxo/topos/wire';
 import { fieldOf, foldClaims } from '../src/fold/claims.ts';
-import { signConsentLine, verifiesOwnerLine } from '../src/land/sign.ts';
+import { signConsentLot, verifiesOwnerLine } from '../src/land/sign.ts';
 
 const claim = (by: string, value: string, epoch = '1'): string =>
   canonical({ scope: 'meeting/when', role: 'reads', form: 'interval', measure: 'hour', value, by, at: `origin:${by}`, epoch });
@@ -39,7 +40,7 @@ test('different origins remain live host inscriptions without an algebraic verdi
   compare(left.forks[0]?.lines.length, right.forks[0]?.lines.length, 'both sides stand');
 });
 
-test('a changed byte of a signed line does not verify', () => {
+test('a changed byte of a signed line does not verify', async () => {
   const pair = generateKeyPairSync('ed25519');
   const pem = pair.privateKey.export({ type: 'pkcs8', format: 'pem' }).toString();
   const pub = pair.publicKey.export({ type: 'spki', format: 'pem' }).toString();
@@ -48,11 +49,11 @@ test('a changed byte of a signed line does not verify', () => {
     by: 'target', at: 'origin:ana',
   });
   const era = 'ed25519:era1';
-  const got = signConsentLine(drafted, pem, { epoch: 1, by: 'ana', algorithm: era });
+  const got = await signConsentLot([drafted], { epoch: 1, by: 'ana', algorithm: era }, pub, [era], async lot => lot.bytes.map(bytes => ({keyId:lot.keyId,signature:signBytes(bytes,pem,lot.algorithm)})));
   compare(got.kind, 'fact', 'signs');
   if (got.kind !== 'fact') return;
-  compare(verifiesOwnerLine(got.line, pub, [era]), true, 'holds');
-  const tampered = got.line.replace('10..14', '10..15');
+  compare(verifiesOwnerLine(got.lines[0]!, pub, [era]), true, 'holds');
+  const tampered = got.lines[0]!.replace('10..14', '10..15');
   compare(verifiesOwnerLine(tampered, pub, [era]), false, 'a changed byte fails');
 });
 

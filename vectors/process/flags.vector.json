@@ -14,19 +14,19 @@
         "dist/cli/verb.js",
         "usage"
       ],
-      "cwd": "bound",
+      "cwd": ".",
       "timeoutMs": 20000,
       "maxBytes": 1048576,
       "exit": 2,
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "flags --as --check --key --key-file --out --place"
+          "pattern": "flags --as --check --key --key-file --signer --place"
         }
       ],
       "inputs": [
-        "bound/vectors/process/cli-case.mjs",
-        "bound/dist/cli/verb.js"
+        "vectors/process/cli-case.mjs",
+        "dist/cli/verb.js"
       ]
     }
   ]

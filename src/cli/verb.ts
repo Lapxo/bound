@@ -21,7 +21,8 @@ import { rolesOf } from '../fold/roles.ts';
 import { authorityFor, releaseSigner, rootSigner, writerFor } from '../fold/signers.ts';
 import { land, ledgerLines, storeOf } from '../land/ledger.ts';
 import { lockLines, releaseOf } from '../fold/keys.ts';
-import { signConsentLine } from '../land/sign.ts';
+import { signConsentLot } from '../land/sign.ts';
+import { signerFor } from '../host/signing.ts';
 import { admittedIn, ownLockOf, tellOwn } from '../fold/signed.ts';
 import { hasVouchedTree, landCoordinates, coordinatesOf, locationsOf, vouching, sourced } from '../land/vouched.ts';
 import { observeText } from '../observe/files.ts';
@@ -43,7 +44,7 @@ import type { VerbName } from './names.ts';
 import { accept, signedBatch } from './accept.ts';
 
 /** The first land of a lock: TARGET.bound into an empty owner ledger, then the sources that lock names. */
-function firstLand(root: string, args: readonly string[]): number | Promise<number> {
+async function firstLand(root: string, args: readonly string[]): Promise<number> {
   const started = Date.now();
   const store = storeOf(root);
   const today = claimLinesIn(targetFile(root));
@@ -63,19 +64,6 @@ function firstLand(root: string, args: readonly string[]): number | Promise<numb
     if (!owner) throw new Error('REFUSE·bootstrap the proposed lock declares no root authorizer');
     keyId = valueOf(args, FLAGS.key) ?? owner;
     if (ledgerLines(store, owner).length) throw new Error('REFUSE·bootstrap the owner ledger already holds claims; the first land happens once');
-    const keyFile = valueOf(args, FLAGS.keyFile);
-    if (keyFile !== undefined) {
-      const pem = observeText(keyFile);
-      if (pem === undefined) throw new Error('REFUSE·bootstrap the requested signing key is unreadable');
-      const signed: string[] = [];
-      for (const line of today) {
-        if (/\bsig=/.test(line)) { signed.push(line); continue; }
-        const got = signConsentLine(line, pem, { epoch: 1, by: keyId, algorithm: config.era });
-        if (got.kind === 'refuse') throw new Error(got.why);
-        signed.push(got.line);
-      }
-      today.splice(0, today.length, ...signed);
-    }
     const said = (measure: string): string => {
       const values = new Set(today.filter((line) => fieldOf(line, 'scope') === `keys/${owner}` && fieldOf(line, 'measure') === measure && fieldOf(line, 'value') !== 'withdraw').map((line) => fieldOf(line, 'value')));
       if (values.size !== 1) throw new Error(`REFUSE·bootstrap root key ${owner} must declare one ${measure}`);
@@ -85,6 +73,15 @@ function firstLand(root: string, args: readonly string[]): number | Promise<numb
     const publicKey = said('public-key');
     const coverage = said('coverage').split('|').filter(Boolean);
     if (!publicKey || !coverage.length) throw new Error('REFUSE·bootstrap the root key must declare its public key and coverage');
+    const drafted = today.filter(line => !fieldOf(line, 'sig'));
+    if (drafted.length) {
+      const invoke = signerFor(today, keyId, valueOf(args, FLAGS.signer), valueOf(args, FLAGS.keyFile));
+      const got = await signConsentLot(drafted, { epoch: 1, by: keyId, algorithm: config.era },
+        publicKey, config.admitted, invoke);
+      if (got.kind === 'refuse') throw new Error(got.why);
+      let i = 0;
+      today.splice(0, today.length, ...today.map(line => fieldOf(line, 'sig') ? line : got.lines[i++]!));
+    }
     const authority = authorityFor(today, { ...releaseSigner(today), id: owner, publicKey, coverage }, config.admitted);
     for (const line of today) {
       const verdict = authority.of(line);
@@ -399,6 +396,21 @@ const VERBS: Readonly<Record<VerbName, (root: string, rest: readonly string[], a
 };
 
 function main(argv: readonly string[]): number | Promise<number> {
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]!;
+    if (!arg.startsWith('--')) continue;
+    if (!(Object.values(FLAGS) as readonly string[]).includes(arg)) {
+      process.stderr.write(`${selfName()}: REFUSE·flag unknown option ${arg}\n`);
+      return EXIT.usage;
+    }
+    if (arg !== FLAGS.check) {
+      if (argv[i + 1] === undefined || argv[i + 1]!.startsWith('--')) {
+        process.stderr.write(`${selfName()}: REFUSE·flag ${arg} needs a value\n`);
+        return EXIT.usage;
+      }
+      i += 1;
+    }
+  }
   const verb = argv[0] ?? '';
   const run = verb in VERBS ? VERBS[verb as VerbName] : undefined;
   const places = positionalsOf(run === undefined ? argv : argv.slice(1)).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());

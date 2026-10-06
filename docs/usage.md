@@ -12,11 +12,11 @@ Start by asking for help and folding the project. If a selected view is unavaila
 
 ## Keys and coverage
 
-Use a named key already admitted by the project. The authority contract declares its public key, class and scope coverage. The private key is a matching PKCS8 PEM file outside the repository. Point `--key-file` at that file and `--key` at the admitted identifier.
+Use a named key already admitted by the project. The authority contract declares its public key, class and scope coverage. Signing uses a declared port. The lock names `keys/<who> measure=signer value=<name>`; `signer/timeout` and `signer/response-bytes` bound each invocation. The built-in `file` port reads a matching PKCS8 PEM outside the repository through `--key-file`. For a command port, the host supplies a `BOUND_SIGNERS` registry mapping that admitted name to `{ "kind": "command", "executable": "...", "args": [] }`. A repository declaration cannot authorize a program. `--signer <name>` must match the admitted selection.
 
 A new device must have its public key and coverage admitted by an authority that already covers the intended scope. The CLI does not currently certify silent key creation or tap-to-sign. This guide does not substitute a self-authorized fixture key for the team's authority.
 
-For automation, supply the private key through the runner's secret storage to a temporary external file with restricted permissions. Do not print, commit or upload it. A source-control token and a Bound authority key have different purposes. Key rotation and revocation are changes to the admitted authority contract, not edits that erase prior signatures.
+For automation through the file port, supply the private key through the runner's secret storage to a temporary external file with restricted permissions. A command signer receives the lot once as canonical signed bytes, one line per record in order. It returns one canonical wire response per record, containing `by` and `sig`, in that same order. Bound verifies the entire reply against the admitted public key before any admission. Timeout, nonzero exit, missing or invalid replies refuse the whole lot; raw signer output is not logged. Hosts can keep private keys outside Bound through this port. Key generation, storage and rotation belong to the host. Do not print, commit or upload it. A source-control token and a Bound authority key have different purposes. Key rotation and revocation are changes to the admitted authority contract, not edits that erase prior signatures.
 
 ## Proposal → signature → admission → reading
 
@@ -42,7 +42,7 @@ receipts.bound is native fold output. Do not write it by hand, use JSON from a t
 
 REFUSE·wire means the current grammar does not admit the record. REFUSE·pin/release means named authentic content or its closure is unavailable or does not match. REFUSE·view means the requested view cannot be rendered under its contract. Authority refusal means the signer is not covered. Keep the line and the failed exit status; follow an explicit fix without changing the named digest or dropping a conflicting statement.
 
-release/blocks is policy read by the fold. The existing policy is incomplete because it has no admitted category links. An incomplete policy is not READY and is not permission to fabricate selectors.
+release/blocks is policy read by the fold. Its admitted category links select existing obligations. The fold prints each missing reading or crossed ceiling as BLOCK; a blocked or incomplete policy is not READY. Read the captured verdict for the exact candidate instead of inferring acceptance from a successful render.
 
 ## Repository and PR review
 

@@ -9,7 +9,7 @@
         "vectors/process/source-tests.mjs",
         "test/owned-history.test.ts"
       ],
-      "cwd": "bound",
+      "cwd": ".",
       "timeoutMs": 70000,
       "maxBytes": 4194304,
       "exit": 0,
@@ -24,11 +24,11 @@
         }
       ],
       "inputs": [
-        "bound/vectors/process/source-tests.mjs",
-        "bound/src/cli/verb.ts",
-        "bound/TARGET.bound",
-        "bound/package.json",
-        "bound/test/owned-history.test.ts"
+        "vectors/process/source-tests.mjs",
+        "src/cli/verb.ts",
+        "TARGET.bound",
+        "package.json",
+        "test/owned-history.test.ts"
       ]
     }
   ]

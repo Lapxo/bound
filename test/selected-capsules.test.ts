@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { canonical } from '@lapxo/topos/wire';
+import { canonical, fromLine } from '@lapxo/topos/wire';
 import { readStanding, standingBytes } from '@lapxo/topos/standing';
 import { selectedCapsules } from '../src/host/selected-capsules.ts';
 import { ownLock } from '../src/observe/runner.ts';
 import { fieldOf } from '../src/fold/claims.ts';
 import type { Capsule } from '../src/host/capsule.ts';
-import {selectedWireList} from '../src/host/selected-topos.ts';
+import {selectedWireList,selectedWireAt} from '../src/host/selected-topos.ts';
 const pin = (name: string, value: string) => canonical({scope:`consumer/uses/${name}`,value,by:'fixture'});
 const standing = (fields: Record<string,string>) => readStanding(standingBytes([canonical(fields)]));
 
@@ -60,4 +60,23 @@ test('an explicitly projected capsule that lacks authentic bytes cannot silently
   const calls:string[][]=[];
   assert.throws(()=>selectedCapsules([pin('domain','sha256:held')],(name,shape)=>{calls.push([name,shape]);return undefined;},()=>topos),/offered capsule .* unavailable/);
   assert.deepEqual(calls,[[digest,fieldOf(alias,'shape')]]);
+});
+
+test('admission reads selected wire fields alongside the place cryptographic era',()=>{
+ const rows=[['fields','scope|role|form|measure|value|by|at|epoch'],['required','scope|role|form|measure|value|by|at'],['roles','reads|writes'],['forms','alphabet'],['at-classes','policy']].map(([name,value])=>canonical({scope:`audit/wire/${name}`,value}));
+ const world=readStanding(standingBytes(rows));
+ const local=[{scope:'wire/era',epoch:'2',value:'fixture'}];
+ const snapshot=selectedWireAt(local,3,[pin('wire','sha256:held')],()=>world);
+ const line=canonical({scope:'name',role:'writes',form:'alphabet',measure:'id',value:'project',by:'target',at:'policy:fixture',epoch:'3'});
+ assert.equal(fromLine(line,snapshot).kind,'fact');
+ assert.deepEqual(local,[{scope:'wire/era',epoch:'2',value:'fixture'}],'reading must not copy selected claims into the place');
+ assert.equal(fromLine(canonical({scope:'name',role:'writes',form:'alphabet',measure:'id',value:'project',by:'target',at:'policy:fixture',unknown:'extra'}),snapshot).kind,'refuse');
+});
+test('selected admission cannot choose a foreign alphabet by order or a future local declaration',()=>{
+ const resolve=(digest:string)=>standing({scope:'wire/fields',value:digest==='sha256:one'?'scope|value':'scope|value|extra'});
+ const pins=[pin('one','sha256:one'),pin('two','sha256:two')];
+ assert.throws(()=>selectedWireAt([],4,pins,resolve),/conflicting selected contracts/);
+ assert.throws(()=>selectedWireAt([],4,[...pins].reverse(),resolve),/conflicting selected contracts/);
+ const future=[{scope:'wire/fields',value:'scope|value|future',epoch:'5'}];
+ assert.deepEqual([...selectedWireAt(future,4,[pins[0]!],resolve)!.fields],['scope','value']);
 });

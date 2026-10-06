@@ -10,7 +10,7 @@
         "dist/cli/verb.js",
         "stranger"
       ],
-      "cwd": "bound",
+      "cwd": ".",
       "timeoutMs": 20000,
       "maxBytes": 1048576,
       "exit": 0,
@@ -37,8 +37,8 @@
         }
       ],
       "inputs": [
-        "bound/vectors/process/product-closure-case.mjs",
-        "bound/dist/cli/verb.js"
+        "vectors/process/product-closure-case.mjs",
+        "dist/cli/verb.js"
       ]
     }
   ]

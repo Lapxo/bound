@@ -374,7 +374,10 @@ export function observedClaims(root: string, store: string, options: { readonly 
           ? asked.ask(due.map((d) => ({
             protocol: PROTOCOL, verb: 'read' as const, rootScope: d.place, region: reader.capsule!.region, held: heldOf(d.place, d.region),
             files: (reader.capsule!.reads.some((read) => read.includes('@')) ? handedAt(root, reader, roleOf, look, d.place) : [d.place]).map((coordinate) => ({ place: coordinate, text: observeText(resolve(root, coordinate)) ?? '' })),
-          }))).map((answer) => (answer?.claims ?? []) as ReturnType<typeof runReader>[number])
+          }))).map((answer) => {
+            if (answer?.kind !== 'fact') throw new Error(`REFUSE·reader ${reader.module} · ${answer?.why ?? 'no capsule answer'}`);
+            return (answer.claims ?? []) as ReturnType<typeof runReader>[number];
+          })
           : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })));
       } catch (error) {
         process.stderr.write(`REFUSE reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}\n`);
