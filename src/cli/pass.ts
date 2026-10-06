@@ -35,8 +35,8 @@ import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
  * has landed, and never when it is refused.
  */
 /**
- * A check reads receipts. It does not run readers. When the instrument that closed them is not the one this process
- * loaded, it names the places that opened and closes each region's hash once.
+ * A check verifies existing receipts without running readers or refreshing hashes. Open regions or a different
+ * instrument refuse; an admitted fold must establish closure before it can be checked.
  */
 async function checked(root: string, entry: string, under: string | undefined): Promise<number> {
   const started = Date.now();
