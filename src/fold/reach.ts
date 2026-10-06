@@ -1,6 +1,6 @@
 import { selectedCapsules } from '../host/selected-capsules.ts';
 import { basename } from '../host/io.ts';
-import { matches } from '@lapxo/topos/wire';
+import { canonical, matches, parse } from '@lapxo/topos/wire';
 import { fieldOf } from './claims.ts';
 import { spoken, worldsIn } from './places.ts';
 import { wordOf, wordsOf } from './wire.ts';
@@ -57,9 +57,27 @@ export const selectionLines = (fold: { readonly root: string; readonly standing:
   return [...new Set([...local, ...qualified])].filter((line) => fieldOf(line, 'value') !== 'withdraw');
 };
 
+/** Host bindings belong to the selected place, never to another sibling's lock. */
+const relativeProjections = (standing:readonly string[],prefix:string):readonly string[] => standing.filter(line=>fieldOf(line,'scope').startsWith(`${prefix}dep/`)).map(line=>{
+  const got=parse(line,{preserveKeys:true});
+  if(got.kind!=='fact')throw Error(`REFUSE·wire ${got.why}`);
+  // An unsigned host projection of admitted fields, never a newly signed claim.
+  const {sig,by,epoch,expires,repo,...fields}=got.value.fields;
+  return canonical({...fields,scope:fields.scope!.slice(prefix.length)},got.value.version);
+});
+export const projectionLines = (fold: { readonly root: string; readonly standing: readonly string[]; readonly under?: string }): readonly string[] => {
+  const place=fold.under?.replace(/\/$/,'')??'';
+  const prefix=place?`${place}/`:'';
+  const local=ownLockOf(fold.root,place).filter(line=>fieldOf(line,'scope').startsWith('dep/'));
+  const qualified=relativeProjections(fold.standing,prefix);
+  return [...new Set([...ownLock(),...local,...qualified])];
+};
+
 export function capsulesFor(standing: readonly string[], place: string, root?: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
   const prefix = place ? `${place}/` : '';
   const pins = root === undefined ? standing.filter(line => fieldOf(line, 'scope').startsWith(`${prefix}uses/`) && fieldOf(line, 'value') !== 'withdraw')
     : selectionLines({ root, standing, ...(prefix ? { under: prefix } : {}) });
-  return selectedCapsules(pins);
+  const host=root===undefined?[...ownLock(),...relativeProjections(standing,prefix)]
+    :projectionLines({root,standing,...(prefix?{under:prefix}:{})});
+  return selectedCapsules(pins,undefined,undefined,host);
 }

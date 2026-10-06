@@ -62,11 +62,16 @@ export async function resolveSelectedContent(lines:readonly string[],port:Conten
  return received;
 }
 /** Exact resource URLs; no repository checkout or inferred release. */
-export async function resolveSources(standing:readonly string[]):Promise<void> {
+export async function resolveSources(standing:readonly string[],materializeInstrument=false):Promise<void> {
  const instrument=ownLock().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];});
  const wire=wireAt(instrument,Number.MAX_SAFE_INTEGER);
  if(wire===null)throw Error('REFUSE·pin instrument has no admitted wire');
- const received=await resolveSelectedContent([...standing,...ownLock().filter(line=>{const p=parse(line);return p.kind==='fact'&&(p.value.fields.scope?.startsWith('dep/')||p.value.fields.scope?.startsWith('sources/'));})],{
+ const bindings=ownLock().filter(line=>{
+  const p=parse(line);if(p.kind!=='fact')return false;
+  const fields=p.value.fields;
+  return fields.scope?.startsWith('sources/') || (fields.scope?.startsWith('dep/') && (fields.role!=='reads' || (materializeInstrument && !!fields.needs)));
+ });
+ const received=await resolveSelectedContent([...standing,...bindings],{
   algorithms:wire.digests,
   read:digest=>observeFile(blobAt(ownStore(),digest)),
   write:(digest,bytes)=>{landBlob(ownStore(),digest,bytes);},

@@ -62,6 +62,22 @@ test('an explicitly projected capsule that lacks authentic bytes cannot silently
   assert.deepEqual(calls,[[digest,fieldOf(alias,'shape')]]);
 });
 
+test('a consumer projects a new artifact without changing the instrument, with no guessed entry',()=>{
+  const digest='sha256:'+'e'.repeat(64);
+  assert.ok(!ownLock().some(line=>fieldOf(line,'value')===digest));
+  const top=standing({scope:'offers/provider',kind:'capsule',measure:'digest',value:digest,restsOn:digest});
+  const binding=(shape:string)=>canonical({scope:'dep/provider',role:'writes',value:digest,shape});
+  const calls:string[][]=[];
+  const capsule={} as Capsule;
+  const got=selectedCapsules([pin('world','sha256:held')],(name,entry)=>{calls.push([name,entry]);return capsule;},()=>top,[binding('package/run.js')]);
+  assert.equal(got[0]!.capsule,capsule);assert.deepEqual(calls,[[digest,'package/run.js']]);
+  calls.length=0;
+  assert.throws(()=>selectedCapsules([pin('world','sha256:held')],()=>{calls.push(['unexpected']);return capsule;},()=>top,[binding('package/run.js'),binding('another.js')]),/conflicting host projections/);
+  assert.deepEqual(calls,[]);
+  for(const shape of ['../run.js','/run.js','package/../../run.js'])assert.throws(()=>selectedCapsules([pin('world','sha256:held')],()=>{calls.push(['unexpected']);return capsule;},()=>top,[binding(shape)]),/REFUSE·archive invalid coordinate/);
+  assert.deepEqual(calls,[]);
+});
+
 test('admission reads selected wire fields alongside the place cryptographic era',()=>{
  const rows=[['fields','scope|role|form|measure|value|by|at|epoch'],['required','scope|role|form|measure|value|by|at'],['roles','reads|writes'],['forms','alphabet'],['at-classes','policy']].map(([name,value])=>canonical({scope:`audit/wire/${name}`,value}));
  const world=readStanding(standingBytes(rows));

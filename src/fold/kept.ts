@@ -1,11 +1,11 @@
 import { createHash, dirname, existsSync, join, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { bytesDigest, coordinateDigest } from './digests.ts';
 import { viewsOf } from './views.ts';
-import { landMemo, ledgerLines, memoAt } from '../land/ledger.ts';
-import { observeText } from '../observe/files.ts';
+import { landMemo, ledgerLines, memoAt, shardFile, writerFile } from '../land/ledger.ts';
+import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts';
 import type { PlaceFold } from '../cli/place.ts';
 import { EXTENSION, fieldOf } from './claims.ts';
-import { keyFor, lockSigners } from './keys.ts';
+import { keyFor, keyOf, lockSigners } from './keys.ts';
 import { sourceOf, vouching } from '../land/vouched.ts';
 import { wordsOf } from './wire.ts';
 import { ownLock } from '../observe/runner.ts';
@@ -55,6 +55,7 @@ export function foldPoints(store: string, standing: readonly string[], under: st
   return [
     `place ${under ?? '.'}`,
     `instrument ${instrument}`,
+    `reading context ${readingContext(store)}`,
     ...written,
     ...lined,
     ...[...new Set(coordinates)].sort(),
@@ -123,12 +124,22 @@ const split = (text: string): readonly string[] => (text === '' ? [] : text.spli
 const linesOf = (value: string | readonly string[] | undefined): readonly string[] =>
   value === undefined ? [] : typeof value === 'string' ? split(value) : value;
 
+/** Operational reader history guards file-fold reuse, never cell-region identity. */
+function readingContext(store: string): string {
+  const speaker = keyOf(store, 'read');
+  const files = speaker === undefined ? [] : [writerFile(store, speaker), ...coordinatesUnder(dirname(shardFile(store, speaker, '')), store)
+    .filter(file => file.endsWith(EXTENSION)).map(file => join(store, file))];
+  return bytesDigest(store, text(files.filter(file => existsSync(file)).sort()
+    .map(file => bytesDigest(store, observeFile(file) ?? new Uint8Array())).join('\n')));
+}
+
 export function keptPlace(store: string, under?: string): PlaceFold | undefined {
   const key = observeText(memoAt(store, lastOf([`place ${under ?? '.'}`])))?.trim();
   if (key === undefined || key === '') return undefined;
   const held = observeText(memoAt(store, `fold/${key}`));
   if (held === undefined) return undefined;
-  const blob = JSON.parse(held) as { readonly fold: Packed & { readonly standing?: string | readonly string[] } };
+  const blob = JSON.parse(held) as { readonly fold: Packed & { readonly standing?: string | readonly string[] }; readonly readingContext?: string };
+  if (blob.readingContext !== readingContext(store)) return undefined;
   const fold = blob.fold;
   return {
     ...fold,
@@ -165,7 +176,7 @@ export function keepFold(store: string, key: string, fold: PlaceFold, points: re
     signed: [...fold.signed],
     kept: false,
   };
-  landMemo(store, `fold/${key}`, text(JSON.stringify({ fold: packed, points, instrument })));
+  landMemo(store, `fold/${key}`, text(JSON.stringify({ fold: packed, points, instrument, readingContext: readingContext(store) })));
   const at = memoAt(store, lastOf(points));
   mkdirSync(dirname(at), { recursive: true });
   writeFileSync(`${at}.${process.pid}.part`, `${key}\n`);

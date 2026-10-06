@@ -362,7 +362,9 @@ function foldVerb(_root: string, rest: readonly string[]): number | Promise<numb
 
 async function foldAt(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
-  if(as !== NAMED_VIEWS.help && signedOwnerLines(storeOf(root)).length) await resolveSources(standingOf(root,under).standing);
+  // Public content is authenticated by its digest, independently of owner history.
+  // A named view does not request mounting every release of the instrument.
+  if(as !== NAMED_VIEWS.help && lockLines(storeOf(root)).length) await resolveSources(standingOf(root,under).standing,as===undefined);
   if(as===OBJECT_VIEW){const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));const cells=objectFold(held.records,held.context);for(const c of cells)process.stdout.write('CELL '+JSON.stringify(c)+'\n');process.stdout.write(`FACT     object fold ${cells.length} cells\n`);return EXIT.closed;}
   const key = valueOf(argv, FLAGS.key);
   if (as === undefined) {

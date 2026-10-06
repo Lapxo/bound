@@ -9,6 +9,7 @@ import { members, unpack } from '../src/host/archive.ts';
 import { layReleases, laidAt, resolvedOf, runtimeTreeAt } from '../src/host/release.ts';
 import { capsuleAt } from '../src/host/capsule.ts';
 import { blobAt } from '../src/land/ledger.ts';
+import {isCeiling} from '../src/fold/configures.ts';
 
 const record = (name: string, text: string, type = '0'): Buffer => {
   const body = Buffer.from(text);
@@ -23,6 +24,25 @@ const tar = (...rows: Buffer[]): Buffer => gzipSync(Buffer.concat([...rows, Buff
 const sha = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 const save = (store: string, digest: string, bytes: Uint8Array): void => { const at = blobAt(store, digest); mkdirSync(join(store, 'cas', 'blobs'), { recursive: true }); writeFileSync(at, bytes); };
 const scope = (digest: string): string => canonical({ scope: 'dep/example', role: 'reads', form: 'alphabet', measure: 'digest', value: digest, needs: 'layout', by: 'fixture', at: 'policy:fixture' });
+
+test('host artifact bindings do not become inert measured ceilings; dependency constraints still do',()=>{
+ assert.equal(isCeiling(scope('sha256:'+'a'.repeat(64))),false);
+ assert.equal(isCeiling(canonical({scope:'dep/library',role:'reads',form:'alphabet',measure:'id',value:'sha256:'+'b'.repeat(64)})),false);
+ assert.equal(isCeiling(canonical({scope:'dep/source/**',role:'reads',form:'alphabet',measure:'id',value:'library'})),true);
+ assert.equal(isCeiling(canonical({scope:'dep/count',role:'reads',form:'interval',measure:'count',value:'0..3'})),true);
+ assert.equal(isCeiling(canonical({scope:'other/identity',role:'reads',form:'alphabet',measure:'id',value:'sha256:'+'b'.repeat(64)})),true);
+});
+
+test('an unrequested release catalog entry cannot block a declared mount',()=>{
+ const root=mkdtempSync(join(tmpdir(),'release-catalog-')),store=join(root,'.bound');
+ try{
+  const bytes=tar(record('module.js','export const value=1;')),digest=sha(bytes);save(store,digest,bytes);
+  const unused=canonical({scope:'dep/unrelated',role:'reads',form:'alphabet',measure:'digest',value:'sha256:'+'f'.repeat(64),by:'fixture',at:'policy:catalog'});
+  assert.equal(layReleases(store,root,[unused,scope(digest)],store),1);
+  assert.equal(readFileSync(join(root,'layout/module.js'),'utf8'),'export const value=1;');
+  assert.deepEqual(resolvedOf(store,root,[unused],store),[],'an unmaterialized catalog entry is not paid');
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
 
 test('declared archive roots mount exact verified members without guessing or dropping siblings', () => {
  const root=mkdtempSync(join(tmpdir(),'archive-root-')),store=join(root,'.bound');

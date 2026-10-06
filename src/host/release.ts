@@ -2,14 +2,18 @@ import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, sep } from 'node:path';
 import { canonical } from '@lapxo/topos/wire';
-import { fieldOf, isWire } from '../fold/claims.ts';
+import { fieldOf, isWire, isConfig } from '../fold/claims.ts';
 import { archiveCoordinate, archiveDestination, members } from './archive.ts';
 import { blobAt, holdStore, landBlob, replaceWhole, storeAt } from '../land/ledger.ts';
 import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts';
 
 export const laidAt = (store: string, digest: string): string => storeAt(store, 'cas', 'laid', digest.replace(/^[^:]*:/, ''));
-export const releasesOf = (lock: readonly string[]): readonly string[] =>
-  lock.filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads' && fieldOf(line, 'value') !== 'withdraw');
+/** A host artifact binding, not a measured ceiling or an object act. */
+export const isReleaseBinding = (line:string):boolean => isConfig(line)
+  && fieldOf(line,'scope').startsWith('dep/') && fieldOf(line,'role')==='reads'
+  && fieldOf(line,'value')!=='withdraw'
+  && (fieldOf(line,'measure')==='digest' || /^[a-zA-Z][a-zA-Z0-9-]*:[a-f0-9]+$/.test(fieldOf(line,'value')));
+export const releasesOf = (lock: readonly string[]): readonly string[] => lock.filter(isReleaseBinding);
 const laidMark = '.laid';
 const digestOf = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 const hashed = (digest: string, bytes: Uint8Array): boolean =>
@@ -120,6 +124,10 @@ function keepSnapshot(store: string, digest: string, bytes: Uint8Array): readonl
 export function layReleases(store: string, own: string, lock: readonly string[], contentStore: string = own): number {
   let laid = 0;
   for (const line of releasesOf(lock)) {
+    // A release catalog entry without a mount is materialized only when requested.
+    // Its absence must not block an unrelated place's fold.
+    const needs = fieldOf(line, 'needs');
+    if(!needs)continue;
     const digest = fieldOf(line, 'value');
     const at = laidAt(store, digest);
     const dir = lstatSync(at, { throwIfNoEntry: false })?.isDirectory() ?? false;
@@ -132,8 +140,6 @@ export function layReleases(store: string, own: string, lock: readonly string[],
     const current = observeText(at);
     if (bytes !== undefined && current !== undefined && !dir && !sameSnapshot(snapshotOf(current), members(bytes).map((one) => [one.name, digestOf(one.bytes)] as const))) throw new Error(`REFUSE·release snapshot for ${digest} omits or changes archive members; explicit rebuild required`);
     if (bytes === undefined && !dir && current === undefined) throw new Error(`REFUSE·release ${fieldOf(line, 'scope')} has no available archive or snapshot`);
-    const needs = fieldOf(line, 'needs');
-    if (!needs) continue;
     const root = fieldOf(line, 'shape');
     const place = join(own, archiveCoordinate(needs));
     const link = lstatSync(place, { throwIfNoEntry: false });
