@@ -7,7 +7,7 @@ on:
     tags: ['v*']
 jobs:
   release:
-    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -19,8 +19,14 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           fetch-depth: 0
       - id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
           version="v$(node -p "require('./package.json').version")"
+          if [ "$EVENT_NAME" = push ]; then
+            test "$REF_NAME" = "$version"
+          fi
           git rev-parse --verify "refs/tags/$version"
           echo "tag=$version" >> "$GITHUB_OUTPUT"
           git checkout --detach "$version"
