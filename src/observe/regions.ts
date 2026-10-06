@@ -1,5 +1,5 @@
 import { selectedCapsules } from '../host/selected-capsules.ts';
-import { selectionLines } from '../fold/reach.ts';
+import { selectionLines, projectionLines } from '../fold/reach.ts';
 export { selectionLines } from '../fold/reach.ts';
 import { createHash } from 'node:crypto';
 import { basename, dirname, join, relative } from 'node:path';
@@ -138,7 +138,7 @@ const heldCapsules = new WeakMap<Placed, readonly Capsule[]>();
 export function capsulesOf(fold: Placed): readonly Capsule[] {
   const cached = heldCapsules.get(fold);
   if (cached !== undefined) return cached;
-  const got = selectedCapsules(selectionLines(fold)).map(one => one.capsule);
+  const got = selectedCapsules(selectionLines(fold),undefined,undefined,projectionLines(fold)).map(one => one.capsule);
   heldCapsules.set(fold, got);
   return got;
 }

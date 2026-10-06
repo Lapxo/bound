@@ -185,7 +185,8 @@ export function prerender(fold: PlaceFold, views: readonly View[]): void {
 }
 
 export function viewOf(fold: PlaceFold, view: View): string {
-  const live = !view.shape;
+  // Native receipts project current file bytes, not only the cached fold's observations.
+  const live = !view.shape || view.regions.some(asked => asked.name === 'receipts');
   const kept = !live && fold.key ? keptRender(fold.store, fold.key, view.name) : undefined;
   if (kept !== undefined) return kept;
   const text = render(fold, view.regions, view.shape);
