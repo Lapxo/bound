@@ -10,7 +10,7 @@ import { layReleases, resolvedOf } from '../host/release.ts';
 import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { landLaid } from '../fold/laid.ts';
 import { actSeconds, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
-import { algorithmCost, instrumentOf } from '../fold/digests.ts';
+import { algorithmCost, instrumentOf, instrumentDigest } from '../fold/digests.ts';
 import { writerFor } from '../fold/signers.ts';
 import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
 import { ownLockOf } from '../fold/signed.ts';
@@ -23,6 +23,9 @@ import { emptyLedger, sayStranger } from '../fold/stranger.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
 import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
 import { releasePolicyLines } from '../fold/release-policy.ts';
+import { carriedFrom } from '../fold/resolved.ts';
+import { wireLine } from '../fold/wire.ts';
+import { isWire, RECEIPTS } from '../fold/claims.ts';
 
 /**
  * The pass of a place, in one process: the releases its instrument names are laid out first, its readers observe
@@ -46,12 +49,16 @@ async function checked(root: string, entry: string, under: string | undefined): 
     process.stderr.write(`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
     return 1;
   }
-  const expectedInstrument = instrumentKept(store);
+  const contract = wireLine(ownLock(), 'receipt-instrument');
+  const evidence = carriedFrom(store, (observeText(join(root, under ?? '', RECEIPTS)) ?? '').split('\n').filter(isWire));
+  const sealed = contract === undefined ? undefined : evidence?.find(line=>fieldOf(line,'scope')===fieldOf(contract,'value')&&fieldOf(line,'measure')==='digest');
+  const expectedInstrument = sealed === undefined ? instrumentKept(store) : fieldOf(sealed,'value');
   if (!expectedInstrument) {
     process.stderr.write(`${selfName()}: REFUSE·check no verified instrument identity is available for these receipts\n`);
     return 1;
   }
-  const instrument = instrumentOf(store, entry, standingOf(root).standing, root, ownLock());
+  const standing = emptyLedger(store) ? ownLockOf(root,under?.replace(/\/$/,'') ?? '') : standingOf(root).standing;
+  const instrument = sealed === undefined ? instrumentOf(store, entry, standing, root, ownLock()) : instrumentDigest(store,entry,[],ownRoot(),ownLock());
   if (expectedInstrument !== instrument) {
     process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; a fold must close it\n`);
     return 1;

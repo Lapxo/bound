@@ -1,5 +1,5 @@
-import { dirname, existsSync, join, mkdirSync, statSync, writeFileSync } from '../host/io.ts';
-import { canonical, LOCK } from '@lapxo/topos/wire';
+import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writeFileSync } from '../host/io.ts';
+import { canonical, LOCK, parse, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, isWire } from './claims.ts';
 import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest.ts';
 import { worldAt } from './places.ts';
@@ -37,12 +37,27 @@ const lockStamp = (root: string, place: string): string => {
   }
 };
 
-function filesOf(root: string, place: string, region: string): readonly string[] {
+function filesOf(root: string, place: string, region: string, inputs: readonly string[]): readonly string[] {
   const step = region.replace(/^receipts\//, '').replace(/\/$/, '');
+  const here = join(root, place);
   const name = place.replace(/\/$/, '');
-  const own = existsSync(join(root, name, LOCK)) ? [name ? `${name}/${LOCK}` : LOCK] : [];
+  const own = existsSync(join(here, LOCK)) ? [name ? `${name}/${LOCK}` : LOCK] : [];
   const receipt = `${name ? `${name}/` : ''}${RECEIPTS}`;
-  return [...new Set([...coordinatesUnder(join(root, place, step), root), ...own])].filter((rel) => rel !== receipt && !rel.split('/').some((part) => part === '.bound' || part === '.cache' || part === '.git'));
+  const claims = roleClaimsOf((observeText(join(here, LOCK)) ?? '').split('\n').filter(isWire).flatMap(line => {
+    const record = parse(line);
+    return record.kind === 'fact' ? [record.value.fields] : [];
+  }));
+  const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relative(here, join(root, rel)), claims) !== 'foreign');
+  // Foreign worlds are not the place's tree. Retain the external files actually handed to its readers.
+  const observed = inputs.filter(line => fieldOf(line, 'measure') === 'observed').flatMap(line => {
+    const coordinate = fieldOf(line, 'scope');
+    const at = resolve(here, coordinate);
+    const local = relative(here, at);
+    if (local === '..' || local.startsWith('../') || resolve(at) === resolve(here)) return [];
+    if (step !== '.' && step !== '' && local !== step && !local.startsWith(`${step}/`)) return [];
+    return existsSync(at) && statSync(at).isFile() ? [relative(root, at)] : [];
+  });
+  return [...new Set([...owned, ...observed, ...own])].filter(rel => rel !== receipt && !rel.split('/').some(part => part === '.bound' || part === '.cache' || part === '.git'));
 }
 
 const rooted = new Map<string, readonly string[]>();
@@ -54,7 +69,8 @@ function rootLines(root: string, place: string): readonly string[] {
   const held = rooted.get(key);
   if (held !== undefined) return held;
   const standing = (observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire);
-  const lines = standing.filter((line) => fieldOf(line, 'value') !== 'withdraw');
+  // Authority validates admission separately; it is not a rendered file input.
+  const lines = standing.filter((line) => fieldOf(line, 'value') !== 'withdraw' && !fieldOf(line, 'scope').startsWith('keys/'));
   const take = takenFor(lines, `${name}/`, worldAt(root, name) ? { own: ownLockOf(root, name), tree: viewsOf(standing) } : undefined);
   const got = lines.filter(take).map((line) => `root ${line}`);
   rooted.set(key, got);
@@ -62,9 +78,9 @@ function rootLines(root: string, place: string): readonly string[] {
 }
 
 /** File-fold identity uses public inputs; admission history stays in its separate ledger guard. */
-export function fileRegionDigest(root: string, place: string, region: string, algorithm: string): string {
-  const files = filesOf(root, place, region);
-  return hashFull([...files.map((rel) => `${rel} ${hashBytes(observeFile(join(root, rel)) ?? new Uint8Array(), algorithm)}`), ...rootLines(root, place)], algorithm);
+export function fileRegionDigest(root: string, place: string, region: string, algorithm: string, inputs: readonly string[] = []): string {
+  const files = filesOf(root, place, region, inputs);
+  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(observeFile(join(root, rel)) ?? new Uint8Array(), algorithm)}`), ...rootLines(root, place)], algorithm);
 }
 
 function namedReceipts(root: string, store: string): ReadonlyMap<string, string> {
@@ -84,9 +100,11 @@ function ownBytes(root: string): readonly string[] {
 }
 
 function bytesMeet(root: string, place: string): boolean {
-  const lines = (observeText(join(root, place, RECEIPTS)) ?? '').split('\n').filter((line) => isWire(line) && fieldOf(line, 'measure') === 'bytes');
+  const shipped = (observeText(join(root, place, RECEIPTS)) ?? '').split('\n').filter(isWire);
+  const inputs = carriedFrom(storeOf(root), shipped) ?? [];
+  const lines = shipped.filter(line => fieldOf(line, 'measure') === 'bytes');
   const algorithm = algorithmIn(lines.join('\n'));
-  return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === lines.map((line) => fileRegionDigest(root, place, fieldOf(line, 'scope'), algorithm)).join('\n');
+  return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === lines.map((line) => fileRegionDigest(root, place, fieldOf(line, 'scope'), algorithm, inputs)).join('\n');
 }
 
 const stampAt = (store: string): string => storeAt(store, 'cas', 'instrument');
@@ -112,7 +130,8 @@ function rewritePlace(root: string, place: string): void {
   const regions = kept.filter((line) => isWire(line) && fieldOf(line, 'measure') === 'count' && fieldOf(line, 'scope').startsWith('receipts/'));
   const bytes = regions.map((line) => {
     const scope = fieldOf(line, 'scope');
-    const now = fileRegionDigest(root, place, scope, algorithm);
+    const inputs = carriedFrom(storeOf(root), kept.filter(isWire)) ?? [];
+    const now = fileRegionDigest(root, place, scope, algorithm, inputs);
     return canonical({ scope, role: 'writes', form: 'alphabet', measure: 'bytes', value: now, at: `place:${now}`, by: fieldOf(line, 'by') || 'bound' });
   });
   writeFileSync(at, `${[...kept.filter((line) => line !== ''), ...bytes].join('\n')}\n`);

@@ -25,10 +25,14 @@ const runtimeExtension = moduleAt === undefined ? '' : extname(moduleAt);
 export const ownRoot = (): string => (fromBlob() ? join(resolve(dirname(self()), '..', '..', '..'), 'bound') : resolve(runtimeAt, '..'));
 export const ownStore = (): string => join(ownRoot(), '..', EXTENSION);
 /** The colocated public artifact is read without an unrelated parent's authority store. */
+// An act is judged by the instrument it started with, even when that act changes its colocated lock.
+let instrumentLock: readonly string[] | undefined;
 export const ownLock = (): readonly string[] => {
+  if (instrumentLock !== undefined) return instrumentLock;
   const lines=(observeText(join(ownRoot(),LOCK))??'').split('\n').filter(isWire);
   const published=publicLock(lines);
-  return published===undefined?ownLockOf(join(ownRoot(),'..'),basename(ownRoot()),true):foldClaims(published).standing;
+  instrumentLock = published===undefined ? ownLockOf(join(ownRoot(),'..'),basename(ownRoot()),true) : foldClaims(published).standing;
+  return instrumentLock;
 };
 export const sourceOf = (): string => (fromBlob() ? join(ownRoot(), 'src', 'cli', 'verb.ts') : self());
 

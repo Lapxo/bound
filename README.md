@@ -98,4 +98,4 @@ Use Bound where independently attributed observations must be judged against an 
 
 ## What is open
 
-- `literal/**` reads `bound/src/render/target.ts=topos:3 bound/src/fold/evidence.ts=topos:1 bound/src/fold/zoom.ts=topos:2 bound/src/fold/stranger.ts=topos:2 +72`, outside its ceiling
+- `bound/door/unreceipted` reads `door/unreceipted=8`, outside its ceiling

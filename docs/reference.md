@@ -2,11 +2,10 @@
 
 | | |
 |---|---|
-| pin | rendering |
 | pin | wire |
+| pin | rendering |
 
 - [README](../README.md)
-- [why](why.md)
 - [reference](reference.md)
-- [release](release.md)
 - [guide](guide.md)
+- [why](why.md)

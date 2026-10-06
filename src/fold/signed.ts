@@ -1,16 +1,16 @@
 import { join } from '../host/io.ts';
 import { region, within } from '@lapxo/obligations/field';
 import { LOCK, parse, windowAt } from '@lapxo/topos/wire';
-import { fieldOf, foldClaims, isWire } from './claims.ts';
+import { fieldOf, foldClaims, isWire, sayingOf } from './claims.ts';
 import { signaturesOf } from './digests.ts';
 import { lockLines, lockStanding } from './keys.ts';
 import { wordOf } from './wire.ts';
 import { authorityFor, rootSigner } from './signers.ts';
-import { storeOf } from '../land/ledger.ts';
+import { shardLines, storeOf } from '../land/ledger.ts';
 import { verifiesFields } from '../land/sign.ts';
 import { observeText } from '../observe/files.ts';
 
-type Verified = { readonly text: string; readonly lock: readonly string[]; readonly lines: readonly string[]; readonly applied: ReadonlySet<string>; readonly folded: Map<boolean, readonly string[]> };
+type Verified = { readonly text: string; readonly lock: readonly string[]; readonly lines: readonly string[]; readonly applied: ReadonlySet<string>; readonly projected: ReadonlySet<string>; readonly folded: Map<boolean, readonly string[]> };
 const held = new Map<string, Verified>();
 const told = new Map<string, readonly string[]>();
 
@@ -18,16 +18,18 @@ const told = new Map<string, readonly string[]>();
 export const tellOwn = (place: string, lines: readonly string[]): void => void told.set(place, lines);
 
 function verified(root: string, place: string): Verified {
-  const text = [observeText(join(root, place, LOCK)) ?? '', ...(told.get(place) ?? [])].join('\n');
   const store = storeOf(root);
   const lock = lockLines(store);
+  const publicText = observeText(join(root, place, LOCK)) ?? '';
+  const hasAuthority = lock.some(line => fieldOf(line, 'sig') !== '');
+  const algorithms = hasAuthority ? signaturesOf(store).admitted : [];
+  const signers = algorithms.length ? authorityFor(lock, rootSigner(root), algorithms).admitted : [];
+  const history = signers.flatMap(signer => shardLines(store, signer.id, `${place}/${LOCK}`));
+  const text = [publicText, ...history, ...(told.get(place) ?? [])].join('\n');
   const key = `${root} ${place}`;
   const last = held.get(key);
   if (last !== undefined && last.text === text && last.lock === lock) return last;
-  const lines = text.split('\n').filter(isWire);
-  const signed = lines.some((line) => / sig=/.test(line));
-  const algorithms = signed && lock.length ? signaturesOf(store).admitted : [];
-  const signers = algorithms.length ? authorityFor(lock, rootSigner(root), algorithms).admitted : [];
+  const lines = [...new Set(text.split('\n').filter(isWire))];
   const family = signers.length ? wordOf(lockStanding(store), 'families', 'region') : '';
   const stands = (line: string): boolean => {
     const got = parse(line);
@@ -40,7 +42,10 @@ function verified(root: string, place: string): Verified {
     return epoch >= window.start && (window.close === null || epoch <= window.close)
       && signer.coverage.some((prefix) => prefix === '*' || within(region(`${family}/${place}/${fields['scope'] ?? ''}`, './'), region(prefix, './')));
   };
-  const got: Verified = { text, lock, lines, applied: new Set(lines.filter(stands)), folded: new Map() };
+  const applied = new Set(lines.filter(stands));
+  // A published copy of an authenticated delivery is not another inscription.
+  const projected = new Set([...applied].map(sayingOf));
+  const got: Verified = { text, lock, lines, applied, projected, folded: new Map() };
   held.set(key, got);
   return got;
 }
@@ -55,7 +60,7 @@ export function ownLockOf(root: string, place: string, signedOnly = false): read
   const got = verified(root, place);
   const kept = got.folded.get(signedOnly);
   if (kept !== undefined) return kept;
-  const standing = foldClaims(got.lines.filter((line) => got.applied.has(line) || (!signedOnly && !/ sig=/.test(line)))).standing
+  const standing = foldClaims(got.lines.filter((line) => got.applied.has(line) || (!signedOnly && !/ sig=/.test(line) && !got.projected.has(sayingOf(line))))).standing
     .filter((line) => fieldOf(line, 'value') !== 'withdraw');
   got.folded.set(signedOnly, standing);
   return standing;
@@ -70,6 +75,6 @@ export const admittedIn = (root: string, place: string, line: string): boolean =
 
 export const appliedIn = (root: string, place: string): readonly string[] => [...verified(root, place).applied];
 
-export const forksIn = (root: string, place: string): readonly string[] => ((got) => foldClaims(got.lines.filter((line) => got.applied.has(line) || !/ sig=/.test(line))).forks.map((fork) => fork.key))(verified(root, place));
+export const forksIn = (root: string, place: string): readonly string[] => ((got) => foldClaims(got.lines.filter((line) => got.applied.has(line) || (!/ sig=/.test(line) && !got.projected.has(sayingOf(line))))).forks.map((fork) => fork.key))(verified(root, place));
 
 export const writtenIn = (root: string, place: string): number => ((got) => got.lines.filter((line) => !got.applied.has(line)).length)(verified(root, place));

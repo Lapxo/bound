@@ -39,6 +39,14 @@ test('missing named bytes remain missing instead of becoming the root summary', 
   assert.deepEqual(carriedIn(store), []);
 }));
 
+test('resolution 8 authenticates an inline carrier in an empty store; summaries and changed bodies do not', () => fixture((_root,store) => {
+  const digest='sha256:'+createHash('sha256').update(line+'\n').digest('hex');
+  assert.deepEqual(carriedFrom(store,[line,rootLine(digest)]),[line]);
+  assert.equal(carriedFrom(store,[rootLine(digest)]),undefined);
+  assert.equal(carriedFrom(store,[line.replace('place/receipts','other/receipts'),rootLine(digest)]),undefined);
+  assert.deepEqual(carriedIn(store),[],'public verification does not manufacture a private carrier');
+}));
+
 test('delivery into another store preserves bytes and refuses a corrupt source', () => fixture((root, source) => {
   const digest = keepCarried(source, [line]);
   const destination = join(root, 'destination');
@@ -139,4 +147,38 @@ test('unchanged child receipt bytes cannot hide a changed child input in the sam
   assert.equal(meets(root,store,''),true);
   writeFileSync(join(child,'src','input.txt'),'after\n');
   assert.equal(meets(root,store,''),false,'a receipt and unchanged TARGET do not authorize a stale input-cache verdict');
+}));
+
+test('file receipts use place-relative coordinates, while inherited render inputs remain inputs', () => fixture((root) => {
+  const child=join(root,'child');
+  const published=join(root,'published');
+  const wire=canonical({scope:'wire/families',role:'writes',form:'alphabet',measure:'id',value:'reader|tree|write|leaf|view',by:'target',at:'policy:wire'});
+  const authority=canonical({scope:'keys/owner',role:'writes',form:'alphabet',measure:'id',value:'public-authority',by:'target',at:'policy:authority'});
+  writeFileSync(join(root,'TARGET.bound'),wire+'\n'+authority+'\n');
+  for(const at of [child,published]) {
+    mkdirSync(join(at,'src'),{recursive:true});
+    writeFileSync(join(at,'TARGET.bound'),'');
+    writeFileSync(join(at,'src','input.txt'),'same input\n');
+  }
+  const native=fileRegionDigest(root,'child/','receipts/src','sha256');
+  assert.equal(native,fileRegionDigest(published,'','receipts/src','sha256'),'moving a place does not rename its inputs');
+  const inherited=canonical({scope:'policy/render',role:'writes',form:'alphabet',measure:'id',value:'selected',needs:'child/src',by:'target',at:'policy:render'});
+  writeFileSync(join(root,'TARGET.bound'),wire+'\n'+authority+'\n'+inherited+'\n');
+  assert.notEqual(fileRegionDigest(root,'child/','receipts/src','sha256'),native,'a parent render input cannot disappear from verification');
+}));
+
+test('declared foreign trees keep consumed inputs without sealing unrelated dependency files', () => fixture((root) => {
+  const foreign=canonical({scope:'leaf-role/vendor',role:'writes',form:'alphabet',measure:'role',value:'foreign',by:'target',at:'policy:external'});
+  writeFileSync(join(root,'TARGET.bound'),foreign+'\n');
+  mkdirSync(join(root,'vendor'),{recursive:true});
+  writeFileSync(join(root,'vendor','contract.txt'),'accepted contract\n');
+  const input=canonical({scope:'vendor/contract.txt',role:'writes',form:'alphabet',measure:'observed',value:'read',by:'reader',at:'place:input'});
+  const first=fileRegionDigest(root,'','receipts/.','sha256',[input]);
+  writeFileSync(join(root,'vendor','unused.txt'),'not handed to the reader\n');
+  assert.equal(fileRegionDigest(root,'','receipts/.','sha256',[input]),first);
+  writeFileSync(join(root,'vendor','contract.txt'),'changed contract\n');
+  assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256',[input]),first,'a consumed external input still invalidates the receipt');
+  const second=fileRegionDigest(root,'','receipts/.','sha256',[input]);
+  writeFileSync(join(root,'new-source.txt'),'new owned input\n');
+  assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256',[input]),second,'new owned files remain part of the place');
 }));
