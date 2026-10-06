@@ -9,7 +9,7 @@ import { observedClaims } from '../fold/observed.ts';
 import { layReleases, resolvedOf } from '../host/release.ts';
 import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { landLaid } from '../fold/laid.ts';
-import { actSeconds, closeReceipts, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
+import { actSeconds, idleCount, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
 import { algorithmCost, instrumentOf } from '../fold/digests.ts';
 import { writerFor } from '../fold/signers.ts';
 import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
@@ -41,17 +41,14 @@ import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
 async function checked(root: string, entry: string, under: string | undefined): Promise<number> {
   const started = Date.now();
   const store = storeOf(root);
+  if (!meets(root, store, under ?? '')) {
+    process.stderr.write(`${selfName()}: REFUSE·check receipts are open; an admitted fold must close them\n`);
+    return 1;
+  }
   const instrument = instrumentOf(store, entry, standingOf(root).standing, root, ownLock());
-  const closed = instrumentKept(store) === instrument && meets(root, store, under ?? '');
-  if (!closed) {
-    const open = await closeReceipts(root, store);
-    process.stderr.write(`open by instrument · ${open.length}\n`);
-    if (!meets(root, store, under ?? '')) {
-      process.stderr.write(`${selfName()}: REFUSE·check receipts still open after one close\n`);
-      return 1;
-    }
-    instrumentKeep(store, instrument);
-    return 0;
+  if (instrumentKept(store) !== instrument) {
+    process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; an admitted fold must close it\n`);
+    return 1;
   }
   const read = receiptsSeen();
   const ms = Date.now() - started;
@@ -66,6 +63,10 @@ async function checked(root: string, entry: string, under: string | undefined): 
 export async function pass(root: string, entry: string, under: string | undefined, check: boolean): Promise<number> {
   if (!under && emptyLedger(storeOf(root))) {
     sayStranger(root);
+    if (check) {
+      process.stderr.write(`${selfName()}: REFUSE·check the proposed place has no admitted ledger; NEEDS is not closed\n`);
+      return 1;
+    }
     return 0;
   }
   if (check) return underTheLock(storeOf(root), 'check', () => checked(root, entry, under));

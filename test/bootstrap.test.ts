@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { canonical } from '@lapxo/topos/wire';
 
 const verb = new URL('../src/cli/verb.ts', import.meta.url).pathname;
-function sandbox(change: 'valid' | 'wrong-key' | 'no-digest' | 'no-signature' | 'no-coverage' | 'restricted-coverage') {
+function sandbox(change: 'valid' | 'wrong-key' | 'no-digest' | 'no-signature' | 'no-coverage' | 'restricted-coverage', receipts = false) {
   const dir = mkdtempSync(join(tmpdir(), 'bootstrap-'));
   mkdirSync(join(dir, '.bound'));
   const pair = generateKeyPairSync('ed25519');
@@ -22,6 +22,7 @@ function sandbox(change: 'valid' | 'wrong-key' | 'no-digest' | 'no-signature' | 
     ...(change === 'no-digest' ? [] : [fact('wire/digest-algorithms', 'id', 'sha256')]),
     ...(change === 'no-signature' ? [] : [fact('wire/signature-algorithms', 'id', 'ed25519:fixture')]),
     fact('wire/era', 'id', 'fixture'),
+    ...(receipts ? [fact('wire/families', 'id', 'reader|tree|write|leaf|view')] : []),
   ];
   const original = `${lines.join('\n')}\n`;
   writeFileSync(join(dir, 'TARGET.bound'), original);
@@ -81,4 +82,41 @@ test('concurrent first lands commit one bootstrap and retain one signed owner le
       strictEqual(readFileSync(join(dir, '.bound', 'ledger', 'land.bound'), 'utf8').trim().split('\n').length, 1);
     } finally { rmSync(dir, { recursive: true, force: true }); }
   }
+});
+
+
+test('check refuses a proposed clone and preserves its carried evidence', () => {
+  const { dir, original } = sandbox('valid');
+  try {
+    writeFileSync(join(dir, 'receipts.bound'), 'unverified carried evidence\n');
+    const run = spawnSync(process.execPath, [verb, 'fold', '--check'], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
+    strictEqual(run.status, 1, run.stdout + run.stderr);
+    match(run.stderr, /REFUSE·check.*no admitted ledger/);
+    match(run.stdout, /RECEIPTS 0 read · 1 opened/);
+    strictEqual(readFileSync(join(dir, 'TARGET.bound'), 'utf8'), original);
+    strictEqual(readFileSync(join(dir, 'receipts.bound'), 'utf8'), 'unverified carried evidence\n');
+    deepStrictEqual(readdirSync(join(dir, '.bound')), []);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('check cannot refresh a stale native region receipt to manufacture closure', () => {
+  const { dir } = sandbox('valid', true);
+  try {
+    const landed = spawnSync(process.execPath, [verb, 'land', '--key-file', join(dir, 'key.pem')], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
+    strictEqual(landed.status, 0, landed.stderr);
+    mkdirSync(join(dir, 'child'));
+    writeFileSync(join(dir, 'child', 'TARGET.bound'), canonical({ scope: 'name', role: 'writes', form: 'alphabet', measure: 'id', value: 'child', at: 'place:child', by: 'target' }) + '\n');
+    const wrong = 'sha256:' + '0'.repeat(64);
+    const receipt = canonical({ scope: 'receipts/src', role: 'writes', form: 'alphabet', measure: 'bytes', value: wrong, at: 'place:' + wrong, by: 'bound' }) + '\n';
+    writeFileSync(join(dir, 'child', 'receipts.bound'), receipt);
+    const carried = '1'.repeat(64);
+    mkdirSync(join(dir, '.bound', 'cas', 'carried'), { recursive: true });
+    writeFileSync(join(dir, '.bound', 'cas', 'carried', carried), canonical({ scope: 'write/child/receipts.bound', role: 'writes', form: 'alphabet', measure: 'digest', value: wrong, at: 'place:' + wrong, by: 'bound' }) + '\n');
+    writeFileSync(join(dir, 'receipts.bound'), canonical({ scope: 'receipts', role: 'writes', form: 'alphabet', measure: 'digest', value: wrong, at: 'place:sha256:' + carried, by: 'bound' }) + '\n');
+    const code = `process.argv[1] = ${JSON.stringify(verb)}; const { pass } = await import(${JSON.stringify(new URL('../src/cli/pass.ts', import.meta.url).href)}); process.exitCode = await pass(process.cwd(), process.argv[1], undefined, true);`;
+    const run = spawnSync(process.execPath, ['--input-type=module', '--eval', code], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
+    strictEqual(run.status, 1, run.stdout + run.stderr);
+    match(run.stderr, /REFUSE·check receipts are open/);
+    strictEqual(readFileSync(join(dir, 'child', 'receipts.bound'), 'utf8'), receipt);
+  } finally { rmSync(dir, { recursive: true, force: true }); }
 });
