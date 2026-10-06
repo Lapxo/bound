@@ -16,5 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm run build
       - run: npm test
-      - run: node --conditions=source src/cli/verb.ts .
+      - run: node dist/cli/verb.js fold --check
+      - run: npm pack --silent
