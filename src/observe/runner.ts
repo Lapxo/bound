@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
+import { sha } from '../host/hash.ts';
 import { existsSync, mkdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { basename, dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,10 +25,14 @@ const runtimeExtension = moduleAt === undefined ? '' : extname(moduleAt);
 export const ownRoot = (): string => (fromBlob() ? join(resolve(dirname(self()), '..', '..', '..'), 'bound') : resolve(runtimeAt, '..'));
 export const ownStore = (): string => join(ownRoot(), '..', EXTENSION);
 /** The colocated public artifact is read without an unrelated parent's authority store. */
+// An act is judged by the instrument it started with, even when that act changes its colocated lock.
+let instrumentLock: readonly string[] | undefined;
 export const ownLock = (): readonly string[] => {
+  if (instrumentLock !== undefined) return instrumentLock;
   const lines=(observeText(join(ownRoot(),LOCK))??'').split('\n').filter(isWire);
   const published=publicLock(lines);
-  return published===undefined?ownLockOf(join(ownRoot(),'..'),basename(ownRoot()),true):foldClaims(published).standing;
+  instrumentLock = published===undefined ? ownLockOf(join(ownRoot(),'..'),basename(ownRoot()),true) : foldClaims(published).standing;
+  return instrumentLock;
 };
 export const sourceOf = (): string => (fromBlob() ? join(ownRoot(), 'src', 'cli', 'verb.ts') : self());
 
@@ -53,7 +57,6 @@ export function bundleOf(module: string): string | undefined {
   const bundler = named && existsSync(join(tree, named)) ? join(tree, named) : '';
   if (!bundler) return undefined;
   const store = join(tree, EXTENSION);
-  const sha = (text: string | Uint8Array): string => createHash('sha256').update(text).digest('hex');
   const stamp = (coordinate: string): string => ((at) => (at === undefined ? '' : `${at.mtimeMs} ${at.size}`))(statSync(join(tree, coordinate), { throwIfNoEntry: false }));
   const index = join(store, 'cas', 'built', sha(`bundle ${module}`));
   const held = JSON.parse(observeText(index) ?? 'null') as { readonly blob: string; readonly inputs: readonly (readonly [string, string])[] } | null;

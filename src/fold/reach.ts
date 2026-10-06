@@ -4,9 +4,9 @@ import { matches } from '@lapxo/topos/wire';
 import { fieldOf } from './claims.ts';
 import { spoken, worldsIn } from './places.ts';
 import { wordOf, wordsOf } from './wire.ts';
-import { capsuleAt } from '../host/capsule.ts';
 import type { Capsule } from '../host/capsule.ts';
 import { ownLock, ownRoot } from '../observe/runner.ts';
+import { ownLockOf } from './signed.ts';
 
 const ROOT = '.';
 const WORLD = '\0';
@@ -50,17 +50,16 @@ export function touchedBy(root: string, places: readonly string[], lines: readon
   return [...new Set([...owners.filter((one): one is string => one !== undefined && one !== ROOT && one !== WORLD), ...worlds])].sort();
 }
 
-const isAlias = (line: string): boolean => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') !== 'reads' && fieldOf(line, 'value') !== 'withdraw';
+/** A selected world can execute only its explicit capsule offers. Dependency aliases are host projections, not selections. */
+export const selectionLines = (fold: { readonly root: string; readonly standing: readonly string[]; readonly under?: string }): readonly string[] => {
+  const local = fold.under ? ownLockOf(fold.root, fold.under.replace(/\/$/, '')).filter((line) => fieldOf(line, 'scope').startsWith('uses/')) : [];
+  const qualified = fold.standing.filter((line) => fieldOf(line, 'scope').startsWith(`${fold.under ?? ''}uses/`));
+  return [...new Set([...local, ...qualified])].filter((line) => fieldOf(line, 'value') !== 'withdraw');
+};
 
-/** The capsules a place can run, in the order the host asks them: those its uses lines pin, then those the instrument carries, each by the coordinate its alias runs; a selected pin that cannot resolve is refused. */
-export function capsulesFor(standing: readonly string[], place: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
-  const aliases = ownLock().filter(isAlias);
-  const pins = standing.filter((line) => fieldOf(line, 'scope').startsWith(`${place}/uses/`) && fieldOf(line, 'value') !== 'withdraw');
-  const selected = selectedCapsules(pins);
-  const digests = new Set(selected.map((one) => one.capsule.digest));
-  const helpers = aliases.filter((alias) => !digests.has(fieldOf(alias, 'value'))).flatMap((alias) => {
-    const capsule = capsuleAt(fieldOf(alias, 'value'), fieldOf(alias, 'shape'));
-    return capsule === undefined ? [] : [{ capsule, offer: alias }];
-  });
-  return [...selected, ...helpers];
+export function capsulesFor(standing: readonly string[], place: string, root?: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
+  const prefix = place ? `${place}/` : '';
+  const pins = root === undefined ? standing.filter(line => fieldOf(line, 'scope').startsWith(`${prefix}uses/`) && fieldOf(line, 'value') !== 'withdraw')
+    : selectionLines({ root, standing, ...(prefix ? { under: prefix } : {}) });
+  return selectedCapsules(pins);
 }

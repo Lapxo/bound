@@ -1,4 +1,4 @@
-import { createHash, dirname, existsSync, mkdirSync, renameSync, writeFileSync } from '../host/io.ts';
+import { dirname, existsSync, mkdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { canonical } from '@lapxo/topos/wire';
 import { bytesDigest } from './digests.ts';
 import { blobAt, landShard, ledgerLines, shardFile, shardLines, storeAt, writerFile } from '../land/ledger.ts';
@@ -11,7 +11,8 @@ export const readerOf = (line: string): string | undefined => /(?:^|\s)by=reader
 type Latest = { readonly at: string; readonly line: string };
 
 export const trimmed = (where: string): string => where.replace(/\/+$/, '');
-export const sha = (text: string): string => createHash('sha256').update(text).digest('hex');
+import { sha } from '../host/hash.ts';
+export { sha } from '../host/hash.ts';
 
 /**
  * What a reader said is kept by region: the region a place lies in is the longest a reader's lock names that holds it,

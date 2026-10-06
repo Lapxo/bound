@@ -4,9 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import { canonical } from '@lapxo/topos/wire';
+import { canonical, PROTOCOL } from '@lapxo/topos/wire';
 import { members, unpack } from '../src/host/archive.ts';
 import { layReleases, laidAt, resolvedOf, runtimeTreeAt } from '../src/host/release.ts';
+import { capsuleAt } from '../src/host/capsule.ts';
 import { blobAt } from '../src/land/ledger.ts';
 
 const record = (name: string, text: string, type = '0'): Buffer => {
@@ -137,5 +138,20 @@ test('runtime trees use verified archives without confusing snapshot metadata wi
     assert.throws(()=>runtimeTreeAt(store,own,'sha256:../../escape'),/invalid digest/);
     save(own,digest,tar(record('other','wrong bytes')));
     assert.throws(()=>runtimeTreeAt(store,own,digest),/does not name its available bytes/);
+  } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('reading authentic capsule declarations needs no runtime; asking a missing entry refuses', () => {
+  const root=mkdtempSync(join(tmpdir(),'capsule-declaration-only-'));
+  try {
+    const declaration=canonical({scope:'region/surface',role:'writes',form:'alphabet',measure:'reads',value:'**',by:'fixture',at:'policy:test'})+'\n';
+    const bytes=tar(record('capsule.bound',declaration)),digest=sha(bytes);
+    save(root,digest,bytes);
+    const capsule=capsuleAt(digest,'dist/absent.js',root);
+    assert.ok(capsule);assert.ok(capsule.lines.some(line=>line.includes('scope=region/surface')));
+    assert.throws(()=>capsule.ask([{protocol:PROTOCOL,verb:'observe',rootScope:'place/',region:'surface',files:[]}]),/REFUSE·capsule .* declared entry dist\/absent.js unavailable/);
+    assert.equal(existsSync(join(root,'cas','answers')),false);
+    assert.throws(()=>capsuleAt(digest,'../escape.js',root),/REFUSE·capsule .* unavailable/);
   } finally {rmSync(root,{recursive:true,force:true});}
 });

@@ -22,6 +22,7 @@ export const fieldsOf = (line: string): Record<string, string> => ({ ...wireFiel
 
 export function selfName(): string { return basename(ownRoot()); }
 export function isWire(line: string): boolean { return line.startsWith(PROTOCOL); }
+export const wireLinesOf = (text: string | undefined): readonly string[] => (text ?? '').split('\n').filter(isWire);
 export const isConfig = (line:string):boolean => {const k=recordKind(line);return k.kind==='fact'&&k.value==='config';};
 export const sayingOf = (line: string): string => !isConfig(line) ? ((p)=>p.kind==='fact'?signedBytes(p.value.fields):line)(parse(line)) : Object.entries(fieldsOf(line)).filter(([k]) => !ENVELOPE.has(k)).sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, v]) => `${k}=${v}`).join(' ');
 

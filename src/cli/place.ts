@@ -1,3 +1,4 @@
+import { timing } from '../host/timing.ts';
 import {attestationObservations} from '../fold/evidence.ts';
 import {parse as parseEvidenceFields} from '@lapxo/topos/wire';
 import { releasePolicy, releaseFaults } from '../fold/release-policy.ts';
@@ -260,12 +261,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
   const theirs = history.live.filter((line) => ((needs) => !under || (needs.length > 0 && needs.every(inside)))(fieldOf(line, 'needs').split('|').filter(Boolean)));
   const reads = under && under !== `${basename(ownRoot())}/` ? { owned, place: under, scopes: new Set(theirs.map((line) => fieldOf(line, 'scope'))) } : undefined;
   const spent: string[] = [];
-  const took = <T>(what: string, fn: () => T): T => {
-    const at = Date.now();
-    const got = fn();
-    spent.push(`${what} ${Date.now() - at}`);
-    return got;
-  };
+  const took = timing(spent);
   const read = given?.observed ?? (under ? took('observe', () => observedClaims(root, store, { wait: look })) : reached);
   const everywhere = [...read, ...took('capsules', () => capsuleReadingsOver({ root, store, ...(under ? { under } : {}), standing, observed: read }))];
   const points = foldPoints(store, standing, under, folder, self, reached, root, answered, reads);

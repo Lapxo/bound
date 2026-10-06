@@ -6,6 +6,7 @@ on:
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         node: [22, 24]
     runs-on: ubuntu-latest
@@ -16,5 +17,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm run build
       - run: npm test
-      - run: node --conditions=source src/cli/verb.ts .
+      - name: Verify native closure and receipt reuse
+        run: |
+          node dist/cli/verb.js fold --check > "$RUNNER_TEMP/bound-check.log" 2>&1 || { cat "$RUNNER_TEMP/bound-check.log"; exit 1; }
+          cat "$RUNNER_TEMP/bound-check.log"
+          grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
+          grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
+      - run: npm pack --silent

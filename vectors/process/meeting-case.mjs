@@ -1,0 +1,14 @@
+import {strict as assert} from 'node:assert';
+import {intervals} from '@lapxo/obligations/forms';
+import {cell,observe,parts,state} from '@lapxo/obligations/views/field';
+const L=intervals(0,24);
+const inputs=[['Ana',10,14],['Luis',12,16],['room',10,13],['boss',18,20]];
+let meeting=cell('meeting',0,[]);
+for(const [i,[origin,lo,hi]] of inputs.slice(0,3).entries()) meeting=observe(meeting,{id:origin,at:i+1,origin,span:{lo,hi}});
+let world=new Map([['meeting',meeting]]);
+assert.equal(state(L,meeting,world),'FREE');assert.deepEqual(parts(L,meeting,world).ceiling,{lo:12,hi:13});
+console.log('INPUT '+JSON.stringify(inputs));console.log('MEET '+JSON.stringify(parts(L,meeting,world).ceiling));
+meeting=observe(meeting,{id:'boss',at:4,origin:'boss',span:{lo:18,hi:20}});world.set('meeting',meeting);
+assert.equal(state(L,meeting,world),'CONFLICT');console.log('CONFLICT boss');
+const taken=observe(meeting,{id:'withdraw-boss',at:5,origin:'boss',span:{lo:18,hi:20}});meeting={...taken,seen:taken.seen.map(one=>one.id==='withdraw-boss'?{...one,takes:'boss'}:one)};world.set('meeting',meeting);
+assert.equal(state(L,meeting,world),'FREE');assert.deepEqual(parts(L,meeting,world).ceiling,{lo:12,hi:13});console.log('WITHDRAW boss '+JSON.stringify(parts(L,meeting,world).ceiling));

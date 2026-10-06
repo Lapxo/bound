@@ -1,0 +1,36 @@
+{
+  "scope": "idempotent",
+  "measure": "count",
+  "result": "failures",
+  "cases": [
+    {
+      "program": "runtime",
+      "args": [
+        "vectors/process/source-tests.mjs",
+        "--test-name-pattern=first land admits a valid ephemeral root",
+        "test/bootstrap.test.ts"
+      ],
+      "cwd": "bound",
+      "timeoutMs": 70000,
+      "maxBytes": 4194304,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "# fail 0(?:\\n|$)"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "# pass [1-9][0-9]*(?:\\n|$)"
+        }
+      ],
+      "inputs": [
+        "bound/vectors/process/source-tests.mjs",
+        "bound/src/cli/verb.ts",
+        "bound/TARGET.bound",
+        "bound/package.json",
+        "bound/test/bootstrap.test.ts"
+      ]
+    }
+  ]
+}

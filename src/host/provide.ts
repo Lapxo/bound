@@ -1,5 +1,6 @@
 import * as nodeModule from 'node:module';
-import { join } from 'node:path';
+import { realpathSync } from 'node:fs';
+import { join, relative, isAbsolute, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { fieldOf } from '../fold/claims.ts';
 import { observeText } from '../observe/files.ts';
@@ -42,6 +43,20 @@ export function pinName(name: string): string {
 
 const manifestOf = (): string => `${theWord(ownLock(), 'pin-shape')}.json`;
 
+/** Node package resolution at a digest-laid library; exports remain authoritative. */
+export function resolvePinned(specifier: string, context: ResolveContext, nextResolve: NextResolve,
+  pin: { readonly at: string; readonly pkg: string; readonly json: string; readonly exports: boolean }): ResolveResult {
+  if (pin.exports) return nextResolve(specifier, { ...context, parentURL: pin.json });
+  const sub = specifier === pin.pkg ? '' : specifier.slice(pin.pkg.length + 1);
+  const requested = join(pin.at, sub);
+  const coordinate = relative(pin.at, requested);
+  if (isAbsolute(coordinate) || coordinate === '..' || coordinate.startsWith(`..${sep}`)) throw new Error('REFUSE·pin library import leaves its laid tree');
+  const file = nodeModule.createRequire(pin.json).resolve(requested);
+  const entry = relative(realpathSync(pin.at), realpathSync(file));
+  if (isAbsolute(entry) || entry === '..' || entry.startsWith(`..${sep}`)) throw new Error('REFUSE·pin library entry leaves its laid tree');
+  return nextResolve(pathToFileURL(file).href, context);
+}
+
 /**
  * A blob stays self-contained. The one thing it does not carry is the SDK the host provides: an import whose package
  * the instrument's own lock names at dep/<name> resolves at the place pinPlace delivers. Nothing is linked into the
@@ -59,7 +74,8 @@ export function provide(): void {
       const at = pinPlace(name);
       const pkg = pinName(name);
       const file = manifestOf();
-      return at && pkg ? [{ at, pkg, href: pathToFileURL(at).href, json: pathToFileURL(join(at, file)).href }] : [];
+      const manifest = JSON.parse(observeText(join(at, file)) ?? '{}') as Record<string, unknown>;
+      return at && pkg ? [{ at, pkg, exports: Object.prototype.hasOwnProperty.call(manifest, 'exports'), href: pathToFileURL(at).href, json: pathToFileURL(join(at, file)).href }] : [];
     });
   registerHooks({
     resolve(specifier, context, nextResolve) {
@@ -67,7 +83,7 @@ export function provide(): void {
       const parent = context.parentURL ?? '';
       const pin = pins.find((one) => specifier === one.pkg || specifier.startsWith(`${one.pkg}/`));
       if (pin === undefined || parent.startsWith(pin.href)) return nextResolve(specifier, context);
-      return nextResolve(specifier, { ...context, parentURL: pin.json });
+      return resolvePinned(specifier, context, nextResolve, pin);
     },
   });
 }

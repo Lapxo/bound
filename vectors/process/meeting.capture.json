@@ -1,0 +1,35 @@
+{
+  "scope": "capture/meeting",
+  "measure": "text",
+  "result": "stdout",
+  "cases": [
+    {
+      "program": "runtime",
+      "args": [
+        "vectors/process/meeting-case.mjs"
+      ],
+      "cwd": "bound",
+      "timeoutMs": 10000,
+      "maxBytes": 100000,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "MEET \\{\"lo\":12,\"hi\":13\\}"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "CONFLICT boss"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "WITHDRAW boss \\{\"lo\":12,\"hi\":13\\}"
+        }
+      ],
+      "inputs": [
+        "bound/vectors/process/meeting-case.mjs",
+        "bound/package.json"
+      ]
+    }
+  ]
+}

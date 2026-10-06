@@ -4,6 +4,8 @@ import { coordinatesUnder, observeFile, observeText, stampOf } from '../observe/
 import { releaseOf, signedLockLines } from './keys.ts';
 import { EXTENSION, fieldOf, foldClaims, selfName } from './claims.ts';
 import { wireLine } from './wire.ts';
+import { publicLock, LOCK } from '@lapxo/topos/wire';
+import {builtinModules,createRequire} from 'node:module';
 
 const held = new Map<string, string>();
 let algorithmMs = 0;
@@ -23,6 +25,13 @@ function namedAlgorithm(store: string): string | undefined {
   if (release) {
     const said = release.find((line) => (fieldOf(line, 'scope') === 'wire/digest-algorithms' || fieldOf(line, 'scope') === 'audit/wire/digest-algorithms') && fieldOf(line, 'value') !== 'withdraw');
     return said === undefined ? undefined : fieldOf(said, 'value').split('|').filter(Boolean)[0]?.split(':')[0];
+  }
+  if (!existsLedger(store)) {
+    const text = observeText(join(dirname(store), LOCK));
+    const lines = text?.split('\n').filter(line => line.startsWith('bound-lock/'));
+    const published = lines === undefined ? undefined : publicLock(lines);
+    const contract = published === undefined ? undefined : wireLine(published, 'digest-algorithms');
+    return contract === undefined ? undefined : fieldOf(contract, 'value').split('|')[0]?.split(':')[0];
   }
   for (const entry of readdirSync(join(store, 'ledger'), { withFileTypes: true })) {
     if (!entry.isFile() || !entry.name.endsWith(EXTENSION)) continue;
@@ -50,6 +59,13 @@ function namedAlgorithm(store: string): string | undefined {
     }
   }
   return name || undefined;
+}
+
+function existsLedger(store: string): boolean {
+  try { return readdirSync(join(store, 'ledger')).length > 0; } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
+  }
 }
 
 function algorithmOf(store: string): string {
@@ -113,11 +129,11 @@ export function memoized(store: string, key: string, compute: () => string): str
 
 const imported = new Map<string, readonly string[]>();
 const importsOf = (store: string, at: string, digest: string): readonly string[] => {
-  const key = `imports ${digest}`;
+  const key = `imports ${fullDigest(store,importsOf.toString())} ${digest}`;
   const memo = memoOf(store);
   const held = imported.get(digest) ?? memo.get(key)?.split('|').filter(Boolean);
   if (held !== undefined) return held;
-  const found = [...new TextDecoder().decode(observeFile(at) ?? new Uint8Array()).matchAll(/from '(\.[^']*)'/g)].map((m) => m[1] ?? '');
+  const found = [...new TextDecoder().decode(observeFile(at) ?? new Uint8Array()).matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s*)['"]([^'"]*)['"]/g)].map((m) => m[1] ?? '');
   imported.set(digest, found);
   memo.set(key, found.join('|'));
   appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);
@@ -133,8 +149,12 @@ const importsOf = (store: string, at: string, digest: string): readonly string[]
  * origin's fold — readable as history, never as this instrument's own state.
  */
 export function instrumentOf(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): string {
+  return instrumentDigest(store, entry, standing, root, releases).replace(/^[^:]*:/, '').slice(0, 12);
+}
+
+export function instrumentDigest(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): string {
   const seen = instrumentCoordinates(store, entry, standing, root, releases);
-  return bytesDigest(store, new TextEncoder().encode([...seen].sort().map(([, digest]) => digest).join('\n'))).replace(/^[^:]*:/, '').slice(0, 12);
+  return bytesDigest(store, new TextEncoder().encode([...seen.values()].sort().join('\n')));
 }
 
 export function instrumentCoordinates(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): ReadonlyMap<string, string> {
@@ -144,7 +164,11 @@ export function instrumentCoordinates(store: string, entry: string, standing: re
     const digest = coordinateDigest(store, at);
     if (digest === undefined) return;
     seen.set(at, digest);
-    for (const one of importsOf(store, at, digest)) walk(resolve(dirname(at), one));
+    for (const one of importsOf(store, at, digest)) {
+      if (one.startsWith('node:') || builtinModules.includes(one)) continue;
+      if (one.startsWith('.')) walk(resolve(dirname(at), one));
+      else walk(createRequire(at).resolve(one));
+    }
   };
   walk(resolve(entry));
   const deps = standing.filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'value') !== 'withdraw')
@@ -169,6 +193,9 @@ export function instrumentCoordinates(store: string, entry: string, standing: re
   const home = relative(root, resolve(entry)).split('/')[0] ?? '';
   for (const line of standing.filter((one) => fieldOf(one, 'scope').startsWith(`${home}/process/`) && fieldOf(one, 'kind') === 'process' && fieldOf(one, 'value') !== 'withdraw')) {
     for (const need of fieldOf(line, 'needs').split('|').filter(Boolean)) walk(resolve(root, need));
+  }
+  for (const line of releases.filter(one=>fieldOf(one,'scope').startsWith('process/')&&fieldOf(one,'kind')==='process'&&fieldOf(one,'value')!=='withdraw')) {
+    for (const need of fieldOf(line,'needs').split('|').filter(Boolean)) walk(resolve(root,need));
   }
   return seen;
 }

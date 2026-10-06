@@ -28,9 +28,10 @@ test('a declared capsule entry runs exactly that member and cannot reuse another
     const body=(name:string)=>`export const render = () => ['${name}'];`;
     const bytes=tar(record('capsule.bound',canonical({scope:'region/one',role:'render',form:'alphabet',measure:'reads',value:'**',by:'fixture',at:'policy:test'})+'\n'),record('chosen.js',body('chosen')),record('other.js',body('other')));
     const digest=sha(bytes);save(store,digest,bytes);
-    assert.throws(()=>capsuleAt(digest,'missing.js',store),/REFUSE·capsule .* declared entry .* unavailable/);
     assert.throws(()=>capsuleAt(digest,'../chosen.js',store),/REFUSE·capsule .* declared entry .* unavailable/);
     const request={protocol:'bound-lock/1',verb:'render' as const,rootScope:'fixture',region:'one',files:[]};
+    const missing=capsuleAt(digest,'missing.js',store);assert.ok(missing);
+    assert.throws(()=>missing.ask([request]),/REFUSE·capsule .* declared entry .* unavailable/);
     const chosen=capsuleAt(digest,'chosen.js',store),other=capsuleAt(digest,'other.js',store);assert.ok(chosen);assert.ok(other);
     assert.deepEqual(chosen.ask([request]),[{protocol:'bound-lock/1',kind:'fact',lines:['chosen']}]);
     assert.deepEqual(other.ask([request]),[{protocol:'bound-lock/1',kind:'fact',lines:['other']}]);

@@ -1,5 +1,5 @@
 import {snapshotVerdict} from './evidence.ts';
-import { createHash, dirname, resolve, spawnSync } from '../host/io.ts';
+import { dirname, resolve, spawnSync } from '../host/io.ts';
 import { ledgerLines } from '../land/ledger.ts';
 import { ownLock } from '../observe/runner.ts';
 import { fieldOf } from './claims.ts';
@@ -21,7 +21,7 @@ export interface SecondHead {
   readonly apart?: readonly string[];
 }
 
-const sha = (bytes: string | Buffer): string => createHash('sha256').update(bytes).digest('hex');
+import { sha } from '../host/hash.ts';
 
 const asked = new Map<string, 'agrees' | 'forks' | undefined>();
 

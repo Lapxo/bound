@@ -1,15 +1,14 @@
 import { createHash, dirname, existsSync, join, linkSync, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
-import { canonical, matches, parse } from '@lapxo/topos/wire';
+import { canonical, parse } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, isWire } from './claims.ts';
 import { bytesDigest } from './digests.ts';
-import { carriesOnly, cased } from './observed.ts';
+import { carriesOnly } from './observed.ts';
 import { writerFor } from './signers.ts';
 import { viewsOf } from './views.ts';
 import { zoomed } from './zoom.ts';
 import { ledgerLines, storeAt } from '../land/ledger.ts';
 import { sourced } from '../land/vouched.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
-import { describedReceipts } from '../observe/regions.ts';
 import type { PlaceFold } from '../cli/place.ts';
 
 export const bytesOnly = (line: string): string => {
@@ -29,16 +28,14 @@ const held = new WeakMap<PlaceFold, readonly string[]>();
 export function receiptsOf(fold: PlaceFold): readonly string[] {
   const kept = held.get(fold);
   if (kept !== undefined) return kept;
-  if (carriesOnly(fold.root, fold.store)) return held.set(fold, [...new Set(carriedIn(fold.store).flatMap((file) => (observeText(file) ?? '').split('\n').filter(isWire)))]).get(fold)!;
+  if (!fold.observed.length && carriesOnly(fold.root, fold.store)) return held.set(fold, [...new Set(carriedIn(fold.store).flatMap((file) => (observeText(file) ?? '').split('\n').filter(isWire)))]).get(fold)!;
   const under = fold.under ?? '';
   const shape = [...viewsOf(fold.standing).values()].flatMap((view) => ('regions' in view && view.regions.some((one) => one.name === 'receipts') ? [view.shape] : []))[0] ?? '';
   const closed = under || !shape ? [] : entriesIn(fold.root).filter((entry) => entry.dir && observeText(join(fold.root, entry.name, shape)) !== undefined).map((entry) => `${entry.name}/`).sort();
   const own = (place: string): boolean => place.startsWith(under) && !closed.some((one) => place.startsWith(one)) && (!shape || !place.endsWith(shape));
   const mine = new Set(fold.observed.filter((line) => fieldOf(line, 'measure') === 'observed' && own(fieldOf(line, 'scope')))
     .map((line) => `${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`));
-  const described = describedReceipts();
   const ran = [...new Set(fold.observed.filter((line) => fieldOf(line, 'measure') !== 'observed'
-    && (cased(fieldOf(line, 'scope')) || /\/(?:no-samples|reproduced)$/.test(fieldOf(line, 'scope')) || described.some((glob) => matches(glob, fieldOf(under ? zoomed(line, under.replace(/\/$/, '')) : line, 'scope'))))
     && mine.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)))];
   const ranAt = new Set(ran.map((line) => `${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`));
   const cones = new Set(fold.observed.filter((line) => fieldOf(line, 'measure') === 'observed' && own(fieldOf(line, 'scope')) && ranAt.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)).map(bytesOnly));
@@ -65,15 +62,18 @@ export function keepCarried(store: string, lines: readonly string[], from?: stri
   const text = lines.map((line) => `${line}\n`).join('');
   const digest = createHash('sha256').update(text).digest('hex');
   const at = storeAt(store, 'cas', 'carried', digest);
-  if (!existsSync(at)) {
+  if (existsSync(at)) {
+    verifiedCarried(at, digest);
+  } else {
     mkdirSync(dirname(at), { recursive: true });
     const src = from === undefined ? '' : storeAt(from, 'cas', 'carried', digest);
     if (src && existsSync(src)) {
+      verifiedCarried(src, digest);
       try {
         linkSync(src, at);
         return `sha256:${digest}`;
       } catch {
-        return `sha256:${digest}`;
+        // Cross-device stores still keep the authenticated bytes below.
       }
     }
     writeFileSync(`${at}.${process.pid}`, text);
@@ -90,10 +90,32 @@ export function keepCarried(store: string, lines: readonly string[], from?: stri
 export function carriedFrom(store: string, shipped: readonly string[]): readonly string[] | undefined {
   const named = shipped.find((line) => fieldOf(line, 'scope') === 'receipts' && fieldOf(line, 'measure') === 'digest');
   if (named === undefined) return shipped;
+  // Resolution 8 may precede its authenticated summary in the same public file.
+  // It is evidence only if its exact bytes meet the summary's carrier digest.
+  for (let i = 1; i < shipped.length; i += 1) {
+    const header = shipped[i]!;
+    if (fieldOf(header, 'scope') !== 'receipts' || fieldOf(header, 'measure') !== 'digest') continue;
+    const digest = fieldOf(header, 'at').replace(/^place:sha256:/, '');
+    const body = shipped.slice(0, i);
+    if (/^[0-9a-f]{64}$/.test(digest) && createHash('sha256').update(body.map(line => `${line}\n`).join('')).digest('hex') === digest) return body;
+  }
   const hex = fieldOf(named, 'at').replace(/^place:(?:sha256:)?/, '');
-  const text = /^[0-9a-f]{64}$/.test(hex) ? observeText(storeAt(store, 'cas', 'carried', hex)) : undefined;
+  const text = /^[0-9a-f]{64}$/.test(hex) ? verifiedCarried(storeAt(store, 'cas', 'carried', hex), hex) : undefined;
   return text === undefined ? undefined : text.split('\n').filter(isWire);
 }
 
 export const carriedIn = (store: string): readonly string[] => ((dir) => (existsSync(dir)
-  ? readdirSync(dir).filter((name) => /^[0-9a-f]{64}$/.test(name)).sort().map((name) => join(dir, name)) : []))(storeAt(store, 'cas', 'carried'));
+  ? readdirSync(dir).filter((name) => /^[0-9a-f]{64}$/.test(name)).sort().map((name) => {
+    const at = join(dir, name);
+    verifiedCarried(at, name);
+    return at;
+  }) : []))(storeAt(store, 'cas', 'carried'));
+
+/** Authenticate the existing SHA-256 receipt carrier before interpreting any lines. */
+function verifiedCarried(at: string, expected: string): string | undefined {
+  const bytes = observeFile(at);
+  if (bytes === undefined) return undefined;
+  const actual = createHash('sha256').update(bytes).digest('hex');
+  if (actual !== expected) throw Error(`REFUSE·receipt carried bytes mismatch · expected sha256:${expected} · got sha256:${actual}`);
+  return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+}

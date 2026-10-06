@@ -1,0 +1,29 @@
+{
+  "scope": "cli/exit/refuse",
+  "measure": "cli-exit-refuse",
+  "result": "status",
+  "cases": [
+    {
+      "program": "runtime",
+      "args": [
+        "vectors/process/cli-case.mjs",
+        "dist/cli/verb.js",
+        "check"
+      ],
+      "cwd": "bound",
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "REFUSE\u00b7check receipts are open"
+        }
+      ],
+      "inputs": [
+        "bound/vectors/process/cli-case.mjs",
+        "bound/dist/cli/verb.js"
+      ]
+    }
+  ]
+}

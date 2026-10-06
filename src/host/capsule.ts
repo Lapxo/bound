@@ -1,8 +1,10 @@
+import { sha } from './hash.ts';
+import { wireLinesOf as linesOf } from '../fold/claims.ts';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve, relative, isAbsolute, sep } from 'node:path';
-import { CAPSULE, PROTOCOL } from '@lapxo/topos/wire';
+import { CAPSULE } from '@lapxo/topos/wire';
 import { declarationOf } from '@lapxo/topos/capsule';
 import type { Declaration } from '@lapxo/topos/capsule';
 import type { Request, Response } from '@lapxo/topos/contract';
@@ -21,7 +23,6 @@ export interface Capsule {
   readonly ask: (requests: readonly Request[]) => readonly (Response | undefined)[];
 }
 
-const linesOf = (text: string | undefined): readonly string[] => (text ?? '').split('\n').filter((line) => line.startsWith(PROTOCOL));
 const declared = new Map<string, { readonly lines: readonly string[]; readonly declaration: Declaration }>();
 const laid = new Map<string, string>();
 process.on('exit', () => { for (const at of laid.values()) rmSync(at, { recursive: true, force: true }); });
@@ -58,10 +59,13 @@ export function capsuleAt(digest: string, entry: string, store?: string): Capsul
   const root = unpacked(digest, bytes);
   const module = resolve(root, entry);
   const coordinate = relative(root, module);
-  if (!entry || isAbsolute(entry) || (coordinate === '..' || coordinate.startsWith(`..${sep}`)) || entry.split(/[\\/]/).includes('..') || !statSync(module, { throwIfNoEntry: false })?.isFile()) {
+  if (!entry || isAbsolute(entry) || (coordinate === '..' || coordinate.startsWith(`..${sep}`)) || entry.split(/[\\/]/).includes('..')) {
     throw new Error(`REFUSE·capsule ${digest} declared entry ${entry || '(absent)'} unavailable`);
   }
-  const capsule = { digest, ...known, ask: (requests: readonly Request[]) => answered(digest, bytes, requests, names, root, store ?? ownStore(), module) };
+  const capsule = { digest, ...known, ask: (requests: readonly Request[]) => {
+    if (!statSync(module, { throwIfNoEntry: false })?.isFile()) throw new Error(`REFUSE·capsule ${digest} declared entry ${entry} unavailable`);
+    return answered(digest, bytes, requests, names, root, store ?? ownStore(), module);
+  } };
   capsules.set(identity, capsule);
   return capsule;
 }
@@ -93,7 +97,6 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
     return requests.map(() => undefined);
   }
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
-  const sha = (text: string): string => createHash('sha256').update(text).digest('hex');
   const slotOf = (request: Request): string => sha(`${digest}\n${loader}${request.verb}\n${request.rootScope}\n${request.region ?? ''}`);
   const hitOf = (request: Request): string => sha(`${digest}\n${loader}${JSON.stringify(request)}`);
   const kept = requests.map((request) => storeAt(cacheStore, 'cas', 'answers', slotOf(request)));

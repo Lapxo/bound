@@ -101,7 +101,11 @@ export function foldCeilings(input: {
     }
   };
   const own = (measure: string): number | undefined => (measure === UNREAD ? undefined : input.own[measure]);
-  const literal = (scope: string): number => scope.split('/').filter((step) => !step.includes('*')).length;
+  // A coordinate projected into this place is not a narrower question merely
+  // because its host prefix adds a segment.
+  const localScope = (scope: string): string => input.under && scope.startsWith(input.under)
+    ? scope.slice(input.under.length) : scope;
+  const literal = (scope: string): number => localScope(scope).split('/').filter((step) => !step.includes('*')).length;
   const last: string[] = [];
   for (const ceiling of input.ceilings) {
     const measure = fieldOf(ceiling, 'measure');

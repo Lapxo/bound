@@ -7,23 +7,67 @@ on:
     tags: ['v*']
 jobs:
   release:
-    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'push' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
-          fetch-depth: 2
+          fetch-depth: 0
+      - id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$EVENT_NAME" = push ]; then
+            test "$REF_NAME" = "$version"
+          fi
+          git rev-parse --verify "refs/tags/$version"
+          echo "tag=$version" >> "$GITHUB_OUTPUT"
+          git checkout --detach "$version"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - run: npm ci
+      - run: npm run build
       - run: npm test
-      - run: node --conditions=source src/cli/verb.ts .
+      - run: node dist/cli/verb.js fold --check
       - env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version="v$(node -p "require('./package.json').version")"
-          gh release view "$version" >/dev/null 2>&1 && exit 0
-          gh release create "$version" --title "$version" --notes "$version"
+          version="${{ steps.version.outputs.tag }}"
+          asset="$(npm pack --silent)"
+          expected="$(sha256sum "$asset" | cut -d ' ' -f 1)"
+          if ! gh release view "$version" >/dev/null 2>&1; then
+            gh release create "$version" "$asset" --title "$version" --notes "$(git log -1 --format=%B)"
+          fi
+          download_dir="$(mktemp -d)"
+          gh release download "$version" --pattern "$asset" --dir "$download_dir"
+          actual="$(sha256sum "$download_dir/$asset" | cut -d ' ' -f 1)"
+          test "$expected" = "$actual"
+  publish:
+    needs: release
+    environment: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm install --global npm@'12.1.0'
+      - run: |
+          npm view "$(node -p "require('./package.json').name")@$(node -p "require('./package.json').version")" version >/dev/null 2>&1 && exit 0
+          npm stage publish

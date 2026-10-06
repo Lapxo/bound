@@ -5,7 +5,7 @@ import { placesIn } from '../fold/places.ts';
 import { admittedIn, forksIn, tellOwn } from '../fold/signed.ts';
 import { wordOf } from '../fold/wire.ts';
 import { observeText } from '../observe/files.ts';
-import { storeOf } from './ledger.ts';
+import { landShard, storeOf } from './ledger.ts';
 
 export type Owned = { readonly ledger: readonly string[]; readonly own: ReadonlyMap<string, readonly string[]>; readonly nowhere: readonly string[]; readonly forked: readonly { readonly place: string; readonly key: string }[] };
 
@@ -54,6 +54,9 @@ export function landOwned(root: string, place: string, lines: readonly string[])
   if (!lines.length) return tellOwn(place, []);
   const at = join(root, place, LOCK);
   const text = observeText(at) ?? '';
+  for (const by of new Set(lines.map(line => fieldOf(line, 'by')))) {
+    landShard(storeOf(root), by, `${place}/${LOCK}`, lines.filter(line => fieldOf(line, 'by') === by));
+  }
   writeFileSync(`${at}.${process.pid}.landing`, `${text.replace(/\n*$/, '\n')}${lines.join('\n')}\n`);
   renameSync(`${at}.${process.pid}.landing`, at);
   tellOwn(place, []);
