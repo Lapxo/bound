@@ -166,7 +166,7 @@ function beat(root: string, fold: PlaceFold, ms: number): void {
  * as if the batch had landed: the batch is signed and folded, never landed, and nothing is written — `--as rank <batch>`
  * is what a batch would move, read before land.
  */
-async function view(root: string, under: string | undefined, asked: string, told: readonly string[] = [], coord?: string, key?: string): Promise<number> {
+async function view(root: string, under: string | undefined, asked: string, told: readonly string[] = [], coord?: string, key?: string, includePolicy = true): Promise<number> {
   const [name = asked, depth] = asked.split('@');
   if (name === NAMED_VIEWS.help) {
     process.stdout.write(`${helpLines().join('\n')}\n`);
@@ -203,7 +203,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     if(parsed.kind!=='fact')throw Error(`REFUSE·wire ${parsed.why}`);
     if(parsed.value.objects.length){
       await cellsWithReceipts(root,history,text=>process.stdout.write(text+'\n'));
-      for (const line of releasePolicyLines(fold.release)) process.stdout.write(line+'\n');
+      if (includePolicy) for (const line of releasePolicyLines(fold.release)) process.stdout.write(line+'\n');
       if (!told.length) beat(root, fold, Date.now() - at);
       return EXIT.closed;
     }
@@ -378,7 +378,7 @@ async function foldAt(root: string, under: string | undefined, argv: readonly st
     if(parsed.value.objects.length){
       const signedCells=[...viewsOf(history).values()].find(one=>!one.shape&&one.regions.some(region=>region.name==='cells'));
       if(!signedCells)throw Error('REFUSE·view object cells require a signed cells view');
-      return view(root,under,signedCells.name);
+      return view(root,under,signedCells.name, [], undefined, undefined, false);
     }
     return exit;
   }
