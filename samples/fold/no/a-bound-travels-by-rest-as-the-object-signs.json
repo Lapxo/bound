@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: at 310 fold/region.ts gathered the bounds on a region's chain of rest itself (polesOf's restsOn loop, rankOf's prefix filter) and met them in a loop of its own (pole): the object's sign, restOf and parts never ran where a ceiling reaches a region, so the verdict's met, short and over rested on a second reading of rest."
+ ],
+ "cases": [
+  {
+   "name": "fold/region.ts at 310",
+   "chains walked by bound": 2,
+   "signatures read by the object": 0,
+   "expected.ok": false
+  }
+ ]
+}

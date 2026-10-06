@@ -1,0 +1,14 @@
+{
+ "about": [
+  "A view is its regions in order, each at its resolution, and its shape; no list of regions stands between a view and the fold. What renders a region is read where the fold is known, and a view asking a region nothing renders is refused there, by name, with regions-described counting such regions over every place."
+ ],
+ "cases": [
+  {
+   "name": "the tree's written views on a copy at epoch 270, with the branch and without it",
+   "renders": 145,
+   "same": "144 both ways; README.md differs on the copy before the change too",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a list branch that reads nothing"
+}

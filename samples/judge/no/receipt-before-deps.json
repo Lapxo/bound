@@ -1,0 +1,8 @@
+{
+  "scope": "audit/plan/foundation/bep-admission",
+  "measure": "status",
+  "produced": { "kind": "enumerated", "values": ["green"] },
+  "restsOn": ["audit/plan/foundation/corpus-normative"],
+  "facts": [],
+  "want": false
+}

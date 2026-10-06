@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a release laid under bound was built on one algebra and run on another. topos 192a5138 named obligations 88474ebf in its own uses, and @lapxo/obligations ^0.2.0 in its manifest, while bound laid obligations ba4149b7 beside it."
+ ],
+ "cases": [
+  {
+   "name": "epoch 228, topos 192a5138 and obligations ba4149b7 laid",
+   "laid-releases-disagree": 1,
+   "expected.ok": false
+  }
+ ]
+}

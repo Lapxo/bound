@@ -1,0 +1,27 @@
+{
+ "about": [
+  "A ceiling reaches a region the way the object signs: every live bound is signed (sign from @lapxo/obligations/views/field) at the region it names, the regions are cells each resting on the one its prefix extends, and a region reads parts(L, cell, world).signed, the meet of every signature up its chain of rest, in the lattice of the bound's form. A bound on a glob is signed at the region that asks. polesOf's ceilings and rankOf's pole of what the bounds above still admit both read it; bound no longer walks the chain or meets the bounds itself."
+ ],
+ "cases": [
+  {
+   "name": "the old pole and the object's sign by rest over every place's regions at 310 and 3000 random chains (open intervals, unparseable spans, not: alphabets, globs)",
+   "poles": "30465 the same",
+   "ranks": "12122 the same",
+   "differ": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "bound/src lines",
+   "before": 8494,
+   "after": 8503,
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy",
+   "gates": "extension green in 3.3 s, check green in 8.6 s",
+   "verify": "agrees: bound 146/165 paid · 0 forks · 0 grey; obligations 18/18; verify 5/6",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a bound that walked its own chain of rest"
+}

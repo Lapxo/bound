@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: at epoch 296 audit/wire/ships names dist|README.md|LICENSE|TARGET.bound and obligations' manifest ships no receipts, yet the ship reading counted the 3126 lines of obligations/receipts.bound, the most of any place's file, as if they travelled."
+ ],
+ "cases": [
+  {
+   "name": "cost/ship at obligations at 296",
+   "reading": 3126,
+   "shipped receipt lines": 0,
+   "expected.ok": false
+  }
+ ]
+}

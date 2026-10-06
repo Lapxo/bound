@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A published place whose gate line reads `clone` is reborn between births by the instrument itself: the release the tree renders of it over the release it is weighed against — the fixture the lock pins, else the release the instrument rests on — the tree's leaves under the top-level entries that release ships, and whole the entries the tree no longer holds, the build's leaves as made, laid in a clone of its own. It is green when its lock stands at epoch one there, the second head agrees inside it, its receipts render the same twice and every leaf its views write reads the same; what differs from the pin is the next birth's diff, reported and never judged, and a green is kept by the digest of what the place would publish."
+ ],
+ "cases": [
+  {
+   "name": "obligations over X on a copy at epoch 272",
+   "leaves released": 466,
+   "migrate": "491 of 491 at epoch 1",
+   "leaves": "SAME 24/24",
+   "next birth's diff": 9,
+   "seconds": 15,
+   "expected.ok": true
+  },
+  {
+   "name": "verify over f3b8563a",
+   "leaves released": 38,
+   "migrate": "344 of 344 at epoch 1",
+   "leaves": "SAME 11/11",
+   "next birth's diff": 28,
+   "seconds": 5,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a script gate of sixty-five seconds"
+}

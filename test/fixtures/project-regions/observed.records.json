@@ -1,0 +1,22 @@
+[
+  {
+    "about": "Synthetic marker for host routing test; not a real reading",
+    "at": "place:synthetic-routing-digest",
+    "by": "read:fixture-hydrology",
+    "form": "alphabet",
+    "measure": "observed",
+    "role": "writes",
+    "scope": "./",
+    "value": "synthetic-routing-digest"
+  },
+  {
+    "about": "Synthetic interval for host routing test; not a real temperature measurement",
+    "at": "place:synthetic-routing-digest",
+    "by": "read:fixture-hydrology",
+    "form": "interval",
+    "measure": "celsius",
+    "role": "reads",
+    "scope": "hydrology/temperature",
+    "value": "10..12"
+  }
+]

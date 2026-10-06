@@ -1,0 +1,11 @@
+{
+ "about": [
+  "an observation is counted once per digest; a background run and a waiting fold that land the same digest are one"
+ ],
+ "cases": [
+  {
+   "name": "duplicate-observations",
+   "expected.ok": true
+  }
+ ]
+}

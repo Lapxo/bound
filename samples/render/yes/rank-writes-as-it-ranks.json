@@ -1,0 +1,14 @@
+{
+ "about": [
+  "Rank writes as it ranks: each bound is ranked and that RANK line is written before the next bound is touched. --out is the draft: the file holds the lines in the order they were ranked, and no later pass rewrites them."
+ ],
+ "cases": [
+  {
+   "name": "bound --as rank --out a file, on a kept fold",
+   "printed": "RANK     N region summaries read · 0 cells visited, then one RANK line per bound that bites, in bound order",
+   "the file": "the same RANK lines, appended as each bound was ranked",
+   "expected.ok": true
+  }
+ ],
+ "red was": "rank collected every bite, sorted, and wrote once after the last bound"
+}

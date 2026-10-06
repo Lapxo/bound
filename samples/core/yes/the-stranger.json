@@ -1,0 +1,20 @@
+{
+ "scope": "the-stranger",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "A fresh repo with no ledger prints the stranger card and folds nothing: RECEIPTS 0 read · 1 opened, NEEDS    README.md, OPEN     uses/world/, RENDER   README.md."
+ ],
+ "cases": [
+  {
+   "name": "a published lock, a README, no ledger",
+   "prints": [
+    "RECEIPTS 0 read · 1 opened",
+    "NEEDS    README.md",
+    "OPEN     uses/world/",
+    "RENDER   README.md"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

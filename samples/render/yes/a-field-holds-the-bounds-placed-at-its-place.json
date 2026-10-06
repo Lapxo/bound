@@ -1,0 +1,16 @@
+{
+ "about": [
+  "The field of a place at resolution N holds every bound placed at the place or at none (placedAt), each in the state its poles give: interval poles that do not meet conflict, as two signers on one key do; a value read outside them is forbidden; a bound nothing read, a reader that refused and a demand unpaid are required; the rest is free. Each coordinate cut to its first N steps takes the worst state it holds. It reads the region summaries and the landed readings of one fold, and no reader runs."
+ ],
+ "cases": [
+  {"name": "bound/ @1", "cells": 19, "bounds": 177, "CONFLICT": 0, "FORBIDDEN": 5, "REQUIRED": 10, "FREE": 4, "expected.ok": true},
+  {"name": "bound/ @2", "cells": 56, "bounds": 177, "CONFLICT": 0, "FORBIDDEN": 7, "REQUIRED": 32, "FREE": 17, "expected.ok": true},
+  {"name": "bound/ @3", "cells": 157, "bounds": 177, "CONFLICT": 0, "FORBIDDEN": 11, "REQUIRED": 100, "FREE": 46, "expected.ok": true},
+  {"name": "obligations/ @1", "cells": 18, "bounds": 145, "CONFLICT": 0, "FORBIDDEN": 2, "REQUIRED": 4, "FREE": 12, "expected.ok": true},
+  {"name": "obligations/ @2", "cells": 54, "bounds": 145, "CONFLICT": 0, "FORBIDDEN": 6, "REQUIRED": 15, "FREE": 33, "expected.ok": true},
+  {"name": "verify/ @2", "cells": 51, "bounds": 137, "CONFLICT": 0, "FORBIDDEN": 5, "REQUIRED": 29, "FREE": 17, "expected.ok": true},
+  {"name": "bound/ @3 FORBIDDEN against PROGRAMS", "field FORBIDDEN bounds": 11, "PROGRAMS over": 11, "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "181 of 181 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "no view showed the field of a place: rank@1 named each ceiling of a batch with its reading, but no cell had a state, so what was required, forbidden, free or in conflict at a resolution was nowhere"
+}

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="590" viewBox="0 0 1000 590" role="img" aria-labelledby="title desc">
+<title id="title">Information carries bounds, provenance, and unresolved conditions</title>
+<desc id="desc">An illustrative animation keeps a declared interval from origin A visible while a topos supplies a measurement from origin B. With A equal to 2 through 9 and B equal to 4 through 11, the admissible intersection is 4 through 9. In the next frame B is absent and the encounter is unresolved, not zero. In the last frame B is 10 through 12 and the intersection is empty, retaining both origins rather than averaging their disagreement. All intervals use the same declared form and measure. Distinct origins do not establish independent evidence. Reduced motion presents the first, compatible frame.</desc>
+<defs><linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17242c"/><stop offset="1" stop-color="#0b1218"/></linearGradient><linearGradient id="shared" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#598e88"/><stop offset="1" stop-color="#9ed0af"/></linearGradient></defs>
+<style>
+text { font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+.kicker { fill:#9babb5;font-size:12px;letter-spacing:2px;font-weight:600; }
+.heading { fill:#edf2f5;font-size:29px;font-weight:600;letter-spacing:-.6px; }
+.label { fill:#dce5e9;font-size:15px;font-weight:600; }
+.note { fill:#b4c2ca;font-size:13px; }
+.mono { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+.frame { opacity:0; animation-duration:18s;animation-timing-function:linear;animation-iteration-count:infinite; }
+.compatible { opacity:1;animation-name:first; }
+.missing { animation-name:second; }
+.conflicting { animation-name:third; }
+@keyframes first { 0%,30%{opacity:1} 32%,96%{opacity:0} 98%,100%{opacity:1} }
+@keyframes second { 0%,32%{opacity:0} 34%,62%{opacity:1} 64%,100%{opacity:0} }
+@keyframes third { 0%,64%{opacity:0} 66%,94%{opacity:1} 96%,100%{opacity:0} }
+.missing-mark { animation:breathe 2s ease-in-out infinite; }
+@keyframes breathe { 0%,100%{opacity:.5}50%{opacity:1} }
+@media(prefers-reduced-motion:reduce) {
+.frame,.missing-mark { animation:none !important; }
+.compatible { opacity:1 !important; }
+.missing,.conflicting { opacity:0 !important; }
+}
+</style>
+<rect width="1000" height="590" rx="18" fill="url(#surface)"/>
+<rect x=".5" y=".5" width="999" height="589" rx="17.5" fill="none" stroke="#30404a"/>
+<text x="40" y="38" class="kicker">BOUND / INFORMATION WITH CONDITIONS</text>
+<text x="40" y="80" class="heading">Keep what is possible. Keep why.</text>
+<text x="40" y="110" class="note">Illustrative encounter · same ordered form and measure · original statements remain visible</text>
+<g class="kicker"><text x="40" y="153">DECLARED BOUNDS</text><text x="365" y="153">TOPOS OBSERVATION</text><text x="697" y="153">ADMISSIBLE INTERSECTION</text></g>
+<g fill="#172630" stroke="#344a58"><rect x="40" y="173" width="274" height="91" rx="10"/><rect x="365" y="173" width="274" height="91" rx="10"/><rect x="697" y="173" width="263" height="91" rx="10"/></g>
+<path d="M314 218H365M639 218H697" fill="none" stroke="#769c9a" stroke-width="1.5"/><path d="m357 213 8 5-8 5m332-10 8 5-8 5" fill="none" stroke="#769c9a" stroke-width="1.5"/>
+<text x="58" y="201" class="note">Origin A · declaration</text><text x="58" y="240" class="label mono">[2, 9]</text>
+<text x="383" y="201" class="note">Origin B · observation</text>
+<g class="frame compatible"><text x="383" y="240" class="label mono">[4, 11]</text><text x="715" y="202" class="note">Both conditions retained</text><text x="715" y="240" class="label mono" fill="#b9daca">[4, 9]</text></g>
+<g class="frame missing"><text x="383" y="240" class="label mono">Not supplied</text><text x="715" y="202" class="note">Evidence remains missing</text><text x="715" y="240" class="label">Unresolved encounter</text></g>
+<g class="frame conflicting"><text x="383" y="240" class="label mono">[10, 12]</text><text x="715" y="202" class="note">No admissible overlap</text><text x="715" y="240" class="label mono">Empty intersection</text></g>
+<g stroke="#2b3f4b" stroke-width="1"><path d="M340 310V477M430 310V477M520 310V477M610 310V477M700 310V477M790 310V477M880 310V477"/></g>
+<g class="note mono" text-anchor="middle"><text x="340" y="301">0</text><text x="430" y="301">2</text><text x="520" y="301">4</text><text x="610" y="301">6</text><text x="700" y="301">8</text><text x="790" y="301">10</text><text x="880" y="301">12</text></g>
+<g class="label"><text x="40" y="342">A · retained</text><text x="40" y="402">B · attributable</text><text x="40" y="462" class="mono">A ∧ B</text></g>
+<rect x="430" y="324" width="315" height="27" rx="5" fill="#729cac" fill-opacity=".4" stroke="#88aebc"/>
+<g class="frame compatible">
+<rect x="520" y="384" width="315" height="27" rx="5" fill="#a096bb" fill-opacity=".35" stroke="#b1a8cd"/>
+<rect x="520" y="444" width="225" height="27" rx="5" fill="url(#shared)" fill-opacity=".85" stroke="#b1d9c6"/>
+<text x="920" y="462" class="note mono">[4,9]</text>
+<rect x="40" y="493" width="920" height="43" rx="7" fill="#19322e"/>
+<text x="57" y="520" class="label">Compatible bounds narrow the admissible region.</text>
+</g>
+<g class="frame missing">
+<rect x="340" y="384" width="540" height="27" rx="5" fill="none" stroke="#96a7af" stroke-dasharray="4 8" class="missing-mark"/>
+<text x="610" y="403" class="note mono" text-anchor="middle">no observation</text>
+<path d="M340 456H880" stroke="#96a7af" stroke-dasharray="4 8"/>
+<text x="920" y="462" class="note mono">?</text>
+<rect x="40" y="493" width="920" height="43" rx="7" fill="#2e2b22"/>
+<text x="57" y="520" class="label">Missing evidence remains unresolved. It does not become zero.</text>
+</g>
+<g class="frame conflicting">
+<rect x="790" y="384" width="90" height="27" rx="5" fill="#a096bb" fill-opacity=".35" stroke="#b1a8cd"/>
+<path d="M745 433V477M790 433V477M751 456H784" stroke="#c39b85" stroke-dasharray="3 4"/>
+<text x="920" y="462" class="note mono">∅</text>
+<rect x="40" y="493" width="920" height="43" rx="7" fill="#332822"/>
+<text x="57" y="520" class="label">Conflicting bounds remain visible. Their average would hide the conflict.</text>
+</g>
+<text x="40" y="566" class="note">Provenance identifies the statement. It does not establish truth or independence of evidence.</text>
+</svg>

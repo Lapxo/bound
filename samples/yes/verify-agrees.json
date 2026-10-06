@@ -1,0 +1,17 @@
+{
+ "scope": "verify-agrees",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "The second head agrees. The fold prints verify agrees."
+ ],
+ "cases": [
+  {
+   "name": "programs names verify agrees",
+   "prints": [
+    "verify agrees"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a release laid under bound was read by its label alone. The host writes the lock's digest into the place's mark when it copies, and compares mark to lock after that; the drift reading compares the dist leaves with a laid copy trusted by its name. Neither reads the bytes bound imports."
+ ],
+ "cases": [
+  {
+   "name": "a line appended to the laid topos README, on a scratch copy",
+   "label": "sha256:192a5138…, unchanged",
+   "dep-drift": 0,
+   "read from the bytes": "nothing did",
+   "expected.ok": false
+  }
+ ]
+}

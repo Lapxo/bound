@@ -1,0 +1,25 @@
+{
+ "about": [
+  "A take passes its gates before it lands, and their runs join its receipt. The instrument, as it stands with the take in place, renders every published place the lock names as the place carries it. Each published place the take reaches is reborn in a scratch clone, signed by a throwaway owner key, where verify agrees; the gate for a place is the one bound's own lock names, and a take that reaches the instrument reaches every place it renders. Every leaf a view writes in the tree reads SAME, the second head's word read live. The lock is rendered before any gate reads the tree. A red gate refuses the take.",
+  "The gates run at the take, not at a rebirth: what a rebirth would find is found before anything lands."
+ ],
+ "cases": [
+  {
+   "name": "gate/extension over 0.2.0",
+   "rendered": 25,
+   "unlike": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "gate/rebirth/obligations: obligations/rebirth.sh gate",
+   "said": "REBIRTH  green · migrate 464 of 464 · verify agrees · receipts the same twice · SAME 23/23",
+   "expected.ok": true
+  },
+  {
+   "name": "gate/check: every written leaf of the tree, the second head asked live",
+   "said": "SAME",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the gates ran at the rebirth, so three bugs landed green and were found a batch too late"
+}

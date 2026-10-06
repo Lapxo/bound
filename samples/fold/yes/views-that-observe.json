@@ -1,0 +1,11 @@
+{
+ "about": [
+  "a view never observes; a fold never renders; a render never folds; it waits for the reader that already ran"
+ ],
+ "cases": [
+  {
+   "name": "views-that-observe",
+   "expected.ok": true
+  }
+ ]
+}

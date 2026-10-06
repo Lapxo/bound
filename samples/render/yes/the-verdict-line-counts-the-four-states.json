@@ -1,0 +1,14 @@
+{
+ "about": ["The verdict line of a place counts the object's four states over its demands, as the judge's verdicts give them (lane B's verdictsFor, epoch 313): each state the place holds, in the order the algebra lists them (obligations' STATES), and none it does not. With the second head agreeing, FREE is every demand paid, and REQUIRED, FORBIDDEN and CONFLICT split what was missing. The rest of the line is unchanged, and no page moves, since no written view carries the programs region."],
+ "cases": [
+  {"name": "bound", "before": "149/168 paid · 19 missing", "after": "REQUIRED 16 · FREE 149 · FORBIDDEN 3", "twice the same": true, "expected.ok": true},
+  {"name": "obligations", "before": "18/18 paid · 0 missing", "after": "FREE 18", "twice the same": true, "expected.ok": true},
+  {"name": "verify", "before": "6/7 paid · 1 missing", "after": "REQUIRED 1 · FREE 6", "twice the same": true, "expected.ok": true},
+  {"name": "topos", "before": "9/11 paid · 2 missing", "after": "REQUIRED 1 · FREE 9 · FORBIDDEN 1", "twice the same": true, "expected.ok": true},
+  {"name": "the root", "before": "213/253 paid · 40 missing", "after": "REQUIRED 33 · FREE 213 · FORBIDDEN 7", "twice the same": true, "expected.ok": true},
+  {"name": "FREE against paid, and the other three against missing, at all five", "equal": true, "expected.ok": true},
+  {"name": "every page the tree's views write", "views": "174 of 174 the same", "expected.ok": true},
+  {"name": "the fixture's views, as cli/measure.ts reads them", "views": "24 of 24 SAME with the body before and after", "moved": 0, "expected.ok": true}
+ ],
+ "red was": "the verdict line said paid and missing, two words the object does not have: at the root, 40 missing held 33 demands still waiting for an origin and 7 that no origin admits, and the line could not tell them apart"
+}

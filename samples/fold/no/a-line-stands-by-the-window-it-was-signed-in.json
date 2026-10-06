@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a place's own lock judged each signed line against the window its key holds now, while the ledger judges it against the window that stood at the epoch it was signed. lane-D's window closed at 228, and at 232 it was re-signed to 268 with the old line withdrawn. A line lane-D signed at 230, while it was closed, stood in an own lock and was refused in the ledger."
+ ],
+ "cases": [
+  {
+   "name": "lane-D, windows 188..228 from 188 to 232 and 188..268 from 232, a line signed at 230 judged by the window it holds now",
+   "window": "188..268",
+   "own lock": "stands",
+   "ledger": "REFUSE·authority lane-D signed at epoch 230, after its epoch closed at 228",
+   "expected.ok": false
+  }
+ ]
+}

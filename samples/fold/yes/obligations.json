@@ -1,0 +1,11 @@
+{
+ "about": [
+  "bound rests on the published algebra by digest; dep/obligations holds the pin"
+ ],
+ "cases": [
+  {
+   "name": "obligations",
+   "expected.ok": true
+  }
+ ]
+}

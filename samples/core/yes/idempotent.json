@@ -1,0 +1,5 @@
+{
+ "scope": "idempotent",
+ "want": 1,
+ "kind": "yes"
+}

@@ -1,0 +1,7 @@
+{
+ "scope": "one-lot-one-place",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: one lot writes the ledger and an own lock together"],
+ "cases": [{ "name": "lines to the ledger and an own lock", "prints": ["ACTS     bound/ · 4 lines to the ledger · 4 to bound's own lock"], "expected.ok": false }]
+}

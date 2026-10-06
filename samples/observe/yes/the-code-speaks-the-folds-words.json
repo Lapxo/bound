@@ -1,0 +1,12 @@
+{
+ "about": [
+  "Lane D's code names what the fold names: a path is a coordinate, the coordinates under a place are coordinatesUnder, what a view writes is its shape, a capsule answers a region with lines, and the rebirth says what its views wrote. The word the lines dropped at epoch 180 is left only where another's name or the wire's word still carries it."
+ ],
+ "cases": [
+  {"name": "observe, host and render at epoch 283", "uses of leaf or leaves": 144, "files": 14, "expected.ok": true},
+  {"name": "the same, after this lot", "uses of leaf or leaves": 9, "of them another's name": "namesLeaf and said.leaf (topos), vouchedLeaves (lane B)", "the wire's word": "measure=leaves on region lines, read in observe/match.ts", "kept for lane B's imports until it switches": "leavesUnder = coordinatesUnder, storeLeavesInside = storeCoordinatesInside", "expected.ok": true},
+  {"name": "what the rebirth prints", "before": "leaves   SAME 24/24 · N of M leaves the views write read SAME", "after": "written  SAME 24/24 · N of M coordinates the views write read SAME", "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "174 of 174 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "the lines dropped leaf for write and region at epoch 180, and lane D's code still named what it reads, writes and hands by the old word, 144 times in 14 files"
+}

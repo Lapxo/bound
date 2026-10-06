@@ -1,0 +1,19 @@
+{
+ "about": [
+  "A doc says each thing once. Where two docs said what one could, they are one: pass, place, extension, take and ledger each carry at most three comments, and nothing a doc said is gone from it."
+ ],
+ "cases": [
+  {
+   "name": "the five files",
+   "comments": {
+    "bound/src/cli/pass.ts": 3,
+    "bound/src/cli/place.ts": 3,
+    "bound/src/fold/extension.ts": 3,
+    "bound/src/judge/take.ts": 3,
+    "bound/src/land/ledger.ts": 2
+   },
+   "expected.ok": true
+  }
+ ],
+ "red was": "nine files of bound over three comments"
+}

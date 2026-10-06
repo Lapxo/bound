@@ -1,0 +1,26 @@
+{
+ "about": [
+  "The falsifier: a place published with views another place's lock spoke. obligations was published with 467 lines and eight views twice, the second copy of each spoken by a capsule place for its own manifest, build, ignore, citation, guide and three pipelines, with none of its leaves left once zoomed.",
+  "Refusing every line a capsule place's lock spoke fails from the other side: a place that is also a capsule is then published with its own ten views read raw from its lock, and none of the leaves they write."
+ ],
+ "cases": [
+  {
+   "name": "obligations published with the views the capsule places spoke for their own leaves",
+   "lines": 467,
+   "views twice": 8,
+   "expected.ok": false
+  },
+  {
+   "name": "topos handed its views twice, the second copies naming no leaf",
+   "release.yml": "rendered empty",
+   "tag.yml": "rendered empty",
+   "expected.ok": false
+  },
+  {
+   "name": "topos-bound published with every line of its own lock refused as a capsule's",
+   "its own views with their leaves": 0,
+   "views naming no leaf": 10,
+   "expected.ok": false
+  }
+ ]
+}

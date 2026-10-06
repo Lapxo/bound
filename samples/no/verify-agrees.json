@@ -1,0 +1,7 @@
+{
+ "scope": "verify-agrees",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: the second head is not asked"],
+ "cases": [{ "name": "programs without verify", "prints": ["verify none"], "expected.ok": false }]
+}

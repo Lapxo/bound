@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: test readings carried in receipts. 0.2.0's receipts.bound holds 20 test/* lines no page reads."
+ ],
+ "cases": [
+  {
+   "name": "0.2.0 rendered with cut 1 alone",
+   "fixture views SAME": "22 of 23",
+   "moved": "receipts.bound",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a line written into a lock instead of applied to it. A launcher that rebuilt bound's processes as blobs rewrote the four runner/* lines of bound's own lock in place, by=target and unsigned, twice; bound reads its own lock signed-only, so the lines stood nowhere and a run from a blob found no runner/<name> process to start."
+ ],
+ "cases": [
+  {
+   "name": "bound/TARGET.bound after the launcher's rewrite",
+   "own-lines-written-in": 4,
+   "runner/verb": "unsigned, stands nowhere",
+   "expected.ok": false
+  }
+ ]
+}

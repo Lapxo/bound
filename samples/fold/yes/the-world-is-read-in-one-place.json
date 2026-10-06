@@ -1,0 +1,20 @@
+{
+ "about": [
+  "The instrument reads the world in one module: a batch, a key, a blob and the entries of a directory are read through what observes files, never by a second reader beside it.",
+  "What a block read is matched by its tokens, never by a pattern built from a path."
+ ],
+ "cases": [
+  {
+   "name": "accept reads a batch and a key",
+   "through": "observeText",
+   "expected.ok": true
+  },
+  {
+   "name": "a withdraw asks whether a block still reads a file",
+   "token": "in:<path>:<12 hex>",
+   "pattern built from the path": false,
+   "expected.ok": true
+  }
+ ],
+ "red was": "verb.ts read files with node:fs beside the module that observes them, and leaving.ts built a pattern out of a path to find a token"
+}

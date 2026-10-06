@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="450" viewBox="0 0 1000 450" role="img" aria-labelledby="title desc">
+<title id="title">Compatible bounds meet without erasing their origins</title>
+<desc id="desc">Illustrative scalar intervals in one ordered form and measure. Declaration A allows 2 through 8, B allows 4 through 10, and their meet allows 4 through 8. The original declarations remain visible. A different interval, 9 through 12, has an empty meet with 4 through 8. The graphic does not imply independent evidence.</desc>
+<style>
+text { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.kicker { fill:#91a1ac;font-size:12px;letter-spacing:2px;font-weight:600; }
+.heading { fill:#edf1f3;font-size:29px;font-weight:600;letter-spacing:-.7px; }
+.label { fill:#dce4e8;font-size:15px;font-weight:500; }
+.note { fill:#aab8c1;font-size:12px; }
+.mono { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; }
+.pulse { animation: pulse 5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity:.25; } 45%,65% { opacity:.85; } }
+@media (prefers-reduced-motion:reduce) { .pulse,.flow { animation:none !important; } }
+</style>
+<defs><linearGradient id="surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#141e26"/><stop offset="1" stop-color="#0b1117"/></linearGradient></defs>
+<rect width="1000" height="450" rx="18" fill="url(#surface)"/>
+<rect x=".5" y=".5" width="999" height="449" rx="17.5" fill="none" stroke="#2a3741"/>
+<text x="42" y="40" class="kicker">BOUND / DECLARATIONS</text>
+<text x="42" y="84" class="heading">Tighten the bounds. Keep the evidence.</text>
+<text x="42" y="113" class="note">One ordered form · one measure · illustrative values</text>
+<g stroke="#24323d" stroke-width="1">
+<path d="M340 155V330M420 155V330M500 155V330M580 155V330M660 155V330M740 155V330M820 155V330M900 155V330"/>
+</g>
+<g class="note mono" text-anchor="middle"><text x="340" y="149">0</text><text x="420" y="149">2</text><text x="500" y="149">4</text><text x="580" y="149">6</text><text x="660" y="149">8</text><text x="740" y="149">10</text><text x="820" y="149">12</text><text x="900" y="149">14</text></g>
+<text x="42" y="192" class="label">Declaration A</text><text x="226" y="192" class="note mono">[2, 8]</text>
+<rect x="420" y="174" width="240" height="26" rx="5" fill="#6c9bab" fill-opacity=".4" stroke="#82afbd"/>
+<text x="42" y="244" class="label">Declaration B</text><text x="226" y="244" class="note mono">[4, 10]</text>
+<rect x="500" y="226" width="240" height="26" rx="5" fill="#9a97b8" fill-opacity=".35" stroke="#aca7cb"/>
+<text x="42" y="296" class="label mono">A ∧ B</text><text x="226" y="296" class="note mono">[4, 8]</text>
+<rect x="500" y="278" width="160" height="26" rx="5" fill="#81b79f" fill-opacity=".7" stroke="#a1d0b9"/>
+<rect x="495" y="273" width="170" height="36" rx="8" fill="none" stroke="#a1d0b9" stroke-width="1.5" class="pulse" opacity=".25"/>
+<path d="M42 348H958" stroke="#2a3741"/>
+<text x="42" y="378" class="label mono">[4, 8] ∧ [9, 12] = ∅</text>
+<text x="460" y="378" class="note">An empty meet preserves the disagreement.</text>
+<text x="42" y="419" class="note">The fold retains provenance. Distinct declarations do not, by themselves, establish independent evidence.</text>
+</svg>

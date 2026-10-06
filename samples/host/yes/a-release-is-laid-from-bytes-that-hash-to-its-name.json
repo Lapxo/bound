@@ -1,0 +1,27 @@
+{
+ "about": [
+  "A release is laid from a blob only when the blob's bytes hash to the digest that names it. A blob that hashes to another digest is refused by name and laid nowhere: the place keeps what it held, and the drift reading counts the release as not laid. The hash is taken of the bytes the unpack reads anyway, once, when a blob is first unpacked."
+ ],
+ "cases": [
+  {
+   "name": "obligations 0.3.0 (ba4149b7), 400 kB",
+   "laid": 1,
+   "hash": "0.13 ms median of 20",
+   "expected.ok": true
+  },
+  {
+   "name": "topos 192a5138, 167 kB",
+   "laid": 1,
+   "hash": "0.05 ms median of 20",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations 0.3.0's name over topos's bytes",
+   "laid": 0,
+   "refused": "blob ba4149b7d009 hashes to 192a513819d8 · not laid",
+   "place": "untouched, no mark",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the host unpacked a blob under the name it was stored by and marked the place with that name, never hashing its bytes: topos's bytes stored as obligations 0.3.0 were laid at node_modules/@lapxo/obligations and marked ba4149b7, a label that measured nothing"
+}

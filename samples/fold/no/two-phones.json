@@ -1,0 +1,16 @@
+{
+ "about": [
+  "The falsifier: two phones whose @0 differs and @1 names one region are told apart at @8 even when that region's lines are the same set."
+ ],
+ "cases": [
+  {
+   "name": "two locks whose roots differ, one region at @1, the same @8 set, reported as not the same",
+   "@0": "differs",
+   "@1": "one region",
+   "@8": "union SAME",
+   "same": false,
+   "depth": 8,
+   "expected.ok": false
+  }
+ ]
+}

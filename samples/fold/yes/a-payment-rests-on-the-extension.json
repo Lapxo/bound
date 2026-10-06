@@ -1,0 +1,27 @@
+{
+ "about": [
+  "A demand paid against a cone stays paid while what the cone renders is the same: a new byte digest with an equal leaf moves nothing.",
+  "A view that writes a leaf is paid while its leaf is what it would write, and is open the moment it is not."
+ ],
+ "cases": [
+  {
+   "name": "a leaf that renders the same",
+   "leaf": "SAME",
+   "demand": "paid",
+   "expected.ok": true
+  },
+  {
+   "name": "a leaf that differs from its render",
+   "leaf": "differs",
+   "demand": "open",
+   "expected.ok": true
+  },
+  {
+   "name": "a view that writes no leaf",
+   "leaf": "none",
+   "demand": "paid by its receipt, as before",
+   "expected.ok": true
+  }
+ ],
+ "red was": "four views whose leaves were SAME stood missing because no receipt had vouched a hidden leaf"
+}

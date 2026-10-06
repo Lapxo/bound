@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: at 321 fold/claims.ts read a withdrawal itself. It took as gone every claim some withdraw's fields named and kept the rest by filtering in bound; the object's observe at −1 and live never ran on the verdict path."
+ ],
+ "cases": [
+  {
+   "name": "fold/claims.ts at 321",
+   "observations at −1 on the verdict path": 0,
+   "a withdrawal read in bound": 1,
+   "expected.ok": false
+  },
+  {
+   "name": "a mutant that reads the cell's claims without live, so no withdrawal takes anything back, over the same sets",
+   "sets": "3735 of 6043 differ",
+   "lines taken back": 0,
+   "expected.ok": false
+  }
+ ]
+}

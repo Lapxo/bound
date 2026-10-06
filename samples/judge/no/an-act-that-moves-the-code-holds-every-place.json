@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: an act held the places its lines named, and a change to the instrument's code moves every place's key. B35 at epoch 253 changed bound's fold and held bound/ and the root, so every other place was left unsettled; lane A's lot at epoch 255, five lines at topos, then spent 57.7 s of its 90 s in gate/check folding places it did not touch, and could not settle them: OUTSIDE for topos-node, topos-notation, topos-typescript-tree and verify."
+ ],
+ "cases": [
+  {
+   "name": "B35, a change to bound/src/fold, epoch 253",
+   "acts": "bound/ · then the root",
+   "places whose key moved": "every place",
+   "expected.ok": false
+  },
+  {
+   "name": "lane A's lot after it, five root lines at topos, epoch 255",
+   "gate/check": "57.7 s",
+   "outside": "topos-node topos-notation topos-typescript-tree verify",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "about": [
+  "The falsifier: a capsule that answered nothing, taken in silence. Until epoch 202 topos-github's regions blob held dist/pipeline.js while its alias named dist/index.js, so its process never started. Each region it was asked came back empty, nothing was said, and the region counted as answered, so no other capsule was asked: verify's three pipelines and its .gitignore, topos-notation's four, and the tag and release pipelines of five topos places were written as pages of one byte.",
+  "Each of those twenty-eight requests was run again at every render, since nothing was kept."
+ ],
+ "cases": [
+  {
+   "name": "verify/.github/workflows/tag.yml, rendered from a capsule that answered nothing",
+   "bytes": 1,
+   "said": "nothing",
+   "expected.ok": false
+  },
+  {
+   "name": "the carried topos-github capsules that render the same regions",
+   "asked": 0,
+   "expected.ok": false
+  },
+  {
+   "name": "the same twenty-eight requests at the next render",
+   "run again": 28,
+   "expected.ok": false
+  }
+ ]
+}

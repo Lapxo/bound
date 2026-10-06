@@ -1,0 +1,18 @@
+{
+ "about": [
+  "A waiter waits the lock out. A lock whose folder is gone for an instant, as when another waiter renames a stale lock away, is asked for again: the folder is made where it was, and the loop turns."
+ ],
+ "cases": [
+  {
+   "name": "the same scratch run, the store's folder removed under the holder and the waiter",
+   "waiter": "ok, holding the lock after the holder let it go",
+   "expected.ok": true
+  },
+  {
+   "name": "a stale lock and eight waiters at once, twenty rounds",
+   "waiters": "160 of 160 ok",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a waiting accept died on ENOENT"
+}

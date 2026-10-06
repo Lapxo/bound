@@ -1,0 +1,28 @@
+{
+ "about": [
+  "The falsifier: gates that run at a rebirth, not at the take. Three bugs landed through accept and were found only when obligations was reborn. Zoom took the import specifier @lapxo/obligations/… for the place, so four learn pages lost their intro and their graph. The receipts region wrote each example's observed line twice per render, 1→2→4. And once a missing extension became a refusal, every published folder refused to fold itself. Each take was green; the rebirth read DIFFERS or refused.",
+  "And a gate that read the second head's word from the lock before its own: a take's gates run after its batch's lines landed, where verify's last attestation rests on the previous epoch, so every verify badge and every second/verdict read stale against leaves that say agrees, and the check refused takes whatever they touched."
+ ],
+ "cases": [
+  {
+   "name": "the zoom that dropped @lapxo/obligations, taken without a rebirth",
+   "rebirth": "DIFFERS · audit/tree/published-place-renders-itself 4",
+   "expected.ok": false
+  },
+  {
+   "name": "the receipts region that doubled an example's line, taken without a rebirth",
+   "rebirth": "receipts.bound does not render the same twice: 10 lines move",
+   "expected.ok": false
+  },
+  {
+   "name": "the extension refusal taken without a rebirth",
+   "rebirth": "refused at the manifest: REFUSE·extension … has no extension",
+   "expected.ok": false
+  },
+  {
+   "name": "B19's take at 199 and lane C's verify/laws-are-the-contract at 200, checked against the word from the lock before",
+   "check": "DIFFERS on every README's verify badge and every receipts.bound that carries second/verdict",
+   "expected.ok": false
+  }
+ ]
+}

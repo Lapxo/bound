@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: at 308 fold/claims.ts folded each claim's values with a poset of its own (SIGNED: ALPHABETS.leq over a parsed polarity and set, INTERVALS.leq over a parsed span, equality otherwise) through foldSigned. The object's cell, meet and state never ran on the verdict path, and a fork carried no state."
+ ],
+ "cases": [
+  {
+   "name": "fold/claims.ts at 308",
+   "cells of the object on the verdict path": 0,
+   "a poset spelled in bound": 1,
+   "expected.ok": false
+  }
+ ]
+}

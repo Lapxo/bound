@@ -1,0 +1,16 @@
+{
+ "about": [
+  "Two phones compared as receipts are compared: @0 differs, then @1 names one region, and the union of that region's @8 lines is SAME. Two keys cannot both close that cell as two cells: one set is one close."
+ ],
+ "cases": [
+  {
+   "name": "two locks whose roots differ, one region at @1, the same @8 set",
+   "@0": "differs",
+   "@1": "one region",
+   "@8": "union SAME",
+   "same": true,
+   "depth": 8,
+   "expected.ok": true
+  }
+ ]
+}

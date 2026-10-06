@@ -1,0 +1,33 @@
+{
+ "about": [
+  "A lock is read by its own wire: bound's own words carry their eras, newest first, and the word in a lock is the first era that lock's own wire lists. The tree lists write and is read in write; the published place 0.2.0 lists leaf and is read in leaf, as it was written, and stays a valid fixture.",
+  "An extension nobody measured is a refusal, never the code standing in for it: a lock that names no published place, a store that does not hold the one named, a lock with no key that writes folds, or a measure that refused each refuse by name.",
+  "The fold a measure runs over a published place is named by the bytes it measures; nothing it keeps is read again."
+ ],
+ "cases": [
+  {
+   "name": "the published place 88474ebf78be98fa (0.2.0), measured by this code",
+   "rendered": 25,
+   "unlike": 0,
+   "outputs": "9e1781f94f9e2c0c",
+   "extension": "678ab59c3d57",
+   "expected.ok": true
+  },
+  {
+   "name": "store/source asked in the tree, whose wire lists write and leaf",
+   "word": "write",
+   "expected.ok": true
+  },
+  {
+   "name": "store/source asked in 0.2.0, whose wire lists leaf",
+   "word": "leaf",
+   "expected.ok": true
+  },
+  {
+   "name": "region/state globbing each era's written leaves over 0.2.0",
+   "readme": "the Pointers section it carries",
+   "expected.ok": true
+  }
+ ],
+ "red was": "bound read a published place in bound's word instead of the place's own, and the extension that failed to measure was stood in for by the code"
+}

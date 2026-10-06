@@ -1,0 +1,8 @@
+{
+ "about": ["The instrument reads a capsule's answer and a shape's coordinates under the topos it lays now and the one it lays next: an answer's lines, else the leaf field the contract names today; namesAt, else namesLeaf, taken from the wire's namespace so a name one release lacks breaks no load. The names the next release retires leave in the lot after it is laid."],
+ "cases": [
+  {"name": "under topos 8a8a93a6, laid today", "pages that move from the dual read": 0, "expected.ok": true},
+  {"name": "an answer in topos 0.1.0's contract, lines and no leaf field", "read": "its lines", "expected.ok": true}
+ ],
+ "red was": "topos 0.1.0 renames the answer's leaf field to lines and namesLeaf to namesAt; the body at epoch 289 read the old names only, so the act that lays 0.1.0 would have rendered every capsule region empty and failed to load the matcher"
+}

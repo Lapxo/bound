@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a loader that spelled where topos lies, a path in host code rather than dep/topos or the lock's uses/topos pin."
+ ],
+ "cases": [
+  {
+   "name": "located.ts importing @lapxo/topos/wire by a path in code",
+   "answer": "the pin names the place; the loader does not",
+   "expected.ok": false
+  }
+ ]
+}

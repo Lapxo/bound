@@ -1,0 +1,18 @@
+{
+ "about": [
+  "A reading taken at a place answers that place's ceilings and the tree's, never another place's. A ceiling whose scope begins with another place is read where that place is folded, and the root reads them all."
+ ],
+ "cases": [
+  {
+   "name": "bound/ ranked with its birth told",
+   "rank": "no version-differs line",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/ folded",
+   "reads": "obligations/version-differs, from its own reading",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a version read at bound bit the ceilings of obligations and verify"
+}

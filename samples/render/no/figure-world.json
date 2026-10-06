@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: two renders of topos-github's docs/img/world.svg differ. The figure named the release digest, and the release is named after the figure is drawn, so the second render carries a different coordinate. A timestamp, an epoch, or regions drawn in an unstable order is the same fault."
+ ],
+ "cases": [
+  {
+   "name": "a figure that names the release digest",
+   "byte-equal": false,
+   "names": "the release digest",
+   "expected.ok": false
+  }
+ ]
+}

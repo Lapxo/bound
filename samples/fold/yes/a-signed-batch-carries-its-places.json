@@ -1,0 +1,23 @@
+{
+ "about": [
+  "A lane's signed batch carries the places its own lines are meant for: bound sign --place p writes # place p above the lines, and the accept that lands the cycle routes that file's own lines to those places only, among the ones its signer covers. A batch naming no place keeps the accept's --place. A place that is not one of the tree's refuses the act by name. bound release <folder> prints the release digest of a folder as the host names what it lays, so a script names a release without importing the instrument."
+ ],
+ "cases": [
+  {
+   "name": "bound release over the laid obligations 0.3.3 and over the published folder obligations-release, on a copy at 315",
+   "answer": "RELEASE sha256:b3dab950… for both, the digest the lay's mark and receipt carry",
+   "expected.ok": true
+  },
+  {
+   "name": "a batch signed with --place bound, accepted with no --place",
+   "landed": "its own line in bound/TARGET.bound only",
+   "expected.ok": true
+  },
+  {
+   "name": "the same batch naming # place nowhere",
+   "answer": "REFUSE·place: nowhere is no place of the tree",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a cycle whose own lines went wherever their signer was admitted"
+}

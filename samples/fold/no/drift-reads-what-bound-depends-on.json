@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a count of every release the lock names, as if bound rested on all of them. Six topos-x releases are named so that places can rest on them, and bound imports none of them. Each was counted, because a line without needs was read as a release the host never laid."
+ ],
+ "cases": [
+  {
+   "name": "audit/bound/rests-on-its-release at epoch 223",
+   "read": "7: dep/topos-typescript-tree, dep/topos-json, dep/topos-bound, dep/topos-doc, dep/topos-node and dep/topos-github 1 each, and dep/topos 1",
+   "rests on": "only dep/topos: bound resolved @lapxo/topos through a link to the sibling topos/",
+   "expected.ok": false
+  }
+ ]
+}

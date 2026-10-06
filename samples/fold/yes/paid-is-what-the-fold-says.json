@@ -1,0 +1,14 @@
+{
+ "about": [
+  "What a take paid is what the fold says it paid: an answer pays a demand only over the coordinates its take judged. A batch landed twice judges again each of its demands the fold still counts unpaid, and a gate that watches takes counts only those landed after the first gate ran; a demand signed again keeps its history, and history is never counted as a take without gates."
+ ],
+ "cases": [
+  {
+   "name": "takes without gates, over the tree at epoch 216",
+   "read": 1,
+   "the one": "bound/src/judge/the-gates-read-a-rendered-tree, taken at 201 under the extension and the rebirth, before the check stood",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a take was matched to a demand by scope alone: the owner's two demands signed again at 212 read as taken without gates by takes that predate every gate, and a batch re-run would have skipped a demand a take of an older signing had answered"
+}

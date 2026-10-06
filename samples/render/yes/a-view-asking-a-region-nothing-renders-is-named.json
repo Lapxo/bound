@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The regions a view asks that nothing renders are named: none of bound's own, whose names are one list tsc holds REGIONS to, and none a capsule the place can run declares. unrendered returns them and renders nothing; whoever dispatches the view refuses it whole by those names. While the wire's list of regions stands it changes no page."
+ ],
+ "cases": [
+  {"name": "every view each place signs", "views": 627, "regions asked": 1294, "unrendered": 0, "expected.ok": true},
+  {"name": "bound/, a view asking rank and field", "unrendered": [], "expected.ok": true},
+  {"name": "REGION_NAMES without orphans, which REGIONS renders", "tsc": "TS2353 orphans does not exist in type Record<RegionName, Region>", "expected.ok": true},
+  {"name": "REGION_NAMES with a name REGIONS does not render", "tsc": "TS1360 the literal does not satisfy Record<RegionName, Region>", "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "181 of 181 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "a view that asked a region neither bound nor any capsule renders rendered that region empty, and only the wire's hand-kept list of regions refused it before a fold"
+}

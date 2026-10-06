@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: every fold was keyed by every ledger of the store. A landing that moved one place changed the judge, take and vouched ledgers, and with them the key of every place, so the render after the landing folded all fifteen places again to find the three leaves that moved."
+ ],
+ "cases": [
+  {
+   "name": "three probe accepts on a scratch copy, each landing one take in bound/",
+   "after landing": "39.5 s · 54.7 s · 45.0 s",
+   "folds": "30 of 32 computed each time",
+   "leaves": "0 rendered with the batch, 3 after the landing",
+   "expected.ok": false
+  }
+ ]
+}

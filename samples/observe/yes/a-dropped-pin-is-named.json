@@ -1,0 +1,31 @@
+{
+ "about": [
+  "A pin is laid through the alias of the instrument's own lock that names its digest. A pin of a world the lock aliases that is not laid, because no alias names its digest or no blob in the store hashes to it, is refused by name once, with its scope and why, and never dropped without a word. A pin of a world the lock does not alias is a release a place builds on, not a capsule, and is not named. The regions of a refused pin still go to whoever answers them next: a pin loading by digest is a later red, and this is the word that it is missing."
+ ],
+ "cases": [
+  {
+   "name": "the tree as it stands, .@337 · bound@332: thirteen places, sixty-five pins, each asked with and without the aliases carried",
+   "asks that lay the same capsules as the epoch 334 body": "26 of 26",
+   "said": "nothing, by either body",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/uses/topos-doc moved to a134e0dcd88a, a blob in the store that no alias names",
+   "laid": "3 before · 2 after",
+   "said": "REFUSE   pin a134e0dcd88a · obligations/uses/topos-doc · no alias names it · not laid",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/uses/topos-doc moved to a digest an alias names and no blob in the store hashes to",
+   "laid": "3 before · 2 after",
+   "said": "REFUSE   pin 000000000000 · obligations/uses/topos-doc · no blob in the store hashes to it · not laid",
+   "expected.ok": true
+  },
+  {
+   "name": "the first of these asked three times more in the same run, the aliases carried",
+   "said": "nothing more: a pin is named once",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a pin no alias named was dropped without a word, and a harness read the regions that fell through to the aliases as the pinned blob's answers"
+}

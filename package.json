@@ -1,0 +1,48 @@
+{
+  "name": "@lapxo/bound",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
+  "main": "dist/cli/verb.js",
+  "types": "dist/cli/verb.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/cli/verb.d.ts",
+      "default": "./dist/cli/verb.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "node --import ./test/setup.ts --test test/*.test.ts",
+    "clean": "rm -rf dist .tsbuildinfo* tsconfig.tsbuildinfo",
+    "build": "node tools/build.mjs",
+    "prepack": "npm run build"
+  },
+  "files": [
+    "LICENSE",
+    "README.md",
+    "CONTRIBUTING.md",
+    "dist/**/*",
+    "TARGET.bound",
+    "receipts.bound",
+    "docs/usage.md",
+    "docs/readme-assets/atlas.svg"
+  ],
+  "author": "Lapxo",
+  "license": "MIT",
+  "dependencies": {
+    "@lapxo/obligations": "0.3.5",
+    "@lapxo/topos": "0.1.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22.15"
+  },
+  "bin": {
+    "bound": "./dist/cli/verb.js"
+  }
+}

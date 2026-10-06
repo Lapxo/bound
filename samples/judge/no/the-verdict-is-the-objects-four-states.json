@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: at 311 the judge's verdict on a demand was paid or missing and nothing else: a demand the take paid and the second head disagreed about read paid, a demand nobody had answered read missing beside one the take had refused, and the second head's word stood apart from every demand, one line of the verdict with no cell to read it on."
+ ],
+ "cases": [
+  {
+   "name": "bound at 311",
+   "paid": 146,
+   "missing": 19,
+   "states": "none: a demand is paid or missing",
+   "expected.ok": false
+  }
+ ]
+}

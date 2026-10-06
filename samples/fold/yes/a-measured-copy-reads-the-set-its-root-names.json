@@ -1,0 +1,28 @@
+{
+ "about": [
+  "The extension's measured copy reads back what its archive carries: the receipts it shipped when they are the whole set, and, when they name a root (@0, scope receipts, measure digest), the set the tree's store keeps at the digest of its bytes that the root's at names. A root the store does not keep refuses the measure by name. fold/resolved.ts's carriedFrom is the one lookup, for the measure and for a rebirth alike."
+ ],
+ "cases": [
+  {
+   "name": "shipped lines with no root line",
+   "read": "the shipped lines",
+   "expected.ok": true
+  },
+  {
+   "name": "a root whose set the copy's store keeps (cas/carried/0def8228…)",
+   "read": "the store's set, 194 lines",
+   "expected.ok": true
+  },
+  {
+   "name": "a root the store does not keep",
+   "read": "no set: the measure refuses",
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy at 305: every fixture ships its own @8",
+   "extension": "green in 3.0 s",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a copy that would read digests as readings"
+}

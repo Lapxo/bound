@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: a second accept waiting on the store's lock died instead of waiting. The exclusive create of the lock answered ENOENT, and the loop took anything but EEXIST for an error of the act."
+ ],
+ "cases": [
+  {
+   "name": "lane C's c21 at epoch 234, behind another accept",
+   "said": "WAIT the store is held by 29555 · accept since 05:00:13Z, then ENOENT: open '.bound/lock' at underTheLock",
+   "landed": "nothing",
+   "expected.ok": false
+  },
+  {
+   "name": "a scratch copy: a holder holds the lock three seconds, a waiter waits, and the store's folder is removed under both",
+   "waiter": "crash ENOENT",
+   "expected.ok": false
+  }
+ ]
+}

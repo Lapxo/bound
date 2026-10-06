@@ -1,0 +1,25 @@
+{
+ "about": [
+  "What bound rests on is what its manifest depends on. Each dependency is the release its own lock names by digest, laid where the line needs it, and each built file there is compared with that release.",
+  "A dependency no release names, a line without needs, and a place the host never made the release are each a count. A release named only for places to rest on is not counted, and a manifest the lock's manifest view does not name is a count."
+ ],
+ "cases": [
+  {
+   "name": "the lock as it stands at 223: obligations 0.2.0 laid, topos with no needs",
+   "read": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "both releases laid where bound needs them, on a scratch copy",
+   "read": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the lock names obligations 0.3.0 while the place still holds 0.2.0",
+   "read": 24,
+   "why": "the host's probe, dist/lattice/index.js, is the same bytes in both releases, so it kept the old copy; the dist files that differ are counted",
+   "expected.ok": true
+  }
+ ],
+ "red was": "six releases named for places counted as bound's own drift"
+}

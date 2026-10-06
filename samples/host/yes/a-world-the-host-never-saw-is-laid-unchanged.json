@@ -1,0 +1,13 @@
+{
+ "about": ["The base's agnosticism test, received. The host laid topos-measure, a world it had never seen, by the digest of its blob (sha256:4c06d2ef28440c6c2e8a45a2b4b21d9ca310e077e3dc6d5eb420e05c950057d1), unpacked by lane D, a lane other than its author, and asked it through its own capsule path: capsuleAt loaded it and read its declaration as written, and each of the world's own vectors was asked as the host's handing builds a request. HELD 4/4, the same twice, and no line of bound or topos was changed to lay it."],
+ "cases": [
+  {"name": "root:topos-measure · held@3 · README.md", "held": true, "twice the same": true, "expected.ok": true},
+  {"name": "agreed:topos-measure · held@3 · README.md", "held": true, "twice the same": true, "expected.ok": true},
+  {"name": "alone:topos-measure · held@3 · README.md", "held": true, "twice the same": true, "expected.ok": true},
+  {"name": "root:topos-measure · readings@3 · README.md", "held": true, "lines": 8, "twice the same": true, "expected.ok": true},
+  {"name": "the declaration as the host read it", "domain": "measurements", "renders": "held|readings", "effects": "none", "expected.ok": true},
+  {"name": "HELD", "value": "4/4", "expected.ok": true},
+  {"name": "the host that laid it", "code": "270ee865922c, the extension of 7ac8eb626625", "lines of bound or topos changed to lay it": 0,
+   "its capsule path, sha256": {"bound/src/host/capsule.ts": "7f4074a792260f46f84166c826638f458b815a5880a52b5bb7512bf5d06fc11a", "bound/src/observe/regions.ts": "554ba7890dc0a9af029002aba6953e09db08a1bac73fea381a7893188b956c97", "bound/src/render/capsule.ts": "5e8b2fec217117781124b62a10f1ecc48189ecb3109e9a139e276602befaa89f"}, "expected.ok": true}
+ ]
+}

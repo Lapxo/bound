@@ -1,0 +1,13 @@
+{
+ "about": [
+  "gate/check names only the places in the act's descent. A lines-only act in one place does not render the whole tree."
+ ],
+ "cases": [
+  {
+   "name": "a lines-only act in bound",
+   "at": "bound",
+   "expected.ok": true
+  }
+ ],
+ "red was": "gate/check at . over the whole tree"
+}

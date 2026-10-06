@@ -1,0 +1,13 @@
+{
+ "about": [
+  "A directory with no own lock is foundable when the root stands a line of its region family naming its coordinates (scope=region/<dir>, measure=coordinates, value holding <dir>/**): accept lets a batch name it, admission reads its absent lock as empty plus the lines told to it, and landOwned writes its first TARGET.bound. With no such line the name is refused as before. The first act that founds a place is lane A's topos-measure batch, after the owner's lines 27 (coverage by name) and 31 (the founding line)."
+ ],
+ "cases": [
+  { "name": "a new directory with its root line", "foundable": true, "expected.ok": true },
+  { "name": "the same directory with no root line", "foundable": false, "accept": "REFUSE·place … no line of the root founds it", "expected.ok": true },
+  { "name": "a root line naming other coordinates", "foundable": false, "expected.ok": true },
+  { "name": "a place that already has its lock", "foundable": false, "expected.ok": true },
+  { "name": "a root line for a directory that does not exist", "foundable": false, "expected.ok": true }
+ ],
+ "red was": "a world with no place to stand"
+}

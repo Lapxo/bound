@@ -1,0 +1,14 @@
+{
+ "about": [
+  "A module says what it is in three comments at most, each carrying a law of the module rather than a line of it, and runs to 500 lines at most: fold/observed.ts hands what a reader is offered, and the capsule readers, to fold/readers.ts."
+ ],
+ "cases": [
+  {
+   "name": "the modules this lot touches",
+   "comments": "reach 3 · rebirth 3 · pass 3 · signed 3 · act 3 · region 3 · kept 3 · observed 2 · readers 2 · gates 1",
+   "lines": "observed 427 · readers 147",
+   "expected.ok": true
+  }
+ ],
+ "red was": "comments over three in ten modules"
+}

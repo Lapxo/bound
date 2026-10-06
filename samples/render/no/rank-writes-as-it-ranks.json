@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: rank mapped every bound, filtered, sorted, and returned the page after the last bound, so a draft named by --out could not exist until ranking had finished."
+ ],
+ "cases": [
+  {
+   "name": "rank as a later pass",
+   "wrote": "once, after sort, nothing at each bound",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a count no fold reads. host/stores.ts counts the leaves of a store laid inside a place, but no reading of the instrument folded it. So the owner's ceiling audit/tree/no-store-inside-a-place could not be signed: accept refuses a ceiling no reading meets as INERT, and 402 leaves under bound/.bound went unread."
+ ],
+ "cases": [
+  {
+   "name": "bound/.bound, laid when bound/ was folded as a root",
+   "leaves": 402,
+   "read by": "nothing",
+   "expected.ok": false
+  }
+ ]
+}

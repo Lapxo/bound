@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: placeLines as landed at epoch 348 puts the root lines a place takes first and keeps a line of the place's own lock only where no taken root line holds its key, the reverse of the fold's standing. A place that says a thing of itself in its own lock is published saying the root's."
+ ],
+ "cases": [
+  {
+   "name": "topos's own version bumped for its next release, told in memory at .@348 · bound@349",
+   "published lock": "566 lines, one version line",
+   "carries": "version 0.1.0, the root's topos/version (at=witness:a-topos-that-was-not-a-place)",
+   "why": "the root's topos/version is taken first and the own version line, of the same key, is dropped",
+   "expected.ok": false
+  }
+ ]
+}

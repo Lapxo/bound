@@ -1,0 +1,21 @@
+{
+ "about": [
+  "A reading is owned by the place of the leaf it was read at, named by the digest of the bytes it read: the index line of each leaf names its place and its bytes, and every reading at those bytes goes with it. A reading of bytes two places hold, or of no leaf, is common. The written views of every place render the same from the common lines and readings and its own as from the whole tree. After an act lands a line in an own lock, the render after the landing reads again what the landing wrote, so the keys it settles are the ones the next act reads."
+ ],
+ "cases": [
+  {
+   "name": "every place's written views from its own and the common readings, against the whole tree's",
+   "compared": 160,
+   "same": 160,
+   "expected.ok": true
+  },
+  {
+   "name": "one line at bound/src/fold after B36 landed a line in bound's own lock, on a copy of the tree",
+   "acts": "bound/ · then the root",
+   "seconds": 18,
+   "outside": "none",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a reread own lock moved every key"
+}

@@ -1,0 +1,15 @@
+{
+ "about": [
+  "A batch landed twice is one: nothing of it lands again. What it left unpaid is judged again, the way it would be now: each of its demands that stands with no FACT is taken, the gates run once over the tree as it stands, and the takes land only when all of it holds. So a lane whose take a gate refused re-runs its batch unchanged."
+ ],
+ "cases": [
+  {
+   "name": "B22 re-run unchanged in a scratch copy of the tree, its demand refused at 205",
+   "said": "ONCE 1 lines · every one already landed · 1 of its demands unpaid, judged again",
+   "gates": "gate/extension green (3332 ms) · gate/check green (19972 ms)",
+   "take": "FACT, 2 sources moved; audit/bound/keys-created-by-a-missing-path answered late",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a batch re-run after its take was refused printed ONCE and left the demand unpaid for good, short of re-signing it under a fresh at"
+}

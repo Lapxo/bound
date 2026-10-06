@@ -1,0 +1,28 @@
+{
+ "about": [
+  "The falsifier: verify published with two lines obligations leads. obligations/pipeline/verify/command and obligations/pipeline/verify/key name no need; verify's lock took them because verify is the third step of their scope.",
+  "Refusing every line another place leads fails from the other side, and so does letting only the families the wire lists name a place: a place is then published without the lines whose needs are its own code."
+ ],
+ "cases": [
+  {
+   "name": "verify published with obligations' two heads",
+   "lines": 338,
+   "lines obligations leads": 2,
+   "expected.ok": false
+  },
+  {
+   "name": "every line another place leads refused, needs or not",
+   "topos-typescript-tree lines": "333 → 325",
+   "topos-json lines": "334 → 333",
+   "expected.ok": false
+  },
+  {
+   "name": "a later step names a place only after a family the wire lists",
+   "obligations lines": "479 → 474",
+   "topos lines": "390 → 386",
+   "topos-doc, topos-github, topos-node lines": "each 4 fewer",
+   "lost": "comment/**, dir/src/**, identifier/**, source/<form>/src/**",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: one lock held the whole store for every act, whatever the act touched. B34, a change to bound's fold, waited 357 s at epoch 247 behind lane C's lot on verify, which it touched nowhere, and C's lot had waited behind B33 the same way."
+ ],
+ "cases": [
+  {
+   "name": "B34 behind lane C's accept on verify",
+   "waited": "357 s",
+   "expected.ok": false
+  }
+ ]
+}

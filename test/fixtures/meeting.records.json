@@ -1,0 +1,42 @@
+[
+  {
+    "about": "ana is free from ten to fourteen",
+    "at": "origin:ana",
+    "by": "ana",
+    "form": "interval",
+    "measure": "hour",
+    "role": "reads",
+    "scope": "meeting/when",
+    "value": "10..14"
+  },
+  {
+    "about": "luis is free from twelve to sixteen",
+    "at": "origin:luis",
+    "by": "luis",
+    "form": "interval",
+    "measure": "hour",
+    "role": "reads",
+    "scope": "meeting/when",
+    "value": "12..16"
+  },
+  {
+    "about": "the room is free from ten to thirteen",
+    "at": "origin:room",
+    "by": "room",
+    "form": "interval",
+    "measure": "hour",
+    "role": "reads",
+    "scope": "meeting/when",
+    "value": "10..13"
+  },
+  {
+    "about": "the boss is free from eighteen to twenty",
+    "at": "origin:boss",
+    "by": "boss",
+    "form": "interval",
+    "measure": "hour",
+    "role": "reads",
+    "scope": "meeting/when",
+    "value": "18..20"
+  }
+]

@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: the field of a place had nothing to read but the fold's verdict lists. At epoch 260 bound/'s fold held 201 bounds and 139 of them met nothing, among them bounds whose first step names topos-*, verify and obligations; a field over those lists would have read them REQUIRED at bound/. No region handed its poles, no bound its place, and a view called at a resolution reached no region."
+ ],
+ "cases": [
+  {
+   "name": "bound/ at epoch 260, lane D's measure",
+   "bounds": 201,
+   "met nothing": 139,
+   "expected.ok": false
+  }
+ ]
+}

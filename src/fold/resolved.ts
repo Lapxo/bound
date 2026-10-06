@@ -1,0 +1,99 @@
+import { createHash, dirname, existsSync, join, linkSync, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
+import { canonical, matches, parse } from '@lapxo/topos/wire';
+import { RECEIPTS, fieldOf, isWire } from './claims.ts';
+import { bytesDigest } from './digests.ts';
+import { carriesOnly, cased } from './observed.ts';
+import { writerFor } from './signers.ts';
+import { viewsOf } from './views.ts';
+import { zoomed } from './zoom.ts';
+import { ledgerLines, storeAt } from '../land/ledger.ts';
+import { sourced } from '../land/vouched.ts';
+import { entriesIn, observeFile, observeText } from '../observe/files.ts';
+import { describedReceipts } from '../observe/regions.ts';
+import type { PlaceFold } from '../cli/place.ts';
+
+export const bytesOnly = (line: string): string => {
+  const got = parse(line);
+  return got.kind === 'fact' && fieldOf(line, 'measure') === 'observed' ? canonical({ ...got.value.fields, value: fieldOf(line, 'at').replace(/^.*:/, '').slice(0, 16) }) : line;
+};
+
+const held = new WeakMap<PlaceFold, readonly string[]>();
+
+/**
+ * Every receipt of a place, @8: the bytes of what it observed that a reading ran over, those readings, the verdicts its
+ * paid demands were taken with, and at the root the digest of each place's own receipts. The attest is none of them:
+ * it stands in the root lock and the release, naming the root these lines resolve to. The fold keeps the set in the
+ * root's store under the digest of its bytes, which every line that resolves it names, and what a place with no reader
+ * carries is read back from there, never from a file the place ships.
+ */
+export function receiptsOf(fold: PlaceFold): readonly string[] {
+  const kept = held.get(fold);
+  if (kept !== undefined) return kept;
+  if (carriesOnly(fold.root, fold.store)) return held.set(fold, [...new Set(carriedIn(fold.store).flatMap((file) => (observeText(file) ?? '').split('\n').filter(isWire)))]).get(fold)!;
+  const under = fold.under ?? '';
+  const shape = [...viewsOf(fold.standing).values()].flatMap((view) => ('regions' in view && view.regions.some((one) => one.name === 'receipts') ? [view.shape] : []))[0] ?? '';
+  const closed = under || !shape ? [] : entriesIn(fold.root).filter((entry) => entry.dir && observeText(join(fold.root, entry.name, shape)) !== undefined).map((entry) => `${entry.name}/`).sort();
+  const own = (place: string): boolean => place.startsWith(under) && !closed.some((one) => place.startsWith(one)) && (!shape || !place.endsWith(shape));
+  const mine = new Set(fold.observed.filter((line) => fieldOf(line, 'measure') === 'observed' && own(fieldOf(line, 'scope')))
+    .map((line) => `${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`));
+  const described = describedReceipts();
+  const ran = [...new Set(fold.observed.filter((line) => fieldOf(line, 'measure') !== 'observed'
+    && (cased(fieldOf(line, 'scope')) || /\/(?:no-samples|reproduced)$/.test(fieldOf(line, 'scope')) || described.some((glob) => matches(glob, fieldOf(under ? zoomed(line, under.replace(/\/$/, '')) : line, 'scope'))))
+    && mine.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)))];
+  const ranAt = new Set(ran.map((line) => `${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`));
+  const cones = new Set(fold.observed.filter((line) => fieldOf(line, 'measure') === 'observed' && own(fieldOf(line, 'scope')) && ranAt.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)).map(bytesOnly));
+  const paid = ledgerLines(fold.store, 'judge').filter((line) => fold.paid.some((demand) => fieldOf(demand, 'scope') === fieldOf(line, 'scope')
+    && !(closed.length > 0 && fieldOf(demand, 'needs').split('|').filter(Boolean).length > 0
+      && fieldOf(demand, 'needs').split('|').filter(Boolean).every((need) => closed.some((one) => need.startsWith(one))))));
+  const named = closed.map((place) => {
+    const digest = bytesDigest(fold.store, observeFile(join(fold.root, place, shape)) ?? new Uint8Array());
+    return canonical({ scope: `${sourced(fold.standing)}/${place}${shape}`, role: 'writes', form: 'alphabet', measure: 'digest', value: digest, by: writerFor(fold.standing, 'fold') ?? '', at: `place:${digest}` });
+  });
+  const place = under.replace(/\/$/, '');
+  const lines = [...named, ...[...cones].sort(), ...[...ran].sort(), ...paid].map((line) => (place ? zoomed(line, place) : line));
+  if (!lines.length) {
+    const shipped = (observeText(join(fold.root, under, RECEIPTS)) ?? '').split('\n').filter(isWire);
+    const carried = carriedFrom(fold.store, shipped);
+    if (carried !== undefined && carried.length) return held.set(fold, carried).get(fold)!;
+  }
+  held.set(fold, lines);
+  keepCarried(fold.store, lines);
+  return lines;
+}
+
+export function keepCarried(store: string, lines: readonly string[], from?: string): string {
+  const text = lines.map((line) => `${line}\n`).join('');
+  const digest = createHash('sha256').update(text).digest('hex');
+  const at = storeAt(store, 'cas', 'carried', digest);
+  if (!existsSync(at)) {
+    mkdirSync(dirname(at), { recursive: true });
+    const src = from === undefined ? '' : storeAt(from, 'cas', 'carried', digest);
+    if (src && existsSync(src)) {
+      try {
+        linkSync(src, at);
+        return `sha256:${digest}`;
+      } catch {
+        return `sha256:${digest}`;
+      }
+    }
+    writeFileSync(`${at}.${process.pid}`, text);
+    renameSync(`${at}.${process.pid}`, at);
+  }
+  return `sha256:${digest}`;
+}
+
+/**
+ * What a copy of a place reads back of its receipts: the lines it shipped when they are the whole set, or, when they
+ * name a root at the digest of its bytes, the set the store keeps there; a root the store does not keep is no set, and
+ * the caller refuses rather than read the lines that only name it.
+ */
+export function carriedFrom(store: string, shipped: readonly string[]): readonly string[] | undefined {
+  const named = shipped.find((line) => fieldOf(line, 'scope') === 'receipts' && fieldOf(line, 'measure') === 'digest');
+  if (named === undefined) return shipped;
+  const hex = fieldOf(named, 'at').replace(/^place:(?:sha256:)?/, '');
+  const text = /^[0-9a-f]{64}$/.test(hex) ? observeText(storeAt(store, 'cas', 'carried', hex)) : undefined;
+  return text === undefined ? undefined : text.split('\n').filter(isWire);
+}
+
+export const carriedIn = (store: string): readonly string[] => ((dir) => (existsSync(dir)
+  ? readdirSync(dir).filter((name) => /^[0-9a-f]{64}$/.test(name)).sort().map((name) => join(dir, name)) : []))(storeAt(store, 'cas', 'carried'));

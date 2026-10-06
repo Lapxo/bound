@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A signed line of a place's own lock stands only inside the window its key held at the epoch the line carries: the window topos gives for that epoch, the same one the ledger's authority reads. A window re-signed wider allows what is signed after it and never what was signed before, so an own lock and the ledger never disagree on a line."
+ ],
+ "cases": [
+  {
+   "name": "lane-D, a line signed at 230, while its window closed at 228",
+   "window": "188..228",
+   "own lock": "does not stand",
+   "ledger": "refused",
+   "expected.ok": true
+  },
+  {
+   "name": "lane-D, a line signed at 233, after the window was re-signed to 268 at 232",
+   "window": "188..268",
+   "own lock": "stands",
+   "ledger": "admitted",
+   "expected.ok": true
+  },
+  {
+   "name": "every signed line of every own lock in the tree at epoch 238, judged by the window of its epoch against the window of now",
+   "lines": 378,
+   "judged differently": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a window that could not widen"
+}

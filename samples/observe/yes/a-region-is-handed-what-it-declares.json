@@ -1,0 +1,38 @@
+{
+ "about": [
+  "Each region of a capsule is handed what its line declares and nothing else: the place's lines as its published lock holds them, and for each region a line of the instrument's lock describes, that region's lines and receipts, the capsule's own lock among them. A region no line describes is not handed, so a region that declares it is refused by its capsule: that refusal is every capsule's no.",
+  "A region whose line says it is a receipt, and names what it reads and never what it writes, is asked of every place that uses its capsule, and what it answers are readings at that place, named by the digest of the capsule and of what the region was handed. A region that names what it writes is a reader of the world and is not asked as a receipt."
+ ],
+ "cases": [
+  {
+   "name": "the frame at the nine places that use it",
+   "regions answered at each": 12,
+   "readings": 108,
+   "capsule-carries-no-views/views": "0 at every place",
+   "expected.ok": true
+  },
+  {
+   "name": "the frame's regions that read region/vectors, which no line describes",
+   "refused at each place": "admitted-by-two-worlds · reads-what-it-declares · vectors-per-region",
+   "why": "handed less than it declares, without region/vectors",
+   "expected.ok": true
+  },
+  {
+   "name": "the readers topos-typescript-tree and topos-bound carry, which name what their regions write",
+   "asked as receipts": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "each place read with its own lines first, from the tree's standing and from the place's own",
+   "lines": 216,
+   "different": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "every page the tree's views write, and the published place 88474ebf78be98fa (0.2.0)",
+   "views": "186 over 15 places, 186 the same · 23 of 23 SAME",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the host asked only the regions a view renders, so the frame's fifteen regions were never asked; and it handed every region its capsule declared, an undescribed one as empty, which a capsule cannot tell from a region with nothing in it"
+}

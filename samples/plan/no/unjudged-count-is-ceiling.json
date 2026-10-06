@@ -1,0 +1,6 @@
+{
+  "next": "audit/bound/unjudged-repairs-are-paths.status",
+  "forbiddenNext": [
+    "audit/bound/tree/unjudged.count"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+ "about": [
+  "What a place holds of a store is read by the instrument as store-leaves-inside-a-place. It counts the leaves under every place, or under the place folded, beside that place's own lock under the store's own name. A place holds none."
+ ],
+ "cases": [
+  {
+   "name": "the tree, on a scratch copy",
+   "read": 0,
+   "places": 14,
+   "expected.ok": true
+  },
+  {
+   "name": "a store laid in topos/ by a fold that took it for its root",
+   "read": 2,
+   "under topos/ alone": 2,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a store inside a place counted by nothing"
+}

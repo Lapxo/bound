@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: at epoch 296 observedClaims in a place with no reader returned the lines of its own receipts.bound, and travelled() imported every place's receipts.bound into the store. The owner's audit/wire/ships at 296 ships no receipts and R1 ships @1 only, so a clone reborn from what the place ships would read back nothing: its pages would rest on no reading."
+ ],
+ "cases": [
+  {
+   "name": "the read-back sources at 296",
+   "shipped receipts files read": "every place's and the root's",
+   "store read": "none",
+   "expected.ok": false
+  }
+ ]
+}

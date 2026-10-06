@@ -1,0 +1,22 @@
+{
+ "about": [
+  "A reader region of a capsule a place can run reads where the place's own lock offers it — region/<name> measure=leaves — through the first capsule, pinned before carried, that writes the region, handed the offered leaves it declares it reads, a reader that runs over its place its sources alone. It takes over exactly what a reader line of the tree read: it runs at a place a withdrawn line reached for the same capsule region, and nowhere a standing line still reaches, so nothing is read twice and nothing is read that no line read before."
+ ],
+ "cases": [
+  {
+   "name": "the tree at epoch 268 on a copy, reader/typescript-hazards standing",
+   "capsule readers": 0,
+   "renders": "153, the same as without the change",
+   "expected.ok": true
+  },
+  {
+   "name": "the same with reader/typescript-hazards withdrawn, told",
+   "capsule readers": "topos-typescript-tree/hazards: bf8a5a67 at bound/ obligations/, 9d9b44b8 at topos/ topos-bound/ topos-json/ topos-typescript-tree/, 8c29831e at verify/",
+   "files handed": "81 · 65 · 36 · 6 · 7 · 21 · 5",
+   "rows answered": "579 · 438 · 238 · 40 · 51 · 139 · 33",
+   "seconds per place": 2.5,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a reader handed nothing answered none of seven places"
+}

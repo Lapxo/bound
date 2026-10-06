@@ -1,0 +1,17 @@
+{
+ "about": [
+  "The falsifier: accept took a line into an own lock only when exactly one own lock admitted it, and read admission from the lock's standing, where a withdrawal never stands. A line with the same bytes at many places was admitted nowhere, and so was every withdrawal. Lane A's capsule train — the same four view withdrawals at seven capsule places — read admitted nowhere in a batch of one place as of seven; lane C's three workflow views at verify, a key that covers obligations and verify, previewed as 6 admitted nowhere, and were landed at epoch 259 by a signed in-place replace beside accept."
+ ],
+ "cases": [
+  {
+   "name": "lane A: view/manifest, view/pipeline-test, view/pipeline-tag, view/pipeline-release withdrawn at seven capsule places",
+   "said": "admitted nowhere",
+   "expected.ok": false
+  },
+  {
+   "name": "lane C: verify's three workflow views with their withdrawals, epoch 259",
+   "said": "6 admitted nowhere; landed by a signed in-place replace",
+   "expected.ok": false
+  }
+ ]
+}

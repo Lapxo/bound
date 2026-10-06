@@ -1,0 +1,15 @@
+{
+ "about": [
+  "The falsifier: the store kept every blob it was ever handed. At epoch 239, 6,783 of the 7,775 blobs in .bound/cas/blobs, 36.86 GB, were named by no standing line of the lock, of any other ledger folded as its own, or of any place's own lock: 4,245 were kept folds, 35.93 GB, and the rest view texts, receipts and 58 archives no line pins any more. 53 of the 94 blobs in bound's own store were named by none either."
+ ],
+ "cases": [
+  {
+   "name": "epoch 239, .bound/cas/blobs",
+   "blobs": 7775,
+   "GB": 36.98,
+   "named by a standing line": 992,
+   "named by none but a memo line, or by none": 6783,
+   "expected.ok": false
+  }
+ ]
+}

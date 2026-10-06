@@ -1,0 +1,27 @@
+{
+ "about": [
+  "The family a source is named in is a word of bound's own signed lock, store/source, and it is write: a source the fold vouches, a written leaf a place's receipts name, and a source that leaves by its line are all named there.",
+  "What a published lock keeps out is named by the lock too: the source family, the reader family and publish, never spelled in the instrument.",
+  "A home whose store holds no lock admits no signer: its own lock folds to no signed line, and nothing is refused."
+ ],
+ "cases": [
+  {
+   "name": "bound's own lock read for signed lines only",
+   "stands": {"store/source": "write", "store/vouches": "tree"},
+   "signed lines": 34,
+   "expected.ok": true
+  },
+  {
+   "name": "the published locks, families read from the lock against the families spelled",
+   "same": {"obligations/": 467, "topos/": 392, "topos-json/": 336},
+   "expected.ok": true
+  },
+  {
+   "name": "bound's own lock under a home with no store",
+   "signed lines": 0,
+   "refused": false,
+   "expected.ok": true
+  }
+ ],
+ "red was": "publish spelled the families it keeps out of a published lock, and one of them was the family word the wire is about to drop"
+}

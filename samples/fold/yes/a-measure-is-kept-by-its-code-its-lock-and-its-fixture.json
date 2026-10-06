@@ -1,0 +1,26 @@
+{
+ "about": [
+  "The extension gate over the copy, called twice with the same code, lock and fixture, then once more with one own line told: the second call reads the measure back and the told line moves the key, so the measure runs again. The count agrees in all three."
+ ],
+ "cases": [
+  {
+   "name": "first call, the measure already kept by the cone",
+   "unlike": 0,
+   "ms": 4,
+   "expected.ok": true
+  },
+  {
+   "name": "second call, same code, same lock, same fixture",
+   "unlike": 0,
+   "ms": 4,
+   "expected.ok": true
+  },
+  {
+   "name": "one own line told, the lock's digest moves",
+   "unlike": 0,
+   "ms": 3375,
+   "measured": true,
+   "expected.ok": true
+  }
+ ]
+}

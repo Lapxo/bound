@@ -1,0 +1,24 @@
+{
+ "about": [
+  "A store is laid beside the lock a fold takes for its root, so a place folded as a root keeps one beside its own lock, inside the tree it belongs to. Every leaf a place holds there is counted as store-leaves-inside-a-place, and a place holds none: the tree's own store is the only store, beside the tree."
+ ],
+ "cases": [
+  {
+   "name": "the tree before the Sep 6 store withdrew",
+   "store-leaves-inside-a-place": {"bound/": 402, "obligations/": 0, "every place": 402},
+   "expected.ok": true
+  },
+  {
+   "name": "the tree after the owner withdrew it, 402 lines at epoch 210",
+   "store-leaves-inside-a-place": {"every place": 0},
+   "ms": 4,
+   "expected.ok": true
+  },
+  {
+   "name": "the store's name, read off the tree's own store and never spelled",
+   "name": "the last step of the store's path",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a store folded into bound/ on Sep 6 stayed as 402 leaves of the place, and nothing counted it"
+}

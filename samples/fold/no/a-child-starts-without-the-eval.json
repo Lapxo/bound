@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: at 299 three spawns in lane B's code passed [...process.execArgv] to their child. Lane D found what that does at the capsule host: a comparison driven by node -e rendered a page, each capsule child re-ran the -e script, which asked the capsule again, 30 processes in 7 minutes before they were killed. A pass driven the same way would have started an observer or a measure that re-ran the driver."
+ ],
+ "cases": [
+  {
+   "name": "lane B's spawns at 299",
+   "forwarding process.execArgv whole": 3,
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,23 @@
+{
+ "about": [
+  "The falsifier: two acts constructed and told in memory over the tree after .@332 (bound@332), never landed, each of which moves regions to an alias. With no body of the host naming the line that answers each region before and after, both would land unseen."
+ ],
+ "cases": [
+  {
+   "name": "constructed: dep/topos-github/lines, an early alias, re-signed in place to the grammar capsule 80c7c8fb",
+   "taken over": 2,
+   "regions": "bound/ license · verify/ ignore",
+   "for example": "bound/ license: dep/topos-doc → dep/topos-github/lines · verify/ ignore: dep/topos-github/lines → dep/topos-github",
+   "twice the same": true,
+   "expected.ok": false,
+   "since .@332": "obligations/ bond is no longer taken: obligations pins 7cd4c760 since .@332, and a place's own pin answers before any alias"
+  },
+  {
+   "name": "constructed: topos re-pinned from the grammar capsule to the forge 155cd87d",
+   "taken over": 8,
+   "regions": "topos/ cff, guide-at-zero, license, hero, install, check, pointers: topos/uses/topos-doc → dep/topos-doc · topos/ regions: topos/uses/topos-doc → dep/topos-doc/lines",
+   "twice the same": true,
+   "expected.ok": false
+  }
+ ]
+}

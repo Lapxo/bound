@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: at epoch 296 no reading resolved a place's receipts. The only digest of them was the whole file's (the root's named line per place), so one moved receipt moved that digest with nothing saying which family moved, a line's signer or epoch moved it as much as its claim, and obligations/receipts.bound ended in the line by=verify epoch=292 that attests the set it sits in."
+ ],
+ "cases": [
+  {
+   "name": "obligations/receipts.bound at 296",
+   "lines": 3126,
+   "attest inside": 1,
+   "family readings": 0,
+   "expected.ok": false
+  }
+ ]
+}

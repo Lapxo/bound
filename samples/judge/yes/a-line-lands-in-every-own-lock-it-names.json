@@ -1,0 +1,35 @@
+{
+ "about": [
+  "A line stands in an own lock by its signature — a key the tree admits signed it, inside its window and its coverage of the place — withdrawal or not. `--place <place>`, as many as a batch needs, names the own locks a batch speaks to: each own line lands in every named place that admits it, so the same bytes land at seven places in one act, and a line no named place admits refuses the batch. With no place named, a line lands in the one own lock that admits it, and one two own locks admit is refused, naming --place."
+ ],
+ "cases": [
+  {
+   "name": "a lane-B own line with --place nosuch, on a copy of the tree at epoch 260",
+   "said": "REFUSE·place nothing landed · nosuch is no place of the tree",
+   "expected.ok": true
+  },
+  {
+   "name": "the same line with --place topos-json, which lane-B does not cover",
+   "said": "REFUSE·nowhere: no place of topos-json takes it",
+   "expected.ok": true
+  },
+  {
+   "name": "the same line with --place bound",
+   "acts": "every place · then the root · 0 lines to the ledger · 1 to bound's own lock",
+   "seconds": 26,
+   "expected.ok": true
+  },
+  {
+   "name": "the same batch again",
+   "said": "ONCE",
+   "expected.ok": true
+  },
+  {
+   "name": "its withdrawal, with no place named",
+   "acts": "every place · then the root · 0 lines to the ledger · 1 to bound's own lock",
+   "seconds": 20,
+   "expected.ok": true
+  }
+ ],
+ "red was": "identical lines at seven places admitted nowhere"
+}

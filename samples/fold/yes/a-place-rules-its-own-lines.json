@@ -1,0 +1,32 @@
+{
+ "about": [
+  "A place's own lock rules its own lines: where the tree holds a line under the same scope, role and measure, the tree's line gives way, withdrawn or standing, and never the place's.",
+  "A view a place writes itself leaves the tree's line for every other place: the tree's needs lose the place, and the place's fold reads its own line first.",
+  "A reader a place's own lock names is the reader, and a role it gives a leaf it holds is that leaf's role, whatever the tree says of the same name."
+ ],
+ "cases": [
+  {
+   "name": "prose the tree withdrew and the place speaks",
+   "tree": "prose/en/obligations/what value=withdraw",
+   "own": "obligations/TARGET.bound prose/en/what",
+   "standing": "prose/en/obligations/what, the place's",
+   "expected.ok": true
+  },
+  {
+   "name": "a reader both name",
+   "tree": "reader/json-said needs=obligations/samples/|obligations/vectors/",
+   "own": "obligations/TARGET.bound reader/json-said",
+   "reads": "the place's line",
+   "expected.ok": true
+  },
+  {
+   "name": "a view the tree places at seven places and one place writes itself",
+   "tree": "view/readme-capsule needs=topos/README.md|topos-doc/README.md",
+   "own": "topos-doc/TARGET.bound view/readme-capsule shape=README.md value=hero",
+   "tree after": "view/readme-capsule needs=topos/README.md",
+   "topos-doc reads first": "its own line",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the owner withdrew the tree's lines for obligations after lane C wrote them into obligations' own lock, and the withdrawn tree lines still won the tie: 97 prose lines, 12 of notation and 3 readers were read nowhere"
+}

@@ -1,0 +1,15 @@
+{
+ "about": [
+  "A batch told to a view is split by where its lines stand: a line the ledger admits is folded into the ledger, and one a key signs for the place's own lock is folded into that lock as if its file held it. Nothing is written in either."
+ ],
+ "cases": [
+  {
+   "name": "bound bound/ --as rank <nine view lines for bound's own lock>, on a scratch copy",
+   "said": "TOLD     9 lines folded as if landed · 0 in the ledger · 9 in bound's own lock · the batch lands nothing and no leaf is written",
+   "rank": "495 region summaries, the same rank as the nine lines signed into the file by hand",
+   "file": "bound/TARGET.bound unchanged",
+   "expected.ok": true
+  }
+ ],
+ "red was": "three view lines of obligations nobody could preview"
+}

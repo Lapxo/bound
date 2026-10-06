@@ -1,0 +1,4 @@
+{
+  "prove": "bound accept --policy",
+  "forbiddenProve": ["--key-file", "<pem>", "owner.pem", "key-file"]
+}

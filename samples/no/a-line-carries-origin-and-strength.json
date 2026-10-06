@@ -1,0 +1,7 @@
+{
+ "scope": "a-line-carries-origin-and-strength",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: a fact with no origin"],
+ "cases": [{ "name": "a line with no by and no epoch", "prints": ["by=∅ epoch=∅"], "expected.ok": false }]
+}

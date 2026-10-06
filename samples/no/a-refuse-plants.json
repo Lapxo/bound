@@ -1,0 +1,7 @@
+{
+ "scope": "a-refuse-plants",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: a refuse that continues"],
+ "cases": [{ "name": "landed after a refuse", "prints": ["FACT     signed"], "expected.ok": false }]
+}

@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A release rendered from the fold renders its readings and carries what was signed. The receipts are the readings the published fold renders, then every line another key signed there, the judge's and the second head's, carried from the release before as it was signed. The lock is carried as it was signed when its lines are the ones the fold publishes."
+ ],
+ "cases": [
+  {
+   "name": "obligations' receipts over C's gate clone at 249, cut code",
+   "readings rendered by the receipts view": 3082,
+   "carried": "44 (43 judge, 1 verify)",
+   "lines": 3126,
+   "byte-equal to the folder's own receipts.bound": true,
+   "expected.ok": true
+  },
+  {
+   "name": "the whole release rendered over C's gate clone",
+   "leaves unlike": "1, TARGET.bound: its keys/owner and keys/verify public-key lines are the gate's throwaway keys, the other 484 lines equal without envelope",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations over the laid copy of X",
+   "expected.ok": true,
+   "released digest equals X": "true: sha256:7749ef6481c944164b85ca6e9bc0f69592c99051314dfca38273529b162cae6f, 466 leaves laid and released, 0 named, 8 s, the blob hashed to X before it was unpacked"
+  }
+ ],
+ "red was": "the release's receipts were the tree's published ones, which leave out every line another key signed, and read the tree's leaf, which the cut code had not rendered again; no pinned release, whose receipts end in its judge's takes and verify's attestation, could be rendered again"
+}

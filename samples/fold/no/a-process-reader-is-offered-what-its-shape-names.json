@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: a reader that runs over its place was offered its sources alone, so a lot that moved only a leaf a view writes never reached it. At epoch 277 lane A withdrew three exports from topos and topos/package.json rendered without them; reader/json-vectors, which reads the manifest and dist, was never run again, and audit/tree/exports-resolve kept reading 3 where the count is 0.",
+  "And the fix that offers every leaf of the place is wrong: receipts.bound is a leaf a view writes from what the readers said, so every pass moved the offer it had just read. On a copy at epoch 280, four passes in a row rendered obligations', topos' and verify's receipts again, and json-vectors ran three times each pass."
+ ],
+ "cases": [
+  {
+   "name": "topos after A23, epoch 277",
+   "exports-resolve": "3 read, 0 true",
+   "expected.ok": false
+  },
+  {
+   "name": "every non-foreign leaf offered, four passes on a copy",
+   "receipts rendered again": "every pass",
+   "expected.ok": false
+  }
+ ]
+}

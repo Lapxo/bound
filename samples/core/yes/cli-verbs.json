@@ -1,0 +1,5 @@
+{
+ "scope": "cli/verbs",
+ "want": 3,
+ "kind": "yes"
+}

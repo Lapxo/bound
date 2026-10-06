@@ -1,0 +1,4 @@
+{
+ "about": ["The falsifier: a comparison run with node -e at epoch 289 rendered topos's reference page, whose capsule asks spawned children with the parent's -e code; each child ran the comparison again and asked the capsule again."],
+ "cases": [{"name": "node -e render of topos/ view/reference-capsule, epoch 289", "processes": "30 in 7 minutes, 4 new about every 40 s, killed by hand", "expected.ok": false}]
+}

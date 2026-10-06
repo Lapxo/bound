@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: comments/*/src/** 0..3 is owed at bound: at epoch 280 the design reads judge/rebirth.ts=6, cli/place.ts=4, fold/reach.ts=8, fold/own.ts=12 and six more modules over three, and fold/observed.ts over 500 lines, 565."
+ ],
+ "cases": [
+  {
+   "name": "bound's design at epoch 280",
+   "comments": "rebirth.ts 6 · reach.ts 8 · signed.ts 5 · act.ts 5 · kept.ts 5 · region.ts 4 · observed.ts 7",
+   "lines": "observed.ts 565",
+   "expected.ok": false
+  }
+ ]
+}

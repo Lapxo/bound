@@ -1,0 +1,11 @@
+{
+ "about": [
+  "The falsifier: an example that does not run, one that prints something other than what its digest says, or one that reaches a name the offers do not list. Any of the three makes a page claim something the package does not do."
+ ],
+ "cases": [
+  {
+   "name": "an example that drifts from its page",
+   "expected.ok": false
+  }
+ ]
+}

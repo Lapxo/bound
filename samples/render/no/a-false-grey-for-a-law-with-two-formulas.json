@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a grey for a law the notation renders. obligations' programs printed GREY law/D11-the-obligatory/formula, owed: a law with no formula is left out of the notation, while law/D11-the-obligatory/floor and law/D11-the-obligatory/ceiling, form=formula, render in README.md, docs/paper.md and docs/reference.md."
+ ],
+ "cases": [
+  {
+   "name": "obligations/ --as programs at epoch 229",
+   "grey": 1,
+   "line": "GREY law/D11-the-obligatory/formula",
+   "expected.ok": false
+  }
+ ]
+}

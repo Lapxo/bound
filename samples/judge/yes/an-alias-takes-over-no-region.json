@@ -1,0 +1,10 @@
+{
+ "about": [
+  "An act that moves an alias or a pin, or signs the ceiling, runs gate/aliases after the check: lane D's takenOver over every place's fold, the lock before against the lock with the batch told. None taken over lands audit/host/alias-takes-no-region 0..0 in the gate's ledger with the act, which every fold reads back as the instrument's own reading; a ceiling the same act's gate reads is not inert."
+ ],
+ "cases": [
+  { "name": "dep/topos-doc/states 7cd4c760 appended last, on a copy warmed by one pass", "gate/aliases": "green in 7005 ms beside gate/check 21155 ms", "reading": "audit/host/alias-takes-no-region 0..0 landed in the gate's ledger", "act": "46 s", "expected.ok": true },
+  { "name": "the owner's ceiling as a root line in a batch whose act runs the gate", "inert": "0 (1 without the gate)", "expected.ok": true }
+ ],
+ "red was": "an alias that could take a region unseen"
+}

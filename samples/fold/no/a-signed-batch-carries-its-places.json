@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: at 315 a signed batch carried no place, and the cycle's accept applied its --place flags to every batch's own lines. A lane covering several places, like lane C over verify, obligations and topos-doc, would land a line meant for one of them in every named place its key covers. And rebirth.sh had no verb to name a release by bound's digest, so it would import fold/laid.ts directly."
+ ],
+ "cases": [
+  {
+   "name": "a verify-only line in a cycle that also names obligations and topos-doc, at 315",
+   "lands at": "verify, obligations and topos-doc",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,31 @@
+{
+ "about": [
+  "An act that moves the instrument's code — a line whose needs name a module the instrument runs — or a line of an own lock holds every place, because every place's key holds both; it settles what it moved before it ends, so the next act folds only the places its own lines touch."
+ ],
+ "cases": [
+  {
+   "name": "B36 on a copy of the tree, whose takes need bound/src/fold/reach.ts, bound/src/cli/verb.ts and bound/src/land",
+   "acts": "every place · then the root",
+   "seconds": 46,
+   "gate/check": "23.1 s",
+   "expected.ok": true
+  },
+  {
+   "name": "a line-only lot after it, one line at bound/src/fold",
+   "acts": "bound/ · then the root",
+   "seconds": 18,
+   "gate/check": "7.0 s",
+   "outside": "none",
+   "expected.ok": true
+  },
+  {
+   "name": "a second line-only lot after that",
+   "acts": "bound/ · then the root",
+   "seconds": 17,
+   "gate/check": "6.9 s",
+   "outside": "none",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a line lot paid a minute for places a code act left unsettled"
+}

@@ -1,0 +1,13 @@
+{
+ "about": ["A published place observes the receipts its release carries: the set the fold keeps, B's receiptsOf, under the digest its root line names, and never the page it ships. A release renders its pages over that place, and its clone reads the same set back from its store, so a page renders the same in the tree and in the clone at whatever resolution the receipts view names."],
+ "cases": [
+  {"name": "obligations, the page as it stands (@8)", "published receipts": "3127 lines, the same as the body before", "observed by the published place": "3082 of 3082", "expected.ok": true},
+  {"name": "obligations, the page at @0|@1", "published receipts": "3127 lines, the same as at @8", "observed by the published place": "3082 of 3082", "expected.ok": true},
+  {"name": "verify, the page as it stands (@8)", "published receipts": "29 lines, the same as the body before", "observed by the published place": "19 of 19", "expected.ok": true},
+  {"name": "verify, the page at @0|@1", "published receipts": "29 lines, the same as at @8", "observed by the published place": "19 of 19", "expected.ok": true},
+  {"name": "the rebirth gate with view/receipts at receipts@0|receipts@1, the release built by this body", "obligations": "receipts 18 lines the same twice, 24 of 24 coordinates SAME, verify agrees in the clone", "verify": "receipts 9 lines the same twice, 11 of 11 SAME, verify agrees in the clone", "expected.ok": true},
+  {"name": "every page the tree's views write", "views": "174 of 174 the same", "expected.ok": true},
+  {"name": "the fixture's views, as cli/measure.ts reads them", "views": "24 of 24 SAME with the body before and after", "moved": 0, "expected.ok": true}
+ ],
+ "red was": "a published place read its readings from the page it ships: once that page was rendered at @0 and @1, the release rendered its pages with none of them while its clone read the whole set, and the rebirth gates refused the owner's view re-sign"
+}

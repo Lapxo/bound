@@ -1,0 +1,8 @@
+{
+ "about": ["The falsifier: a published place took what it observed from the receipts page it ships. When the owner re-signed view/receipts to receipts@0|receipts@1 after epoch 310, the act rendered every place's receipts.bound at @0 and @1 before its gates. The published place then observed none of its readings, and the release rendered its pages without them. Each clone read the whole set from its store and rendered them with it, so the rebirth gates were red and nothing landed."],
+ "cases": [
+  {"name": "the owner's accept of view/receipts at receipts@0|receipts@1 with keys/lane-D 188..380, after epoch 310", "gates": "gate/rebirth/obligations red: 10 of 24 coordinates the views write read SAME; gate/rebirth/verify red: 10 of 11", "landed": "nothing", "expected.ok": false},
+  {"name": "obligations, the page at @0|@1, the body before", "published receipts": "18 lines", "observed by the published place": "0 of 3082", "expected.ok": false},
+  {"name": "verify, the page at @0|@1, the body before", "published receipts": "9 lines", "observed by the published place": "0 of 19", "expected.ok": false}
+ ]
+}

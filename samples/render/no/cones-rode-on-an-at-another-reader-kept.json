@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: cones kept by bytes alone. 0.2.0's receipts.bound holds 769 cones, and 527 of them have no reading of their own reader at their bytes."
+ ],
+ "cases": [
+  {
+   "name": "0.2.0 rendered with cut 2 alone",
+   "fixture views SAME": "22 of 23",
+   "moved": "receipts.bound",
+   "expected.ok": false
+  },
+  {
+   "name": "0.2.0 rendered with both cuts",
+   "receipts": "1937 → 1390 lines, 382,022 B, sha256 832147575b870c81dccec0eaf3d63cbb237b5addd9e17e9f16d016f6777494b0",
+   "expected.ok": false
+  }
+ ]
+}

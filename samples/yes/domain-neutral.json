@@ -1,0 +1,7 @@
+{
+ "scope": "domain-neutral",
+ "want": 1,
+ "kind": "yes",
+ "about": ["the readers pass on a sample that is only lines, not code"],
+ "cases": [{ "name": "alice bob carol on one cell", "prints": ["scope=cli/exit/closed"], "expected.ok": true }]
+}

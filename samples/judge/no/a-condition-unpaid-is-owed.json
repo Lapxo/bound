@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a demand whose condition had no FACT refused its whole batch, so under the one act no demand could stand owed from its birth."
+ ],
+ "cases": [
+  {
+   "name": "lane C at 228: verify/gate/rebirth, condition gate/rebirth/verify",
+   "said": "REFUSE take verify/gate/rebirth · it rests on gate/rebirth/verify, which has no FACT · a batch lands whole or not at all",
+   "expected.ok": false
+  }
+ ]
+}

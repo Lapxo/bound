@@ -1,0 +1,33 @@
+{
+  "next": "audit/bound/known-cells-are-not-cards.status",
+  "forbiddenNext": [
+    "dep/bound/src/cli/porcelain-scan.ts.id"
+  ],
+  "cells": [
+    {
+      "scope": "dep/bound/src/cli/porcelain-scan.ts",
+      "measure": "id",
+      "role": "writes",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no forbidden token" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/cli/porcelain-scan.ts"]
+    },
+    {
+      "scope": "audit/bound/known-cells-are-not-cards",
+      "measure": "status",
+      "role": "demands",
+      "shape": "alphabet",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/scan/task-pack.ts"],
+      "extra": {
+        "shape": "alphabet",
+        "in": "ResidualCell",
+        "out": "TaskView",
+        "vectors": "bound/samples/plan/no/known-cell-as-card.json"
+      }
+    }
+  ]
+}

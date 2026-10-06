@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a release laid from bytes the host never hashed. With the host as it stood at epoch 228, topos's blob (192a5138) stored under obligations 0.3.0's name was unpacked, copied to the place and marked with the name it was stored by."
+ ],
+ "cases": [
+  {
+   "name": "obligations 0.3.0's name over topos's bytes",
+   "laid": 1,
+   "place holds": "@lapxo/topos@0.1.0",
+   "mark": "ba4149b7",
+   "expected.ok": false
+  }
+ ]
+}

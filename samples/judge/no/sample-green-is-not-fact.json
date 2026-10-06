@@ -1,0 +1,10 @@
+{
+  "scope": "audit/plan/bound-mcp/tool/plan",
+  "measure": "status",
+  "produced": { "kind": "enumerated", "values": ["green"] },
+  "by": "freeze",
+  "at": "bound/samples/plan/no/present.bound",
+  "restsOn": [],
+  "facts": [],
+  "want": false
+}

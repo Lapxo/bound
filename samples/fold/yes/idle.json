@@ -1,0 +1,14 @@
+{
+ "about": [
+  "A place's own lock is part of its bytes: TARGET.bound and the ledger lines that stand in it. receipts@1 measure=bytes covers them. A line that lands in the place opens it, a withdraw included: the descent of the act includes the place, and the fold reads the lock it just gained."
+ ],
+ "cases": [
+  {
+   "name": "the withdraw of view/manifest in topos-github's own lock at 375",
+   "opens": "topos-github",
+   "published": "one view/manifest",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a fold over a closed region"
+}

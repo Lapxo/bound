@@ -1,0 +1,11 @@
+{
+ "about": [
+  "the instrument own processes are regions of its cone: editing measure or observe re-measures"
+ ],
+ "cases": [
+  {
+   "name": "processes-outside-the-cone",
+   "expected.ok": true
+  }
+ ]
+}

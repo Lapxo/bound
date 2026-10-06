@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: lane B's own lot at 299 read a place's files line by shape === 'package.json', a manifest's name spelled in fold/own.ts, and bound's design has read it as a red since: identifier/bound/src/** own.ts=package.json:77 and literal/bound/src/** own.ts=package:77|package.json:77."
+ ],
+ "cases": [
+  {
+   "name": "bound's design at 305",
+   "identifier/bound/src/**": "fold/own.ts=package.json:77",
+   "literal/bound/src/**": "fold/own.ts=package:77|package.json:77",
+   "expected.ok": false
+  }
+ ]
+}

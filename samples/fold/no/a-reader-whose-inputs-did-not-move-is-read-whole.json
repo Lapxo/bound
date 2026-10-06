@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: every act read every reader's observation back, offer by offer, though nothing it reads had moved. After B39 on the tree at epoch 266, with 0 readers run: `OBSERVE 0 run · 2822 read by key · 14958 ms` — 39 shard files of 8.3 MB, the observations by key and the lock, read from the external disk on every pass, check and accept; 12 to 26 s of every line-only lot."
+ ],
+ "cases": [
+  {
+   "name": "observation on the tree after B39, nothing moved",
+   "offers read back": 2822,
+   "run": 0,
+   "seconds": "12 to 26",
+   "expected.ok": false
+  }
+ ]
+}

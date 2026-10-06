@@ -1,0 +1,21 @@
+{
+ "about": [
+  "A place's key holds the own locks as the host hands them: its own lock, as its signed lines and as its target text, told lines and all; of every other own lock, the lines publish/takes carries into every place; and the instrument's own lock, which says how the instrument renders every place and which capsules answer it, but for its gates. The root, where the places join, holds every own lock whole. A page an own lock moves is never kept by its key, and a line of one place's own lock moves that place and the root."
+ ],
+ "cases": [
+  {
+   "name": "region/laws measure=lines and region/cases withdrawn from bound's own lock, on a copy of the tree at epoch 256",
+   "places whose pages moved": 12,
+   "keys moved": 14,
+   "pages moved under a kept key": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "docs/why and law/theorem/**/derivable withdrawn from obligations' own lock",
+   "places whose pages moved": 0,
+   "keys moved": "obligations",
+   "expected.ok": true
+  }
+ ],
+ "red was": "twelve places moved by an own lock kept their keys"
+}

@@ -1,0 +1,19 @@
+{
+ "scope": "the-stranger",
+ "want": 0,
+ "kind": "no",
+ "about": [
+  "The falsifier: a fresh repo with no ledger runs the ordinary pass, prints RECEIPTS with a millisecond count, OPEN of the root, and RENDERED, and never names NEEDS, uses/, or RENDER README.md."
+ ],
+ "cases": [
+  {
+   "name": "a published lock, a README, no ledger, folded as a tree that already has receipts",
+   "prints": [
+    "RECEIPTS 0 read · 1 opened ·",
+    "OPEN     .",
+    "RENDERED README.md"
+   ],
+   "expected.ok": false
+  }
+ ]
+}

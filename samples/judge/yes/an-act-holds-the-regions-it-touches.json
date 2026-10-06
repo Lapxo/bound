@@ -1,0 +1,19 @@
+{
+ "about": [
+  "An act holds the regions its batch touches and not the tree: accept signs, names the places its lines own before it takes any lock (ACTS), takes them in their order, and takes the root, where the places are joined, only when it renders the join, holding it to the end. A line no place owns touches every place. Acts on places no other act touches run at once and meet only at the join; an act on the whole tree holds the store's lock and every region; a process an act runs waits on none of what its parent holds."
+ ],
+ "cases": [
+  {
+   "name": "three processes on one store: A on bound and B on topos-json, 3 s each on the place and 1 s at the root, and T on the tree, started 0.5 s after",
+   "timeline": "A and B hold their places at once; B holds the root at 1.6 s and lets go at 2.6 s; A waits for it and holds it from 2.7 s to 3.7 s; T waits for bound and holds the tree from 3.7 s to 4.7 s",
+   "together": "5 s for A and B, not 8",
+   "expected.ok": true
+  },
+  {
+   "name": "a ceiling on bound/src/fold accepted",
+   "acts": "ACTS     bound/ · then the root, where the places join · 1 lines · before the lock",
+   "expected.ok": true
+  }
+ ],
+ "red was": "one lock for every act"
+}

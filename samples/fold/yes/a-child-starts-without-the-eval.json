@@ -1,0 +1,19 @@
+{
+ "about": [
+  "A child the instrument starts gets the parent's module-loading flags and never an eval: the measured copy's migrate (cli/measure.ts), the extension's measure (fold/extension.ts) and the observer that runs behind a fold (fold/observed.ts) take host/capsule.ts's childFlags, which drops -e, --eval, -p, --print and --input-type with the code they carry, as the capsule host and the rebirth already do."
+ ],
+ "cases": [
+  {
+   "name": "the spawns of lane B's code after this lot",
+   "forwarding process.execArgv whole": 0,
+   "through childFlags": 3,
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy at 299",
+   "extension": "green in 3.0 s, its measure child started through childFlags",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a child that re-ran the parent's eval"
+}

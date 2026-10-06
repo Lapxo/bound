@@ -1,0 +1,17 @@
+{
+ "scope": "page-quiet",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "A page is a function of its cone. If the render equals the file, the pass counts SAME and does not write."
+ ],
+ "cases": [
+  {
+   "name": "same bytes are not rewritten",
+   "prints": [
+    "SAME"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

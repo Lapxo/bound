@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: after the owner withdrew audit/wire/regions at epoch 268, and the forge lot's re-sign of it at 269 came in retracted at the retired at, the branch of viewsOf that read the list read nothing: 0 of the 24 lines of that scope stand. Left in, a list signed again at a fresh at would have brought back a hand-kept whitelist that refuses regions a capsule renders."
+ ],
+ "cases": [
+  {
+   "name": "audit/wire/regions at epoch 270",
+   "lines standing": 0,
+   "withdraws": 24,
+   "expected.ok": false
+  }
+ ]
+}

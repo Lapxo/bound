@@ -1,0 +1,5 @@
+{
+  "needs": ["a.ts", "b.ts"],
+  "present": ["a.ts"],
+  "allowed": ["a.ts", "b.ts"]
+}

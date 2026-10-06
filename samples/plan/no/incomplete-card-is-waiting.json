@@ -1,0 +1,51 @@
+{
+  "next": "audit/bound/card-is-answerable-or-waiting.status",
+  "forbiddenNext": [
+    "audit/bound/shapeless-demand.status",
+    "audit/bound/empty-pack.status"
+  ],
+  "waiting": [
+    "audit/bound/shapeless-demand.status · WAITING·incomplete · shape",
+    "audit/bound/empty-pack.status · WAITING·incomplete · vectors"
+  ],
+  "cells": [
+    {
+      "scope": "audit/bound/shapeless-demand",
+      "measure": "status",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/scan/task-pack.ts"]
+    },
+    {
+      "scope": "audit/bound/empty-pack",
+      "measure": "status",
+      "role": "demands",
+      "shape": "alphabet",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/scan/task-pack.ts"]
+    },
+    {
+      "scope": "audit/bound/card-is-answerable-or-waiting",
+      "measure": "status",
+      "role": "demands",
+      "shape": "alphabet",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": [
+        "bound/src/scan/task-pack.ts",
+        "bound-mcp/src/tools/plan.ts"
+      ],
+      "extra": {
+        "shape": "alphabet",
+        "in": "CardSignature",
+        "out": "WAITING·incomplete|TaskView",
+        "vectors": "bound/samples/plan/no/incomplete-card-is-waiting.json"
+      }
+    }
+  ]
+}

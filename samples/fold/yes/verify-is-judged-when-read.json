@@ -1,0 +1,20 @@
+{
+ "about": [
+  "The second head is judged when read. When its latest word rests on the lock it was given, that word stands. When it rests on another lock, the head bound's own lock names (head/second) is asked now, over the ledger as it stands, with no key: what it says is read, never kept, and no attestation from the lock before is ever rendered as this one's.",
+  "A head that never spoke, or whose key the lock does not admit, is read as it is: none, or grey."
+ ],
+ "cases": [
+  {
+   "name": "the tree, asked live with no key",
+   "said": "VERIFY   agrees · 2539 lines stand here · 2539 in the render · 0 missing · 0 extra · epoch 201 · not attested: no --key-file",
+   "verdict": "agrees",
+   "expected.ok": true
+  },
+  {
+   "name": "the published place 0.2.0 inside its measure, where verify never spoke",
+   "verdict": "none",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the second head's word was read from the lock before its own, so at every take each verify badge read stale"
+}

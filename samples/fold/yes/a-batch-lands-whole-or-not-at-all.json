@@ -1,0 +1,22 @@
+{
+ "about": [
+  "A batch is judged before anything of it lands. The pass before it takes the batch, signed as accept will sign it, and renders the tree with its lines in; accept folds the same signed lines over that tree, judges every take and runs the gates once on that fold, and lands only when all of it holds.",
+  "A batch refused leaves nothing of itself: no line, no take marked open. What the instrument keeps of its own folds while judging is its memory, not the batch."
+ ],
+ "cases": [
+  {
+   "name": "a batch whose take and gates are green, in a scratch copy of the tree",
+   "gates": "gate/extension green (2271 ms) · gate/check green (10963 ms)",
+   "take": "FACT, 11 sources moved, build green",
+   "landed": "whole, at the next epoch",
+   "expected.ok": true
+  },
+  {
+   "name": "a batch that meets a leaf the pass did not render",
+   "gates": "gate/check red: DIFFERS topos-frame/README.md",
+   "landed": "nothing: no line of the batch, no take marked open",
+   "expected.ok": true
+  }
+ ],
+ "red was": "gates read the tree between two states, and a refused take left its batch's lines landed and its take open"
+}

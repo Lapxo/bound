@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A capsule's answer is kept by the digest of the capsule and of the request it answers, a refusal as much as a fact, so a request asked again is read back and never run twice. A run that answered nothing is not kept: it is named, with the error the capsule's process printed, and asked again the next time.",
+  "A region a capsule refused or never answered is named and asked of the next capsule that renders it; a capsule that fails never stands for a region with nothing to show."
+ ],
+ "cases": [
+  {
+   "name": "topos-github's regions blob while its alias named dist/index.js, before epoch 202",
+   "said": "REFUSE capsule d8061c5387d9 · verify/pipeline-tag · no answer · Error [ERR_MODULE_NOT_FOUND]: Cannot find module …/dist/index.js",
+   "kept": false,
+   "expected.ok": true
+  },
+  {
+   "name": "the frame's three regions refused at nine places, asked a second time",
+   "run": 0,
+   "read back": 27,
+   "expected.ok": true
+  },
+  {
+   "name": "every page the tree's views write, and the published place 88474ebf78be98fa (0.2.0)",
+   "views": "186 over 15 places, 186 the same · 23 of 23 SAME",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a capsule whose process answered nothing was taken for a region with nothing to show: the page was written empty, nothing was said, and the capsules that could have rendered it were never asked"
+}

@@ -1,0 +1,28 @@
+{
+ "about": [
+  "The second head rests on the lines the lock's signers signed, in whatever ledger each landed and in whatever order: an unsigned line in a ledger is no part of what it attests.",
+  "Its word is read against the lock alone, never against what a place's own lock says for the tree."
+ ],
+ "cases": [
+  {
+   "name": "an owner ledger that also holds unsigned target lines, beside two lane ledgers",
+   "ledgers": {
+    "owner": {
+     "signed": 3906,
+     "unsigned": 13
+    },
+    "lane-A": {
+     "signed": 60,
+     "unsigned": 0
+    },
+    "lane-B": {
+     "signed": 3,
+     "unsigned": 0
+    }
+   },
+   "restsOn": "sha256 of the sorted set of the 3969 signed lines",
+   "expected.ok": true
+  }
+ ],
+ "red was": "verify began to rest on the signed lines of every signer's ledger, and bound still digested every line of the owner's, so a fresh attestation read stale"
+}

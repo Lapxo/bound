@@ -1,0 +1,15 @@
+{
+ "about": [
+  "A line is read by the place its scope's first step names, or the one place its needs lie in but bound; by every place when an own lock speaks it, when it is the published place bound is measured over, when publish/takes carries it into every place, when it is a view, or when its needs are bound's own modules; by the one place a later step of its scope names; and otherwise by the root alone, where the places join. A batch of lines only the root reads touches no place: the act holds the root, and no place's key moves."
+ ],
+ "cases": [
+  {
+   "name": "every place's written views rendered without the lines only the root reads, against the whole tree, on a copy at epoch 264",
+   "compared": 153,
+   "same": 153,
+   "lines only the root reads": 514,
+   "expected.ok": true
+  }
+ ],
+ "red was": "514 root lines in every place's key"
+}

@@ -1,0 +1,20 @@
+{
+ "about": [
+  "The falsifier: the fold read the at a line answers for as part of what it claims, so two readers of one field at two ats were two claims no order compares. spec/vectors/fold.txt block 1, 0..320 at a:1 and 0..255 at b:1 on order/ref, left both lines standing and named a fork, where the meet is 0..255 alone. The same held for the open end signed twice by one source, the commutative pair on tag/slug and the two readers of pipe/name: four forks the spec names as none, and four scopes on which bound and the second head disagreed."
+ ],
+ "cases": [
+  {
+   "name": "spec block 1, either order of arrival",
+   "standing": ["0..320", "0..255"],
+   "forks": 1,
+   "expected.ok": false
+  },
+  {
+   "name": "the whole of spec/vectors/fold.txt, bound beside verify",
+   "forked scopes": 13,
+   "verify": 9,
+   "scopes that differ": ["order/ref", "order/seq", "tag/slug", "pipe/name"],
+   "expected.ok": false
+  }
+ ]
+}

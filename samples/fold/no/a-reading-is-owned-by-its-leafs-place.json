@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a reading was common to every place unless it was the index line of a leaf, so 16,272 of 17,956 readings of the tree were in every place's key. On a copy of the tree at epoch 256, the lot after B36 — one line at bound/src/fold — found every other place unsettled, because the readers had read bound/TARGET.bound again after B36 landed a line in it, and could settle none of them: OUTSIDE for obligations, topos-bound, topos-contract, topos-doc, topos-frame, topos-github, topos-json, topos-laws and the rest."
+ ],
+ "cases": [
+  {
+   "name": "one line at bound/src/fold after B36 landed an own-lock line, reach.ts at epoch 253",
+   "acts": "bound/ · then the root",
+   "outside": "every other place",
+   "expected.ok": false
+  }
+ ]
+}

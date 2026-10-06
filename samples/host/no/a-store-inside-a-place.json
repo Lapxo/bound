@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a store kept inside a place as its leaves. bound/.bound held 402 files from Sep 6 (active, gen/, memo/), left by a fold that took bound/ for its root; the laws reader walked them as claim files, since *.bound named the directory, and nothing ever asked that they leave."
+ ],
+ "cases": [
+  {
+   "name": "bound/.bound, a store inside bound/",
+   "leaves": 402,
+   "read as claim files by": "reader/bound-laws",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,32 @@
+{
+ "about": [
+  "A view reads its regions, and a region is read once for a fold however many views ask it: the place's lines are taken once, each region of it is handed once, and what a capsule answered for what a region was handed is read back and never asked again. A view whose regions read what they read before renders what it rendered before, and a pass with nothing changed reads every fold and every page back."
+ ],
+ "cases": [
+  {
+   "name": "obligations folded again, 24 views",
+   "regions asked": 44,
+   "regions built": "44 before, 3: once for each fold the views are rendered from",
+   "cpu": "1031 to 1172 ms before, 17 to 25 ms",
+   "expected.ok": true
+  },
+  {
+   "name": "topos-node folded again, 12 views",
+   "regions asked": 20,
+   "regions built": "20 before, 3",
+   "cpu": "318 to 354 ms before, 25 to 29 ms",
+   "expected.ok": true
+  },
+  {
+   "name": "bound/ passed twice with nothing changed",
+   "second pass": "7.4 s against 64.7 s: 2 folds read back by key, 0 folded, 0 readers run, 3 renders the same",
+   "expected.ok": true
+  },
+  {
+   "name": "every page the tree's views write, and the published place 88474ebf78be98fa (0.2.0)",
+   "views": "188 over 15 places, 188 the same · 23 of 23 SAME",
+   "expected.ok": true
+  }
+ ],
+ "red was": "each view handed its capsules the place again: the place's lines and every region they read were built once to ask the capsules for all the views and once more for each view that read the answers"
+}

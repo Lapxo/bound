@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 202" width="640" height="202" role="img" aria-label="the line cites/two-sided-constraints, 7 fields">
+<style>
+text{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#59636e}.field{fill:#2da44e;font-weight:600}
+@media (prefers-color-scheme:dark){text{fill:#9198a1}}
+</style>
+<text class="field" x="104" y="30" text-anchor="end">scope</text>
+<text x="116" y="30">cites/two-sided-constraints</text>
+<text class="field" x="104" y="56" text-anchor="end">role</text>
+<text x="116" y="56">writes</text>
+<text class="field" x="104" y="82" text-anchor="end">form</text>
+<text x="116" y="82">alphabet</text>
+<text class="field" x="104" y="108" text-anchor="end">measure</text>
+<text x="116" y="108">doi</text>
+<text class="field" x="104" y="134" text-anchor="end">value</text>
+<text x="116" y="134">10.5281/zenodo.21858428</text>
+<text class="field" x="104" y="160" text-anchor="end">at</text>
+<text x="116" y="160">policy:bound/010</text>
+<text class="field" x="104" y="186" text-anchor="end">by</text>
+<text x="116" y="186">lane-B</text>
+</svg>

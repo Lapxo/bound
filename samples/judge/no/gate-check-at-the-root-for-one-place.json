@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: gate/check at . for one place. The check names the descent, and a lines-only act in one place does not render the whole tree."
+ ],
+ "cases": [
+  {
+   "name": "gate/check at . for one place",
+   "at": ".",
+   "expected.ok": false
+  }
+ ]
+}

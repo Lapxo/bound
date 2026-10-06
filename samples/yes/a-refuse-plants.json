@@ -1,0 +1,17 @@
+{
+ "scope": "a-refuse-plants",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "A REFUSE prints its line and stops. A drafted batch with a signer and no sig is refused."
+ ],
+ "cases": [
+  {
+   "name": "a bare line names a signer it was not signed with",
+   "prints": [
+    "REFUSE·bare"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

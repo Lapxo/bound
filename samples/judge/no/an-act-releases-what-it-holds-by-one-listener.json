@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: an act added one listener on its process's exit for every lock it took. B35's accept at epoch 253 held the store and every region under its wrapper, and node printed MaxListenersExceededWarning at the eleventh; on a copy of the tree, one act on the whole tree took 16 locks and added 16 exit listeners."
+ ],
+ "cases": [
+  {
+   "name": "one act on the whole tree of 14 places, act.ts at epoch 253",
+   "locks": 16,
+   "exit listeners added": 16,
+   "warned": "MaxListenersExceededWarning: 11 exit listeners added to [process]",
+   "expected.ok": false
+  }
+ ]
+}

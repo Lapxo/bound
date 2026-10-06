@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: the first act to run the clone gates for real took 348 s at epoch 278 — gates 333.7 s: extension 19.8, check 105.9, rebirth/obligations 119.8, rebirth/verify 86.1 — while the rebirth inside the clone took about 13 s and 6.5 s. Each gate folded its place again after the check had folded it with the same lines and readings, and said nothing of where its time went. The walk of the tree named a toolchain's folders to skip them: identifier/bound/src/** read judge/rebirth.ts=node_modules:88."
+ ],
+ "cases": [
+  {
+   "name": "the owner's act at epoch 278",
+   "seconds": 348,
+   "rebirth/obligations": 119.8,
+   "rebirth/verify": 86.1,
+   "expected.ok": false
+  },
+  {
+   "name": "judge/rebirth.ts at epoch 276",
+   "identifier": "node_modules:88",
+   "expected.ok": false
+  }
+ ]
+}

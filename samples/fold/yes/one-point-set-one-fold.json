@@ -1,0 +1,21 @@
+{
+ "about": [
+  "The store takes passes that run at once. A point set is kept once, by the first to keep it: a second fold of the same points is read back as the first, and lands no head of its own.",
+  "A file named by the digest of its bytes lands whole, once, whoever lands it: it is written aside and renamed into place, so a second landing changes nothing and no reader meets half of it."
+ ],
+ "cases": [
+  {
+   "name": "one point set kept twice, with different timings in its bytes",
+   "kept": "the first fold",
+   "fork": false,
+   "expected.ok": true
+  },
+  {
+   "name": "one blob landed twice",
+   "error": false,
+   "bytes": "one whole file",
+   "expected.ok": true
+  }
+ ],
+ "red was": "two lanes' passes kept one point set at once and every pass refused on the fork; a blob landed twice crashed a pass"
+}

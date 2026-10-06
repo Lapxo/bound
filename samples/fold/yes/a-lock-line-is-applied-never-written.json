@@ -1,0 +1,20 @@
+{
+ "about": [
+  "What derives lands by apply: a launcher emits a batch and a key signs it; nobody writes a lock. Every line of bound's own lock stands because a key the tree admits signed it there, and a line that none signed is counted as written in, whatever wrote it.",
+  "The fold of a place's own lock is the one it was: the same verification decides both what stands and what was written in."
+ ],
+ "cases": [
+  {
+   "name": "bound's own lock, the four runner/* lines re-signed with lane-B at their digests",
+   "own-lines-written-in": 0,
+   "signed lines standing": 43,
+   "expected.ok": true
+  },
+  {
+   "name": "the own locks of bound, topos-doc and obligations, folded by the old and the new code",
+   "same": {"bound": 43, "topos-doc": 19, "obligations": "0 signed, 156 in all"},
+   "expected.ok": true
+  }
+ ],
+ "red was": "a launcher wrote bound's runner lines into its lock in place, unsigned, and they stood nowhere"
+}

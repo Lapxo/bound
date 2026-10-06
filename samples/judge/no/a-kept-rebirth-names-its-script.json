@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a green rebirth kept by what the place publishes alone. Its key was the place, the instrument, the gate's arguments, the lock and the receipts, and not the bytes of the script that ran it. So an edit to obligations/rebirth.sh, such as making it read LOCK and RECEIPTS, left the green kept before the edit answering for the script after it."
+ ],
+ "cases": [
+  {
+   "name": "obligations/rebirth.sh edited to read LOCK and RECEIPTS",
+   "kept": "a green kept before the edit answered for the script after it, over the same lock and receipts: nothing in its key had moved",
+   "expected.ok": false
+  }
+ ]
+}

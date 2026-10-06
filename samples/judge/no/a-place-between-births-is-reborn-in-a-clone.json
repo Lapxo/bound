@@ -1,0 +1,17 @@
+{
+ "about": [
+  "The falsifier: between births a published place was reborn only by a script beside the instrument, obligations/rebirth.sh gate, and a place without one had no gate at all. The script took 65 s over obligations at epoch 271, and 205 s at 255; verify, a published place with a release of its own, had no rebirth gate while it waited for one."
+ ],
+ "cases": [
+  {
+   "name": "obligations/rebirth.sh gate over the tree, epoch 271",
+   "seconds": 65,
+   "expected.ok": false
+  },
+  {
+   "name": "verify between births",
+   "gate": "none",
+   "expected.ok": false
+  }
+ ]
+}

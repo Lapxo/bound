@@ -1,0 +1,40 @@
+{
+ "about": [
+  "Five examples a reader runs. Each imports only what the offers list, prints what it finds, and ends with one sentence of why.",
+  "Every fold runs all five and takes the digest of what each printed: an example that stops running, or that prints something else, is red by its own name.",
+  "The example is its own case. There is no file of expected numbers beside it \u2014 what it printed is the case, and its digest is here."
+ ],
+ "cases": [
+  {
+   "name": "five examples, their output digests",
+   "examples": [
+    {
+     "name": "price",
+     "digest": "e991e5dfab5b",
+     "lines": 4
+    },
+    {
+     "name": "thermometer",
+     "digest": "a67c039a3658",
+     "lines": 8
+    },
+    {
+     "name": "withdrawal",
+     "digest": "6688e5390586",
+     "lines": 4
+    },
+    {
+     "name": "in-phase",
+     "digest": "d3298a473981",
+     "lines": 4
+    },
+    {
+     "name": "signature",
+     "digest": "284a3454abb7",
+     "lines": 7
+    }
+   ],
+   "expect": true
+  }
+ ]
+}

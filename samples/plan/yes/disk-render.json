@@ -1,0 +1,6 @@
+{
+  "next": "audit/bound/plan-no-census.status",
+  "reads": ["TARGET.bound", ".bound/shadows"],
+  "walks": [],
+  "census": false
+}

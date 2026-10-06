@@ -1,0 +1,30 @@
+{
+ "about": [
+  "A place's own lock is folded as the tree's lock is: a line that carries a signature stands only when a key the tree admits signed it, inside that key's window and inside its coverage of the place, the place's name before the line's scope; a line that carries none is the place's target text until the place signs its lock.",
+  "bound's own words are lines of its own lock, read through that fold: never a word spelled by an unsigned file.",
+  "A source the fold vouched is read by what vouched it, a digest in the vouching ledger, whatever family named it then; so a family that is renamed leaves what was vouched vouched."
+ ],
+ "cases": [
+  {
+   "name": "bound's own lock signed by lane-B, with bound/** in lane-B's coverage",
+   "stands": ["store/source", "store/vouches"],
+   "expected.ok": true
+  },
+  {
+   "name": "a line changed after it was signed",
+   "stands": false,
+   "expected.ok": true
+  },
+  {
+   "name": "an unsigned line added to a signed own lock, asked for signed lines only",
+   "stands": false,
+   "expected.ok": true
+  },
+  {
+   "name": "the vouched sources, read without naming the family that vouched them",
+   "vouched": "the same 375 sources",
+   "expected.ok": true
+  }
+ ],
+ "red was": "bound read its own words by spelling them out of an unsigned file, and read what it vouched only under the one family word the wire was about to drop"
+}

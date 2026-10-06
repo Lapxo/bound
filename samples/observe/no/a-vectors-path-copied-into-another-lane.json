@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: two spellings of one path. If observe/identity.ts moved where a reader's vectors live, the copy in lane B's key would go on keying kept observations by the old path, and a reader whose vectors changed would be read back whole from a key that no longer names them."
+ ],
+ "cases": [
+  {"name": "lane B's key at epoch 272", "spells": "<package>/vectors/<stem>.json", "imports vectorsOf": false, "expected.ok": false}
+ ]
+}

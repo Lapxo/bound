@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: a release's receipts taken from the tree's published leaf, without what the release's own keys signed."
+ ],
+ "cases": [
+  {
+   "name": "releaseOf as landed at 248, over C's gate clone at 249",
+   "receipts": "3746 lines: the tree's leaf, not cut again, with no judge or attest line of the folder",
+   "the folder's": "3126 lines",
+   "expected.ok": false
+  },
+  {
+   "name": "the attest line alone added",
+   "receipts": "3747 lines, still not the folder's 3126",
+   "expected.ok": false
+  }
+ ]
+}

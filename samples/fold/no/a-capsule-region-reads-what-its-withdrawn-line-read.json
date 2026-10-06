@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a reader the capsule train made pure — handed its files, never reading the disk — ran as a process reader, which is handed no file. reader/typescript-hazards answered none of its 7 places on every pass from the capsule train on (REFUSE on every act of epochs 253 to 266), so hazard/* at bound, obligations, topos, topos-bound, topos-json, topos-typescript-tree and verify read what was kept before, and a hazard written since showed nowhere."
+ ],
+ "cases": [
+  {
+   "name": "reader/typescript-hazards, epochs 253 to 266",
+   "said": "REFUSE reader topos-typescript-tree/src/hazards.ts · answered none of 7 places · nothing landed, they stay due",
+   "expected.ok": false
+  }
+ ]
+}

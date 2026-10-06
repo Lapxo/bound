@@ -1,0 +1,40 @@
+{
+ "about": [
+  "A line another published place leads is that place's: a published lock takes it only when every need it names is a leaf of the place, never because a later step of its scope names the place.",
+  "The place a line leads with is the first step of its scope, and a published place is a name some publish/<place>/bootstrap line holds: read off the standing, never listed from the tree."
+ ],
+ "cases": [
+  {
+   "name": "verify, published",
+   "lines": 336,
+   "lines obligations leads": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "topos-typescript-tree, whose source.ts every lines ceiling of five places needs",
+   "lines": 333,
+   "taken by their needs": 8,
+   "expected.ok": true
+  },
+  {
+   "name": "topos-json, whose vectors.ts topos/vector/coverage-honours-withdraws needs",
+   "lines": 334,
+   "taken by its needs": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "every other place, published and folded",
+   "lines moved": 0,
+   "paths-outside-a-place": {"bound/": 18, "obligations/": 14, "topos/": 37, "topos-bound/": 4, "verify/": 3},
+   "renders": "188 of 188 unmoved",
+   "expected.ok": true
+  },
+  {
+   "name": "the published place 88474ebf78be98fa (0.2.0)",
+   "views": 23,
+   "unlike what it carries": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a published lock took any line whose scope named the place at a later step, so verify was published with obligations/pipeline/verify/command and obligations/pipeline/verify/key, zoomed to obligations/pipeline/command and obligations/pipeline/key, lines of obligations' two heads that name no need of verify"
+}

@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: every fold and every view text a pass kept left a line in the folder's ledger naming a blob, so the ledger grew by a line per memo and the store kept each blob for as long as that line stood. At epoch 239, .bound/ledger/bound.bound held 40,420 memo lines, measure=fold, and they alone named 5,770 of the 7,775 blobs in .bound/cas/blobs, 32.61 GB of 36.98 GB. A store cannot contract by what its standing lines name while memos are lines."
+ ],
+ "cases": [
+  {
+   "name": "epoch 239, the folder's ledger and the blobs its memo lines name",
+   "memo lines": 40420,
+   "blobs named only by a memo line": 5770,
+   "GB named only by a memo line": 32.61,
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,4 @@
+{
+ "about": ["The falsifier: the matcher landed at epoch 289 reads the region measure words from a literal list. With audit/wire/region-measures re-signed as coordinates alone, it still offers every region line in the retired word."],
+ "cases": [{"name": "the tree with the list re-signed as coordinates alone, the epoch 289 matcher", "matches": 210, "lines of the retired word offered": "bound 24 · obligations 30 · verify 18 matches", "expected.ok": false}]
+}
