@@ -97,17 +97,3 @@ A pin names standing, not a download URL or runtime entry. Its declared artifact
 Use Bound where independently attributed observations must be judged against an accepted contract: compatibility between components, operational limits, or a team's project requirements. The selected topos must supply the actual measurements; a digest identifies the evidence without declaring it true.
 
 [Contribute a counterexample or a proposed lot](CONTRIBUTING.md).
-
-## What is open
-
-- `capture/differs` is demanded and not paid
-- `exchange/cost` is demanded and not paid
-- `figures/redrawn` is demanded and not paid
-- `figures/timestamped` is demanded and not paid
-- `figures/unanimated` is demanded and not paid
-- `no-error` is demanded and not paid
-- `place-is-a-capsule` is demanded and not paid
-- `region/state` is demanded and not paid
-- `view/figure-fold` is demanded and not paid
-- `view/figure-line` is demanded and not paid
-- `view/figure-refuses` is demanded and not paid
