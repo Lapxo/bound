@@ -1,0 +1,27 @@
+{
+ "about": [
+  "A reader is what it emits over its vectors: its identity is measured again when any file the bundler takes of it moves, its module or a helper a step above it, and it stays the reader it was when what it emits did not move.",
+  "What keys the measure is the bundle's inputs at their stamps, as the bundler read them: never the files that merely lie beside the module."
+ ],
+ "cases": [
+  {
+   "name": "a helper a directory above the module changes what it emits",
+   "inputs": ["topos-typescript-tree/src/vocabulary.ts", "topos-typescript-tree/src/comments.ts"],
+   "measured again": true,
+   "identity": "moves",
+   "expected.ok": true
+  },
+  {
+   "name": "a helper changes and the reader emits the same over its vectors",
+   "measured again": true,
+   "identity": "the one it was, memos kept",
+   "expected.ok": true
+  },
+  {
+   "name": "a file beside the module that the module never imports moves",
+   "measured again": false,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a reader's identity digested the files beside its module, so a helper a directory up that changed what it emitted served the old answers under the old identity"
+}

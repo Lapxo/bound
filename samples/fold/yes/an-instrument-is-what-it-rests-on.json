@@ -1,0 +1,25 @@
+{
+ "about": [
+  "The instrument is what it runs. Its identity is its own code by its bytes, plus, for every region it depends on, the release its own lock names by digest where the host lays it. For a region no release is laid for, the identity is that region's sources.",
+  "Re-pinning a release moves the identity, so the extension over the fixture is measured again before any fold of the other code is kept. A sibling rebuilt beside it moves nothing."
+ ],
+ "cases": [
+  {
+   "name": "dep/topos with needs, pinned to one release and then the other, on a scratch copy",
+   "identity": "at 192a5138: 8858651c0df5 · at b79df96e: 560a7a3980e6",
+   "expected.ok": true
+  },
+  {
+   "name": "the sibling topos/src/wire/index.ts edited and put back",
+   "identity": "resting on releases: 8858651c0df5 all three times",
+   "expected.ok": true
+  },
+  {
+   "name": "bound on obligations 0.3.0 (ba4149b7) and topos 192a5138, both laid",
+   "extension": "EXTENSION 5ee6135008e5 is the extension of 678ab59c3d57 · 25 rendered · 0 unlike",
+   "root": "the root's design, folded fresh under 0.2.0 and under 0.3.0, reads the same bytes",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a release moved under bound without moving its identity"
+}

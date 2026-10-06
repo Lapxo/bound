@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The host loads a world's wire and capsule from dep/topos, or from the lock's uses/topos pin when that line names no place. The loader spells no path. Fold of bound --as why README.md printed WHY after that load."
+ ],
+ "cases": [
+  {
+   "name": "bound --as why README.md, after locate reads wire and capsule through pinExport('topos')",
+   "printed": "WHY view/readme · witness:bound-readme-still-the-derived-list",
+   "expected.ok": true
+  }
+ ]
+}

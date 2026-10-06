@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: the same parse failed and the crash named only the parser's message, so the file that was empty could not be found."
+ ],
+ "cases": [
+  {
+   "name": "a killed write left a one-byte manifest",
+   "said": "REFUSE·crash Unexpected end of JSON input",
+   "expected.ok": false
+  }
+ ]
+}

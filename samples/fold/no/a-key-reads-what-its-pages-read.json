@@ -1,0 +1,11 @@
+{
+ "about": [
+  "The falsifier, measured on a copy of the tree at 327: a place's keys read inputs no page of it reads. The reach key carried the second head's epoch, so every word it said again, agreeing as before, unsettled every place; the fold key carried the gate ledger's digest, so every line a gate landed missed every kept fold; and the fold key never read capsule.bound, so a kept fold rendered an index for a declaration it never read."
+ ],
+ "cases": [
+  { "name": "the second head agrees again at a new epoch", "reach keys moved": "15 of 15, point second", "expected.ok": false },
+  { "name": "a gate line lands", "fold keys moved": "14 of 14, point gate", "expected.ok": false },
+  { "name": "capsule.bound edited at topos-github", "fold keys moved": "0 of 14: the kept fold e9764f50 wrote an index importing a law the capsule no longer declared", "expected.ok": false },
+  { "name": "the act after one that held a single region", "gate/check": "157043 ms at bound@325 against 35541 ms at .@325 and 37 to 49 s at every act from 309 to 322", "expected.ok": false }
+ ]
+}

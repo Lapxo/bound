@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: bound/src/lines 0..8708 was the cut, and the instrument outgrew it while it still read the ceiling as owed. The source carried 10325 lines and no no of the ratchet stood, so the law had no sample of the bug it named."
+ ],
+ "cases": [
+  {
+   "name": "the ratchet outgrown while the ceiling still read owed",
+   "ceiling": "0..8708",
+   "lines": 10325,
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "about": [
+  "The falsifier: the first act that ran the clone gate for real, the owner's at epoch 278, spent 119.8 s on obligations' rebirth and 86.1 s on verify's where the same reads took 20 s and 15 s in scratch, and no line said which step spent it. rebornIn now says the time of each step, so what the act spends beyond the rebirth is the act's own."
+ ],
+ "cases": [
+  {"name": "gate/rebirth/obligations at epoch 278", "seconds": 119.8, "steps named": 0, "expected.ok": false},
+  {"name": "gate/rebirth/verify at epoch 278", "seconds": 86.1, "steps named": 0, "expected.ok": false},
+  {"name": "the same rebirths in scratch after this lot", "obligations": "migrate 2630 · verify 196 · receipts 4379 · check 5762 · checks 76 ms", "verify": "migrate 1254 · verify 177 · receipts 2307 · check 2722 · checks 58 ms", "expected.ok": true}
+ ]
+}

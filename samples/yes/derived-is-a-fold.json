@@ -1,0 +1,7 @@
+{
+ "scope": "derived-is-a-fold",
+ "want": 1,
+ "kind": "yes",
+ "about": ["a page is a view; --check says SAME or DIFFERS"],
+ "cases": [{ "name": "readme --check prints SAME or DIFFERS", "prints": ["SAME"], "expected.ok": true }]
+}

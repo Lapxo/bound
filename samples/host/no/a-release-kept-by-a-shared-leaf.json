@@ -1,0 +1,23 @@
+{
+ "about": [
+  "The falsifier: a place taken for a release because one leaf reads the same, and a release copied over the one before it. Laid by the host as it stood at epoch 226, with the releases in bound's own store."
+ ],
+ "cases": [
+  {
+   "name": "obligations re-pinned from 0.2.0 to 0.3.0, shape=dist/lattice/index.js",
+   "laid": 0,
+   "dist leaves unlike 0.3.0": 24,
+   "expected.ok": false
+  },
+  {
+   "name": "topos re-pinned from 192a5138 to 8fc23c34",
+   "dist leaves left behind": 40,
+   "expected.ok": false
+  },
+  {
+   "name": "obligations re-pinned from 0.3.0 to 0.2.0",
+   "dist leaves left behind": 14,
+   "expected.ok": false
+  }
+ ]
+}

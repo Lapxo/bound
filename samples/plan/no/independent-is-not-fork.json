@@ -1,0 +1,21 @@
+{
+  "forbiddenStop": "fork",
+  "cells": [
+    {
+      "scope": "audit/plan/source/shadow",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/prepare/census-shadows.ts"]
+    },
+    {
+      "scope": "audit/plan/foundation/envelope-complete",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/host/envelope.ts"]
+    }
+  ]
+}

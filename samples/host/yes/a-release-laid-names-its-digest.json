@@ -1,0 +1,11 @@
+{
+ "about": [
+  "What stands laid is said: resolvedOf gives, for each release the instrument's own lock names, a line resolved/<dep> naming the digest when the blob hashes to that name and the place its line needs holds it, or the store's cas holds it when its line needs no place. The fold lands those lines at every lay; a changed release is a new at, never a rewrite."
+ ],
+ "cases": [
+  {"name": "the instrument's own lock at epoch 267", "releases": 9, "resolved": 9, "lines": ["resolved/obligations ba4149b7d009", "resolved/topos 8a8a93a6d95a", "resolved/topos-typescript-tree fcd87e3dcb13", "resolved/topos-json ddee424ba7c8", "resolved/topos-bound 23ea35997c2a", "resolved/topos-doc adc787638f8c", "resolved/topos-node c4ae9ecd8ecc", "resolved/topos-github c7b0a1ba1e56", "resolved/verify f3b8563a085c"], "expected.ok": true},
+  {"name": "its cost over 1040 kB of blobs", "ms": "1.3 cold · 0.5 warm", "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "181 of 181 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "which release each dep of the instrument resolved to was said only by the .laid label the host writes into the place, a label that measures nothing, and no landed line named the digest"
+}

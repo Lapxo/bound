@@ -1,0 +1,35 @@
+{
+ "about": [
+  "A place the instrument's lock needs a release at is that release when it holds the release's digest: the host marks the copy it lays with the digest it laid, beside dist/, where the drift reading never counts it. A place that holds another digest, or none, is laid again whole beside the old copy and swapped in, so nothing an older release held is left behind; one that holds the digest is not touched."
+ ],
+ "cases": [
+  {
+   "name": "obligations re-pinned from 0.2.0 (88474ebf) to 0.3.0 (ba4149b7), both named by shape=dist/lattice/index.js, the same bytes in each",
+   "laid": 1,
+   "dist leaves unlike 0.3.0": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the same lock laid again",
+   "laid": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "topos re-pinned from 192a5138 (142 dist leaves) to 8fc23c34 (102)",
+   "dist leaves left behind": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "obligations re-pinned from 0.3.0 (126 dist leaves) to 0.2.0 (112)",
+   "dist leaves left behind": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the tree's two laid places, relaid once to hold their mark",
+   "dep/obligations": "ba4149b7 · drift 0",
+   "dep/topos": "192a5138 · drift 0",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the host took a place for the release its lock named when one leaf, the line's shape, read the same, and laid a new release over the old copy: dep/obligations named 0.3.0 by a leaf 0.2.0 shares, so bound ran 0.2.0 under an identity that says 0.3.0, and a release that drops a file would have left it behind"
+}

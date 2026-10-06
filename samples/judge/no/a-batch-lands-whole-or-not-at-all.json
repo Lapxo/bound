@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a batch that lands its lines before its takes are judged. accept landed the lines and marked each take open, then judged; every gate that read the tree read the batch's own lines and its own open take, and a refusal left the lines standing and the take open, to be signed again under a fresh at."
+ ],
+ "cases": [
+  {
+   "name": "B19, B21 and B22, and lane C's and lane D's takes at 200, 202 and 204",
+   "landed": "their lines, with their takes refused and unpaid",
+   "check": "DIFFERS on the root README, which listed the take being judged as open",
+   "expected.ok": false
+  }
+ ]
+}

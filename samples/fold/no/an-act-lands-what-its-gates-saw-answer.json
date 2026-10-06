@@ -1,0 +1,17 @@
+{
+ "about": [
+  "The falsifier: at epoch 283 the fold key's ledger holds 17 rendered/* lines, while a pass that folds every place of a copy of the same tree stands 162. An act renders its places in its gates, where nothing lands, and settles them there; the render after its landing finds them settled and folds only the root, so which capsule answered a region of a place the act moved was said nowhere."
+ ],
+ "cases": [
+  {
+   "name": "the fold key's ledger at epoch 283",
+   "rendered/* lines": 17,
+   "expected.ok": false
+  },
+  {
+   "name": "a pass that folds every place of a copy at 283",
+   "rendered/* lines": 162,
+   "expected.ok": true
+  }
+ ]
+}

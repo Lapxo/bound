@@ -1,0 +1,25 @@
+{
+ "about": [
+  "The falsifier: a batch checked by one step and landed by another. A pass took the batch, then accept signed and landed it; between the two the store was anyone's. Another lane landed in the window, the second accept signed an epoch the first had already signed, and it wrote leaves rendered before the first had landed.",
+  "And a check read over one lock with renders made over another: a re-pin batch's pass rendered its capsules with the pins that stood, its gate rendered them with the batch's, and a batch that was right could not land.",
+  "And the batch folded twice: once by the pass, once by accept's check."
+ ],
+ "cases": [
+  {
+   "name": "lane C's c14 and lane A's batch, accepted one after the other at 20:18",
+   "epochs": "both landed at 218, and no line stands at 219",
+   "leaves": "verify/.github/workflows/release.yml read npm publish again from 20:18:20 to 20:20:30: the render from before 218",
+   "expected.ok": false
+  },
+  {
+   "name": "a re-pin batch through a pass and then accept",
+   "check": "DIFFERS on the pipelines it re-pinned: the pass rendered the pins that stood, the gate the batch's",
+   "expected.ok": false
+  },
+  {
+   "name": "B25 through bound . --batch and then accept",
+   "folds": "two: 151 s for the pass, then accept refused it with no pass took this batch, because the epoch had moved in between",
+   "expected.ok": false
+  }
+ ]
+}

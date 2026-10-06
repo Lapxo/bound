@@ -1,0 +1,11 @@
+{
+ "about": [
+  "nothing in a pass runs twice over the same digest: renders, checks, attestations and rebuilds"
+ ],
+ "cases": [
+  {
+   "name": "repeated-work-on-one-digest",
+   "expected.ok": true
+  }
+ ]
+}

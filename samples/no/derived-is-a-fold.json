@@ -1,0 +1,7 @@
+{
+ "scope": "derived-is-a-fold",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: a stale page with no red"],
+ "cases": [{ "name": "a page that differs is silent", "prints": ["stale and silent"], "expected.ok": false }]
+}

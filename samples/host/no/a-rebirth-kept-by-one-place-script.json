@@ -1,0 +1,10 @@
+{
+ "about": [
+  "The falsifiers of a generic rebirth. A leaf a hand changed after the fold rendered it is named by the fixed point; a release that carries the attest another key signed at the last birth turns its own clone's verify grey, since that attest is by a key the clone's lock no longer names; and a release built from the last release's leaves instead of the tree's loses what the tree grew since, a law and its samples."
+ ],
+ "cases": [
+  {"name": "obligations/, README.md with a line a hand wrote", "refused": "23 of 24 leaves the views write read SAME: README.md", "expected.ok": false},
+  {"name": "obligations/, receipts carrying 0.3.1's attest by the tree's verify key", "clone": "verify grey: the signature does not verify against verify", "read": "23 of 24 SAME: README.md (its verify badge)", "expected.ok": false},
+  {"name": "verify/, leaves taken from 0.1.0 instead of the tree", "read": "10 of 11 SAME: README.md says four axioms where the tree has five", "expected.ok": false}
+ ]
+}

@@ -1,0 +1,29 @@
+{
+ "about": [
+  "A place is keyed by what its pages read: the second head's word, with its epoch only while the word is stale, since only then does a page print it; the ledgers a fold reads, never the gate's, whose lines no fold reads; and, beside the coordinates its readers observed, the files a measure=lines region hands whole. Measured on the same copy with the new keys."
+ ],
+ "cases": [
+  {
+   "name": "the second head agrees again at a new epoch",
+   "reach keys moved": "0 of 15 on second; bound and the root moved on placed, the copy's own readers landing between the two reads",
+   "expected.ok": true
+  },
+  {
+   "name": "a gate line lands",
+   "fold keys moved": "0 of 14",
+   "expected.ok": true
+  },
+  {
+   "name": "capsule.bound edited at topos-github",
+   "fold keys moved": "1 of 14, topos-github, point lines",
+   "expected.ok": true
+  },
+  {
+   "name": "bound/src lines",
+   "fold/reach.ts": "185 → 187",
+   "fold/kept.ts": "132 → 136",
+   "expected.ok": true
+  }
+ ],
+ "red was": "an act that paid for every place its neighbour left"
+}

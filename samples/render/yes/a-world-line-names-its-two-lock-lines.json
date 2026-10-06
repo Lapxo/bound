@@ -1,0 +1,21 @@
+{
+ "about": [
+  "A world's line page names the two lock lines a reader adds, and nothing a package template would say."
+ ],
+ "cases": [
+  {
+   "name": "topos-doc · line@3 · RELEASE.md",
+   "page": [
+    "## Line",
+    "",
+    "Add to your lock:",
+    "sources/topos-doc value=github:Lapxo/topos-doc",
+    "uses/topos-doc sha256:<release digest>",
+    "Fetch the release asset, verify its sha256 equals the uses/ line, place it in bound/cas/blobs/. Fold: its pages appear.",
+    "open: line/install needs=host/resolve — when bound resolves sources/ itself, the fetch line leaves the page by fold."
+   ],
+   "holds": ["sources/topos-doc value=github:Lapxo/topos-doc", "uses/topos-doc sha256:<release digest>"],
+   "expected.ok": true
+  }
+ ]
+}

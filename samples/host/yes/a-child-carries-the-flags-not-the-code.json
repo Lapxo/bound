@@ -1,0 +1,9 @@
+{
+ "about": ["A child the host starts, a capsule or a rebirth's runs, carries the flags that shape how its modules load and never the code its parent was started with: an eval, a print and an input type stay with the parent."],
+ "cases": [
+  {"name": "--conditions=source --disable-warning=ExperimentalWarning --input-type=module -e <code>", "child gets": "--conditions=source --disable-warning=ExperimentalWarning", "expected.ok": true},
+  {"name": "--conditions=source --eval=<code> --print <code> --disable-warning=MODULE_TYPELESS_PACKAGE_JSON", "child gets": "--conditions=source --disable-warning=MODULE_TYPELESS_PACKAGE_JSON", "expected.ok": true},
+  {"name": "the CLI's own flags", "child gets": "the same flags", "expected.ok": true}
+ ],
+ "red was": "the host started capsule children with every flag its parent had, so a run started with an inline script handed that script to each child, and each child ran it again"
+}

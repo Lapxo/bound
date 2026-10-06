@@ -1,0 +1,7 @@
+{
+ "scope": "page-quiet",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: an unrelated land rewrites a page"],
+ "cases": [{ "name": "a page rewrites when its cone did not move", "prints": ["RENDERED README.md"], "expected.ok": false }]
+}

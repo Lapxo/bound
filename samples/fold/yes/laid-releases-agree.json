@@ -1,0 +1,20 @@
+{
+ "about": [
+  "The releases laid under bound agree: each names, in the uses of its own lock, the digest bound lays for that name. A pin to a name bound lays no release for, such as a capsule, is the host's and is not counted. The reading is taken when the fold is read, since a re-pin can leave the extension where it was."
+ ],
+ "cases": [
+  {
+   "name": "epoch 233, dep/topos at 9bd23c16, which pins obligations ba4149b7 and says ^0.3.0",
+   "laid-releases-disagree": 0,
+   "dep-drift": 0,
+   "laid-digest-differs": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "at epoch 228, the count read literally, as every pin not laid anywhere",
+   "read": "8, all capsule pins, and 0 for the one that disagreed, since 88474ebf was still in cas/laid",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a notation built on 0.2.0 run on 0.3.0"
+}

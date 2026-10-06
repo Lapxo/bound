@@ -1,0 +1,15 @@
+{
+ "about": [
+  "A demand whose condition has no FACT lands REQUIRED: owed, with no take and no refusal of its batch. Its take runs when the condition is paid and the batch is landed again. Refusal is for a line that is not an act."
+ ],
+ "cases": [
+  {
+   "name": "a batch of one conditioned demand, on a scratch copy",
+   "said": "OWED     take bound/src/judge/owed-until-its-condition-is-paid · it rests on bound/src/judge/a-condition-nobody-has-paid, which has no FACT: it stands owed until that is paid",
+   "gates": "gate/extension green · gate/check green",
+   "programs": "77/97 paid · 20 missing → 77/98 paid · 21 missing",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a demand with an unpaid condition refused its batch"
+}

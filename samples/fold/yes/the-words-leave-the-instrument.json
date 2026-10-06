@@ -1,0 +1,28 @@
+{
+ "about": [
+  "The instrument spells no family of the store: the writer that vouches a source and the family a source is named in are words bound's own lock names, and the wire lists; bound reads them there.",
+  "A role is read the one way topos reads it, from the lines that give it, whether a leaf-role line or a region's role; bound never spells the family of the line that gave it.",
+  "What bound says of what it did names sources, renders and regions, never the words a lock may change."
+ ],
+ "cases": [
+  {
+   "name": "the vouched sources, read through the words bound's own lock names",
+   "store/vouches": "tree",
+   "store/source": "leaf",
+   "vouched": 375,
+   "same as before": true,
+   "expected.ok": true
+  },
+  {
+   "name": "the regions a fold names from roles",
+   "same as before": true,
+   "expected.ok": true
+  },
+  {
+   "name": "a bound whose own lock names no word for its store",
+   "refused": "bound: REFUSE·wire `` is not one of `audit/wire/families`",
+   "expected.ok": false
+  }
+ ],
+ "red was": "bound spelled the store's families in its own code, 25 times across 14 modules: a lock that renamed a family would have been read through words it no longer said"
+}

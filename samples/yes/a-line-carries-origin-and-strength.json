@@ -1,0 +1,7 @@
+{
+ "scope": "a-line-carries-origin-and-strength",
+ "want": 1,
+ "kind": "yes",
+ "about": ["a printed line names who signed it and at which epoch"],
+ "cases": [{ "name": "help is signed by no one and still a printed line", "prints": ["verbs fold land sign"], "expected.ok": true }]
+}

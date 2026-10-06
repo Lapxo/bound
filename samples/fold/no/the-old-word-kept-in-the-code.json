@@ -1,0 +1,11 @@
+{
+ "about": [
+  "The falsifier: literal/**/src/**, identifier/**/src/** and comment/**/src/** carry the old word as banned since epoch 288, and at 289 lane B's code held it 451 times: in the names it exports (leafDigest, landLeaves, leafWithdrawals, vouchedLeaves), in what an act prints (no leaf is written, leaves released), in the region measure it read alone (leaves), and in its comments, several of them using the verb where they meant goes or keeps."
+ ],
+ "cases": [
+  {"name": "cli at epoch 289", "uses": 106, "expected.ok": false},
+  {"name": "fold at epoch 289", "uses": 238, "expected.ok": false},
+  {"name": "judge at epoch 289", "uses": 84, "expected.ok": false},
+  {"name": "land at epoch 289", "uses": 23, "expected.ok": false}
+ ]
+}

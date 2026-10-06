@@ -1,0 +1,27 @@
+{
+ "about": [
+  "The fold's meet is the object's: each claim's content is a cell (cell from @lapxo/obligations/views/field), its live values the claims its origins observed there in the lattice of its form (intervals, or the alphabet form's subsets over the tokens its values name and one for every token they leave unnamed), and the class that holds meet(L, cell) stands alone. Where none holds it the values are incomparable, every narrowest class stands, and the fork carries state(L, cell). What stands is what stood before, line for line; bound's own poset over parsed values is gone from the verdict path."
+ ],
+ "cases": [
+  {
+   "name": "the old fold and the new over the tree at 308: every ledger file, every ledger at once, every place's own lock, the readers' observations as placed readings, and 4000 random cells (permit and forbid alphabets, intervals, unparseable intervals, withdraws)",
+   "sets": "4028 of 4028 the same",
+   "lines": 139146,
+   "forks named by state": "3638 of 4904",
+   "expected.ok": true
+  },
+  {
+   "name": "bound/src lines",
+   "before": 8484,
+   "after": 8494,
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy",
+   "gates": "extension green in 3.3 s, check green in 25.7 s",
+   "verify": "agrees: bound 145/164 paid · 0 forks · 0 grey; obligations 18/18 paid",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a second algebra on the verdict path"
+}

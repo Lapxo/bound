@@ -1,0 +1,22 @@
+{
+ "about": [
+  "The falsifier: a zoom that takes a value for the place. Seen from inside obligations, a scope that spelled obligations at any depth lost it, so the import specifier @lapxo/obligations/views/field in obligations' receipts reached the published folder as @lapxo/views/field. learn.ts found no call into @lapxo/obligations, and four learn pages lost their intro and the graph of what they rest on."
+ ],
+ "cases": [
+  {
+   "name": "obligations' published receipts under the old zoom",
+   "rewritten": [
+    "source/imports/@lapxo/obligations/views/field -> source/imports/@lapxo/views/field (3)",
+    "source/imports/@lapxo/obligations/views/product -> source/imports/@lapxo/views/product (1)",
+    "source/imports/@lapxo/obligations/forms -> source/imports/@lapxo/forms (2)"
+   ],
+   "zoom-rewrites-outside-the-place": 6,
+   "expected.ok": false
+  },
+  {
+   "name": "the learn pages of obligations' published folder",
+   "audit/tree/published-place-renders-itself": 4,
+   "expected.ok": false
+  }
+ ]
+}

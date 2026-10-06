@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: --as rank folded only lines of the tree's ledger. Lines drafted for a place's own lock had no preview, so lane C could not rank three view lines of obligations before signing them."
+ ],
+ "cases": [
+  {
+   "name": "view lines for a place's own lock, told to --as rank",
+   "folded": "none: the ledger admits none of them",
+   "expected.ok": false
+  }
+ ]
+}

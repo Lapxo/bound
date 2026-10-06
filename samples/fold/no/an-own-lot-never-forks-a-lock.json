@@ -1,0 +1,15 @@
+{
+ "about": [
+  "The falsifier: A26 at 296 was 92 own lines, each belonging to one of 8 places, accepted with --place for all 8. Every named place admitted every line by its signature, so each lock took all of them: 300 lines per lock, 64 region/vocabulary lines each, every lock offering the others' regions. The gates stayed green because no render moved. Lane A repaired it through the fold with 8 single-place lots (A27, 297), and the owner ruled no multi-place own lot with differing values until this guard lands."
+ ],
+ "cases": [
+  {
+   "name": "A26 at 296",
+   "places": 8,
+   "lines per lock after": 300,
+   "region/vocabulary lines per lock": 64,
+   "refused": false,
+   "expected.ok": false
+  }
+ ]
+}

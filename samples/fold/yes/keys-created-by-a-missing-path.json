@@ -1,0 +1,23 @@
+{
+ "about": [
+  "verify never makes a key where none is. A --key-file whose path holds no key is refused, and nothing is made at that path, since a key made on the spot would attest with a key the lock never admitted.",
+  "The second head bound asks live, by its own lock's head/second, is run with no key at all: it folds and says what it found, attests nothing, and makes nothing."
+ ],
+ "cases": [
+  {
+   "name": "verify over the tree with --key-file at a path that does not exist",
+   "said": "verify: REFUSE·key no key at …/no-such-dir/verify.pem: a key made on the spot would attest with a key the lock never admitted",
+   "exit": 2,
+   "made": "nothing: the directory is still absent",
+   "expected.ok": true
+  },
+  {
+   "name": "the second head asked live by bound, with no key",
+   "said": "VERIFY   agrees · 2539 lines stand here · 2539 in the render · 0 missing · 0 extra · epoch 201 · not attested: no --key-file",
+   "attested": false,
+   "made": "nothing",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a verify key made where a path was missing, which attests with a key nobody admitted"
+}

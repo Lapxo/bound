@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a foreign leaf released because it lay inside a directory a list copies whole. obligations/rebirth.sh copies src, samples, vectors, examples, docs and test with cp -R, so src/.DS_Store, whose role is foreign, ships in the folder; the release the fold renders leaves it out."
+ ],
+ "cases": [
+  {
+   "name": "src/.DS_Store beside src/index.ts",
+   "role": "foreign",
+   "rebirth.sh cp -R src ships it": true,
+   "the fold's release holds it": false,
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: a region rendered by a capsule nobody named. capsuleViews answered each region with the capsule that answered first and kept only the leaf, so which capsule rendered it, and whether a pin or the carried order chose it, was nowhere."
+ ],
+ "cases": [
+  {"name": "verify/, 11 views, 16 regions a capsule answered, no uses/ pin", "capsules named before": 0, "chosen by": "the carried order", "expected.ok": false}
+ ]
+}

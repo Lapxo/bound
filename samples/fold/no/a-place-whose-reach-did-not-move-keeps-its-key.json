@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: every place's key carried two digests of the whole lock, every line it stands on and every line it owns, so a line that landed anywhere moved every place, and every act folded the tree whole, twice: once to check the batch and once after it landed. Each fold also did again, for its own place, what the tree does once: the lock's standing, the lines each key signed, the second head, the own locks the places speak, and every reading of the tree the place then threw away."
+ ],
+ "cases": [
+  {
+   "name": "one ceiling on bound/src/fold, accepted on a copy of the tree at epoch 247",
+   "folds": 30,
+   "seconds": "62: the check 42.3, after landing 11.9",
+   "expected.ok": false
+  },
+  {
+   "name": "B33 at epoch 244, one byte of the fold's order moved",
+   "seconds": 808,
+   "expected.ok": false
+  }
+ ]
+}

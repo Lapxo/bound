@@ -1,0 +1,7 @@
+{
+ "scope": "domain-neutral",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: a reader that requires a src/ path"],
+ "cases": [{ "name": "the reader asks for TypeScript", "prints": ["src/**/*.ts"], "expected.ok": false }]
+}

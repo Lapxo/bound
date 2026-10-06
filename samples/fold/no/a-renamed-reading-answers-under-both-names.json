@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: at 328 each of four readings answered under its old word only (published-leaves-differ, rendered-leaves-differ, leaves-with-two-views, store-leaves-inside-a-place). A ceiling on the new word, signed alone, stood unread and was refused as inert, so the rename needed the owner, lane A, lane C and lane B to sign one act together."
+ ],
+ "cases": [
+  { "name": "cli/place.ts:221 and fold/own.ts:299 at 328", "new names answered": 0, "old names answered": 4, "expected.ok": false }
+ ]
+}

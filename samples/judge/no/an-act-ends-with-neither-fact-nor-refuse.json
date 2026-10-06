@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: an act ends with neither FACT nor REFUSE. A thrown or killed accept still prints REFUSE·crash."
+ ],
+ "cases": [
+  {
+   "name": "an accept that dies after OPEN",
+   "ends": "neither FACT nor REFUSE",
+   "expected.ok": false
+  }
+ ]
+}

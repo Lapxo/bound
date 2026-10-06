@@ -1,0 +1,16 @@
+{
+ "about": [
+  "`bound gc` weighs what the store holds against the digests the standing lines name: each blob of the tree's store and of bound's own, each release laid out, and the marks memos were once claimed by. It writes the list of what no standing line names to .bound/gc/<epoch>.list and prints the gigabytes before and after and the owner's command that moves the list, and the memo lines of each ledger, beside the tree on its own disk. It moves nothing itself: contracting the store is the owner's act."
+ ],
+ "cases": [
+  {
+   "name": "a copy of the tree at epoch 240",
+   "listed": 15497,
+   "memo lines": 40566,
+   "moved by bound": 0,
+   "seconds": 44,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a store that kept every blob it was handed"
+}

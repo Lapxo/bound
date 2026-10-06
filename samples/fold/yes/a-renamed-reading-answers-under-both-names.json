@@ -1,0 +1,10 @@
+{
+ "about": [
+  "Each renamed reading answers under both words with one value: published- and rendered-coordinates-differ beside their leaves- words in cli/place.ts, coordinates-with-two-views beside leaves-with-two-views, and store-coordinates-inside-a-place beside store-leaves-inside-a-place in fold/own.ts, computed once. A lane lands its ceiling on the new word alone; the old word leaves when no ceiling reads it."
+ ],
+ "cases": [
+  { "name": "names answered", "new names": 4, "old names": 4, "one value each": true, "expected.ok": true },
+  { "name": "bound/src lines", "cli/place.ts + fold/own.ts": "unchanged", "expected.ok": true }
+ ],
+ "red was": "a rename that needed four keys in one act"
+}

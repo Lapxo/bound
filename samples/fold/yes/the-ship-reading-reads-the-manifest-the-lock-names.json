@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The ship reading finds a place's files line by the manifest the lock names, the shape of its manifest view as fold/carried.ts's manifestCoordinate reads it, and never by a manifest's name spelled in code; with no manifest view no files line is read and the wire's ships list decides."
+ ],
+ "cases": [
+  {
+   "name": "bound's design after this lot, on a copy at 305",
+   "identifier/bound/src/**": "no longer read as a red: nothing in bound/src spells a manifest's name",
+   "literal/bound/src/**": "no longer read as a red",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations' ship reading after this lot",
+   "cost/ship": "met; obligations' PROGRAMS: 18/18 paid · verify agrees · 119 met · 9 over",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a manifest name spelled in the code"
+}

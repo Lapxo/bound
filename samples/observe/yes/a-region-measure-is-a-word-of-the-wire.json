@@ -1,0 +1,9 @@
+{
+ "about": ["The measures a region line may count its coordinates by are the words audit/wire/region-measures names, read from the lock and spelled nowhere in code: a word the owner adds is offered at once, and a word the owner drops stops being offered at the re-sign, with no code act on it."],
+ "cases": [
+  {"name": "the tree at epoch 297, list coordinates|leaves", "matches before": 210, "matches after": 210, "expected.ok": true},
+  {"name": "the same tree with the list re-signed as coordinates alone", "matches": 138, "places still on the retired word": "bound 24 · obligations 30 · verify 18 matches go until their region lines are re-signed", "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "174 of 174 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "the matcher spelled the region measure words in code, so the owner's switch from one word to the other would have needed a code act, and the lock's line would have said one thing while the code read another"
+}

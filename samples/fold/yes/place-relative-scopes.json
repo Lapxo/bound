@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A place's own lock names its laws as audit/<name>, never audit/<place>/<name>: the zoom is the only difference between the tree's view of a place and the place's own.",
+  "A line of a place's own lock that still names the place is counted, so the rule never regresses."
+ ],
+ "cases": [
+  {
+   "name": "a law named from inside the place",
+   "scope": "audit/one-contract",
+   "counted": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "a law named from the tree inside the place's own lock",
+   "scope": "audit/topos/one-contract",
+   "counted": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "a withdrawn line that named the place",
+   "scope": "audit/close/topos/isolate",
+   "value": "withdraw",
+   "counted": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "topos's lock named its laws audit/topos/<name>, which the published lock would have carried beside the tree's audit/<name> as a second name for one law"
+}

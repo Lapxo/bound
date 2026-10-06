@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A cone rides in the receipts only beside a reading its own reader kept at the same bytes, keyed by reader and at."
+ ],
+ "cases": [
+  {
+   "name": "the tree's receipts leaves, cut 2 alone, live observations",
+   "obligations": "3645 → 3059 (−586, 131 kB)",
+   "topos-doc": "−66",
+   "topos-json": "−18",
+   "every leaf": "−712 lines, −158 kB",
+   "expected.ok": true
+  },
+  {
+   "name": "every other view of the tree",
+   "moved": 0,
+   "of": 173,
+   "expected.ok": true
+  },
+  {
+   "name": "the fixture resolved to X, obligations 0.3.1",
+   "expected.ok": true,
+   "receipts": "3126 lines, 288 cones, 288 of them beside a reading of their own reader at their bytes",
+   "digest": "sha256:7749ef6481c944164b85ca6e9bc0f69592c99051314dfca38273529b162cae6f"
+  }
+ ],
+ "red was": "a cone was kept whenever any kept reading stood at its bytes, so every reader that saw the same bytes rode along"
+}

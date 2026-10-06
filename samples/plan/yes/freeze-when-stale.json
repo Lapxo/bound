@@ -1,0 +1,5 @@
+{
+  "lock": "at=freeze:<digest>",
+  "staleAfterProves": 1,
+  "manual": false
+}

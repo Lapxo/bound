@@ -1,0 +1,11 @@
+{
+ "about": [
+  "a scratch copy of a place is built from the CAS bytes of its digest, never from a folder on disk"
+ ],
+ "cases": [
+  {
+   "name": "copies-built-from-paths",
+   "expected.ok": true
+  }
+ ]
+}

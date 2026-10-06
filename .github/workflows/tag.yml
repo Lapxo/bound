@@ -1,0 +1,17 @@
+name: tag
+on:
+  push:
+    branches: [main]
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          version="v$(node -p "require('./package.json').version")"
+          git tag --list "$version" | grep -q . && exit 0
+          git tag "$version" && git push origin "$version"

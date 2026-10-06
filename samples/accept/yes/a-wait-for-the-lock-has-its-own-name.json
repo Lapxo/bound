@@ -1,0 +1,9 @@
+{
+ "about": [
+  "SPENT names both parts before the act: sign is accept's own work up to asking for the lock, wait is the time the lock was held by another; a wait over a minute prints RED with its length, beside the WAIT line that names the holder. Measured on a copy with the tree held 70 s by another process."
+ ],
+ "cases": [
+  { "name": "an alias act on a copy whose lock another process held", "RED": "wait 64 s for the lock before the act · a wait over a minute is a red", "SPENT": "sign 1642 ms · wait 63892 ms · … gates 33193 ms", "WAIT": "the store is held by 16654 · accept since …", "expected.ok": true }
+ ],
+ "red was": "a wait booked as signing"
+}

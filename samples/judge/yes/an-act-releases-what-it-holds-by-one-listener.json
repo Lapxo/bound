@@ -1,0 +1,15 @@
+{
+ "about": [
+  "An act releases every lock it holds when its process ends, by one listener however many it holds: the first lock taken adds it, and it lets go of what is held at that moment, each lock only if it still names this process."
+ ],
+ "cases": [
+  {
+   "name": "one act on the whole tree of 14 places",
+   "locks": 16,
+   "exit listeners added": 1,
+   "warned": "nothing",
+   "expected.ok": true
+  }
+ ],
+ "red was": "eleven exit listeners for one act"
+}

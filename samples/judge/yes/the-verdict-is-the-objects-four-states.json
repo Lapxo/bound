@@ -1,0 +1,42 @@
+{
+ "about": [
+  "The judge's verdict on each demand is the object's state of a cell (state from @lapxo/obligations/views/field): the demand is the floor the place requires (present), and the two heads are its origins — the take, holding it (present) where it paid it and not (absent) where it answered without paying, silent where nothing answered; and the second head, holding what the take holds where its word agrees, the other where the demand's region stands apart, silent where its word is stale, grey or missing. FREE: both hold it. REQUIRED: fewer than two have spoken. CONFLICT: the two disagree. FORBIDDEN: neither admits it. fold/paid.ts verdictsFor(fold) returns it per demand scope, for kept folds and new ones alike, for the verdict line to print as counts of states."
+ ],
+ "cases": [
+  {
+   "name": "second head agrees",
+   "paid": "FREE",
+   "answered, not paid": "FORBIDDEN",
+   "never answered": "REQUIRED",
+   "expected.ok": true
+  },
+  {
+   "name": "second head forks, the demand's region apart",
+   "paid": "CONFLICT",
+   "answered, not paid": "CONFLICT",
+   "never answered": "REQUIRED",
+   "expected.ok": true
+  },
+  {
+   "name": "second head stale, grey or silent",
+   "every demand": "REQUIRED",
+   "expected.ok": true
+  },
+  {
+   "name": "on a copy at 311, verify agreeing everywhere",
+   "bound": "FREE 146 · REQUIRED 16 · FORBIDDEN 3 (paid 146, missing 19)",
+   "obligations": "FREE 18",
+   "verify": "FREE 5 · REQUIRED 1",
+   "topos": "FREE 9 · REQUIRED 1 · FORBIDDEN 1",
+   "root": "FREE 209 · REQUIRED 33 · FORBIDDEN 7",
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy",
+   "gates": "extension green in 3.2 s, check green in 20.1 s",
+   "verify": "agrees: bound 147/166 paid · 0 forks; obligations 18/18; verify 5/6",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a verdict that knew paid and missing and not the two heads"
+}

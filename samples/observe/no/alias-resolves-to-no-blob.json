@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: an alias that resolves to no blob, handed to the runtime anyway. With runner/host standing only as target text in bound's own lock, a blob run found no signed line, joined an empty id onto its own directory and started node on .bound/cas/blobs. Every capsule it asked answered nothing, and a render would have written each page without the regions its capsules own."
+ ],
+ "cases": [
+  {
+   "name": "the render capsules 8e80e249 2f0d5b0b e8a91cc3 6a80af35 4f2a2eb6, asked from the blob",
+   "said": "no answer · Cannot find module …/.bound/cas/blobs",
+   "expected.ok": false
+  }
+ ]
+}

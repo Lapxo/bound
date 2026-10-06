@@ -1,0 +1,7 @@
+{
+  "consent": "directory",
+  "bridgesFrom": "bridgeFile",
+  "grantsIn": "bound.authorities",
+  "position": "operational",
+  "want": "policyFromLines"
+}

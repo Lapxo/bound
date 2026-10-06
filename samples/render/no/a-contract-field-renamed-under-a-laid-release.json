@@ -1,0 +1,4 @@
+{
+ "about": ["The falsifier: under topos 0.1.0 an answer carries lines and no leaf field, and the wire exports namesAt and no namesLeaf. The body at epoch 289 reads said.leaf, which is undefined, so every capsule region renders empty, and imports namesLeaf by name, which fails when the module loads."],
+ "cases": [{"name": "the epoch 289 body under topos 0.1.0", "capsule regions rendered": "empty", "matcher": "fails to load", "expected.ok": false}]
+}

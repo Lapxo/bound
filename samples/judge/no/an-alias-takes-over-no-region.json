@@ -1,0 +1,9 @@
+{
+ "about": [
+  "The falsifiers. Before this lot an act that re-signed an alias in place, or withdrew one, could hand a place's regions to another capsule with nothing read but the pages; and the ceiling that bounds it was refused alone as inert, since no reading met it. Measured on a copy of the tree at 327 with lane D's answeringOf."
+ ],
+ "cases": [
+  { "name": "dep/topos-github/lines re-signed in place to the document capsule 80c7c8fb, told on the copy", "gate/aliases": "red in 5342 ms: 3 regions taken over — bound/ license dep/topos-doc → dep/topos-github/lines · obligations/ bond dep/topos-doc/merged → dep/topos-github/lines · verify/ ignore dep/topos-github/lines → dep/topos-github", "landed": "nothing; bound's lock untouched", "expected.ok": false },
+  { "name": "the owner's ceiling audit/host/alias-takes-no-region 0..0 in a batch alone, before this lot", "inert": "1: REFUSE·inert, no reading meets it", "expected.ok": false }
+ ]
+}

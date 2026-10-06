@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: the view wrote straight onto the final name. A kill mid-write left a one-byte file, and the next read parsed it."
+ ],
+ "cases": [
+  {
+   "name": "package.json left as a single newline",
+   "said": "writeFileSync onto the final name",
+   "expected.ok": false
+  }
+ ]
+}

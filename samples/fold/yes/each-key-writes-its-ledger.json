@@ -1,0 +1,37 @@
+{
+ "about": [
+  "Each key the lock admits to sign it writes its own ledger, and the lock is every one of them: an accept lands under the key that signed it, never under another's name.",
+  "The epoch is counted over every signer, so two keys never stamp one epoch for two batches they landed apart.",
+  "What the render, the take, the second head and every reader of the lock read is the lock whole; a line no admitted key covers is refused before it lands.",
+  "The lines that vouch a source are read through land/vouched.ts, the module the words of the store left: the lock a key writes is read the same way."
+ ],
+ "cases": [
+  {
+   "name": "a lane signs inside its coverage",
+   "key": "lane-B",
+   "coverage": "bound/src/**",
+   "scope": "bound/src/each-key-writes-its-ledger",
+   "lands in": "ledger/lane-B.bound",
+   "rendered": true,
+   "expected.ok": true
+  },
+  {
+   "name": "a lane signs outside its coverage",
+   "key": "lane-B",
+   "coverage": "bound/src/**",
+   "scope": "audit/bound/each-key-writes-its-ledger",
+   "refused": "REFUSE·authority lane-B does not cover audit/bound/each-key-writes-its-ledger",
+   "expected.ok": false
+  },
+  {
+   "name": "the owner signs after a lane",
+   "epochs": [
+    163,
+    164
+   ],
+   "lands in": "ledger/owner.bound",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a lane key admitted at epoch 162 signed its first batch into the owner's ledger, and the render kept only lines by the owner: the batch landed and stood nowhere"
+}

@@ -1,0 +1,16 @@
+{
+ "about": [
+  "rank has a resolution. At @0 it is as it was; at @1 every ceiling of the batch, or of the place when no batch is told, is named with its bound and what the fold reads for it, or unmeasured where no reading answers it."
+ ],
+ "cases": [
+  {
+   "name": "bound bound/ --as rank@1 <the same two ceilings>",
+   "said": [
+    "RANK@1   bound/src/fold/laid · laid-digest-differs 0..0 · read 0 · met",
+    "RANK@1   bound/src/fold/unread-by-anyone · no-reader-reads-this 0..0 · unmeasured"
+   ],
+   "expected.ok": true
+  }
+ ],
+ "red was": "a met ceiling and an unread one both printed nothing"
+}

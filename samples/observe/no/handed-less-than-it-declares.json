@@ -1,0 +1,23 @@
+{
+ "about": [
+  "The falsifier: a region handed less than it declares that answers anyway. Asked at topos-node with region/vectors listed among its reads and handed empty, though no line describes region/vectors, the frame answered as if the region held nothing: every region held in fewer than two worlds, no region let a short hand through, and the fewest cases that held were none.",
+  "A zero read off a region nobody handed is no evidence, and a ceiling that meets it is paid by silence."
+ ],
+ "cases": [
+  {
+   "name": "admitted-by-two-worlds at topos-node, region/vectors handed empty",
+   "said": "admitted-by-two-worlds/regions=3",
+   "expected.ok": false
+  },
+  {
+   "name": "reads-what-it-declares at topos-node, region/vectors handed empty",
+   "said": "reads-what-it-declares/regions=0",
+   "expected.ok": false
+  },
+  {
+   "name": "vectors-per-region at topos-node, region/vectors handed empty",
+   "said": "vectors-per-region/fewest=0",
+   "expected.ok": false
+  }
+ ]
+}

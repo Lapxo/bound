@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A withdrawal is the object's act: each claim key is a cell (cell from @lapxo/obligations/views/field) whose lines are the claims their signers observed there; each withdraw is observe(c, { takes: id }, −1) for every line whose fields hold the withdraw's own, the wire's naming; and what stands is live(c.seen), which 0.3.4 exports. What stands is what stood before, line for line; bound's own reading of withdrawal is gone from the verdict path."
+ ],
+ "cases": [
+  {
+   "name": "the old fold and the new over the tree at 325: every ledger file, every ledger at once, every place's own lock as written and as placed, the root lock, the readers' observations as placed readings, and 6000 random cells whose withdraws name lines by more, fewer or other fields than they carry",
+   "sets": "6043 of 6043 the same",
+   "real sets": "43 of 43 the same · 133346 lines · 7746 withdraws · 3365 lines taken back",
+   "expected.ok": true
+  },
+  {
+   "name": "bound/src lines, and fold/claims.ts on the verdict path",
+   "before": 8563,
+   "after": 8563,
+   "fold/claims.ts": "196 before, 196 after: the three lines that read a withdrawal in bound are three lines that ask the object",
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's act on a copy of the tree at 331, re-pinned first to 0.3.4 (52ef58ef) the way the owner's lines re-pin it",
+   "re-pin": "2 lines to bound's own lock, extension green in 3.2 s, check green in 20.8 s; the copy's @lapxo/obligations then reads 0.3.4 and exports live",
+   "gates": "extension green in 3.3 s, check green in 24.6 s",
+   "act": "40 s, the demand met in its cone",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a second algebra on the verdict path"
+}

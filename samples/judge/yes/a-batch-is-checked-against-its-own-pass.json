@@ -1,0 +1,29 @@
+{
+ "about": [
+  "A batch is checked against its own pass, and that pass is inside its accept. accept is one act under the store's lock. It signs the batch at the epoch the lock stands at, folds it, judges its takes, renders every leaf with it and runs the gates once on that fold. Only then does it land, and it renders what the landing moved. A second accept waits for the lock, so it signs the next epoch over a tree the first has finished writing.",
+  "A batch refused leaves nothing: every leaf the act rendered is written back as it held it, and a leaf it made leaves with the folders it made. What a batch would move is read before it with --as rank <batch>. That folds the batch as if it had landed; the batch lands nothing and no leaf is written."
+ ],
+ "cases": [
+  {
+   "name": "two accepts started 5 s apart on a scratch copy of the tree",
+   "first": "GATES gate/extension green · gate/check green (61326 ms) · landed at epoch 221 in 130060 ms",
+   "second": "WAIT the store is held by the first accept · HELD after 125181 ms · landed at epoch 222",
+   "after": "bound . --check reads 159 renders · 159 same",
+   "expected.ok": true
+  },
+  {
+   "name": "an act that lands nothing, over a copy with README.md stale and a receipts leaf missing",
+   "journal": "2 leaves rendered: README.md receipts.bound",
+   "undone": 2,
+   "tree": "3579 files before · 3579 after · 0 differ · 0 gone",
+   "expected.ok": true
+  },
+  {
+   "name": "bound . --as rank <batch> with a withdrawal told",
+   "said": "TOLD 1 lines folded as if landed · RANK 464 region summaries read, against 466 as the tree stands",
+   "landed": "no line of the batch",
+   "expected.ok": true
+  }
+ ],
+ "red was": "two accepts signed one epoch, and the second wrote leaves rendered before the first had landed"
+}

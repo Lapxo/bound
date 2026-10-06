@@ -1,0 +1,7 @@
+{
+ "scope": "page-quiet",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: an unrelated land rewrites a page"],
+ "cases": [{ "name": "mtime moved on a page the land did not touch", "prints": ["RENDERED"], "expected.ok": false }]
+}

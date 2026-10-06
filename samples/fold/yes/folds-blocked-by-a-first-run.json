@@ -1,0 +1,11 @@
+{
+ "about": [
+  "a reader with no memo runs behind, grey by name; no fold waits for a first run"
+ ],
+ "cases": [
+  {
+   "name": "folds-blocked-by-a-first-run",
+   "expected.ok": true
+  }
+ ]
+}

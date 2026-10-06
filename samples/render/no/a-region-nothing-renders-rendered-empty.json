@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: render answered a region nobody renders with nothing, so the view came out as an empty page and no line named the region. Only audit/wire/regions, a list kept by hand, stood between a view and that page."
+ ],
+ "cases": [
+  {"name": "bound/, a view asking no-such-region", "render before": "\"\\n\"", "unrendered": ["no-such-region"], "expected.ok": false}
+ ]
+}

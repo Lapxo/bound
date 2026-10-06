@@ -1,0 +1,36 @@
+{
+ "about": [
+  "A place is folded by its reach: the lines and readings every place reads — what an own lock speaks for the tree, the published place bound is measured over, the lines that name bound's own modules, and every line no place owns — and the lines and leaves its own place owns, never another place's; the forks, greys and second head's word its pages print, the judgements of the demands it reads, the leaves its views wrote, and the instrument. A pass that settles keeps each place's digest in the store's memos under that digest, with no line; a place whose digest is kept is not folded again, since nothing its pages read has moved. What the tree folds once — the lock's standing, each key's signed lines, the second head, the own locks' words — is folded once per act, and a place reads nothing of the tree it would throw away."
+ ],
+ "cases": [
+  {
+   "name": "every written view of every place at epoch 247, rendered from its whole reading and from its reach alone",
+   "views": 160,
+   "differ": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the one ceiling of the falsifier, accepted after the change",
+   "folds": 3,
+   "seconds": "16: the check 6.3, after landing 2.2",
+   "expected.ok": true
+  },
+  {
+   "name": "one byte of the fold's order moved and its demand accepted, the act B33 was",
+   "seconds": "30: every place folded, the check 19.8, the extension 2.1, after landing 5.0",
+   "expected.ok": true
+  },
+  {
+   "name": "a pass and a check of the settled tree",
+   "seconds": "8 and 4.5",
+   "renders": "160, 160 same",
+   "expected.ok": true
+  },
+  {
+   "name": "the published place the extension is measured over",
+   "outputs": "9e1781f94f9e2c0c, 25 rendered, 0 unlike",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a place's key carried the whole lock"
+}

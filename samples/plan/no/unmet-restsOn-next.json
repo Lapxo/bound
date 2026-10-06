@@ -1,0 +1,23 @@
+{
+  "forbiddenNext": "audit/plan/foundation/bep-admission.status",
+  "waiting": "audit/plan/foundation/bep-admission.status · restsOn · root=audit/plan/foundation/corpus-normative · prefix",
+  "cells": [
+    {
+      "scope": "audit/plan/foundation/bep-admission",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["topos/src/laws/index.ts", "vectors/"],
+      "restsOn": ["audit/plan/foundation/corpus-normative", "audit/plan/foundation/falsifier"]
+    },
+    {
+      "scope": "audit/plan/source/shadow",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/prepare/census-shadows.ts"]
+    }
+  ]
+}

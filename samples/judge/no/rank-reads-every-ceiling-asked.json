@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: --as rank printed a line only for a ceiling that bit. A ceiling that was met printed nothing, and so did one no reader read, so a batch's preview could not tell met from unmeasured."
+ ],
+ "cases": [
+  {
+   "name": "a batch of two ceilings, one met and one no reading answers, at rank",
+   "said": "neither ceiling named",
+   "expected.ok": false
+  }
+ ]
+}

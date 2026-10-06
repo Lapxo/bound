@@ -1,0 +1,18 @@
+{
+ "about": ["receipts.bound is the receipts region rendered at the resolution its view names, printed from lane B's readings, resolved(fold): each region's name, count and digest, never recomputed. @0 is the root digest line, at the digest of the @8 bytes the root's store keeps them under. @1 is one line per region, in the byte order of the names: its count as the value, the digest of its set as the place it was read at. @2 and finer is every receipt, with no attest line. Every @0 and @1 line is a wire line built with canonical(), by=bound. A release renders its receipts over the place as the tree folds it, the set a clone reads back from its store, so the tree's @1 and a release's are the same bytes when their receipts are."],
+ "cases": [
+  {"name": "obligations @0", "lines": 1, "bytes": 237, "twice the same": true, "expected.ok": true},
+  {"name": "obligations @1", "lines": 17, "regions": 17, "bytes": 3088, "sha256": "3c5cb74bc722a599d827bf2653cadc5a62be7ef4c3ceb4293b4122645cc12e1d", "twice the same": true, "expected.ok": true},
+  {"name": "obligations @8", "lines": 3127, "bytes": 740907, "attest lines": 0, "twice the same": true, "expected.ok": true},
+  {"name": "verify @0", "lines": 1, "bytes": 237, "twice the same": true, "expected.ok": true},
+  {"name": "verify @1", "lines": 8, "regions": 8, "bytes": 1483, "sha256": "457fb41edc69e1e84f4ce59c7fc772372c6f46f1e447945bc7d69ff1dfd7d3e1", "counts sum to the @8 lines": "29 = 29", "twice the same": true, "expected.ok": true},
+  {"name": "verify @8", "lines": 29, "bytes": 5839, "attest lines": 0, "twice the same": true, "expected.ok": true},
+  {"name": "the fixture, obligations 0.3.1 (7749ef64), @0", "lines": 1, "bytes": 237, "sha256": "b54b794cf7328a4334902f3348e64f4eb055f0cb9009d40b8e78775abc478a94", "twice the same": true, "the body before": "the same bytes", "expected.ok": true},
+  {"name": "the fixture @1", "lines": 16, "regions": 16, "bytes": 2909, "sha256": "f3cec79eb33d47cb1e392c3f7ec701d1e18959a1ecc85555860e14edcce295d3", "twice the same": true, "the body before": "32 lines, two per region", "expected.ok": true},
+  {"name": "the fixture @8", "lines": 3126, "bytes": 740909, "sha256": "4ed4ccca70bb3a98747cab632eed8e64a09ad1f365abf8ff9d098d4efa2e3845", "twice the same": true, "the body before": "the same bytes", "expected.ok": true},
+  {"name": "the tree's obligations against a release built from its fold, laid in a clone with its @8 carried by digest", "@0": "1 line, 237 B, identical", "@1": "17 lines, 3088 B, identical", "@8": "3127 lines, 740907 B, identical", "each side twice the same": true, "expected.ok": true},
+  {"name": "every page the tree's views write", "views": "174 of 174 the same", "expected.ok": true},
+  {"name": "the fixture's views, as cli/measure.ts reads them", "views": "24 of 24 SAME with the body before and after", "moved": 0, "expected.ok": true}
+ ],
+ "red was": "@1 printed two lines per region, a digest line and a count line, both at the digest of the @8 bytes, where the ledger's audit/wire/receipts rules one line per region: its region, its count and the digest of its set"
+}

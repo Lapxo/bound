@@ -1,0 +1,64 @@
+{
+  "forbiddenNext": "audit/plan/bound-mcp/server.status",
+  "waiting": "audit/plan/bound-mcp/server.status · restsOn",
+  "cells": [
+    {
+      "scope": "audit/plan/bound-mcp/server",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound-mcp/src/server.ts"],
+      "restsOn": [
+        "audit/plan/bound-mcp/tool/plan",
+        "audit/plan/bound-mcp/tool/fold",
+        "audit/plan/bound-mcp/tool/read",
+        "audit/plan/bound-mcp/tool/edit",
+        "audit/plan/bound-mcp/tool/prove",
+        "audit/plan/bound-mcp/tool/propose"
+      ]
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/plan",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/fold",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/read",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/edit",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/prove",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    },
+    {
+      "scope": "audit/plan/bound-mcp/tool/propose",
+      "measure": "status",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] }
+    }
+  ]
+}

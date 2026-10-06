@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: every capsule the instrument's own lock carries was in every place's key. At epoch 264 the forge alias moved from bc28ee15 to 8ad84ca3, and no page of any place moved; the act still moved all 14 keys and re-folded every place, 69 s, gate/check 44.8 s."
+ ],
+ "cases": [
+  {
+   "name": "dep/topos-github/actions re-aliased, epoch 264",
+   "pages moved": 0,
+   "keys moved": 14,
+   "seconds": 69,
+   "expected.ok": false
+  }
+ ]
+}

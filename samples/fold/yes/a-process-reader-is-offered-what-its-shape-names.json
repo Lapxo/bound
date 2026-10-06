@@ -1,0 +1,19 @@
+{
+ "about": [
+  "A reader that runs over its place is offered its sources and every leaf its shape names besides the word it runs by — `run|package.json|dist/**` offers the manifest and the build — so a lot that moves a leaf it reads runs it again, and a leaf a view writes from what readers said is offered only when a shape names it, so no reading moves its own offer. The readers of leaves and of directories are offered as before; a capsule reader is offered the leaves it is handed."
+ ],
+ "cases": [
+  {
+   "name": "the tree's readers as their lines stand, passes on a copy at epoch 280",
+   "second pass": "settled",
+   "third pass": "5 s, 15 readers kept whole",
+   "expected.ok": true
+  },
+  {
+   "name": "a shape naming dist/**",
+   "offered": "topos/dist/index.js, topos/dist/wire/index.d.ts; never topos/receipts.bound",
+   "expected.ok": true
+  }
+ ],
+ "red was": "exports-resolve read three after a manifest-only lot"
+}

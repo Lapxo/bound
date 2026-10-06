@@ -1,0 +1,11 @@
+{
+ "about": [
+  "bound takes a region at a resolution and --as a view; accept takes a batch and a key; --check is the closed fold"
+ ],
+ "cases": [
+  {
+   "name": "flags",
+   "expected.ok": true
+  }
+ ]
+}

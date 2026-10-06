@@ -1,0 +1,7 @@
+{
+ "scope": "disagreement-stays-visible",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: the last edit wins"],
+ "cases": [{ "name": "an average of three origins", "prints": ["averaged"], "expected.ok": false }]
+}

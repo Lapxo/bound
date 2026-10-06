@@ -1,0 +1,37 @@
+{
+ "about": [
+  "What is laid is read again from its bytes by the method that named the release, and the pass lands the digest as a receipt, laid/<name>/digest, keyed by the stamps of the bytes it read. The reading counts each release whose bytes as they lie now have no receipt, or one whose digest is not the one the lock names."
+ ],
+ "cases": [
+  {
+   "name": "the tree as laid",
+   "receipts": "laid/obligations/digest sha256:ba4149b7… (454 files) · laid/topos/digest sha256:192a5138… (263 files)",
+   "laid-digest-differs": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "one byte appended to the laid topos dist/wire/index.js, no pass yet",
+   "laid-digest-differs": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "after a pass",
+   "receipt": "sha256:203802e8…",
+   "laid-digest-differs": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "a line appended to the laid topos README",
+   "dep-drift": 0,
+   "laid-digest-differs": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "the bytes put back, after a pass",
+   "receipt": "sha256:192a5138…",
+   "laid-digest-differs": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a release laid under bound read by the label the host wrote when it copied it"
+}

@@ -1,0 +1,47 @@
+{
+ "about": [
+  "A view is the place's own: a published lock takes a view line that names leaves only when one of them is a leaf of the place, and a line that names none where its view names this place or no place at all.",
+  "So a place is published with each of its views once, with the leaf it writes, and never with a view another place's lock spoke. A place that is also a capsule keeps its own views: a capsule's own lock declares regions and never a view."
+ ],
+ "cases": [
+  {
+   "name": "obligations, published",
+   "lines": 459,
+   "views": 23,
+   "views twice": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "topos, published",
+   "lines": 385,
+   "views": 14,
+   "views twice": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "topos-bound, a place that is also a capsule, published",
+   "lines": 314,
+   "views": 12,
+   "its own views, each with its leaf": "manifest package.json · tsconfig tsconfig.json · gitignore .gitignore · readme-capsule README.md · reference-capsule docs/reference.md · citation-file CITATION.cff · guide CONTRIBUTING.md · pipeline-test · pipeline-tag · pipeline-release",
+   "expected.ok": true
+  },
+  {
+   "name": "topos, the pipelines a capsule renders from the place's views",
+   "release.yml": "1806 bytes, whole",
+   "tag.yml": "517 bytes, whole",
+   "expected.ok": true
+  },
+  {
+   "name": "needs a place's taken lines name outside it",
+   "paths-outside-a-place": {"bound/": 18, "obligations/": 14, "topos/": 37, "topos-bound/": 4, "verify/": 3},
+   "expected.ok": true
+  },
+  {
+   "name": "the published place 88474ebf78be98fa (0.2.0)",
+   "views": 23,
+   "unlike what it carries": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a view line was taken into a place's published lock whenever the first view of its name wrote there, whatever leaves the line itself named; the zoom then dropped those leaves, and every place was published with the views of the others"
+}

@@ -1,0 +1,20 @@
+{
+ "about": [
+  "A process of the instrument is the blob a signed line of its own lock names, beside the blob that runs; run from its source it is the module beside the command. A name that resolves to no blob is refused by name before anything is started."
+ ],
+ "cases": [
+  {
+   "name": "run from source",
+   "host": "bound/src/cli/host.ts",
+   "verb": "bound/src/cli/verb.ts",
+   "expected.ok": true
+  },
+  {
+   "name": "run as the verb blob 90a0f8f339a5, its own lock naming the four runners only as target text",
+   "said": "bound: REFUSE·alias runner/host resolves to no blob: no signed line of the instrument's own lock names it",
+   "started": "nothing",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a runner the instrument's own lock names only as target text resolved to an empty id, and the runtime was handed the store's own directory to run"
+}

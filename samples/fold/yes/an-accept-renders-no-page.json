@@ -1,0 +1,15 @@
+{
+ "about": [
+  "An accept signs, lands, takes what it signed, answers what landed late, renders the lock and beats: it renders no page, because the pass renders every page once per batch, before the batch is signed.",
+  "A page a view writes after an accept is written by the next pass, never by the accept that moved the lock."
+ ],
+ "cases": [
+  {
+   "name": "an accept of one demand over bound/src",
+   "spent": "lines 843 ms · render 661 ms · build 20697 ms",
+   "door": "gone: 17700 ms that folded the root and rendered its pages again",
+   "expected.ok": true
+  }
+ ],
+ "red was": "every accept ran a pass over the root after it landed, 17.7 s of observing and folding for pages the next pass renders anyway"
+}

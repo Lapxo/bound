@@ -1,0 +1,29 @@
+{
+ "about": [
+  "Accept lands a line where it stands: a line the ledger admits lands in the ledger, and a line the ledger does not cover lands in the one own lock that admits it — signed by the batch's key, inside the window it held, inside its coverage of the place, the scope read as a region of the place. An own lock speaks of its place without naming it, so a line whose scope names a place first is the ledger's alone. The own lines are told to that lock for the gates, the releases they name are laid before the extension is measured, and they land appended whole after the ledger's; a red gate tells nothing, writes nothing, and lays again what stands. A line no lock admits, one two locks would take, or one whose scope names a place the ledger refuses it for, refuses the batch; a line that names a signer or an epoch it was not signed with here is bare, and refuses it too: accept signs, and nothing is written into a lock bare."
+ ],
+ "cases": [
+  {
+   "name": "the region/vectors descriptor for bound's own lock, beside four demands, accepted on a copy of the tree",
+   "acts": "ACTS     every place · then the root, where the places join · 5 lines to the ledger · 1 to bound's own lock · before the lock",
+   "fact": "1 in bound/TARGET.bound",
+   "expected.ok": true
+  },
+  {
+   "name": "the same batch again",
+   "said": "ONCE: every line already landed and every demand of it paid",
+   "expected.ok": true
+  },
+  {
+   "name": "a line with by=lane-B epoch=255 and no sig in the batch",
+   "said": "REFUSE·bare nothing landed",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/probe-nowhere and topos-json/probe-nowhere from lane-B",
+   "said": "REFUSE·nowhere nothing landed: the ledger refuses them and no own lock may take a line that names a place first",
+   "expected.ok": true
+  }
+ ],
+ "red was": "three hand-written lock edits this week"
+}

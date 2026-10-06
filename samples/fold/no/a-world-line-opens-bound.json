@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: one views/world line opens bound. views/world never resolves into bound, obligations, topos, verify, topos-bound, or topos-contract."
+ ],
+ "cases": [
+  {
+   "name": "one views/world line opens bound",
+   "opens": "bound",
+   "opened": 13,
+   "expected.ok": false
+  }
+ ]
+}

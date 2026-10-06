@@ -1,0 +1,18 @@
+{
+ "about": [
+  "A world's release.yml is the render of audit/wire/pipeline/world: push to main, the tag folded into the one job when the version line changed and no tag names it, checkout at that tag at full depth, node from the runtime line, npm ci, bound fold --as release twice with equal digests, verify SAME from the blob, checks at secrets 0, stray 0, dist-non-js 0 and registry words 0, release.json rendered from the lines, gh release create of the tag with the blob as the only asset and release.json, the downloaded asset's sha256 equal to the digest or the release deleted, and the job summary printing the three consumer lines sources/, uses/ and needs/. permissions are contents: write only."
+ ],
+ "cases": [
+  {
+   "name": "the world release reference",
+   "on": "push to main",
+   "permissions": "contents: write",
+   "jobs": ["release"],
+   "publish": false,
+   "test": false,
+   "id-token": false,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a world release that carried a publish job, an id-token, or a test job"
+}

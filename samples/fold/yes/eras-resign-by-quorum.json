@@ -1,0 +1,11 @@
+{
+ "about": [
+  "when an era closes, what stands under it is signed again by a quorum of the keys it admitted"
+ ],
+ "cases": [
+  {
+   "name": "eras-resign-by-quorum",
+   "expected.ok": true
+  }
+ ]
+}

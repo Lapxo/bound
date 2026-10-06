@@ -1,0 +1,17 @@
+{
+ "scope": "three-verbs",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "fold --as help prints the three verbs and no fourth."
+ ],
+ "cases": [
+  {
+   "name": "help names fold land sign",
+   "prints": [
+    "verbs fold land sign"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

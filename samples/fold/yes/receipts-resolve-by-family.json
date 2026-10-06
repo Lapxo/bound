@@ -1,0 +1,105 @@
+{
+ "about": [
+  "A place's receipts are read at a resolution: at N a receipt stands in the region the first N steps of its scope spell, as the line spells them, so every resolution is a partition; @0 is the root, @1 the family. A region's digest is over each line's claim (scope, role, measure, form, value, at; never by, epoch or sig), canonical, sorted by bytes, each followed by a newline; the regions go in the byte order of their names and the root is the digest of their digests, each followed by a newline, in that order; a line the attest key signed is never one of them. The readings are receipts/<family> (count, digest) and receipts (the root), returned by fold/resolved.ts resolved(fold) with the digest of the @8 bytes as at; no receipt's value moves and no digest is copied into a line."
+ ],
+ "cases": [
+  {
+   "name": "families sorted by bytes, lines sorted by bytes, the attest excluded, one claim said twice",
+   "attest": "verify",
+   "lines": [
+    "bound-lock/1 at=place:sha256:aaaa by=reader:111 form=alphabet measure=id role=writes scope=source/b value=x",
+    "bound-lock/1 at=place:sha256:aaaa by=reader:222 form=alphabet measure=id role=writes scope=source/b value=x",
+    "bound-lock/1 at=place:sha256:bbbb by=reader:111 form=alphabet measure=id role=writes scope=source/a value=～",
+    "bound-lock/1 at=place:sha256:bbbb by=reader:111 form=alphabet measure=id role=writes scope=source/a value=😀",
+    "bound-lock/1 at=receipt:sha256:cccc by=judge form=alphabet measure=status role=writes scope=said-it value=present",
+    "bound-lock/1 at=place:./ by=reader:111 form=alphabet measure=observed role=writes scope=./ value=dddd",
+    "bound-lock/1 at=place:sha256:eeee by=reader:111 form=interval measure=count role=writes scope=Said/c value=1..1",
+    "bound-lock/1 at=place:root by=verify epoch=9 form=alphabet measure=status role=writes scope=verify/attest sig=\"x\" value=agrees"
+   ],
+   "expected": {
+    "root": "sha256:7890b0b18fa85fbeef735c926b05943a42084a1b9b4a9fa54324d4b36e0f9b77",
+    "regions": [
+     {
+      "name": "receipts/.",
+      "count": 1,
+      "digest": "sha256:de21db56eb74adbae407d056d0d289b339b2ba2da42648fa9ee0d14b9fd31999"
+     },
+     {
+      "name": "receipts/Said",
+      "count": 1,
+      "digest": "sha256:7cabca9e227d36559b58135b9d910434b57c9a7951c0834d48e6016713426e75"
+     },
+     {
+      "name": "receipts/said-it",
+      "count": 1,
+      "digest": "sha256:8287ad18407644a46dd378b2ce0957797c3ee3e058c54b87f77585abc262bb7c"
+     },
+     {
+      "name": "receipts/source",
+      "count": 3,
+      "digest": "sha256:a0cbf43fea04f8b2df0aae92717f73f58e37178aa4f81c38fd13bfd957a03603"
+     }
+    ]
+   },
+   "expected.ok": true
+  },
+  {
+   "name": "the same set with one receipt moved: Said/c's count",
+   "attest": "verify",
+   "lines": [
+    "bound-lock/1 at=place:sha256:aaaa by=reader:111 form=alphabet measure=id role=writes scope=source/b value=x",
+    "bound-lock/1 at=place:sha256:aaaa by=reader:222 form=alphabet measure=id role=writes scope=source/b value=x",
+    "bound-lock/1 at=place:sha256:bbbb by=reader:111 form=alphabet measure=id role=writes scope=source/a value=～",
+    "bound-lock/1 at=place:sha256:bbbb by=reader:111 form=alphabet measure=id role=writes scope=source/a value=😀",
+    "bound-lock/1 at=receipt:sha256:cccc by=judge form=alphabet measure=status role=writes scope=said-it value=present",
+    "bound-lock/1 at=place:./ by=reader:111 form=alphabet measure=observed role=writes scope=./ value=dddd",
+    "bound-lock/1 at=place:sha256:eeee by=reader:111 form=interval measure=count role=writes scope=Said/c value=2..2",
+    "bound-lock/1 at=place:root by=verify epoch=9 form=alphabet measure=status role=writes scope=verify/attest sig=\"x\" value=agrees"
+   ],
+   "expected": {
+    "root": "sha256:bf95b0b1173c5b7a9736ebf859664f363cc2bd8f25155bd780858bb013747ab6",
+    "regions": [
+     {
+      "name": "receipts/.",
+      "count": 1,
+      "digest": "sha256:de21db56eb74adbae407d056d0d289b339b2ba2da42648fa9ee0d14b9fd31999"
+     },
+     {
+      "name": "receipts/Said",
+      "count": 1,
+      "digest": "sha256:b19cf1e930071754fbe988ee33985e165c7194e50cbf9afcc9d80e93bbd6338c"
+     },
+     {
+      "name": "receipts/said-it",
+      "count": 1,
+      "digest": "sha256:8287ad18407644a46dd378b2ce0957797c3ee3e058c54b87f77585abc262bb7c"
+     },
+     {
+      "name": "receipts/source",
+      "count": 3,
+      "digest": "sha256:a0cbf43fea04f8b2df0aae92717f73f58e37178aa4f81c38fd13bfd957a03603"
+     }
+    ]
+   },
+   "expected.ok": true
+  },
+  {
+   "name": "every place's receiptsOf against its receipts file on a copy at 296, the attest dropped and each line spelled from inside its place",
+   "places": "14 of 14 SAME (the root and 13 places)",
+   "obligations": "3125 lines, 16 families, root dad723a9aa98",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations on the copy: one said/ receipt's value moved",
+   "apart": "receipts/said and the root",
+   "kept": "15 of 15 other families",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations on the copy: the same claims said by another key",
+   "root": "kept",
+   "expected.ok": true
+  }
+ ],
+ "red was": "receipts shipped whole and attested inside: receipts.bound was 740.9 kB of an 898.4 kB tarball and held the attest that attests it"
+}

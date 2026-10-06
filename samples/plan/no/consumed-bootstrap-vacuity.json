@@ -1,0 +1,11 @@
+{
+  "forbiddenNext": "audit/bootstrap/plan-is-missing",
+  "cells": [{
+    "scope": "audit/bootstrap/plan-is-missing",
+    "measure": "path",
+    "verdict": "single",
+    "produced": { "kind": "empty", "why": "no writer" },
+    "required": { "kind": "empty", "why": "no demand" },
+    "permitted": { "kind": "enumerated", "values": ["bound/src/scan/task-pick.ts"] }
+  }]
+}

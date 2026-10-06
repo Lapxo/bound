@@ -1,0 +1,22 @@
+{
+ "about": [
+  "The falsifier: a capsule's reads met against a place's leaves instead of against what the place offers. Every reader then reaches every leaf its globs fit anywhere in the tree: the runtime reader, which reads obligations/src, would read every TypeScript source of every place."
+ ],
+ "cases": [
+  {
+   "name": "runtime, reads *.ts, met against source leaves",
+   "leaves": "63 by its line, 360 by its globs",
+   "expected.ok": false
+  },
+  {
+   "name": "vocabulary, reads *.ts|*.json, met against source leaves",
+   "leaves": "296 by its line, 779 by its globs",
+   "expected.ok": false
+  },
+  {
+   "name": "hazards, reads src/**@2, met against source leaves",
+   "reach": "7 places by its line, 332 leaves by its globs",
+   "expected.ok": false
+  }
+ ]
+}

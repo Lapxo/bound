@@ -1,0 +1,14 @@
+{
+ "about": [
+  "A module runs to 500 lines at most and says what it is in three comments at most, each carrying a law of the module rather than a line of it: cli/verb.ts hands its arguments to cli/args.ts, a take to cli/takes.ts and an act to cli/accept.ts, and the place's fold and the readings a place owes fold their docs into the laws they state."
+ ],
+ "cases": [
+  {
+   "name": "the modules this lot touches",
+   "comments": "verb 2 · accept 3 · args 1 · takes 1 · pass 3 · place 3 · own 3",
+   "lines": "verb 245 · accept 369 · args 36 · takes 116 · pass 167 · place 398 · own 350",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a verb of seven hundred twenty-five lines"
+}

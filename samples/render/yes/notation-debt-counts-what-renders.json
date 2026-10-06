@@ -1,0 +1,20 @@
+{
+ "about": [
+  "A law the notation names owes a formula only when no law line with form=formula stands under it, whatever the last step of that line: the set the notation renders. A law with two formulas, a floor and a ceiling, owes none."
+ ],
+ "cases": [
+  {
+   "name": "obligations, D11-the-obligatory",
+   "formula lines": "law/D11-the-obligatory/floor and law/D11-the-obligatory/ceiling, form=formula, in src/laws/laws.bound",
+   "rendered at": "README.md 23-24 · docs/paper.md 19-20 · docs/reference.md 23-24",
+   "owed": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the debts of every place and of the tree",
+   "moved": "obligations 1 → 0, the other fourteen 0 → 0",
+   "expected.ok": true
+  }
+ ],
+ "red was": "the notation's debt counted a formula only on a line whose scope ends in /formula, so obligations was told GREY law/D11-the-obligatory/formula for a law whose two formula lines render on three of its pages"
+}

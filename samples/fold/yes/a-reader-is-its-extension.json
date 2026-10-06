@@ -1,0 +1,49 @@
+{
+ "about": [
+  "A reader is what it emits over its vectors, never the bytes of its code or of the shell it imports.",
+  "An edit that emits the same over them keeps the reader's identity and every place it read; an edit that emits otherwise is another reader and reads again.",
+  "The runner of a package's tests is the same: what it reports over its vectors keys every block it kept, never the bytes of run.ts."
+ ],
+ "cases": [
+  {
+   "name": "an edit beside a reader that emits the same",
+   "code": "moved",
+   "vectors": "unchanged",
+   "emits": "unchanged",
+   "identity": "kept",
+   "places read again": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "an edit that changes what the reader emits",
+   "code": "moved",
+   "vectors": "unchanged",
+   "emits": "moved",
+   "identity": "new",
+   "places read again": "all",
+   "expected.ok": true
+  },
+  {
+   "name": "the first measure adopts the identity the memo names",
+   "code": "unchanged since it last read",
+   "identity": "the one it already had",
+   "places read again": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "a reader with no vectors is its code",
+   "vectors": "absent",
+   "identity": "its code digest",
+   "counted": "readers-without-vectors",
+   "expected.ok": true
+  },
+  {
+   "name": "a runner edit that reports the same",
+   "run.ts": "moved",
+   "report": "unchanged",
+   "blocks run again": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "an edit of one reader re-ran every reader beside it: 517 s for one line, because a reader's identity was the digest of its directory"
+}

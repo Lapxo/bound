@@ -1,0 +1,11 @@
+{
+ "about": [
+  "a line signed under a closed era after it closed is refused, wherever it arrives from"
+ ],
+ "cases": [
+  {
+   "name": "closed-era-refuses-new-lines",
+   "expected.ok": true
+  }
+ ]
+}

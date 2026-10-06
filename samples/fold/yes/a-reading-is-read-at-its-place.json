@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A reading's at is the place it was read at, so what a reader said of two places is said of two cells, and the reader's lines are counted cell by cell. Every fold parses a value once, and folds each content apart from the others, since no order compares two contents; the classes that stand keep the order their first value came in, so the fold says exactly what it said before, faster."
+ ],
+ "cases": [
+  {
+   "name": "every ledger, ledger shard and own lock of the tree at epoch 244, the root's lock and spec/vectors/fold.txt, folded by B33 and by this change",
+   "files": 101,
+   "standing": 66818,
+   "that differ, in any field or in order": 0,
+   "ms": "2787 before, 1093 after",
+   "expected.ok": true
+  },
+  {
+   "name": "a cold fold of topos-json/",
+   "seconds": "37.8 before, 6.8 after; its check 43.7 s before, 11.2 s after",
+   "expected.ok": true
+  },
+  {
+   "name": "the published place the extension is measured over",
+   "rendered": "25, 0 unlike",
+   "outputs": "9e1781f94f9e2c0c, those of 678ab59c3d57 again",
+   "reader": "floor 1379 lines signed",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a fold that compared a reader's readings of every file pair by pair"
+}

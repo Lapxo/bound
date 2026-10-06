@@ -1,0 +1,25 @@
+{
+ "about": [
+  "While the wire lists regions, a view asking any other is refused as before. With no list, a view is refused whole where it is rendered when it asks a region that is none of bound's own names and that no capsule the place can run declares, and the refusal names those regions; the pass writes none of it and `--as <view>` refuses by name. The count of such regions over every place's written views is regions-described, and zero is what lets the list go."
+ ],
+ "cases": [
+  {
+   "name": "every place's written views on a copy at epoch 265, with the list and without it",
+   "regions-described": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "a view asking hero|no-such-region, written at the root, with no list",
+   "unrendered": "no-such-region",
+   "regions-described": 1,
+   "expected.ok": true
+  },
+  {
+   "name": "the tree's written views with the change and the list standing",
+   "renders": 153,
+   "same": "152, and README.md, which differs on the copy with the code before it too",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a list of regions kept by hand"
+}

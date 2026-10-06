@@ -1,0 +1,19 @@
+{
+ "about": [
+  "What bound says of a place names what the place holds as sources, renders and regions: the count no reader reaches is of sources, and the floor of a lock is the sources the fold vouched.",
+  "Only the words change: the counts are the same counts."
+ ],
+ "cases": [
+  {
+   "name": "the horizon of the tree",
+   "said": "HORIZON  75 of 330 sources no reader reaches",
+   "expected.ok": true
+  },
+  {
+   "name": "the lock of bound",
+   "said": "LOCK     bound/TARGET.bound · floor 250 sources vouched · ceiling 28 lines",
+   "expected.ok": true
+  }
+ ],
+ "red was": "PROGRAMS said leaves: a word the owner took out of the instrument, which a lock that renamed its families would still have printed"
+}

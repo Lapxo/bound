@@ -1,0 +1,35 @@
+{
+ "about": [
+  "Blocks whose inputs did not move are read back from the root's store, as before: the fold keeps each place's receipts (@8, without the attest) in the root's store at cas/carried/<digest of their bytes>; a place with no reader, a clone, reads back what it carries from there, and the clone gate lays the place's @8 beside the release in the clone's own store. No place's shipped file is read back: the import that read every place's receipts.bound left the readers path, where the tree's store already holds what its readers said."
+ ],
+ "cases": [
+  {
+   "name": "the clone gate for obligations on a copy at 296",
+   "gate": "green",
+   "receipts": "3126 lines, the same twice",
+   "written": "SAME 24/24",
+   "total": "7.1 s",
+   "expected.ok": true
+  },
+  {
+   "name": "the clone gate for verify on the copy",
+   "gate": "green",
+   "written": "SAME 11/11",
+   "total": "4.3 s",
+   "expected.ok": true
+  },
+  {
+   "name": "a pass over the copy with the import off the readers path",
+   "renders": "145 of 145 the same",
+   "observe": "0 run, 10 readers kept whole",
+   "expected.ok": true
+  },
+  {
+   "name": "what writes cas/carried",
+   "by": "receiptsOf, whenever a fold computes it: the clone gate for its place, the extension's measured copy, and every place the receipts region renders once the render asks receiptsOf",
+   "not": "a pass alone before that: the 13 files the copy held at 296 were written by a probe that read every place's resolved(), not by the pass as this sample said at 299",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a clone that read its receipts from what it shipped"
+}

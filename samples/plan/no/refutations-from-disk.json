@@ -1,0 +1,5 @@
+{
+  "loadRefutations": ".bound/refutations.json",
+  "position": "operational",
+  "forbidden": true
+}

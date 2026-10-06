@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a live lock is taken over. EPERM means the pid is alive. A live holder is waited on, and the lock is not renamed away."
+ ],
+ "cases": [
+  {
+   "name": "a lock whose pid is alive",
+   "line": "STALE",
+   "expected.ok": false
+  }
+ ]
+}

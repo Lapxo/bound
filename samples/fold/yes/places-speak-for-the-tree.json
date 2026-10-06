@@ -1,0 +1,41 @@
+{
+ "about": [
+  "A place's own lock speaks for the tree: its views, its readers, its notation and its prose are read by the pass as the tree's, each path it names read from the place and its prose written under its name.",
+  "Where the tree already says something under the same scope, role and measure, the tree's line stands; a view both write gains the places the place names.",
+  "The roles a place's own lock gives are the roles of what that place holds, and of nothing another place holds."
+ ],
+ "cases": [
+  {
+   "name": "a view a place's own lock writes",
+   "own": "view/readme-x shape=README.md value=door",
+   "tree": "view/readme-x needs=topos-x/README.md shape=README.md value=door",
+   "placed at": ["topos-x/"],
+   "expected.ok": true
+  },
+  {
+   "name": "prose a place's own lock speaks",
+   "own": "prose/en/what",
+   "tree": "prose/en/topos-x/what",
+   "expected.ok": true
+  },
+  {
+   "name": "a reader a place's own lock names",
+   "own": "reader/x-json needs=./|vectors/ value=src/observe.ts",
+   "tree": "reader/x-json needs=topos-x/|topos-x/vectors/ value=topos-x/src/observe.ts",
+   "expected.ok": true
+  },
+  {
+   "name": "a role a place's own lock gives",
+   "own": "leaf-role/NOTES.md value=derived",
+   "roles": { "topos-x/NOTES.md": "derived", "NOTES.md": "source", "bound/NOTES.md": "source" },
+   "expected.ok": true
+  },
+  {
+   "name": "a line of a family bound's own lock does not list",
+   "own": "audit/not-lifted value=0..0",
+   "tree": null,
+   "expected.ok": true
+  }
+ ],
+ "red was": "lanes moved their views and readers into their places' own locks, and the pass read only the root's: the lines were written where they belong and read nowhere"
+}

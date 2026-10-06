@@ -1,0 +1,11 @@
+{
+ "about": [
+  "no table of regions, readers or capsules in code: descriptors and uses lines say what renders"
+ ],
+ "cases": [
+  {
+   "name": "tables-in-code",
+   "expected.ok": true
+  }
+ ]
+}

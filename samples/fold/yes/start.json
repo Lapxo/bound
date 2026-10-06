@@ -1,0 +1,11 @@
+{
+ "about": [
+  "the runner starts as a compiled blob in a tenth of a second; it waits for the reader that already ran"
+ ],
+ "cases": [
+  {
+   "name": "start",
+   "expected.ok": true
+  }
+ ]
+}

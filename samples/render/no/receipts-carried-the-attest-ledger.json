@@ -1,0 +1,26 @@
+{
+ "about": [
+  "The falsifier: a receipts leaf that copies the attest key's ledger. Each of twelve leaves carried the same 512 lines of verify, 119 verdicts of verify/target and 393 digests of verify/region/*, 191 kB each and 2.3 MB in all, where 0.2.0 was published with one verdict."
+ ],
+ "cases": [
+  {
+   "name": "obligations/receipts.bound, read by cost/ship",
+   "lines": 4194,
+   "attest lines": 512,
+   "kB": 1040,
+   "expected.ok": false
+  },
+  {
+   "name": "topos-contract/receipts.bound, a place with nothing else to receipt",
+   "lines": 513,
+   "attest lines": 512,
+   "expected.ok": false
+  },
+  {
+   "name": "the tree's own receipts.bound",
+   "lines": 523,
+   "attest lines": 512,
+   "expected.ok": false
+  }
+ ]
+}

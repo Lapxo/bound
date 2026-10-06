@@ -1,0 +1,20 @@
+{
+ "about": [
+  "The ship reading counts the receipt lines a place ships: the lines of the receipts file when the place's files line (shape package.json) names it, or the wire's ships list where no files line stands, and none otherwise. cost/ship stays 0..1000; the ceiling does not move, the reading does."
+ ],
+ "cases": [
+  {
+   "name": "obligations' PROGRAMS on a copy at 296, before",
+   "line": "ceilings 119 met here · 0 short · 10 over",
+   "over": "cost/ship · 3126",
+   "expected.ok": true
+  },
+  {
+   "name": "the same, after",
+   "line": "ceilings 119 met here · 0 short · 9 over",
+   "cost/ship": "met: the wire ships dist, README.md, LICENSE and TARGET.bound, no receipts",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a ship reading of receipts nothing ships"
+}

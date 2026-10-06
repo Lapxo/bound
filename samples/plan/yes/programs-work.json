@@ -1,0 +1,6 @@
+{
+  "reads": "WORK",
+  "buckets": ["paid", "shadow", "held", "waiting", "potential"],
+  "missing": "demands minus receipts",
+  "unobserved": "a cell with no floor is never produced=required"
+}

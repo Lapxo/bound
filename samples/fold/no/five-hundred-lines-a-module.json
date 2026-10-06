@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: lines/*/src/**/* 0..500 and comments/*/src/** 0..3 are owed at bound: at epoch 283 the design reads cli/verb.ts over 500 lines, 725, and over three comments cli/verb.ts=10, cli/place.ts=4 and fold/own.ts=12."
+ ],
+ "cases": [
+  {
+   "name": "bound's design at epoch 283",
+   "comments": "verb.ts 10 · place.ts 4 · own.ts 12",
+   "lines": "verb.ts 725",
+   "expected.ok": false
+  }
+ ]
+}

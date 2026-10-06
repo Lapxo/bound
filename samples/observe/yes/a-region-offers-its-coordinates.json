@@ -1,0 +1,11 @@
+{
+ "about": [
+  "A region a place offers is a region/<name> line whose measure is coordinates, the owner's word from epoch 288 on; while the lines move from the word the owner retired, a line in either word is read, so no match moves on the way."
+ ],
+ "cases": [
+  {"name": "every region line of the tree at epoch 288, all still in the retired word", "matches before": 210, "matches after": 210, "the same": true, "expected.ok": true},
+  {"name": "a root region/hazards line with measure=coordinates", "matches": 3, "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "174 of 174 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "the owner named the measure of a region line coordinates at epoch 288, and the matcher read only the retired word, so a line re-signed in the owner's word would have offered nothing"
+}

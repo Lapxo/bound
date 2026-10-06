@@ -1,0 +1,4 @@
+{
+ "about": ["The falsifier: every interval reading summed, whatever it measures. A longest read over many files became their sum, and a ceiling of 0..40 on the longest line read over for a place whose longest line was within it."],
+ "cases": [{"name": "source/longest/<place>/src/** read as the sum of each file's longest", "read": "a sum", "expected.ok": false}]
+}

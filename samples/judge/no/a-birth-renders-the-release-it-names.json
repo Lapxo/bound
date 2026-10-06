@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a gate that measures a birth against the pin it replaces refuses every birth. Over the laid fixture X (7749ef64, obligations 0.3.1), the release the tree renders of obligations is not X once anything the place publishes has moved: at epoch 255 lane D read 3 leaves differ, 45 s; on a copy at epoch 260 the same 3 leaves."
+ ],
+ "cases": [
+  {
+   "name": "obligations measured against X, the release it replaces, on a copy at epoch 260",
+   "said": "3 leaves of obligations unlike 7749ef6481c9: differs TARGET.bound · differs docs/reference.md · differs receipts.bound",
+   "expected.ok": false
+  }
+ ]
+}

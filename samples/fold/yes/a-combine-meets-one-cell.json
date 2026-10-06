@@ -1,0 +1,37 @@
+{
+ "about": [
+  "A combine of bounds meets them where they land on one cell (T102): what a line claims is its named fields less the at it answers for, so two readers of one field at two ats are one claim, compared by the cell's order, and the narrower stands alone; a signer's later line on the same claim revises the earlier whatever at it answers for. Lines on two cells keep two cells."
+ ],
+ "cases": [
+  {
+   "name": "spec block 1, 0..320 then 0..255",
+   "standing": ["0..255"],
+   "forks": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the same two, arriving the other way",
+   "standing": ["0..255"],
+   "forks": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the whole of spec/vectors/fold.txt, bound beside verify's fold",
+   "unforked standing": "19 and 19, the same lines",
+   "forked scopes": "9 and 9, the same scopes",
+   "expected.ok": true
+  },
+  {
+   "name": "the lock at epoch 242 and every place's own lock, folded before and after",
+   "lines that stand differently": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the published place the extension is measured over",
+   "rendered": "25, 0 unlike what the place carries",
+   "moved": "programs alone: KEY keys/reader · floor 1379 → 1199 lines signed, the reader's lines on one cell at several ats now one claim each",
+   "expected.ok": true
+  }
+ ],
+ "red was": "combine folds a meeting pair as a fork"
+}

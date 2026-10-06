@@ -1,0 +1,40 @@
+{
+ "about": [
+  "A release is what the fold renders over the release it replaces. What the build made stands as made, by digest. The lock and the receipts are the published ones, the lock carried as it was signed when its lines are the lines the fold publishes. Each leaf a view writes is rendered from the published fold, and every other leaf is the laid copy's. A foreign leaf is never released.",
+  "The release is laid whole in a clone of its own and named by releaseDigest. The clone is removed after unless REBIRTH_KEEP keeps it and names where. Each leaf unlike the laid copy, or held by one side only, is named."
+ ],
+ "cases": [
+  {
+   "name": "the pins, packed again from their folders by releaseDigest",
+   "obligations-release": "ba4149b7 = dep/obligations, 3.9 s",
+   "verify-release": "f3b8563a = dep/verify, 1.0 s",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations rendered from the fold over its laid copy ba4149b7, the tree moved since 0.3.0",
+   "released": "e5f35325, twice",
+   "named": "differs .github/workflows/release.yml, README.md, TARGET.bound, dist/views/field.d.ts, dist/views/field.js, docs/reference.md, receipts.bound; only released dist/field/fragility.d.ts, dist/field/fragility.js, docs/paper.md; only laid none",
+   "expected.ok": true
+  },
+  {
+   "name": "verify rendered from the fold over its laid copy f3b8563a",
+   "released": "008e68f6, twice over one fold",
+   "named": "differs .github/workflows/release.yml, CITATION.cff, README.md, TARGET.bound, dist/cli.js, dist/fold.js, dist/key.d.ts, dist/key.js, dist/region.d.ts, dist/region.js, package.json, receipts.bound",
+   "expected.ok": true
+  },
+  {
+   "name": "the clone",
+   "without REBIRTH_KEEP": "removed",
+   "with REBIRTH_KEEP=1": "kept and named in the answer",
+   "expected.ok": true
+  },
+  {
+   "name": "the leaves of the release pinned for obligations 0.3.0, by role",
+   "source": "315, the laid copy's",
+   "derived a view writes": "12, rendered",
+   "derived under dist/": "126, the build's",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a release was reborn by a script that copies a list of directories from the tree, so a foreign leaf inside one of them shipped, a place with no script had no rebirth, and nothing weighed the reborn folder against the digest its dep line pins"
+}

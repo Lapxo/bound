@@ -1,0 +1,7 @@
+{
+ "scope": "three-verbs",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: help names a fourth verb"],
+ "cases": [{ "name": "help names a fourth", "prints": ["verbs fold land sign peek"], "expected.ok": false }]
+}

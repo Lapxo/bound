@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: topos's bytes stored under obligations 0.3.0's name, with the place marked laid by that name. The label the place holds says obligations 0.3.0 is laid there; the bytes hash to topos. resolvedOf names no release for it."
+ ],
+ "cases": [
+  {"name": "a forged own store: blob ba4149b7d009 holding topos 8a8a93a6's bytes, node_modules/@lapxo/obligations/.laid = sha256:ba4149b7…", "the label says": "laid ba4149b7d009", "resolved lines": 0, "expected.ok": false}
+ ]
+}

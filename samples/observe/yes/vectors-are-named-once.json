@@ -1,0 +1,9 @@
+{
+ "about": [
+  "Where a reader's vectors live is said once: observe/identity.ts exports vectorsOf, <package>/vectors/<stem>.json, so the fold's key can import it instead of spelling the path again, and a moved vectors file moves the key that reads it."
+ ],
+ "cases": [
+  {"name": "observe/identity.ts", "exports": "vectorsOf", "paths moved": 0, "expected.ok": true}
+ ],
+ "red was": "lane B's key at epoch 272 kept whole observations under the digest of what each reader reads, its vectors among them, and spelled the vectors path itself, because observe/identity.ts kept vectorsOf to itself"
+}

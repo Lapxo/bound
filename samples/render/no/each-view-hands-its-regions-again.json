@@ -1,0 +1,21 @@
+{
+ "about": [
+  "The falsifier: a region read again for every view that asks it. At obligations, 24 views built the place's lines and every region their capsules read 44 times in one fold, each build 22 to 27 ms of cpu, after the same had been built once to ask the capsules for all of them."
+ ],
+ "cases": [
+  {
+   "name": "obligations, 24 views, a fold that moved one reading",
+   "regions asked": 44,
+   "regions built": 44,
+   "cpu": "1031 to 1172 ms",
+   "expected.ok": false
+  },
+  {
+   "name": "topos-node, 12 views, a fold that moved one reading",
+   "regions asked": 20,
+   "regions built": 20,
+   "cpu": "318 to 354 ms",
+   "expected.ok": false
+  }
+ ]
+}

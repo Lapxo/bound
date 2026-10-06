@@ -1,0 +1,23 @@
+{
+ "about": [
+  "A fold of one place is keyed by what its readers answered, and an answer already landed is read back by the key it was kept under: its digest, taken once, is the point, and the answer is never read again to find the fold.",
+  "Only a reader whose places moved, or whose answer is not kept, is read in full; what it answers is digested the same way, so a key taken from answers read back equals a key taken from answers read in full."
+ ],
+ "cases": [
+  {
+   "name": "bound/ with nothing moved",
+   "points": "666 answers read back as digests",
+   "observed": "96 ms",
+   "was": "2505 lines read to digest them again",
+   "keys equal": true,
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/ with some readers moved",
+   "points": "805 digests, those of the moved readers taken from their lines",
+   "keys equal": true,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a kept fold of bound/ read every answer its readers had given, 2505 lines, only to digest them into the key that found the fold which already held them"
+}

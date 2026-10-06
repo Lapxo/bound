@@ -1,0 +1,27 @@
+{
+ "about": [
+  "A place's receipts write each observed line once per digest: an observed line is a cone, never also a reading, and a line said twice is one.",
+  "So a place folded at its own root renders the receipts it carries, and a render read back renders the same."
+ ],
+ "cases": [
+  {
+   "name": "obligations published, folded at its own root",
+   "lines": 3756,
+   "repeated": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the receipts of the tree, eleven places and the root",
+   "rendered": "the same",
+   "repeated": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the published place 88474ebf78be98fa (0.2.0)",
+   "views": 23,
+   "unlike what it carries": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "an observed line whose scope a receipts region names was written as a cone and again as a reading, so a place folded at its own root wrote each of its examples twice"
+}

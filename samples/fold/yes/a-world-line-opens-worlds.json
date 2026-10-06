@@ -1,0 +1,14 @@
+{
+ "about": [
+  "A views/world line resolves into the seven worlds and no other place. A root default for those worlds opens them, runs no reader, and the other six read their receipt. RECEIPTS N read · M opened, and M is that descent."
+ ],
+ "cases": [
+  {
+   "name": "one views/world line",
+   "opens": "topos-doc topos-frame topos-github topos-json topos-measure topos-node topos-typescript-tree",
+   "opened": 7,
+   "expected.ok": true
+  }
+ ],
+ "red was": "RECEIPTS 0 read · 13 opened"
+}

@@ -1,0 +1,15 @@
+{
+ "about": [
+  "Two renders of the same lines are byte-equal. The figure names the blob digest. It never names the release, which is named after the figure is drawn. No timestamp and no epoch is drawn. Regions are drawn in sorted order."
+ ],
+ "cases": [
+  {
+   "name": "topos-github docs/img/world.svg rendered twice from one handing of its lines",
+   "byte-equal": true,
+   "names": "the blob digest",
+   "regions": "sorted",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a second render of the same lines"
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "about": "Synthetic routing fixture; no instrument execution claimed",
+    "at": "witness:receipt-routing-fixture",
+    "by": "fixture",
+    "form": "alphabet",
+    "measure": "receipts",
+    "role": "writes",
+    "scope": "region/hydrology",
+    "value": "hydrology/temperature"
+  },
+  {
+    "absence": "refuse",
+    "at": "witness:receipt-routing-fixture",
+    "by": "fixture",
+    "form": "alphabet",
+    "measure": "id",
+    "reads": "page/count/hydrology/temperature|region/hydrology",
+    "role": "writes",
+    "scope": "page/compose/carnet/070",
+    "shape": "carnet/observations.md",
+    "value": "count@3"
+  },
+  {
+    "about": "Température",
+    "at": "witness:receipt-routing-fixture",
+    "by": "fixture",
+    "form": "alphabet",
+    "measure": "text",
+    "role": "writes",
+    "scope": "page/count/hydrology/temperature",
+    "value": "declared"
+  }
+]

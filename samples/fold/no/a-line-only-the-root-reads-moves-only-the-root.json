@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The falsifier: a line no place owned was in every place's key. Of the 3,292 lines standing on a copy at epoch 264, 514 are read by no place's written views — leaf/bound-mcp 142, audit/tree 68, leaf/fold 55, audit/close 19, leaf/spec 17, audit/step 16, leaf/ledger 16, law/*, docs/why, cost/*, theory/* and more — and each of them, landed, re-folded all fifteen places."
+ ],
+ "cases": [
+  {
+   "name": "the 514 lines no place's pages read, epoch 264",
+   "in every place's key": 514,
+   "expected.ok": false
+  }
+ ]
+}

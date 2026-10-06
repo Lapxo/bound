@@ -1,0 +1,22 @@
+{
+ "about": [
+  "The lock is rendered once per digest of its lines, the anchor it is read with, the day that decides what expired and what the judge has said: the same inputs read the render back.",
+  "A render read back is the render taken: its text, its standing, its forks, its grey, its refused and its vacuous lines are the same bytes."
+ ],
+ "cases": [
+  {
+   "name": "a second fold of an unmoved lock",
+   "lines": 3984,
+   "rendered": "64 ms, read back",
+   "was": "263 ms, every signature verified again",
+   "expected.ok": true
+  },
+  {
+   "name": "a line lands",
+   "key": "moves with the lines",
+   "rendered": "taken again, once",
+   "expected.ok": true
+  }
+ ],
+ "red was": "every fold of every place rendered the lock again and verified every signature it holds, for lines that had not moved since the last fold"
+}

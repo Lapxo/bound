@@ -1,0 +1,17 @@
+{
+ "about": [
+  "The falsifier: a workflow rendered for a world that contains a publish job or a test job. A world release has neither, and it has no id-token."
+ ],
+ "cases": [
+  {
+   "name": "a workflow that contains a publish job",
+   "publish": true,
+   "expected.ok": false
+  },
+  {
+   "name": "a workflow that contains a test job",
+   "test": true,
+   "expected.ok": false
+  }
+ ]
+}

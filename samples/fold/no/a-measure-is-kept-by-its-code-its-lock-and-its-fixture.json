@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier, read off the act at 334: the cone measured code c96d99b363b5 over the published place (26 rendered, 0 unlike, 16049 ms), then the extension gate measured the same code over the same place again (49057 ms). Nothing kept the first measure for the second."
+ ],
+ "cases": [
+  {
+   "name": "the same code measured twice in one act at 334",
+   "cone ms": 16049,
+   "gate ms": 49057,
+   "expected.ok": false
+  }
+ ],
+ "red was": "a gate that measured again what the cone had measured"
+}

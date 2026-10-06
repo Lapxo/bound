@@ -1,0 +1,30 @@
+{
+ "about": [
+  "An answer read from a landed cone is a judgment like a take: it pays a demand only where a take would have, a view by its leaf and anything else with a case in its cone.",
+  "A demand whose cone holds no sample and no vector is not paid by reading that its leaves are vouched: vouched is not judged."
+ ],
+ "cases": [
+  {
+   "name": "a law whose cone holds only code, read from a landed cone",
+   "demand": "audit/bound/eras-resign-by-quorum needs=bound/src/fold/digests.ts|bound/src/cli/verb.ts",
+   "answer": "at=cone:<digest of the vouched leaves>",
+   "paid": false,
+   "expected.ok": true
+  },
+  {
+   "name": "a view whose leaf is vouched, read from a landed cone",
+   "demand": "view/manifest needs=obligations/package.json",
+   "answer": "at=cone:<digest of the vouched leaves>",
+   "paid": true,
+   "expected.ok": true
+  },
+  {
+   "name": "a law whose cone holds its sample, read from a landed cone",
+   "demand": "replay-folds-what-landed needs=samples/yes/replay-folds-what-landed.json|src/replay.ts",
+   "answer": "at=cone:<digest of the vouched leaves>",
+   "paid": true,
+   "expected.ok": true
+  }
+ ],
+ "red was": "an accept vouched digests.ts and verb.ts for another demand, and two demands for eras that were never built were answered from the landed cone and read as paid"
+}

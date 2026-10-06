@@ -1,0 +1,10 @@
+{
+ "about": [
+  "The falsifier: the rebirth landed at epoch 274 named a toolchain and read the world where it ran. It skipped node_modules by name while walking the clone, called a tsconfig file stray by name, and ran verify in process.cwd(); the ceilings on what bound's code names read all three over. The clone holds only what the release carried, so nothing has to be skipped by name; a stray is a leaf the rebirth left that the release did not carry; verify runs in the clone."
+ ],
+ "cases": [
+  {"name": "identifier/*/src/** at epoch 274", "read": "bound/src/host/rebirth.ts=process.cwd:51", "expected.ok": false},
+  {"name": "identifier/bound/src/** at epoch 274", "read": "bound/src/host/rebirth.ts=node_modules:9|tsconfig:8", "expected.ok": false},
+  {"name": "literal/bound/src/** at epoch 274", "read": "bound/src/host/rebirth.ts=node_modules:9", "expected.ok": false}
+ ]
+}

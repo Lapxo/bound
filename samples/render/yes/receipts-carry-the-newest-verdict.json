@@ -1,0 +1,40 @@
+{
+ "about": [
+  "What the second head said reaches a place's receipts as its newest verdict alone: the last verify/target line of the attest key, as the published place 0.2.0 carries it. The rest of that key's ledger stays in the store, where every reader of it reads it, and a published place's receipts drop every line of it."
+ ],
+ "cases": [
+  {
+   "name": "every receipts leaf of the tree, twelve of them",
+   "attest lines in each": "512 → 1",
+   "lines": "11430 → 5298",
+   "kB": "3513 → 1221",
+   "expected.ok": true
+  },
+  {
+   "name": "obligations/receipts.bound, the leaf cost/ship reads",
+   "lines": "4194 → 3683",
+   "kB": "1040 → 849",
+   "expected.ok": true
+  },
+  {
+   "name": "every other view the tree writes",
+   "views": 173,
+   "moved": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "the published place 88474ebf78be98fa (0.2.0)",
+   "attest lines it carries": "1: verify/target agrees",
+   "views": 23,
+   "unlike what it carries": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "who reads the attest key's ledger",
+   "from the store": "fold/second.ts, fold/own.ts, fold/kept.ts, cli/place.ts",
+   "from a receipts leaf": "none",
+   "expected.ok": true
+  }
+ ],
+ "red was": "every receipts leaf carried the attest key's whole ledger, 512 lines and 191 kB of 119 verdicts and 393 digests, so twelve leaves held twelve copies of one ledger no page reads, and obligations' leaf, the one cost/ship reads, weighed 191 kB more than its pages read"
+}

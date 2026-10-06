@@ -1,0 +1,6 @@
+{
+ "about": ["The falsifier: paid by scope alone. Any FACT that ever landed under a demand's scope read as its take, so a demand signed again under a fresh at was held paid by its old signing, and its old take was counted as a take without gates."],
+ "cases": [
+  {"name": "audit/topos/source-is-leaves-by-digest and audit/tree/concepts-are-one-function, signed again at 212", "counted as": "taken without gates, by takes from before any gate", "expected.ok": false}
+ ]
+}

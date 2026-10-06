@@ -1,0 +1,7 @@
+{
+  "scope": "audit/bootstrap/plan-is-missing",
+  "measure": "path",
+  "produced": { "kind": "enumerated", "values": ["present"] },
+  "permitted": { "kind": "enumerated", "values": ["bound/src/scan/task-pick.ts"] },
+  "at": "receipt:sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

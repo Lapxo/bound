@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier, landed by B33 at epoch 244: once the at a line answers for stopped being its content, what the reader said of 467 files at one question became one claim, 461 values no order compares, and the fold compared them pair by pair, parsing each alphabet again for every pair. The count of lines each key signed folds the reader's readings in every place, so a cold fold of topos-json took 37.8 s, 32.6 s of it in that count and 26.9 s parsing alphabets; B33's own check took 660 s. The count itself fell from 1379 to 1199 over the published place, moving the extension, though no reading had moved."
+ ],
+ "cases": [
+  {
+   "name": "a cold fold of topos-json/ at epoch 244",
+   "seconds": 37.8,
+   "in the count of signed lines": 32.6,
+   "expected.ok": false
+  },
+  {
+   "name": "the reader's count over the published place the extension is measured over",
+   "floor": "1379 before B33, 1199 after",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,33 @@
+{
+ "about": [
+  "A world whose index only names where it lies is loaded by its host: the lock beside the index read once, each region loaded from its one file by name and role into the shell of its kind, a world answered only by the capsules its place pins, and a world's own prose, keyed by its lock, handed zoomed where the place holds no line of that scope."
+ ],
+ "cases": [
+  {
+   "name": "the frame re-frozen on topos 0.1.2 (scratch d118), split one region to a file, asked through the host end of the contract with the located module in the index's place",
+   "regions": "22 by name and role from the lock",
+   "vectors": "104 of 104 held in one run",
+   "expected.ok": true
+  },
+  {
+   "name": "every page the pass writes at every place, rendered by the tree's code and by the lot's, the owner's four precondition pins told to both, at .@353 · locks c1dc36a3",
+   "pages": "132 of 132 the same",
+   "expected.ok": true
+  },
+  {
+   "name": "the published places reborn by an instrument carrying the lot, the four pins told",
+   "rebirth verify, obligations, topos and topos-json": "green",
+   "rebirth topos-bound and topos-doc": "8 of 10 written SAME, src/index.ts and docs/reference.md apart, as the tree's own instrument reads them",
+   "expected.ok": true
+  },
+  {
+   "name": "a capsule keyed capsule/key measure with prose/en/measure/door/what and prose/en/measure/rests/on",
+   "a region that reads prose/*/door/* and prose/*/rests/on": "handed prose/en/door/what and prose/en/rests/on",
+   "a region that reads neither": "handed no prose",
+   "the same capsule with no key": "hands no prose",
+   "a scope the place already holds (prose/en/what)": "the place's own line is handed, not the world's",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a world its host could not load"
+}

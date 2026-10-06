@@ -1,0 +1,7 @@
+{
+ "scope": "a-fact-is-a-printed-line",
+ "want": 0,
+ "kind": "no",
+ "about": ["the falsifier: a fact that was not printed"],
+ "cases": [{ "name": "a millisecond count on the stranger", "prints": ["RECEIPTS 0 read · 1 opened ·"], "expected.ok": false }]
+}

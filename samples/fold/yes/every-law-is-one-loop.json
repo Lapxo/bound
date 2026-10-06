@@ -1,0 +1,14 @@
+{
+ "law": "authority",
+ "region": "audit/bound",
+ "points": [
+  {
+   "at": "audit/bound/one-landing",
+   "epoch": 3
+  }
+ ],
+ "f": "covers: the origin's region contains the coordinate, at a resolution and an epoch inside its windows",
+ "edges_needed": 0,
+ "why": "a law that is a region and a local reading needs no table of edges: who may speak here is read off the coordinate and the windows, not off a graph of who admitted whom",
+ "expected.ok": true
+}

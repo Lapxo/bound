@@ -1,0 +1,20 @@
+{
+ "about": [
+  "An own lot never forks a place's lock: accept tells each place the lines of the lot it takes and folds its lock with and without them, and a claim that would stand twice where it stood once refuses the lot whole, before anything is signed into a lock. A lot for many places lands the same lines at each; lines meant for one place go in a lot of their own."
+ ],
+ "cases": [
+  {
+   "name": "a lot on a copy at 299 telling bound's lock region/vocabulary twice (src/**/*.ts at one witness, src/**/*.mts at another)",
+   "answer": "FORKED bound/TARGET.bound · region/vocabulary reads coordinates",
+   "landed": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "this lot's own lines at bound: 8 withdraws and 8 region lines, one per claim",
+   "forks": 0,
+   "landed": 16,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a lot for eight places that landed every line at each"
+}

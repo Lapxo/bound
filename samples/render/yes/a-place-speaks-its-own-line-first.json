@@ -1,0 +1,35 @@
+{
+ "about": [
+  "What a place publishes and what a capsule at it is handed hold one line per claim key (scope, role and measure), and where the place's own lock holds a line of that key it is the place's own line, ahead of the root's lines the place takes, in the order the fold already gives a place's standing. A root line the place takes stands only where the place holds no line of its key."
+ ],
+ "cases": [
+  {
+   "name": "topos's own version bumped for its next release, told in memory at .@348 · bound@349",
+   "published lock": "566 lines, one version line",
+   "carries": "version 0.1.1, the place's own (at=witness:a-release-that-carried-the-roots-version)",
+   "expected.ok": true
+  },
+  {
+   "name": "every shaped view at every place, folded for real, the flip against the tree's code",
+   "views": "163 of 163 the same",
+   "expected.ok": true
+  },
+  {
+   "name": "each published place's release, the flip against the tree's code over the same fold and laid pin",
+   "places": "obligations, verify, topos, topos-bound, topos-doc, topos-github, topos-json, topos-node, topos-typescript-tree",
+   "differ": "TARGET.bound only, at every place; the same line count, own lines where a root line of their key stood",
+   "rebirth topos": "green, 566 of 566, written SAME 17/17",
+   "rebirth verify": "green, 446 of 446, written SAME 11/11",
+   "expected.ok": true
+  },
+  {
+   "name": "the documents world's own vectors for the rule, second origin by lane C (topos-doc D8, sha256:3af35f8a, vectors/)",
+   "figure-fold.json": "root:topos-own-free · figure-fold@1 · docs/img/fold.svg: the place's own FREE colour for that key turns the meet and nothing else",
+   "check.json": "root:topos-node-own-heading · check@0 · README.md: the place's own prose/en/check/heading over the shared form/prose/en/page/check/heading, for that one word",
+   "hero.json": "root:topos-node-default-badges · hero@3 · README.md: no docs/badges of its own, the audit/wire/badges/world default, the badges topos-node wears",
+   "bare": "figure-fold.json root:topos-no-look and media.json root:topos-media-bare: with no style lines it renders without the attributes",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a release that carried the root's version"
+}

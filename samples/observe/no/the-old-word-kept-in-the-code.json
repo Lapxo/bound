@@ -1,0 +1,10 @@
+{
+ "about": [
+  "The falsifier: the old word, 144 times in lane D's code at epoch 283, in the names others import (leavesUnder, storeLeavesInside), in what the rebirth prints (leaves SAME), in what a capsule's answer was called (Answer.leaf), and in its comments, one of them saying a line leaves where it meant goes."
+ ],
+ "cases": [
+  {"name": "observe at epoch 283", "uses": 37, "expected.ok": false},
+  {"name": "host at epoch 283", "uses": 39, "expected.ok": false},
+  {"name": "render at epoch 283", "uses": 68, "expected.ok": false}
+ ]
+}

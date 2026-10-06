@@ -1,0 +1,7 @@
+{
+ "scope": "disagreement-stays-visible",
+ "want": 1,
+ "kind": "yes",
+ "about": ["two origins that do not meet stay as a fork"],
+ "cases": [{ "name": "alice bob and carol on one cell", "prints": ["by=alice", "by=bob", "by=carol"], "expected.ok": true }]
+}

@@ -1,0 +1,9 @@
+{
+ "about": [
+  "The falsifier: the field body landed at epoch 263 said in its doc comment that interval poles 'do not meet'. A description, but the words are the ones the owner's vocabulary ceilings ban in comments and identifiers as orders to a model inside code, so comment/**/src/** and identifier/**/src/** read over at render/field.ts. The body re-landed says the poles have no value in common, and both read met."
+ ],
+ "cases": [
+  {"name": "render/field.ts at epoch 263, comment/**/src/**", "read": "bound/src/render/field.ts=do not", "expected.ok": false},
+  {"name": "render/field.ts at epoch 263, identifier/**/src/**", "read": "bound/src/render/field.ts=do not:14", "expected.ok": false}
+ ]
+}

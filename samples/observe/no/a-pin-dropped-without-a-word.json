@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: capsulesOf as landed at epoch 334 lays a pin only through an alias that names its digest, and a pin no alias names is dropped without a word. Its regions fall through to the aliases that stand, and whoever reads the page reads their answers as the pin's."
+ ],
+ "cases": [
+  {
+   "name": "the re-blob word on topos-doc 9f4673c2, the blob placed as the pin of every place that pins topos-doc against the own lock as it stood, with no alias for it yet",
+   "said": "nothing",
+   "what it cost": "sixty rows reported as moved were the standing aliases' answers, never the blob's; retracted once C, the second head, caught the placement",
+   "expected.ok": false
+  },
+  {
+   "name": "obligations/uses/topos-doc moved to a134e0dcd88a, a blob in the store that no alias names, the epoch 334 body",
+   "laid": "3 before · 2 after",
+   "said": "nothing",
+   "expected.ok": false
+  }
+ ]
+}

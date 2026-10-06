@@ -1,0 +1,24 @@
+{
+ "about": [
+  "A published place names no published place to measure the instrument over, since it is one; it says so by its publish/bootstrap line. Inside it the instrument is its code, and bound says that once. A lock that names neither a published place nor itself as one still refuses, and a lock that names one still measures it or refuses."
+ ],
+ "cases": [
+  {
+   "name": "the published place 0.2.0, folded from inside with no measure asked",
+   "said": "EXTENSION <code> is its code · a published place names none to measure it over",
+   "readme": "SAME",
+   "expected.ok": true
+  },
+  {
+   "name": "the tree, which names 0.2.0",
+   "extension": "678ab59c3d57",
+   "expected.ok": true
+  },
+  {
+   "name": "a lock that names no published place and publishes none",
+   "said": "REFUSE·extension … the lock names no published place to measure it over, and is not one itself",
+   "expected.ok": true
+  }
+ ],
+ "red was": "every published folder refused to fold itself once a missing extension became a refusal"
+}

@@ -1,0 +1,28 @@
+{
+ "about": [
+  "A region reads the place's own ceilings as the fold reads them, and the place's verdict line, when a region it declares names them. Each ceiling of the place is handed at the scope the place speaks it, with its reading as the fold reads it, while the bound stays on the ceiling's line. The verdict line is handed as counts, verdict/<name>. A region whose lines name none of them is handed nothing more."
+ ],
+ "cases": [
+  {
+   "name": "topos-doc's claims at topos, the tree at .@344 · bound@343, with lane-B's region/state line (…|verdict/*|audit/*) told",
+   "region/state receipts": "14 → 30",
+   "readings": "audit/algebra-is-imported 0..0 · audit/capsule-imports-only-topos 0..0 · audit/produces-no-text 0..0 · audit/wire-parsed-once 0..0",
+   "verdict": "claims 3317 · forks 0 · refused 0 · vacuous 2 · history 1 · met 85 · short 0 · over 7 · REQUIRED 1 · FREE 10 · FORBIDDEN 1 · CONFLICT 0",
+   "expected.ok": true
+  },
+  {
+   "name": "every shaped view at every place, folded for real, with the same line told",
+   "views": "155",
+   "moved": "1: topos/README.md, lines 15 to 17, each claim reading 0 where it read its ceiling as written, 0..0",
+   "expected.ok": true
+  },
+  {
+   "name": "the host alone, no region line naming the new receipts",
+   "views": "155 of 155 the same",
+   "fixture": "24 of 24 SAME",
+   "rebirth obligations": "green, 547 of 547",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a claim that read its ceiling as written"
+}

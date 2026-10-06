@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a world's line page contained npm."
+ ],
+ "cases": [
+  {
+   "name": "a world line that said npm",
+   "page": ["npm install @lapxo/topos-doc"],
+   "holds": "npm",
+   "expected.ok": false
+  }
+ ],
+ "red was": "a world line that said npm"
+}

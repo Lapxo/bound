@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a batch whose lines all stand is answered ONCE and nothing is judged, so a take a gate refused stays unpaid whatever the tree does next, and the only way back is to withdraw the demand and sign it again."
+ ],
+ "cases": [
+  {
+   "name": "owner batch 10 re-run after its three takes were refused at 212",
+   "said": "ONCE · every one already landed, nothing landed",
+   "paid": "none of the three",
+   "expected.ok": false
+  }
+ ]
+}

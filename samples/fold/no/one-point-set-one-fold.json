@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: two passes that fold one point set at once both keep a head. Two lanes' passes folded the same points and both landed fold/63a46956…: the blobs carried one instrument and one list of points and differed only in what the points do not fix, the fold writer's own ledger count and the readers' cost lines. Every pass then refused with REFUSE·fork until the points moved.",
+  "Its sibling: a blob landed by two passes at once. One pass checked that .bound/cas/blobs/3e7908a2… was not there, the other landed it, and the first one's exclusive open threw EEXIST and crashed the pass, though the bytes it meant to land were already there."
+ ],
+ "cases": [
+  {
+   "name": "two passes keep fold/63a46956b3469d0664ea3f21f1e685d861f85bcb08d1ed24553eb466c523cb40",
+   "heads": ["sha256:61788e7718787bf1…", "sha256:28f5a2867b0b576d…"],
+   "pass": "REFUSE·fork",
+   "expected.ok": false
+  },
+  {
+   "name": "two passes land the blob 3e7908a2a0504ba9…",
+   "pass": "EEXIST in landBlob",
+   "expected.ok": false
+  }
+ ]
+}

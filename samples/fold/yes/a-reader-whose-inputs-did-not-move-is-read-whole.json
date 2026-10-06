@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A reader's whole observation is kept under the digest of what it reads — its code as bundled, its vectors, and the bytes of every leaf it is offered, and for a capsule reader the capsule, the region and the leaves it is handed — and read back whole while none of that moves. A reader that refused, or runs behind, is not kept, and one whose inputs moved is read again, offer by offer."
+ ],
+ "cases": [
+  {
+   "name": "the tree on a copy at epoch 271, observed twice",
+   "lines": 18061,
+   "second read": "the same bytes as the first",
+   "readers kept whole": 15,
+   "expected.ok": true
+  },
+  {
+   "name": "a leaf the readers read changed between two reads",
+   "said": "its readers read again, 4 offers run; the others kept whole",
+   "expected.ok": true
+  },
+  {
+   "name": "the tree's written views with the change",
+   "renders": 145,
+   "same": "144, and README.md, which differs on the copy before the change too",
+   "expected.ok": true
+  }
+ ],
+ "red was": "2822 offers read back on every act"
+}

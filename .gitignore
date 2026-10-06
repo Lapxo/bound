@@ -1,0 +1,11 @@
+.bound/
+node_modules/
+dist/
+.cache/
+*.tsbuildinfo
+*.pem
+*.key
+*.tgz
+.env
+.env.*
+.DS_Store

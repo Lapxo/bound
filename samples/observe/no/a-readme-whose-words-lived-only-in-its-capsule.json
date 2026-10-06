@@ -1,0 +1,12 @@
+{
+ "about": [
+  "The same rebirth read by a host that hands a region only the place's own lines: every word the world moved into its capsule falls silent at its place."
+ ],
+ "cases": [
+  {
+   "name": "topos-measure reborn as 1fdaecd9, folded on .@363, the capsule's prose not handed to the place",
+   "pages": "README.md 49 → 35 lines: the door, the idea, the figure's heading, what it claims, how to read it and what it rests on are gone, and the claims line reads '- **.** · [](receipts.bound)'",
+   "expected.ok": false
+  }
+ ]
+}

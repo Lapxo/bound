@@ -1,0 +1,13 @@
+{
+ "about": [
+  "A world's prose written under its key in its own capsule reaches its place's pages: a region the place's views ask is handed the capsule's prose zoomed to the place's coordinates wherever the place holds no line of that scope, and the place's own line wins where it does."
+ ],
+ "cases": [
+  {
+   "name": "topos-measure reborn as 1fdaecd9, its prose moved from the place into prose/en/measure/* of its capsule (A's 81 and 81b), folded on .@363",
+   "pages": "README.md 49 lines, 8 of 11 pages byte for byte as the place spoke them before the move; the 3 that move are src/index.ts (the index view's one line), the caption digest, and colours the doc pin restores",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a readme whose words lived only in its capsule"
+}

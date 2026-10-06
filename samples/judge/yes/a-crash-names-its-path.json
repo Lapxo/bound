@@ -1,0 +1,12 @@
+{
+ "about": [
+  "A file the fold reads as JSON and cannot parse is named in the crash: the path, then the parser's message. REFUSE·crash prints that line."
+ ],
+ "cases": [
+  {
+   "name": "topos-node/package.json held one newline",
+   "said": "REFUSE·crash topos-node/package.json: Unexpected end of JSON input",
+   "expected.ok": true
+  }
+ ]
+}

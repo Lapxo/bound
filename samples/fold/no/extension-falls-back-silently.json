@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: an extension nobody measured, stood in for by the code that asked for it. At epoch 183 bound's lock named the family a source is written in write; the published place 0.2.0 lists leaf in its own wire, so the measure refused in wordOf, and extensionOf returned the code digest without a word. Every fold kept from then on was keyed by an identity no measure recorded, and every edit refolded everything.",
+  "The same era read in bound's word instead of the place's: region/state globbed write/** only, so 0.2.0's written leaves, named leaf/, went unread and its readme lost its Pointers section."
+ ],
+ "cases": [
+  {
+   "name": "store/source=write, 0.2.0 declares leaf, the measure refuses",
+   "extension": "the code digest, unmeasured",
+   "said": "nothing",
+   "expected.ok": false
+  },
+  {
+   "name": "region/state globbing write/** only, over 0.2.0",
+   "readme": "the Pointers section is gone",
+   "expected.ok": false
+  }
+ ]
+}

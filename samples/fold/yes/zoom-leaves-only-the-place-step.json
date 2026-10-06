@@ -1,0 +1,39 @@
+{
+ "about": [
+  "Zoom rewrites a scope only at the place's own step: the step after the family, or after the one word that qualifies it. The name leaves region/<place>/…, prose/en/<place>/…, hazard/<kind>/<place>/…, source/<measure>/<place>/… and audit/priority/<place>/…; a deeper step that spells it is inside a name, such as a package a module imports, and stays.",
+  "Over the fourteen places of the tree and 40674 zoomed lines, this differs from the zoom it replaces on exactly six receipt lines of obligations, all import specifiers, and on no line of any lock."
+ ],
+ "cases": [
+  {
+   "name": "region/obligations/src/** from inside obligations",
+   "zoomed": "region/src/**",
+   "expected.ok": true
+  },
+  {
+   "name": "prose/en/obligations/contributing from inside obligations",
+   "zoomed": "prose/en/contributing",
+   "expected.ok": true
+  },
+  {
+   "name": "hazard/workaround/obligations/src/** from inside obligations",
+   "zoomed": "hazard/workaround/src/**",
+   "expected.ok": true
+  },
+  {
+   "name": "source/lexed/topos-doc/src/** from inside topos-doc",
+   "zoomed": "source/lexed/src/**",
+   "expected.ok": true
+  },
+  {
+   "name": "source/imports/@lapxo/obligations/views/field from inside obligations",
+   "zoomed": "source/imports/@lapxo/obligations/views/field",
+   "expected.ok": true
+  },
+  {
+   "name": "every published place, read by zoom-rewrites-outside-the-place",
+   "read": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a scope that spelled the place at any depth lost it, so an import specifier was zoomed as if it were the place"
+}

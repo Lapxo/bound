@@ -1,0 +1,13 @@
+{
+  "about": [
+    "An accept judges and lands receipts. It does not render a page. A page renders when a view asks: a fold --as page, the release, or a head."
+  ],
+  "cases": [
+    {
+      "name": "a pin act",
+      "line": "RENDER 0",
+      "expected.ok": true
+    }
+  ],
+  "red was": "a pin act that rendered the pages of every place it touched"
+}

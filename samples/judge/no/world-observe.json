@@ -1,0 +1,5 @@
+{
+  "observe": "world",
+  "forbidden": true,
+  "want": "allowed"
+}

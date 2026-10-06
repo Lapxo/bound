@@ -1,0 +1,18 @@
+{
+ "about": [
+  "A rebirth is kept by what the place would publish and by the script that ran it. Its key carries the digest of the gate script's bytes, so an edited script runs the rebirth again, and the same script over the same lock and receipts reads its green back. A script that is not there is keyed as absent, and its gate is red when it cannot run."
+ ],
+ "cases": [
+  {
+   "name": "obligations/rebirth.sh as it stands",
+   "script": "sha256:55770beba3dcc555…, in the key beside the place, the instrument, the arguments, the lock and the receipts",
+   "expected.ok": true
+  },
+  {
+   "name": "the same place and publication after an edit to the script",
+   "kept": "no green matches the new key: the place is reborn again",
+   "expected.ok": true
+  }
+ ],
+ "red was": "an edited rebirth script kept the green of the script before it"
+}

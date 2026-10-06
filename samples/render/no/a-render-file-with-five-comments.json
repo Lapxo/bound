@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: render/view.ts held five doc comments where the owner's ceiling on comments allows three per file, one of them the comment of renderedOf, which says who rendered each region. The three that describe one path, render, prerender and renderedOf, are one comment now, on render; nothing they said is lost."
+ ],
+ "cases": [
+  {"name": "comments/*/src/** at epoch 276", "read": "bound/src/render/view.ts=5", "ceiling": "0..3", "expected.ok": false}
+ ]
+}

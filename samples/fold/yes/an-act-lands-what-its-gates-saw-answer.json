@@ -1,0 +1,19 @@
+{
+ "about": [
+  "What an act's gates saw answer lands by the key that writes folds once its batch has landed: the check renders every place the act holds with the batch's lines told in, and settles it, so the render after the landing folds none of them again; the capsule that answered each region of each view the check rendered is kept with the act and landed after its batch, each line once, and a batch refused lands none."
+ ],
+ "cases": [
+  {
+   "name": "this lot on a copy of the tree at epoch 285, a code act that folds every place in its gates",
+   "rendered/* before": 45,
+   "rendered/* after": 162,
+   "expected.ok": true
+  },
+  {
+   "name": "a pass after it",
+   "landed": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "rendered lines an act settled in its gates"
+}

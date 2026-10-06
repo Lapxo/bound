@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: a line of a place's own lock had no act to land by. Accept refused every line the ledger's authority did not cover, so bound's own lock was edited three times this week by a script that signed lines and appended them to bound/TARGET.bound outside any act — dep/topos and dep/verify at epoch 237, dep/topos-json at 243 — with no gate run over them, no ACTS, and no lock but the one the script took for itself."
+ ],
+ "cases": [
+  {
+   "name": "dep/topos → 8a8a93a6 and dep/verify → f3b8563a, epoch 237",
+   "landed by": "a script beside accept",
+   "gates": "none",
+   "expected.ok": false
+  },
+  {
+   "name": "dep/topos-json → ddee424b, epoch 243",
+   "landed by": "a script beside accept",
+   "gates": "none",
+   "expected.ok": false
+  }
+ ]
+}

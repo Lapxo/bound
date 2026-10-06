@@ -1,0 +1,24 @@
+{
+ "about": [
+  "The falsifier: at epoch 313 the owner's view/receipts act spent 83309 ms in its gates, over a minute. It ran two rebirth gates, 15162 ms at obligations and 6087 ms at verify. In each, the receipts step rendered receipts.bound in two processes, 4683 ms and 2095 ms as the instrument measured them, and the check then rendered it a third time and compared it with the file: the second process only repeated what the check does."
+ ],
+ "cases": [
+  {
+   "name": "the owner's act at epoch 313",
+   "gates": "83309 ms: gate/check@. 48852, gate/rebirth/obligations 15162, gate/rebirth/verify 6087, gate/extension@published 4430",
+   "expected.ok": false
+  },
+  {
+   "name": "obligations' rebirth, receipts step",
+   "processes that render receipts before the check": 2,
+   "spent": "4683 ms",
+   "expected.ok": false
+  },
+  {
+   "name": "verify's rebirth, receipts step",
+   "processes that render receipts before the check": 2,
+   "spent": "2095 ms",
+   "expected.ok": false
+  }
+ ]
+}

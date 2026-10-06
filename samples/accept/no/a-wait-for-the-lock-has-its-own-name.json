@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: at 330 an act's first SPENT entry, sign, ran from the start of accept to the start of the act under the lock, so the time an act waited for another's lock was printed as signing: a wait of 81 s read sign 81 s, over a minute and unnamed."
+ ],
+ "cases": [
+  { "name": "cli/accept.ts at 330", "entries before the act": "sign only", "a wait over a minute printed as a red": false, "expected.ok": false }
+ ]
+}

@@ -1,0 +1,8 @@
+{
+ "about": ["The falsifier: at epoch 293 lane B's code imported coordinatesUnder and storeCoordinatesInside everywhere, and observe/files.ts and host/stores.ts still exported the old word under two names nobody imported, while render/design.ts read lane B's vouchedCoordinates through the alias vouchedLeaves."],
+ "cases": [
+  {"name": "leavesUnder in observe/files.ts at epoch 293", "importers": 0, "expected.ok": false},
+  {"name": "storeLeavesInside in host/stores.ts at epoch 293", "importers": 0, "expected.ok": false},
+  {"name": "vouchedLeaves read by render/design.ts at epoch 293", "the name it aliases": "vouchedCoordinates", "expected.ok": false}
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "about": [
+  "A fold of one place is named by the points of that place, so finding it asks the readers only about the place: what they read elsewhere never enters its key.",
+  "Only a fold that was not kept observes the whole tree, and it keeps what it folded under the key it was asked by.",
+  "The pass, which observes once for every place, hands its observation to each fold and asks nothing twice."
+ ],
+ "cases": [
+  {
+   "name": "a kept fold of bound/ with nothing moved",
+   "observed": "845 places read by key, 0 run",
+   "before": "3151 places read by key, 2.2 s",
+   "expected.ok": true
+  },
+  {
+   "name": "a fold of bound/ after an edit elsewhere",
+   "observed": "the readers of bound/ only",
+   "key": "unchanged",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a kept fold of bound/ observed every reader over every place before it looked its own key up: 2.2 s of reading for a fold that then read a blob"
+}

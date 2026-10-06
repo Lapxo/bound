@@ -1,0 +1,13 @@
+{
+ "about": [
+  "An accept that dies ends with REFUSE·crash and a why. No act ends without FACT or REFUSE."
+ ],
+ "cases": [
+  {
+   "name": "a thrown or killed accept",
+   "line": "REFUSE·crash",
+   "expected.ok": true
+  }
+ ],
+ "red was": "exit unknown after OPEN, neither FACT nor REFUSE"
+}

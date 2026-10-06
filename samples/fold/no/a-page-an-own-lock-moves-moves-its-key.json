@@ -1,0 +1,14 @@
+{
+ "about": [
+  "The falsifier: a place's key was the lines and readings of the tree, and no own lock was in it. On a copy of the tree at epoch 255, two withdrawals told to bound's own lock — region/laws measure=lines and region/cases — moved the pages of 12 places and kept the key of all 14, so a settled pass would have skipped every one of them and left its pages as they were."
+ ],
+ "cases": [
+  {
+   "name": "region/laws measure=lines and region/cases withdrawn from bound's own lock, reach.ts at epoch 253",
+   "places whose pages moved": 12,
+   "pages moved": "obligations 9 (README.md, docs/learn/in-phase.md, docs/learn/price.md, …), the README of the 11 others",
+   "keys moved": 0,
+   "expected.ok": false
+  }
+ ]
+}

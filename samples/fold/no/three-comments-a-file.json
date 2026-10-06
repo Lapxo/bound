@@ -1,0 +1,22 @@
+{
+ "about": [
+  "The falsifier: files of bound over the ceiling of three comments, comments/*/src/** 0..3, at bound/."
+ ],
+ "cases": [
+  {
+   "name": "bound/ at epoch 228",
+   "over": {
+    "bound/src/cli/pass.ts": 4,
+    "bound/src/cli/place.ts": 5,
+    "bound/src/fold/extension.ts": 4,
+    "bound/src/judge/take.ts": 4,
+    "bound/src/land/ledger.ts": 5,
+    "bound/src/cli/verb.ts": 10,
+    "bound/src/fold/kept.ts": 7,
+    "bound/src/fold/own.ts": 11,
+    "bound/src/render/view.ts": 4
+   },
+   "expected.ok": false
+  }
+ ]
+}

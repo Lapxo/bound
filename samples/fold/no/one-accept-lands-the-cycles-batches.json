@@ -1,0 +1,17 @@
+{
+ "about": [
+  "The falsifier: at 306 accept signed every line of its batches with the one key it was given and refused any line a lane had signed (BARE), so a cycle of lanes landed one accept per lane, each re-folding every place and running every gate, and two lanes' lines that forked each other landed as a fork unless one signer forked itself."
+ ],
+ "cases": [
+  {
+   "name": "accept at 306 given a batch another lane signed",
+   "answer": "REFUSE·bare: a batch proposes by=target, and accept signs",
+   "expected.ok": false
+  },
+  {
+   "name": "two lanes' incomparable lines on one claim in one cycle at 306",
+   "refused": false,
+   "expected.ok": false
+  }
+ ]
+}

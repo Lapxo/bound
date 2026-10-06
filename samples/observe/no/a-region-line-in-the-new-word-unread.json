@@ -1,0 +1,8 @@
+{
+ "about": [
+  "The falsifier: a region line signed in the owner's word, measure=coordinates, read by the matcher landed at epoch 287: it offers nothing, so the capsule that declares the region is handed nothing there."
+ ],
+ "cases": [
+  {"name": "a root region/hazards line with measure=coordinates, the matcher of epoch 287", "matches": 0, "expected.ok": false}
+ ]
+}

@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: one observation written twice. Folded at its own root, obligations rendered 3761 receipt lines, five of them twice: the observed lines of examples/release/price.ts, thermometer.ts, in-phase.ts, withdrawal.ts and signature.ts, each as a cone and as a reading.",
+  "Read back, the copies are observations too, so each render doubles them: one, two, four."
+ ],
+ "cases": [
+  {
+   "name": "obligations published, folded at its own root",
+   "lines": 3761,
+   "repeated": 5,
+   "expected.ok": false
+  },
+  {
+   "name": "the same receipts read back and rendered again",
+   "copies of each example": "1, 2, 4",
+   "expected.ok": false
+  }
+ ]
+}

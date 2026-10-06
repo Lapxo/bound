@@ -1,0 +1,61 @@
+{
+ "about": [
+  "Between births a published place's release is reborn in a clone of its own, as rebirth.sh reads one, and green is what that rebirth reads, never byte equality with the pin: its lock, with the owner's and the verifier's keys swapped for keys made for this read, stands whole at epoch 1; verify agrees inside it; its receipts render the same twice, once written and once by the check that reads every page it writes, so no process renders them only to compare; every leaf its views write reads SAME; nothing secret, stray, or foreign to dist rides in it. The release is the tree's leaves under the top-level entries the last release shipped, those views write rendered from the fold, dist from the build; what differs from the pin is reported as the next birth's diff."
+ ],
+ "cases": [
+  {
+   "name": "obligations/ between births, after lanes C and A moved its pipeline at 254 and 255",
+   "leaves released": 466,
+   "migrate": "491 of 491 at epoch 1",
+   "verify": "agrees",
+   "receipts": "the same twice",
+   "leaves SAME": "24/24",
+   "checks": "secrets 0 · stray 0 · dist-non-js 0",
+   "green": true,
+   "next birth's diff against 0.3.1 (7749ef64)": 9,
+   "expected.ok": true
+  },
+  {
+   "name": "verify/ between births, the place with no rebirth script",
+   "leaves released": 38,
+   "migrate": "344 of 344 at epoch 1",
+   "verify": "agrees",
+   "leaves SAME": "11/11",
+   "green": true,
+   "next birth's diff against 0.1.0 (f3b8563a)": 28,
+   "expected.ok": true
+  },
+  {
+   "name": "rebirth.sh gate over the same tree",
+   "green": true,
+   "leaves SAME": "24/24",
+   "receipts": "3126 lines, the same twice",
+   "seconds": 65,
+   "this gate's seconds": 42,
+   "expected.ok": true
+  },
+  {
+   "name": "obligations reborn by this body, twice, over the tree after epoch 317",
+   "green": true,
+   "receipts": "18 lines, the same twice: written once, rendered again by the check",
+   "processes that render receipts before the check": 1,
+   "leaves SAME": "24/24",
+   "expected.ok": true
+  },
+  {
+   "name": "verify reborn by this body, twice, over the tree after epoch 317",
+   "green": true,
+   "receipts": "10 lines, the same twice",
+   "processes that render receipts before the check": 1,
+   "leaves SAME": "11/11",
+   "expected.ok": true
+  },
+  {
+   "name": "the same rebirths by the body before",
+   "green": true,
+   "processes that render receipts before the check": 2,
+   "expected.ok": true
+  }
+ ],
+ "red was": "the only gate a release had between births was obligations/rebirth.sh, a script kept by one place and keyed by its name, so verify had none and nothing generic said a place could be reborn from the tree; then, at epoch 313, the gates of an act that touched two releases spent over a minute, and each rebirth rendered its receipts in a second process only to repeat what its check does"
+}

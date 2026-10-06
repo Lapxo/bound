@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: a withdraw in topos-github's own lock at 375 did not open the place. The published view re-read the kept fold, and both view/manifest lines stood. A withdraw was a special case the descent left closed, so the fold over that region stayed idle."
+ ],
+ "cases": [
+  {
+   "name": "a withdraw that does not open its place",
+   "fold": "idle",
+   "published": "two view/manifest lines",
+   "expected.ok": false
+  }
+ ]
+}

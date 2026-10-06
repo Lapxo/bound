@@ -1,0 +1,38 @@
+{
+ "about": [
+  "Accept takes the cycle's batches as one act: each lane signs its own batch with `bound sign` at the epoch the act lands at, and nothing lands until one accept takes every batch, verifies each line against its signer at that epoch, folds once, runs the gates once and lands each line in its signer's ledger. Drafted lines beside them are signed by the key the accept names. A line signed at another epoch, or whose signature does not verify, refuses the whole act by name. One signer never forks itself, and one act never forks itself: a fork whose standing lines are two of the act's own is refused before anything lands. The own locks keep the guard of 303."
+ ],
+ "cases": [
+  {
+   "name": "on a copy at 306: a batch signed alone with bound sign, then landed by accept with no key",
+   "landed": "1 line at 306, its take met",
+   "expected.ok": true
+  },
+  {
+   "name": "two batches signed apart at 307, landed by one accept",
+   "landed": "2 lines at epoch 307 in one act, the fold and the gates once",
+   "expected.ok": true
+  },
+  {
+   "name": "a signed line whose value was changed after signing",
+   "answer": "REFUSE·signed · the signature does not verify against lane-B",
+   "expected.ok": true
+  },
+  {
+   "name": "a batch signed at 306 when the act lands at 307",
+   "answer": "REFUSE·signed · signed by lane-B at epoch 306, and this act lands at 307: sign it again",
+   "expected.ok": true
+  },
+  {
+   "name": "two signers' incomparable values on one claim in one act (the fork check over synthetic lines)",
+   "refused": "1 fork: the act forks itself",
+   "expected.ok": true
+  },
+  {
+   "name": "two signers' identical values, and two signers' nested values",
+   "refused": "none: identical lines land everywhere, and the narrower of nested values stands",
+   "expected.ok": true
+  }
+ ],
+ "red was": "an accept that could land one lane's batch at a time"
+}

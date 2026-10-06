@@ -1,0 +1,8 @@
+{
+ "about": ["The falsifier: at epoch 301 the receipts region printed @1 as two lines per region, a digest line and a count line, both at the digest of the @8 bytes, where audit/wire/receipts (owner, epoch 296) rules one line per region: region, count, digest of its set. A second head that reads a line per region reads every region twice, and a line at the digest of the whole set moves when any region does."],
+ "cases": [
+  {"name": "obligations @1 at epoch 305", "lines": 34, "regions": 17, "bytes": 7298, "expected.ok": false},
+  {"name": "verify @1 at epoch 305", "lines": 16, "regions": 8, "bytes": 3508, "expected.ok": false},
+  {"name": "the fixture @1 with the body of epoch 301", "lines": 32, "regions": 16, "expected.ok": false}
+ ]
+}

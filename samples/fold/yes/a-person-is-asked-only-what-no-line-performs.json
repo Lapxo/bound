@@ -1,0 +1,18 @@
+{
+ "about": [
+  "An act asked of a person is a line of shell a page tells its reader to type that no line of the place's lock spells: the instrument recognises its own acts by what the lock says, never by the name of a tool."
+ ],
+ "cases": [
+  {
+   "name": "a page asks for a command the lock spells",
+   "counted": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "a page asks for a command no line spells",
+   "counted": 1,
+   "expected.ok": true
+  }
+ ],
+ "red was": "the reading kept its own list of package-manager commands as the instrument's acts, a tool named in the instrument's code"
+}

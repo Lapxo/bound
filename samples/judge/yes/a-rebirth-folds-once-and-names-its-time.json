@@ -1,0 +1,24 @@
+{
+ "about": [
+  "A clone gate reads the place as the check folded it, with the same told lines and readings, and never folds it again; it walks the tree only under the top-level entries the release it is weighed against ships, so it names no folder of any toolchain; and it prints what each step took — the rebirth's own steps, then the fold, the lay and walk, the release, the clone and the diff."
+ ],
+ "cases": [
+  {
+   "name": "obligations over X on a copy at epoch 280",
+   "lay and walk": "22 ms",
+   "release": "248 ms",
+   "clone": "6271 ms",
+   "said": "green · 466 leaves · diff 9",
+   "expected.ok": true
+  },
+  {
+   "name": "verify over f3b8563a",
+   "lay and walk": "13 ms",
+   "release": "82 ms",
+   "clone": "3585 ms",
+   "said": "green · 38 leaves · diff 28",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a rebirth of three hundred forty-eight seconds"
+}

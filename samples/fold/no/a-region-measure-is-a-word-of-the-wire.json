@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: at 299 fold/readers.ts spelled the measure words itself, ['coordinates', 'leaves'], while the owner signed them as a wire list at 297 and D's matcher read that list at 298: the owner's switch to coordinates alone would have moved one reader and not the other, and the two would have offered different regions."
+ ],
+ "cases": [
+  {
+   "name": "fold/readers.ts at 299",
+   "measure words spelled in code": 2,
+   "read from the wire": 0,
+   "expected.ok": false
+  }
+ ]
+}

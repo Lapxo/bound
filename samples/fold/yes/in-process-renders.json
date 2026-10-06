@@ -1,0 +1,11 @@
+{
+ "about": [
+  "a page, a manifest, a workflow, a citation, a badge, a figure is never rendered by the instrument; a world writes it"
+ ],
+ "cases": [
+  {
+   "name": "in-process-renders",
+   "expected.ok": true
+  }
+ ]
+}

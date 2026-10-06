@@ -1,0 +1,13 @@
+{
+ "about": [
+  "STALE means the pid is dead: process.kill(pid, 0) fails with ESRCH. The lock is taken over only then."
+ ],
+ "cases": [
+  {
+   "name": "a lock whose pid is gone",
+   "line": "STALE",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a live pid taken over"
+}

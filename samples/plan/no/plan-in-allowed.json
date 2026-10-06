@@ -1,0 +1,5 @@
+{
+  "witness": "bound-mcp.plan.md:13",
+  "needs": ["bound/src/cli/porcelain-scan.ts", "bound/src/cli/porcelain-help.ts"],
+  "forbidden": ["bound-mcp.plan.md"]
+}

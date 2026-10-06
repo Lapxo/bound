@@ -1,0 +1,17 @@
+{
+ "scope": "one-lot-one-place",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "A lot named with --place lands in that own lock and not the ledger."
+ ],
+ "cases": [
+  {
+   "name": "ACTS names the own lock",
+   "prints": [
+    "ACTS     bound/ · 0 lines to the ledger"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

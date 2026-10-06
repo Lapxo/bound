@@ -1,0 +1,14 @@
+{
+ "about": [
+  "Who rendered each region of a view is named. A region bound renders itself names the instrument by the id its fold/extension line carries; a region a capsule answered names the capsule by its digest, and the place's pin besides when the pin chose it; a region nobody answered names nobody. The asks are the ones the views already make, read back from the capsule's cache, so no page moves."
+ ],
+ "cases": [
+  {"name": "obligations/", "views": 24, "regions": 40, "by bound": 1, "by a capsule": 39, "chosen by a pin": 39, "answered by nobody": 0, "expected.ok": true},
+  {"name": "verify/", "views": 11, "regions": 17, "by bound": 1, "by a capsule": 16, "chosen by a pin": 0, "answered by nobody": 0, "expected.ok": true},
+  {"name": "topos-json/", "views": 12, "regions": 15, "by bound": 1, "by a capsule": 14, "chosen by a pin": 14, "answered by nobody": 0, "expected.ok": true},
+  {"name": "topos-doc/", "views": 12, "regions": 15, "by bound": 1, "by a capsule": 14, "chosen by a pin": 14, "answered by nobody": 0, "expected.ok": true},
+  {"name": "the four places together", "rendered lines": 154, "seconds": 21, "expected.ok": true},
+  {"name": "every page the tree's views write, and the published place obligations 0.3.1 (7749ef64)", "views": "188 of 188 the same · 24 of 24 SAME", "expected.ok": true}
+ ],
+ "red was": "the host rendered a region by whichever capsule answered first, in the order the place's pins and the carried aliases came, and left no line saying which one: at verify sixteen regions were rendered by the carried order, and nothing named the capsule"
+}

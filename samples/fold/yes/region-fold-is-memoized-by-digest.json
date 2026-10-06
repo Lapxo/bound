@@ -1,0 +1,23 @@
+{
+ "about": [
+  "A fold is a function of the points it folds: the digest each leaf was observed at, the lines that stand, and the receipts the store keeps.",
+  "Two trees whose points have one digest have one fold, so the fold is taken once and read after that.",
+  "It is kept as a blob in the store and announced by one claim, never as a folder of files or a key on the clock."
+ ],
+ "cases": [
+  {
+   "name": "the same points answer twice",
+   "points": [
+    "observed/<leaf digest>",
+    "the standing lines",
+    "the receipts"
+   ],
+   "kept": "cas/blobs/<digest>",
+   "announced": "fold/<key> by=<the signer the lock admits for folds>",
+   "reading": "read the blob the claim names",
+   "missing": "REFUSE naming the blob and the claim",
+   "forked": "two signers, two blobs, one key: a fork, never the nearer one",
+   "expected.ok": true
+  }
+ ]
+}

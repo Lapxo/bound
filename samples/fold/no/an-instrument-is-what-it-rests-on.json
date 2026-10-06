@@ -1,0 +1,19 @@
+{
+ "about": [
+  "The falsifier: an identity walked out of what the instrument runs. bound's digest took the sources of every region its dependency lines name, so it walked the sibling topos/src and obligations/src, and never looked at the releases its own lock names.",
+  "bound had long run obligations from the 0.2.0 release laid under it, not from the sibling, yet an edit to the sibling moved bound's identity. Re-pinning a release changed the code bound runs and left its identity where it was, so the extension over the fixture was never measured again for it."
+ ],
+ "cases": [
+  {
+   "name": "the sibling topos/src/wire/index.ts edited and put back, on a scratch copy",
+   "identity": "walking the siblings: d7922d379f65, then 68d56000b89d, then d7922d379f65",
+   "expected.ok": false
+  },
+  {
+   "name": "dep/topos re-pinned from b79df96e to 192a5138",
+   "identity": "walking the siblings, the same digest under either pin: the lines naming a release were never read",
+   "extension": "not measured again, and folds kept by the code before were served for the code after",
+   "expected.ok": false
+  }
+ ]
+}

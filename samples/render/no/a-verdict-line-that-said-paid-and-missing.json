@@ -1,0 +1,8 @@
+{
+ "about": ["The falsifier: the verdict line counted demands as paid or missing. The judge's verdicts are the object's four states, and missing merged two of them: REQUIRED, a demand fewer than two origins have spoken on, and FORBIDDEN, a demand no origin admits."],
+ "cases": [
+  {"name": "the root", "line": "213/253 paid · 40 missing", "states merged in missing": "REQUIRED 33, FORBIDDEN 7", "expected.ok": false},
+  {"name": "bound", "line": "149/168 paid · 19 missing", "states merged in missing": "REQUIRED 16, FORBIDDEN 3", "expected.ok": false},
+  {"name": "topos", "line": "9/11 paid · 2 missing", "states merged in missing": "REQUIRED 1, FORBIDDEN 1", "expected.ok": false}
+ ]
+}

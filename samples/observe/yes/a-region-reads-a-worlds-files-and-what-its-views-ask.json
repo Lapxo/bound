@@ -1,0 +1,32 @@
+{
+ "about": [
+  "A region reads a world's files and what the views of the places pinning it ask, when a region it declares names them. Each file of a world, a place that holds its own capsule lock, is handed as coordinate/<path> at the path the place speaks it, out of foreign trees and dot directories, at the place in the tree, in the release the tree renders of it and in its clone alike. Each region the world renders is handed as asked/<region> with the count of pinning places whose written views name it, read from the locks at fold time; that is the tree's to say, so a released fold is handed none of it, as it is handed none of the judge's lists. A place that holds no capsule lock is handed neither."
+ ],
+ "cases": [
+  {
+   "name": "region/state re-said with coordinate/** and asked/** (card 45 told) at .@351 · bound@352, the frame sha256:2d673389 pinned at every place",
+   "topos-frame": "coordinate 97 · asked 1, asked/entry 6..6: six places pinning it write a view that names entry",
+   "topos-bound, topos-contract, topos-doc, topos-github, topos-json, topos-node, topos-typescript-tree (a capsule line in the own lock)": "coordinate 36, 13, 187, 26, 35, 36 and 55 · asked none, each a released fold or asked by no view",
+   "obligations, bound, topos, verify and the root (no capsule line in their own lock)": "neither",
+   "expected.ok": true
+  },
+  {
+   "name": "every shaped view at every place, folded for real, with the same card told",
+   "views": "163 of 163 the same",
+   "expected.ok": true
+  },
+  {
+   "name": "the published places reborn by an instrument whose own lock carries the card, one state (locks 1ed8e9e7)",
+   "rebirth verify, obligations, topos and topos-json": "green",
+   "rebirth topos-bound and topos-doc": "8 of 10 written SAME, src/index.ts and docs/reference.md apart, the same as the tree's own instrument reads them",
+   "expected.ok": true
+  },
+  {
+   "name": "world-shape and is-asked of the frame sha256:2d673389 over the files each world is handed",
+   "topos-doc, topos-github": "world-shape/files 0",
+   "topos-frame": "world-shape/files 1 (src/code.ts, the helpers the new frame moves to src/helpers/) · is-asked/regions 0",
+   "expected.ok": true
+  }
+ ],
+ "red was": "a world's shape read without its files"
+}

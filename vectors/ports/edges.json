@@ -1,0 +1,17 @@
+{
+  "witness": "colon-in-path",
+  "ports": {
+    "store": ["path-with-colon", "cwd-outside-root", "two-writers", "symlinked-tree"],
+    "effects": ["cwd-outside-root", "two-writers"],
+    "clock": ["stale-process"],
+    "spawn": ["missing-binary", "stale-process", "pnpm-exec"]
+  },
+  "cases": [
+    { "id": "path-with-colon", "port": "store", "input": "sha256:deadbeef", "refuse": "ERR_PNPM_BAD_PATH_DIR" },
+    { "id": "cwd-outside-root", "port": "store", "input": "work/", "refuse": "store-root" },
+    { "id": "two-writers", "port": "effects", "input": "receipt-floors.bound", "refuse": "one-file-per-writer" },
+    { "id": "stale-process", "port": "spawn", "input": "bound-mcp/dist/server.js", "refuse": "judge-stale" },
+    { "id": "missing-binary", "port": "spawn", "input": "cursor-agent", "refuse": "provider-missing" },
+    { "id": "symlinked-tree", "port": "store", "input": "diorism/ts/diorism/ts", "refuse": "tree/targets" }
+  ]
+}

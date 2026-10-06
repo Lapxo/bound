@@ -1,0 +1,7 @@
+{
+ "witness": "laws-are-the-lock",
+ "lock": "obligations/src/laws/laws.bound",
+ "laws": 54,
+ "why": "a law of obligations is a line of its lock naming its vector, never a script beside it; replay folds what landed against those lines",
+ "expected.ok": true
+}

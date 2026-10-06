@@ -1,0 +1,13 @@
+{
+ "about": [
+  "The falsifier: the second head's word read from the lock before this one. verify is a live family, judged when read and never kept, yet the fold read its latest stored attestation; at a take the batch's lines have landed and that attestation rests on the previous epoch, so every verify badge and every second/verdict rendered stale against leaves that say agrees."
+ ],
+ "cases": [
+  {
+   "name": "lane C's take verify/laws-are-the-contract at epoch 200, the tree checked at its gate",
+   "verdict": "stale",
+   "check": "DIFFERS on the receipts of bound, obligations, topos-bound and topos, the README of ten places, the root README and CONTRIBUTING",
+   "expected.ok": false
+  }
+ ]
+}

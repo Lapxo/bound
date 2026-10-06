@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A fold is keyed by what it reads. A place's fold is keyed by the lock it was handed, the batch in it, and by the judge, take and vouched lines of the demands that are the place's. The root's and the instrument's are keyed by every ledger. What a fold shows of the whole store (its effects, its costs and the colours no claim makes) is read when the fold is read, never kept."
+ ],
+ "cases": [
+  {
+   "name": "the same three accepts, from the same snapshot",
+   "after landing": "15.8 s · 16.2 s · 16.2 s",
+   "with the batch": "58.9 s · 56.3 s · 52.5 s, as before",
+   "folds": "17 or 18 of 32 computed: after the landing 13 of 15 places read their kept fold",
+   "total": "105 → 87 s · 111 → 80 s · 142 → 76 s",
+   "expected.ok": true
+  },
+  {
+   "name": "the tree after them",
+   "said": "PASS 159 renders · 159 same · 15 places",
+   "expected.ok": true
+  },
+  {
+   "name": "the extension of the new code",
+   "said": "EXTENSION f152b47b6b59 is the extension of 678ab59c3d57 · 25 rendered · 0 unlike",
+   "expected.ok": true
+  }
+ ],
+ "red was": "every place refolded after a landing that moved one"
+}

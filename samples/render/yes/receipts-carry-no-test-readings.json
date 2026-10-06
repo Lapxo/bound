@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A receipt carries what a page reads: the cases, and the no-samples and reproductions the laws name. A test reading no page reads is not carried."
+ ],
+ "cases": [
+  {
+   "name": "obligations' receipts leaf, cut 1 alone, live observations",
+   "lines": "3645 → 3623",
+   "test/* readings": "22 → 0",
+   "expected.ok": true
+  },
+  {
+   "name": "every other view of the tree",
+   "moved": 0,
+   "of": 173,
+   "expected.ok": true
+  },
+  {
+   "name": "the fixture resolved to X, obligations 0.3.1",
+   "expected.ok": true,
+   "receipts": "3126 lines, 0 test/* readings",
+   "digest": "sha256:7749ef6481c944164b85ca6e9bc0f69592c99051314dfca38273529b162cae6f"
+  }
+ ],
+ "red was": "receipts carried every test/* reading, 22 at obligations, though no page of the place reads one"
+}

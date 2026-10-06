@@ -1,0 +1,18 @@
+{
+ "about": [
+  "The falsifier: a key made where none was. A head that fills a missing key path on the spot attests with a key the lock never admitted, and its word lands as grey, or as a head nobody asked for; the stray verify key was one."
+ ],
+ "cases": [
+  {
+   "name": "verify given --key-file at a missing path, filling it",
+   "made": "a key nobody admitted",
+   "attested": "grey",
+   "expected.ok": false
+  },
+  {
+   "name": "a live second head that asks verify with a key it made for the asking",
+   "attested": "a word the lock never admitted, landed in the tree",
+   "expected.ok": false
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "scope": "a-fact-is-a-printed-line",
+ "want": 1,
+ "kind": "yes",
+ "about": [
+  "A fact is a line the CLI printed. The stranger prints RECEIPTS, NEEDS, OPEN, RENDER."
+ ],
+ "cases": [
+  {
+   "name": "stranger prints four lines",
+   "prints": [
+    "RECEIPTS 0 read · 1 opened",
+    "NEEDS    README.md",
+    "OPEN     uses/world/",
+    "RENDER   README.md"
+   ],
+   "expected.ok": true
+  }
+ ]
+}

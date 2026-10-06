@@ -1,0 +1,48 @@
+{
+ "about": [
+  "An alias takes over no region. At every place each region its written views ask a capsule is answered by the first capsule, in the host's order, that answers it, named by the lock line it stands on: a pin of the place, or an alias of the instrument's own lock, never its digest, so a re-signed alias that keeps its regions moves nothing. Between the lock before an act and after it, a region is taken over when its answering line changes, a line answered it before, and the line after is an alias rather than the place's own pin. The host asks aliases in its own lock's order, and a new alias is appended last, so it answers only what nobody answered."
+ ],
+ "cases": [
+  {
+   "name": "constructed: the grammar capsule's alias alone (dep/topos-doc/grammar, 80c7c8fb), appended last as it landed at epoch 319",
+   "places": 15,
+   "taken over": 0,
+   "twice the same": true,
+   "expected.ok": true
+  },
+  {
+   "name": "a real act, .@319, lot 21: topos/uses/topos-doc 3aa97584 → 80c7c8fb, with the alias dep/topos-doc/grammar",
+   "regions whose answering capsule changed": 8,
+   "pages moved": 0,
+   "taken over": 0,
+   "why": "the place's own pin line answers all 8 before and after: the place's own choice",
+   "expected.ok": true
+  },
+  {
+   "name": "a real act, .@321, lot 25: topos/uses/topos-github 8ad84ca3 → 155cd87d, with the aliases dep/topos-github/notes and dep/topos-measure/cells",
+   "regions whose answering capsule changed": 4,
+   "taken over": 0,
+   "expected.ok": true
+  },
+  {
+   "name": "a real act, .@326, lane C: verify/uses/topos-doc added (e8a91cc3), verify having had no documents pin since .@242",
+   "taken over": 0,
+   "why": "every region it now answers is answered by the place's own pin",
+   "twice the same": true,
+   "expected.ok": true
+  },
+  {
+   "name": "every page the tree's views write, with capsulesOf taking the own lock it is handed",
+   "views": "174 of 174 the same",
+   "expected.ok": true
+  },
+  {
+   "name": "the fixture's views, as cli/measure.ts reads them",
+   "views": "24 of 24 SAME with the body before and after",
+   "moved": 0,
+   "expected.ok": true
+  }
+ ],
+ "red was": "a takeover only a harness could see: whether an alias took a region from another capsule was read by a two-placement harness in one lane's scratch, and no body of the host said it",
+ "measured": "over a fresh copy of the tree after .@332 (bound@332), with this act's two files beside it"
+}

@@ -1,0 +1,26 @@
+{
+ "about": [
+  "A memo is kept under its key in the store's memos, cas/memo/fold/<key> for a fold and cas/memo/render/<key>/<view> for the text a view reads off it, and no ledger carries a line for either. The first to keep a key keeps it: the bytes are linked into place, and a second writer finds the name taken and leaves it. What a memo holds is what the line's blob held, so its bytes reproduce the digest the old line named."
+ ],
+ "cases": [
+  {
+   "name": "a pass of bound/ on a copy of the tree at epoch 239",
+   "memo lines before": 40527,
+   "memo lines after": 40527,
+   "kept": "cas/memo/fold/eb480d30… and its three view texts",
+   "expected.ok": true
+  },
+  {
+   "name": "topos-json/ folded by the code before and after, at one key 978e3757…",
+   "view texts": "12 of 12 reproduce the digest the old memo line named",
+   "fold": "differs, and not by the memo: the fold of a place carries the tree's 15,609 observations, bound's own source among them, so the code that changes moves the bytes; a fold holding only its reach is the next change",
+   "expected.ok": true
+  },
+  {
+   "name": "the extension after the change",
+   "extension": "f2e1ea08c23d is the extension of 678ab59c3d57 · 25 rendered · 0 unlike",
+   "expected.ok": true
+  }
+ ],
+ "red was": "memo lines in the ledger"
+}

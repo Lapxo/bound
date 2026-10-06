@@ -1,0 +1,13 @@
+{
+  "given": {
+    "before": "sha256:before-generation",
+    "after": "sha256:after-generation",
+    "proposalDirectoryWritable": false
+  },
+  "when": "judge-attempt",
+  "then": {
+    "reads": ["before", "after"],
+    "writesPatch": false,
+    "receiptNamesGeneration": true
+  }
+}

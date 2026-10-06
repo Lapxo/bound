@@ -1,0 +1,58 @@
+{
+  "next": "audit/bound/ceilings-are-not-cards.status",
+  "forbiddenNext": [
+    "audit/bound/actor-words.count",
+    "ident/bound/src/**.id",
+    "dir/bound/src.id",
+    "dep/bound/**.free"
+  ],
+  "forbiddenWaiting": [
+    "ident/bound/src/**",
+    "dir/bound/src",
+    "dep/bound/**"
+  ],
+  "cells": [
+    {
+      "scope": "audit/bound/actor-words",
+      "measure": "count",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound-foundational-closure.md#8"]
+    },
+    {
+      "scope": "ident/bound/src/**",
+      "measure": "id",
+      "role": "reads",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "unobserved" },
+      "required": { "kind": "enumerated", "values": ["not:task"] }
+    },
+    {
+      "scope": "dir/bound/src",
+      "measure": "id",
+      "role": "reads",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "unobserved" },
+      "required": { "kind": "enumerated", "values": ["discovery"] }
+    },
+    {
+      "scope": "dep/bound/**",
+      "measure": "free",
+      "role": "reads",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "unobserved" },
+      "required": { "kind": "interval", "lo": 0, "hi": 0 }
+    },
+    {
+      "scope": "audit/bound/ceilings-are-not-cards",
+      "measure": "status",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "enumerated", "values": ["present"] },
+      "needs": ["bound/src/scan/task-pack.ts"]
+    }
+  ]
+}

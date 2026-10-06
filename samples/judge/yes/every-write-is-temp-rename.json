@@ -1,0 +1,12 @@
+{
+ "about": [
+  "A file the fold replaces is written to a temp beside it and moved into place by one rename. A killed write leaves the temp. The name a later read parses is the previous file or the whole new one."
+ ],
+ "cases": [
+  {
+   "name": "a view text and a capsule answer",
+   "said": "replaceWhole: temp then rename",
+   "expected.ok": true
+  }
+ ]
+}

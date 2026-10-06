@@ -1,0 +1,80 @@
+{
+  "stop": "fork",
+  "chooseCount": 1,
+  "forbiddenNext": [
+    "audit/tree/shard/bound/src/run/freeze/a/0.ts.count",
+    "audit/tree/shard/bound/src/run/freeze/a/1.ts.count",
+    "audit/tree/shard/bound/src/run/freeze/b/0.ts.count",
+    "audit/tree/shard/bound/src/run/freeze/b/1.ts.count"
+  ],
+  "cells": [
+    {
+      "scope": "work/repairs-per-freeze/growth",
+      "measure": "ratio",
+      "role": "reads",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "unobserved" },
+      "required": { "kind": "interval", "lo": 0, "hi": 1.5 }
+    },
+    {
+      "scope": "work/repairs-per-freeze/gen/0",
+      "measure": "count",
+      "role": "writes",
+      "verdict": "ok",
+      "produced": { "kind": "interval", "lo": 2, "hi": 2 },
+      "at": "bound/src/run/freeze.ts|bound/src/scan/attempt.ts"
+    },
+    {
+      "scope": "work/repairs-per-freeze/gen/1",
+      "measure": "count",
+      "role": "writes",
+      "verdict": "ok",
+      "produced": { "kind": "interval", "lo": 4, "hi": 4 },
+      "at": "bound/src/run/freeze/a.ts|bound/src/run/freeze/b.ts|bound/src/scan/attempt/a.ts|bound/src/scan/attempt/b.ts"
+    },
+    {
+      "scope": "work/repairs-per-freeze/gen/2",
+      "measure": "count",
+      "role": "writes",
+      "verdict": "ok",
+      "produced": { "kind": "interval", "lo": 8, "hi": 8 },
+      "at": "bound/src/run/freeze/a/0.ts|bound/src/run/freeze/a/1.ts|bound/src/run/freeze/b/0.ts|bound/src/run/freeze/b/1.ts|bound/src/scan/attempt/a/0.ts|bound/src/scan/attempt/a/1.ts|bound/src/scan/attempt/b/0.ts|bound/src/scan/attempt/b/1.ts"
+    },
+    {
+      "scope": "audit/tree/shard/bound/src/run/freeze/a/0.ts",
+      "measure": "count",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "interval", "lo": 0, "hi": 0 },
+      "needs": ["bound/src/run/freeze/a/0.ts"]
+    },
+    {
+      "scope": "audit/tree/shard/bound/src/run/freeze/a/1.ts",
+      "measure": "count",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "interval", "lo": 0, "hi": 0 },
+      "needs": ["bound/src/run/freeze/a/1.ts"]
+    },
+    {
+      "scope": "audit/tree/shard/bound/src/run/freeze/b/0.ts",
+      "measure": "count",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "interval", "lo": 0, "hi": 0 },
+      "needs": ["bound/src/run/freeze/b/0.ts"]
+    },
+    {
+      "scope": "audit/tree/shard/bound/src/run/freeze/b/1.ts",
+      "measure": "count",
+      "role": "demands",
+      "verdict": "ok",
+      "produced": { "kind": "empty", "why": "no writer" },
+      "required": { "kind": "interval", "lo": 0, "hi": 0 },
+      "needs": ["bound/src/run/freeze/b/1.ts"]
+    }
+  ]
+}
