@@ -58,10 +58,13 @@ export function capsuleAt(digest: string, entry: string, store?: string): Capsul
   const root = unpacked(digest, bytes);
   const module = resolve(root, entry);
   const coordinate = relative(root, module);
-  if (!entry || isAbsolute(entry) || (coordinate === '..' || coordinate.startsWith(`..${sep}`)) || entry.split(/[\\/]/).includes('..') || !statSync(module, { throwIfNoEntry: false })?.isFile()) {
+  if (!entry || isAbsolute(entry) || (coordinate === '..' || coordinate.startsWith(`..${sep}`)) || entry.split(/[\\/]/).includes('..')) {
     throw new Error(`REFUSE·capsule ${digest} declared entry ${entry || '(absent)'} unavailable`);
   }
-  const capsule = { digest, ...known, ask: (requests: readonly Request[]) => answered(digest, bytes, requests, names, root, store ?? ownStore(), module) };
+  const capsule = { digest, ...known, ask: (requests: readonly Request[]) => {
+    if (!statSync(module, { throwIfNoEntry: false })?.isFile()) throw new Error(`REFUSE·capsule ${digest} declared entry ${entry} unavailable`);
+    return answered(digest, bytes, requests, names, root, store ?? ownStore(), module);
+  } };
   capsules.set(identity, capsule);
   return capsule;
 }

@@ -2,11 +2,11 @@
 
 | | |
 |---|---|
-| pin | topos-doc |
-| pin | topos-node |
+| pin | rendering |
+| pin | wire |
 
 - [README](../README.md)
-- [reference](reference.md)
-- [guide](guide.md)
 - [why](why.md)
+- [reference](reference.md)
 - [release](release.md)
+- [guide](guide.md)

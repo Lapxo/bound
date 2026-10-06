@@ -1,28 +1,15 @@
 # @lapxo/bound
 
-Declare what must hold. Read what does. Keep the evidence.
+![license MIT](https://img.shields.io/badge/license-MIT-)
 
-Bound reads a project's admitted statements, checks observations against its requirements, and produces the views its selected topos declares. It keeps conflicting evidence and its origins instead of choosing a convenient answer.
+Declare what must hold. Read what does. Keep the evidence
 
-`fold` reads. `sign` signs a proposed lot. `land` admits that lot under the place's authority. These acts work across domains: a selected topos supplies forms, units, readers and views.
-
-## Start in an admitted project
-
-```sh
+```bash
 npx @lapxo/bound@0.1.0 fold --as help
 npx @lapxo/bound@0.1.0 fold
 ```
 
-The help view prints:
-
-```text
-verbs fold land sign
-flags --as --check --key --key-file --out --place
-```
-
-The default fold runs the project's declared views. Its authority and selected topos determine what can be admitted, read and shown.
-
-Start with the team's accepted TARGET, admitted authority and selected readers. [Full usage guide](docs/usage.md).
+## How Bound reads a project
 
 ## A meeting everyone can understand
 
@@ -73,30 +60,6 @@ For typed object withdrawals, `takes` names the exact claim or mark id. Removing
 
 [Authority, withdrawals, receipts and PR review](docs/usage.md).
 
-## Read a declared view and reuse its evidence
-
-When the project has admitted a cells view:
-
-```sh
-npx @lapxo/bound@0.1.0 fold --as cells
-```
-
-The installed interval scene printed this on an unchanged second reading:
-
-```text
-RECEIPTS 4 read · 0 opened · idle · provider 0
-```
-
-Native receipts identify the live semantic inputs, declared rest, selected topos, codecs and selected rendering implementation. They exclude delivery count, display paths and Bound's error wrapper. A local join changes its own cell's receipt. A travelling sign changes dependent cells. Missing or corrupt carried bytes cannot prove reuse.
-
-For judgement:
-
-```sh
-npx @lapxo/bound@0.1.0 fold --check
-```
-
-Keep stdout, stderr and the exit status. `--check` is not an install-and-build replacement. A source test passing does not pay an unread ceiling, prove a cold clone, or accept a release.
-
 ## Select a topos by what it declares
 
 `sources/<name>` says where a world can be obtained. An admitted `uses/<name>` names the digest of that topos's folded standing: canonical live claims in wire byte order, excluding signature envelopes and host shape. Re-signing the same standing preserves the pin. A changed live form, class, view or offer changes it.
@@ -132,3 +95,7 @@ A pin names standing, not a download URL or runtime entry. Its declared artifact
 Use Bound where independently attributed observations must be judged against an accepted contract: compatibility between components, operational limits, or a team's project requirements. The selected topos must supply the actual measurements; a digest identifies the evidence without declaring it true.
 
 [Contribute a counterexample or a proposed lot](CONTRIBUTING.md).
+
+## What is open
+
+- `literal/**` reads `bound/src/render/target.ts=topos:3 bound/src/fold/evidence.ts=topos:1 bound/src/fold/zoom.ts=topos:2 bound/src/fold/stranger.ts=topos:2 +72`, outside its ceiling

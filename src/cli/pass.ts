@@ -9,7 +9,7 @@ import { observedClaims } from '../fold/observed.ts';
 import { layReleases, resolvedOf } from '../host/release.ts';
 import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { landLaid } from '../fold/laid.ts';
-import { actSeconds, idleCount, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
+import { actSeconds, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
 import { algorithmCost, instrumentOf } from '../fold/digests.ts';
 import { writerFor } from '../fold/signers.ts';
 import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
@@ -22,6 +22,7 @@ import { holdRoot, holds, underTheLock } from '../land/act.ts';
 import { emptyLedger, sayStranger } from '../fold/stranger.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
 import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
+import { releasePolicyLines } from '../fold/release-policy.ts';
 
 /**
  * The pass of a place, in one process: the releases its instrument names are laid out first, its readers observe
@@ -42,12 +43,17 @@ async function checked(root: string, entry: string, under: string | undefined): 
   const started = Date.now();
   const store = storeOf(root);
   if (!meets(root, store, under ?? '')) {
-    process.stderr.write(`${selfName()}: REFUSE·check receipts are open; an admitted fold must close them\n`);
+    process.stderr.write(`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
+    return 1;
+  }
+  const expectedInstrument = instrumentKept(store);
+  if (!expectedInstrument) {
+    process.stderr.write(`${selfName()}: REFUSE·check no verified instrument identity is available for these receipts\n`);
     return 1;
   }
   const instrument = instrumentOf(store, entry, standingOf(root).standing, root, ownLock());
-  if (instrumentKept(store) !== instrument) {
-    process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; an admitted fold must close it\n`);
+  if (expectedInstrument !== instrument) {
+    process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; a fold must close it\n`);
     return 1;
   }
   const read = receiptsSeen();
@@ -61,25 +67,26 @@ async function checked(root: string, entry: string, under: string | undefined): 
 }
 
 export async function pass(root: string, entry: string, under: string | undefined, check: boolean): Promise<number> {
+  if (check) {
+    // Verification reads existing evidence; it grants no admission authority.
+    return emptyLedger(storeOf(root)) ? checked(root, entry, under) : underTheLock(storeOf(root), 'check', () => checked(root, entry, under));
+  }
   if (!under && emptyLedger(storeOf(root))) {
     sayStranger(root);
-    if (check) {
-      process.stderr.write(`${selfName()}: REFUSE·check the proposed place has no admitted ledger; NEEDS is not closed\n`);
-      return 1;
-    }
     return 0;
   }
-  if (check) return underTheLock(storeOf(root), 'check', () => checked(root, entry, under));
   const started = Date.now();
   const run = async (): Promise<number> => {
     const swept = await sweep(root, entry, under, check, []);
     for (const coordinate of check ? swept.written : []) process.stdout.write(`DIFFERS  ${coordinate}\n`);
     const closed = meets(root, storeOf(root), under ?? '') && !swept.written.length;
+    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }), free: true });
+    for (const line of releasePolicyLines(fold.release)) process.stdout.write(`${line}\n`);
     if (closed) {
+      instrumentKeep(storeOf(root), instrumentOf(storeOf(root), entry, standingOf(root).standing, root, ownLock()));
       process.stdout.write(`PASS     closed · ${swept.places} places · ${Date.now() - started} ms\n`);
       return 0;
     }
-    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), observed: swept.observed });
     process.stdout.write(`PASS     ${swept.same + swept.written.length} renders · ${swept.same} same${swept.written.length ? ` · ${swept.written.length} ${check ? 'differ' : 'still written after three rounds'}` : ''} · ${swept.places} places · ${Date.now() - started} ms\n`);
     process.stdout.write(render(fold, [{ name: 'programs', at: 1 }]));
     return swept.written.length ? 1 : 0;
@@ -109,6 +116,7 @@ async function sweep(root: string, entry: string, under: string | undefined, che
   const store = storeOf(root);
   const digestAt = Date.now();
   const met = told.length === 0 && reach === undefined && meets(root, store, under ?? '');
+  const sameInstrument = instrumentKept(store) === instrumentOf(store, entry, standingOf(root).standing, root, ownLock());
   const missingView = (): boolean => {
     if (!under || !worldAt(root, under.replace(/\/$/, ''))) return false;
     const held = standingOf(root, under);
@@ -118,7 +126,7 @@ async function sweep(root: string, entry: string, under: string | undefined, che
       return view?.shape !== undefined && view.shape !== '' && observeText(join(root, under, view.shape)) === undefined;
     });
   };
-  const settled = met && !missingView();
+  const settled = met && sameInstrument && !missingView();
     if (settled) {
     const ms = Date.now() - digestAt;
     const read = receiptsSeen();
@@ -169,7 +177,7 @@ async function sweep(root: string, entry: string, under: string | undefined, che
   let same = 0;
   let written: string[] = [];
   const read = new Set(ownLock().filter((line) => fieldOf(line, 'scope').startsWith('region/') && fieldOf(line, 'measure') === 'lines').flatMap((line) => fieldOf(line, 'value').split('|')));
-  const free = (place: string): boolean => limited ? descended(place) : !meets(root, store, place);
+  const free = (place: string): boolean => limited ? descended(place) : !sameInstrument || !meets(root, store, place);
   const folds = new Map<string, PlaceFold>();
   const answered = new Map<string, readonly string[]>();
   const paint = (place: string, drawn: readonly Drawn[], moved: { at: boolean }): void => {

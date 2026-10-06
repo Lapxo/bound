@@ -55,7 +55,8 @@ const isAlias = (line: string): boolean => fieldOf(line, 'scope').startsWith('de
 /** The capsules a place can run, in the order the host asks them: those its uses lines pin, then those the instrument carries, each by the coordinate its alias runs; a selected pin that cannot resolve is refused. */
 export function capsulesFor(standing: readonly string[], place: string): readonly { readonly capsule: Capsule; readonly offer: string }[] {
   const aliases = ownLock().filter(isAlias);
-  const pins = standing.filter((line) => fieldOf(line, 'scope').startsWith(`${place}/uses/`) && fieldOf(line, 'value') !== 'withdraw');
+  const prefix = place ? `${place}/` : '';
+  const pins = standing.filter((line) => fieldOf(line, 'scope').startsWith(`${prefix}uses/`) && fieldOf(line, 'value') !== 'withdraw');
   const selected = selectedCapsules(pins);
   const digests = new Set(selected.map((one) => one.capsule.digest));
   const helpers = aliases.filter((alias) => !digests.has(fieldOf(alias, 'value'))).flatMap((alias) => {

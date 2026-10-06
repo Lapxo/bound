@@ -131,13 +131,18 @@ function regionOf(fold: Placed, name: string, lines: readonly string[], facts: (
   };
 }
 
-const pinLines = (fold: Placed): readonly string[] => fold.standing.filter((line) => fieldOf(line, 'scope').startsWith(`${fold.under ?? ''}uses/`) && fieldOf(line, 'value') !== 'withdraw');
+/** A local selection belongs to its own lock; tree-qualified selections retain their explicit owner. */
+export const selectionLines = (fold: Pick<Placed, 'root' | 'standing' | 'under'>): readonly string[] => {
+  const local = fold.under ? ownLockOf(fold.root, fold.under.replace(/\/$/, '')).filter((line) => fieldOf(line, 'scope').startsWith('uses/')) : [];
+  const qualified = fold.standing.filter((line) => fieldOf(line, 'scope').startsWith(`${fold.under ?? ''}uses/`));
+  return [...new Set([...local, ...qualified])].filter((line) => fieldOf(line, 'value') !== 'withdraw');
+};
 const heldCapsules = new WeakMap<Placed, readonly Capsule[]>();
 /** Execution is supplied only by explicit capsule offers of the selected standing. */
 export function capsulesOf(fold: Placed): readonly Capsule[] {
   const cached = heldCapsules.get(fold);
   if (cached !== undefined) return cached;
-  const got = selectedCapsules(pinLines(fold)).map(one => one.capsule);
+  const got = selectedCapsules(selectionLines(fold)).map(one => one.capsule);
   heldCapsules.set(fold, got);
   return got;
 }

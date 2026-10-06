@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strictEqual, match, deepStrictEqual } from 'node:assert';
-import { generateKeyPairSync } from 'node:crypto';
+import { createHash, generateKeyPairSync } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -85,14 +85,14 @@ test('concurrent first lands commit one bootstrap and retain one signed owner le
 });
 
 
-test('check refuses a proposed clone and preserves its carried evidence', () => {
+test('check inspects a proposed clone without granting admission or rewriting evidence', () => {
   const { dir, original } = sandbox('valid');
   try {
     writeFileSync(join(dir, 'receipts.bound'), 'unverified carried evidence\n');
     const run = spawnSync(process.execPath, [verb, 'fold', '--check'], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
     strictEqual(run.status, 1, run.stdout + run.stderr);
-    match(run.stderr, /REFUSE·check.*no admitted ledger/);
-    match(run.stdout, /RECEIPTS 0 read · 1 opened/);
+    match(run.stderr, /REFUSE·check receipts are open/);
+    strictEqual(run.stdout, '');
     strictEqual(readFileSync(join(dir, 'TARGET.bound'), 'utf8'), original);
     strictEqual(readFileSync(join(dir, 'receipts.bound'), 'utf8'), 'unverified carried evidence\n');
     deepStrictEqual(readdirSync(join(dir, '.bound')), []);
@@ -109,9 +109,11 @@ test('check cannot refresh a stale native region receipt to manufacture closure'
     const wrong = 'sha256:' + '0'.repeat(64);
     const receipt = canonical({ scope: 'receipts/src', role: 'writes', form: 'alphabet', measure: 'bytes', value: wrong, at: 'place:' + wrong, by: 'bound' }) + '\n';
     writeFileSync(join(dir, 'child', 'receipts.bound'), receipt);
-    const carried = '1'.repeat(64);
+    const receiptDigest = 'sha256:' + createHash('sha256').update(receipt).digest('hex');
+    const carriedText = canonical({ scope: 'write/child/receipts.bound', role: 'writes', form: 'alphabet', measure: 'digest', value: receiptDigest, at: 'place:' + receiptDigest, by: 'bound' }) + '\n';
+    const carried = createHash('sha256').update(carriedText).digest('hex');
     mkdirSync(join(dir, '.bound', 'cas', 'carried'), { recursive: true });
-    writeFileSync(join(dir, '.bound', 'cas', 'carried', carried), canonical({ scope: 'write/child/receipts.bound', role: 'writes', form: 'alphabet', measure: 'digest', value: wrong, at: 'place:' + wrong, by: 'bound' }) + '\n');
+    writeFileSync(join(dir, '.bound', 'cas', 'carried', carried), carriedText);
     writeFileSync(join(dir, 'receipts.bound'), canonical({ scope: 'receipts', role: 'writes', form: 'alphabet', measure: 'digest', value: wrong, at: 'place:sha256:' + carried, by: 'bound' }) + '\n');
     const code = `process.argv[1] = ${JSON.stringify(verb)}; const { pass } = await import(${JSON.stringify(new URL('../src/cli/pass.ts', import.meta.url).href)}); process.exitCode = await pass(process.cwd(), process.argv[1], undefined, true);`;
     const run = spawnSync(process.execPath, ['--input-type=module', '--eval', code], { cwd: dir, encoding: 'utf8', timeout: 10_000 });
@@ -119,4 +121,33 @@ test('check cannot refresh a stale native region receipt to manufacture closure'
     match(run.stderr, /REFUSE·check receipts are open/);
     strictEqual(readFileSync(join(dir, 'child', 'receipts.bound'), 'utf8'), receipt);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test('a public check authenticates carriers without a ledger and never creates one', () => {
+  const { dir, original } = sandbox('valid');
+  try {
+    const child = canonical({scope:'receipts', role:'writes', form:'alphabet', measure:'digest', value:'sha256:'+'c'.repeat(64), at:'place:receipt', by:'bound'})+'\n';
+    const childDigest = 'sha256:'+createHash('sha256').update(child).digest('hex');
+    const body = canonical({scope:'write/child/receipts.bound', role:'writes', form:'alphabet', measure:'digest', value:childDigest, at:'place:'+childDigest, by:'bound'})+'\n';
+    const digest = createHash('sha256').update(body).digest('hex');
+    const path = join(dir,'.bound','cas','carried',digest);
+    mkdirSync(join(dir,'.bound','cas','carried'),{recursive:true});
+    writeFileSync(path,body);
+    mkdirSync(join(dir,'child'));
+    writeFileSync(join(dir,'child','receipts.bound'),child);
+    const header = canonical({scope:'receipts', role:'writes', form:'alphabet', measure:'digest', value:'sha256:'+digest, at:'place:sha256:'+digest, by:'bound'})+'\n';
+    writeFileSync(join(dir,'receipts.bound'),header);
+    const run = () => spawnSync(process.execPath,[verb,'fold','--check'],{cwd:dir,encoding:'utf8',timeout:10_000});
+    const intact=run();strictEqual(intact.status,1,intact.stdout+intact.stderr);
+    match(intact.stderr,/REFUSE·check no verified instrument identity/);
+    writeFileSync(path,body+'\n');
+    const corrupt=run();strictEqual(corrupt.status,1,corrupt.stdout+corrupt.stderr);
+    match(corrupt.stderr,/REFUSE·receipt carried bytes mismatch/);
+    strictEqual(corrupt.stdout,'');
+    strictEqual(readFileSync(path,'utf8'),body+'\n');
+    strictEqual(readFileSync(join(dir,'TARGET.bound'),'utf8'),original);
+    strictEqual(readFileSync(join(dir,'receipts.bound'),'utf8'),header);
+    deepStrictEqual(readdirSync(join(dir,'.bound')),['cas']);
+  } finally { rmSync(dir,{recursive:true,force:true}); }
 });

@@ -6,8 +6,32 @@ import { selectedCapsules } from '../src/host/selected-capsules.ts';
 import { ownLock } from '../src/observe/runner.ts';
 import { fieldOf } from '../src/fold/claims.ts';
 import type { Capsule } from '../src/host/capsule.ts';
+import {selectedWireList} from '../src/host/selected-topos.ts';
 const pin = (name: string, value: string) => canonical({scope:`consumer/uses/${name}`,value,by:'fixture'});
 const standing = (fields: Record<string,string>) => readStanding(standingBytes([canonical(fields)]));
+
+test('selected wire contracts resolve without executable offers or copied foreign claims', () => {
+  const local:readonly string[]=[];
+  const world=standing({scope:'audit/wire/receipt-fields',value:'scope|value|at'});
+  let reads=0;
+  const result=selectedWireList(local,4,[pin('wire','sha256:held'),pin('same','sha256:held')],'receipt-fields',()=>{reads++;return world;});
+  assert.deepEqual(result,['scope','value','at']);
+  assert.equal(reads,1);
+  assert.deepEqual(local,[]);
+});
+test('selected wire contracts cannot resolve disagreement by selection order', () => {
+  const local=[canonical({scope:'wire/receipt-fields',epoch:'4',value:'scope|value'})];
+  const resolve=()=>standing({scope:'wire/receipt-fields',value:'scope|at'});
+  assert.throws(()=>selectedWireList(local,4,[pin('wire','sha256:held')],'receipt-fields',resolve),/REFUSE·wire .*conflicting contracts/);
+  const agreeing=()=>standing({scope:'wire/receipt-fields',value:'value|scope'});
+  assert.deepEqual(selectedWireList(local,4,[pin('wire','sha256:held')],'receipt-fields',agreeing),['scope','value']);
+});
+test('missing or unavailable wire contracts refuse without SDK defaults', () => {
+  assert.throws(()=>selectedWireList([],4,[],'receipt-fields'),/REFUSE·wire .*no declared contract/);
+  assert.throws(()=>selectedWireList([],4,[pin('wire','sha256:missing')],'receipt-fields',()=>{throw Error('REFUSE·pin not laid');}),/REFUSE·pin not laid/);
+  const future=[canonical({scope:'wire/receipt-fields',epoch:'5',value:'scope|value'})];
+  assert.throws(()=>selectedWireList(future,4,[],'receipt-fields'),/no declared contract/);
+});
 
 test('missing selected standing refuses before any unrelated executable can resolve', () => {
   let calls=0;
