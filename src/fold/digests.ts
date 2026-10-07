@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import { appendFileSync, dirname, join, mkdirSync, readdirSync, relative, resolve } from '../host/io.ts';
 import { bytesDigest as bytesWith, fullDigest as fullWith } from '../host/digest.ts';
 import { coordinatesUnder, observeFile, observeText, stampOf } from '../observe/files.ts';
@@ -111,6 +112,7 @@ export function coordinateDigest(store: string, at: string): string | undefined 
   if (held !== undefined) return held;
   const digest = bytesDigest(store, observeFile(at) ?? new Uint8Array());
   memo.set(key, digest);
+  if (readOnly()) return digest;
   mkdirSync(join(store, 'cas'), { recursive: true });
   appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${digest}\n`);
   return digest;
@@ -122,6 +124,7 @@ export function memoized(store: string, key: string, compute: () => string): str
   if (held !== undefined) return held;
   const value = compute();
   memo.set(key, value);
+  if (readOnly()) return value;
   mkdirSync(join(store, 'cas'), { recursive: true });
   appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${value}\n`);
   return value;
@@ -136,7 +139,7 @@ const importsOf = (store: string, at: string, digest: string): readonly string[]
   const found = [...new TextDecoder().decode(observeFile(at) ?? new Uint8Array()).matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s*)['"]([^'"]*)['"]/g)].map((m) => m[1] ?? '');
   imported.set(digest, found);
   memo.set(key, found.join('|'));
-  appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);
+  if (!readOnly()) appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);
   return found;
 };
 

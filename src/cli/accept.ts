@@ -1,3 +1,4 @@
+import {withoutEffects} from '../host/read-only.ts';
 import {selectedWireAt} from '../host/selected-topos.ts';
 import { timing } from '../host/timing.ts';
 import {admittedObjects} from '../host/objects.ts';
@@ -22,7 +23,7 @@ import { ownLock, ownRoot, ownStore } from '../observe/runner.ts';
 import { widenedWithoutWitness } from '../judge/widening.ts';
 import { retractedTogether, withdrawal } from '../land/withdraw.ts';
 import { isCeiling } from '../fold/configures.ts';
-import { inertIn, rankedIn } from '../land/inert.ts';
+import { inertIn } from '../land/inert.ts';
 import { landSaid } from './pass.ts';
 import { underTheLock, underTheRegions } from '../land/act.ts';
 import { openedBy } from '../fold/opened.ts';
@@ -44,6 +45,63 @@ import type { Judged } from './takes.ts';
 
 export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly epoch: number; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
 
+/** Admission reads an existing evidence snapshot; acquiring observations belongs to fold. */
+function admissionEvidence(root: string, signed: readonly string[], standing: readonly string[]) {
+  return withoutEffects(() => {
+    const store = storeOf(root);
+    const reads = !signed.some(isReaderLock) && signed.some(isCeiling);
+    const fold = reads ? coneOf(root, entryOf(root), signed.filter(isCeiling)) : { standing, observed: [], own: {}, kept: true };
+    const inert = inertIn(signed, { standing: fold.standing, ceiling: isCeiling, signsReader: !reads, observed: fold.observed, own: fold.own, epoch: epochOf([...lockLines(store), ...signed]) });
+    if (inert.length) throw Error('REFUSE·inert no existing reading meets these ceilings; fold the declared inputs first');
+    const coordinates = coordinatesWithdrawn(root, store, signed, [...signed, ...standing]);
+    if (coordinates.refused.length) throw Error(`REFUSE·withdraw a file is still read: ${coordinates.refused.map(one => `${one.path} by ${one.by}`).join(' · ')}`);
+    const view = `${wordOf(standing, 'families', 'view')}/`;
+    const judged = signed.filter(one => isConfig(one) && fieldOf(one, 'role') === 'demands' && fieldOf(one, 'value') !== 'withdraw' && !fieldOf(one, 'scope').startsWith(view)).map(one => judgeDemand(root, one));
+    const refused = judged.filter(one => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
+    if (refused.length) throw Error(`REFUSE·takes ${refused.map(one => `${one.scope}: ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}`).join(' · ')}`);
+    return { coordinates, judged, fold };
+  });
+}
+
+/** One witness rule for prospective admission and the locked act. */
+function refusesWidening(signed: readonly string[], standing: readonly string[]): boolean {
+  const widened = widenedWithoutWitness(signed, standing, isCeiling, wordOf(standing, 'at-classes', 'witness'));
+  if (widened.length) {
+    for (const line of widened) process.stderr.write(`WIDER    ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
+    process.stderr.write(`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
+    return true;
+  }
+  return false;
+}
+
+/** Admission-only checks; observation and mutation belong to the later act. */
+function refusesAdmission(root: string, signed: readonly string[], standing: readonly string[]): boolean {
+  if (refusesWidening(signed, standing)) return true;
+  const store = storeOf(root);
+  const outside = outsideTheirCapsule(root, standing, signed);
+  for (const line of outside) process.stderr.write(`OUTSIDE  ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
+  if (outside.length) {
+    process.stderr.write(`${selfName()}: REFUSE·outside nothing landed · a reader or a capsule lands in the capsule of its world, never in the wire or the instrument\n`);
+    return true;
+  }
+  const forks = forksJoinedBy(store, signed).filter(fork => forksItself(fork.lines) || fork.lines.filter(line => signed.includes(line)).length > 1);
+  if (forks.length) {
+    for (const fork of forks) {
+      process.stderr.write(`FORK     ${fork.key}\n`);
+      for (const line of fork.lines) process.stderr.write(`  ${signed.includes(line) ? 'new ' : 'held'}  by=${fieldOf(line, 'by')} ${sideOf(line, lockLines(store))}\n`);
+    }
+    process.stderr.write(`${selfName()}: REFUSE·fork nothing landed · one signer never forks itself, and one act never forks itself: withdraw the held side in this batch, or sign the other reading under its own scope\n`);
+    return true;
+  }
+  const held = aliasPinned(root, signed);
+  if (held.length) {
+    for (const one of held) process.stderr.write(`ALIAS    ${one.scope} · ${one.digest} · ${one.by.join(' ')}\n`);
+    process.stderr.write(`${selfName()}: REFUSE·alias nothing landed · an alias is withdrawn only when no pin names its digest\n`);
+    return true;
+  }
+  return false;
+}
+
 /** A batch signed as accept signs it: at the next epoch, by the key it names, each line read by the wire it would land under. */
 export async function signedBatch(root: string, args: readonly string[], files: readonly string[]): Promise<Batch> {
   const byFile = files.map((file) => [placesOfFile(file), claimLinesIn(file)] as const);
@@ -61,10 +119,16 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   }
   const store = storeOf(root);
   const destinations = [...new Set([...namedPlaces(args), ...byFile.flatMap(([heads]) => heads)])];
+  const rooted = lockStanding(store);
+  const stray = destinations.filter(one => !placesIn(root).includes(one) && !foundableIn(root, rooted, wordOf(rooted, 'families', 'region'), one));
+  if (stray.length) {
+    process.stderr.write(`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
+    return {kind:'exit',code:2};
+  }
   const epoch = epochOf([...lockLines(store), ...destinations.flatMap((place) => appliedIn(root, place))]) + 1;
   const stale = proposed.filter((line) => fieldOf(line, 'sig')).flatMap((line) => ((by, key) => (key === undefined || !verifiesOwnerLine(line, key, signaturesOf(store).admitted)
     ? [`${fieldOf(line, 'scope')} · the signature does not hold for ${by || '∅'}`]
-    : isConfig(line) && Number(fieldOf(line, 'epoch')) !== epoch ? [`${fieldOf(line, 'scope')} · signed by ${by} at epoch ${fieldOf(line, 'epoch')}, and this act lands at ${epoch}: sign it again`] : []))(fieldOf(line, 'by'), publicKeyOf(root, fieldOf(line, 'by'))));
+    : []))(fieldOf(line, 'by'), publicKeyOf(root, fieldOf(line, 'by'))));
   if (stale.length) {
     for (const one of stale) process.stderr.write(`SIGNED   ${one}\n`);
     process.stderr.write(`${selfName()}: REFUSE·signed nothing landed · ${stale.length} lines a lane signed stand at no epoch this act\n`);
@@ -79,6 +143,12 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   if (proposed.every((line) => held(line))) {
     if(proposed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...proposed]);}catch(e){process.stderr.write(`${selfName()}: ${String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
     return { kind: 'once', proposed };
+  }
+  const outdated = proposed.filter(line => fieldOf(line, 'sig') && isConfig(line) && Number(fieldOf(line, 'epoch')) !== epoch);
+  if (outdated.length) {
+    for (const line of outdated) process.stderr.write(`SIGNED   ${fieldOf(line, 'scope')} · signed by ${fieldOf(line, 'by')} at epoch ${fieldOf(line, 'epoch')}, and this act lands at ${epoch}: sign it again\n`);
+    process.stderr.write(`${selfName()}: REFUSE·signed nothing landed · ${outdated.length} lines a lane signed stand at no epoch this act\n`);
+    return { kind: 'exit', code: 1 };
   }
   const keyFile = valueOf(args, FLAGS.keyFile);
   const keyId = valueOf(args, FLAGS.key) ?? ownerOf(store);
@@ -116,6 +186,15 @@ export async function signedBatch(root: string, args: readonly string[], files: 
       return { kind: 'exit', code: 1 };
     }
   }
+  const taken = retractedTogether(signed);
+  if (taken.length) {
+    for (const pair of taken) {
+      process.stderr.write(`WITHDRAW ${sayingOf(pair.withdraw)}\n`);
+      process.stderr.write(`NEW      ${sayingOf(pair.line)}\n`);
+    }
+    process.stderr.write(`${selfName()}: REFUSE·withdraw nothing landed · a withdraw matches a new line in this batch, so it takes that line too\n`);
+    return { kind: 'exit', code: 1 };
+  }
   const authority = authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted);
   const ownership = ownedOf(root, signed, line => authority.of(line).kind === 'admitted',
     by => authority.admitted.find(one => one.id === by)?.coverage ?? [], named,
@@ -124,7 +203,15 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     for (const line of ownership.nowhere) process.stderr.write(`${selfName()}: REFUSE·signer ${keyId} uncovered ${fieldOf(line, 'scope')} · nothing signed for delivery\n`);
     return { kind: 'exit', code: 1 };
   }
+  if (ownership.forked.length) {
+    for (const one of ownership.forked) process.stderr.write(`FORKED   ${one.place}/${LOCK} · ${one.key} · the lot would leave two standing claims where the lock had one\n`);
+    process.stderr.write(`${selfName()}: REFUSE·forked nothing landed · ${ownership.forked.length} claims an own lot would fork: a lot for many places lands the same lines at each, and lines meant for one place go in a lot of their own\n`);
+    return {kind:'exit',code:1};
+  }
+  if (refusesAdmission(root, ownership.ledger, lockStanding(store))) return { kind: 'exit', code: 1 };
   if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>process.stdout.write(text+'\n'));}catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
+  try { admissionEvidence(root, ownership.ledger, lockStanding(store)); }
+  catch(error) {process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return {kind:'exit',code:1};}
   return { kind: 'signed', signed, epoch, ...(drafted.length ? { keyId } : {}) };
 }
 
@@ -140,35 +227,15 @@ export async function accept(root: string, args: readonly string[]): Promise<num
   const started = Date.now();
   const named = namedPlaces(args);
   const placed = positionalsOf(args).reduce((all, file) => ((places) => (places.length ? claimLinesIn(file).reduce((got, line) => got.set(sayingOf(line), [...new Set([...(got.get(sayingOf(line)) ?? []), ...places])]), all) : all))(placesOfFile(file)), new Map<string, readonly string[]>());
-  const rooted = lockStanding(storeOf(root));
-  const stray = [...new Set([...named, ...[...placed.values()].flat()])].filter((one) => !placesIn(root).includes(one) && !foundableIn(root, rooted, wordOf(rooted, 'families', 'region'), one));
-  if (stray.length) {
-    process.stderr.write(`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
-    return 2;
-  }
   const batch = await signedBatch(root, args, positionalsOf(args));
   if (batch.kind === 'exit') return batch.code;
   if (batch.kind === 'once') return underTheLock(storeOf(root), 'land', () => repaid(root, batch.proposed, started));
-  const taken = retractedTogether(batch.signed);
-  if (taken.length) {
-    for (const pair of taken) {
-      process.stderr.write(`WITHDRAW ${sayingOf(pair.withdraw)}\n`);
-      process.stderr.write(`NEW      ${sayingOf(pair.line)}\n`);
-    }
-    process.stderr.write(`${selfName()}: REFUSE·withdraw nothing landed · a withdraw matches a new line in this batch, so it takes that line too\n`);
-    return 1;
-  }
   const store = storeOf(root);
   const authority = authorityFor([...lockLines(store), ...batch.signed], rootSigner(root), signaturesOf(store).admitted);
   const owned = ownedOf(root, batch.signed, (line) => authority.of(line).kind === 'admitted', (by) => authority.admitted.find((one) => one.id === by)?.coverage ?? [], named, (line) => placed.get(sayingOf(line)));
   if (owned.nowhere.length) {
     for (const line of owned.nowhere) process.stderr.write(`NOWHERE  ${fieldOf(line, 'scope')} · ${((got) => (got.kind === 'admitted' ? 'admitted' : got.why))(authority.of(line))}, and ${named.length ? `no place of ${named.join(', ')} takes it` : 'no one own lock it covers takes it: name the places with --place'}\n`);
     process.stderr.write(`${selfName()}: REFUSE·nowhere nothing landed · ${owned.nowhere.length} lines neither the ledger nor an own lock admits: a line is landed signed where it stands, never written in bare\n`);
-    return 1;
-  }
-  if (owned.forked.length) {
-    for (const one of owned.forked) process.stderr.write(`FORKED   ${one.place}/${LOCK} · ${one.key} · the lot would leave two standing claims where the lock had one\n`);
-    process.stderr.write(`${selfName()}: REFUSE·forked nothing landed · ${owned.forked.length} claims an own lot would fork: a lot for many places lands the same lines at each, and lines meant for one place go in a lot of their own\n`);
     return 1;
   }
   const places = placesIn(root);
@@ -193,36 +260,12 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     try {await admittedObjects(root,[...signedOwnerLines(store),...signed]);}
     catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return 1;}
   }
-  const reads = !signed.some(isReaderLock) && signed.some(isCeiling);
-  const fold = reads ? took('cone', () => coneOf(root, entryOf(root), signed.filter(isCeiling), descent)) : { ...took('lines', () => standingOf(root)), observed: [], own: {}, kept: true };
-  const inert = inertIn(signed, { standing: fold.standing, ceiling: isCeiling, signsReader: !reads, observed: fold.observed, own: fold.own, epoch });
-  const widened = widenedWithoutWitness(signed, fold.standing, isCeiling, wordOf(fold.standing, 'at-classes', 'witness'));
-  if (widened.length) {
-    for (const line of widened) process.stderr.write(`WIDER    ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
-    return 1;
-  }
-  if (inert.length) {
-    for (const line of inert) process.stderr.write(`INERT    ${fieldOf(line, 'scope')} measure=${fieldOf(line, 'measure')}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·inert nothing landed · no reading meets these ceilings: sign the reader that meets them in this batch, or leave them out\n`);
-    return 1;
-  }
-  const outside = outsideTheirCapsule(root, fold.standing, signed);
-  for (const line of outside) process.stderr.write(`OUTSIDE  ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
-  if (outside.length) {
-    process.stderr.write(`${selfName()}: REFUSE·outside nothing landed · a reader or a capsule lands in the capsule of its world, never in the wire or the instrument\n`);
-    return 1;
-  }
-  const forks = took('fork', () => forksJoinedBy(store, signed).filter((fork) => forksItself(fork.lines) || fork.lines.filter((line) => signed.includes(line)).length > 1));
-  if (forks.length) {
-    for (const fork of forks) {
-      process.stderr.write(`FORK     ${fork.key}\n`);
-      for (const line of fork.lines) process.stderr.write(`  ${signed.includes(line) ? 'new ' : 'held'}  by=${fieldOf(line, 'by')} ${sideOf(line, lockLines(store))}\n`);
-    }
-    process.stderr.write(`${selfName()}: REFUSE·fork nothing landed · one signer never forks itself, and one act never forks itself: withdraw the held side in this batch, or sign the other reading under its own scope\n`);
-    return 1;
-  }
-  if (reads) for (const line of rankedIn(signed.filter(isCeiling), fold)) process.stdout.write(`${line}\n`);
+  const snapshot = took('lines', () => standingOf(root));
+  if (refusesAdmission(root, signed, snapshot.standing)) return 1;
+  let evidence: ReturnType<typeof admissionEvidence>;
+  try { evidence = took('evidence', () => admissionEvidence(root, signed, snapshot.standing)); }
+  catch(error) {process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return 1;}
+  const fold = evidence.fold;
   const authority = took('authority', () => authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted));
   for (const line of signed) {
     const verdict = authority.of(line);
@@ -231,13 +274,8 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
       return 1;
     }
   }
-  const coordinates = coordinatesWithdrawn(root, store, signed, [...signed, ...fold.standing]);
-  if (coordinates.refused.length) {
-    for (const one of coordinates.refused) process.stderr.write(`RUN      ${one.path} · still read by ${one.by}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·withdraw nothing landed · a file a block still reads cannot leave: withdraw what reads it first, or keep it\n`);
-    return 1;
-  }
   const withdraws = signed.filter((line) => fieldOf(line, 'value') === 'withdraw');
+  const coordinates = evidence.coordinates;
   const withdrawn = withdraws.length ? withdrawal(withdraws, lockLines(store)) : null;
   const view = `${wordOf(fold.standing, 'families', 'view')}/`;
   const lot = fullDigest(store, signed);
@@ -245,19 +283,12 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     ? fullDigest(store, [...vouchedCoordinates(store)].sort(([a], [b]) => a.localeCompare(b)).map(([coordinate, digest]) => `${coordinate} ${digest}`))
     : 'key' in fold && typeof fold.key === 'string' ? fold.key : fullDigest(store, fold.standing);
   const cached = keptTakes(keptVerdict(store, tree, lot));
-  const judged = cached ?? took('takes', () => signed.filter((one) => fieldOf(one, 'role') === 'demands' && fieldOf(one, 'value') !== 'withdraw' && !fieldOf(one, 'scope').startsWith(view))
-    .map((line) => judgeDemand(root, line)));
+  const judged = cached ?? evidence.judged;
   if (!cached) keepVerdict(store, tree, lot, judged.map(packTake));
   const refused = judged.filter((one) => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
   if (refused.length) {
     for (const one of refused) process.stdout.write(`REFUSE   take ${one.scope} · ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}\n`);
     process.stderr.write(`${selfName()}: REFUSE·takes nothing landed · ${refused.length} takes refused: a batch lands whole or not at all\n`);
-    return 1;
-  }
-  const held = aliasPinned(root, signed);
-  if (held.length) {
-    for (const one of held) process.stderr.write(`ALIAS    ${one.scope} · ${one.digest} · ${one.by.join(' ')}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·alias nothing landed · an alias is withdrawn only when no pin names its digest\n`);
     return 1;
   }
   const told = took('told', () => standingOf(root, undefined, signed));

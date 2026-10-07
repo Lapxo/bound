@@ -1,0 +1,4 @@
+{
+  "lot": [{"scope":"sample/reading","form":"alphabet","role":"writes","measure":"id","value":"yes","at":"policy:sample"}],
+  "expected": "admitted"
+}

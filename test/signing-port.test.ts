@@ -4,8 +4,8 @@ import {tmpdir} from 'node:os';import {join,resolve} from 'node:path';import {sp
 import {canonical,parse} from '@lapxo/topos/wire';
 import {test} from 'node:test';
 test('declared signing ports are equivalent and CLI refusals are atomic',()=>{
-const reader=new URL('../src/cli/verb.ts',import.meta.url).pathname,temp=mkdtempSync(join(tmpdir(),'bound-sign-cli-'));
-const report={reader,dependency:'isolated Topos signing API candidate; not published 0.1.7',runs:[],complete:false};
+const reader=process.env.BOUND_TEST_READER??new URL('../src/cli/verb.ts',import.meta.url).pathname,temp=mkdtempSync(join(tmpdir(),'bound-sign-cli-'));
+const report={reader,dependency:'Topos 0.1.8 signing-lot/1',runs:[],complete:false};
 const pair=generateKeyPairSync('ed25519'),key=join(temp,'device.pem');writeFileSync(key,pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});
 const pub=pair.publicKey.export({type:'spki',format:'der'}).toString('base64');const wire=new URL('../node_modules/@lapxo/topos/dist/wire/index.js',import.meta.url).pathname;
 const counter=join(temp,'counter'),command=join(temp,'signer.mjs'),registry=join(temp,'bindings.json');

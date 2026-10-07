@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import {snapshotVerdict} from './evidence.ts';
 import { dirname, resolve, spawnSync } from '../host/io.ts';
 import { ledgerLines } from '../land/ledger.ts';
@@ -26,6 +27,7 @@ import { sha } from '../host/hash.ts';
 const asked = new Map<string, 'agrees' | 'forks' | undefined>();
 
 function askedNow(store: string, rests: string): 'agrees' | 'forks' | undefined {
+  if (readOnly()) return undefined;
   const root = dirname(store);
   const key = `${root} ${rests}`;
   if (asked.has(key)) return asked.get(key);

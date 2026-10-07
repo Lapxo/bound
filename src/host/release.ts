@@ -1,3 +1,4 @@
+import {ContentNeeded} from './content-needed.ts';
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, sep } from 'node:path';
@@ -139,7 +140,7 @@ export function layReleases(store: string, own: string, lock: readonly string[],
     if (bytes !== undefined && !dir && observeText(at) === undefined) keepSnapshot(store, digest, bytes);
     const current = observeText(at);
     if (bytes !== undefined && current !== undefined && !dir && !sameSnapshot(snapshotOf(current), members(bytes).map((one) => [one.name, digestOf(one.bytes)] as const))) throw new Error(`REFUSE·release snapshot for ${digest} omits or changes archive members; explicit rebuild required`);
-    if (bytes === undefined && !dir && current === undefined) throw new Error(`REFUSE·release ${fieldOf(line, 'scope')} has no available archive or snapshot`);
+    if (bytes === undefined && !dir && current === undefined) throw new ContentNeeded(digest, `REFUSE·release ${fieldOf(line, 'scope')} has no available archive or snapshot`);
     const root = fieldOf(line, 'shape');
     const place = join(own, archiveCoordinate(needs));
     const link = lstatSync(place, { throwIfNoEntry: false });

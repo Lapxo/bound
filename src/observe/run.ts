@@ -45,5 +45,8 @@ export function runReader(module: string, root: string, inputs: readonly Input[]
   if (ran.error) throw Object.assign(new Error(`${module}: reader process failed: ${ran.error.message}`), { cause: ran.error });
   if (ran.status !== 0) throw new Error(`${module}: reader exited ${ran.status ?? `with signal ${ran.signal}`}\n${ran.stderr ?? ''}${ran.stdout ?? ''}`);
   if (ran.stderr) process.stderr.write(ran.stderr);
-  return responsesOf(ran.stdout ?? '', inputs.length).map((answer) => (answer.claims ?? []) as readonly Row[]);
+  return responsesOf(ran.stdout ?? '', inputs.length).map((answer) => {
+    if (answer.kind !== 'fact') throw new Error(`REFUSE·reader ${module} · ${answer.why ?? 'no reading answered'}`);
+    return (answer.claims ?? []) as readonly Row[];
+  });
 }

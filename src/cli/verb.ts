@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import {resolveSources} from '../host/source-content.ts';
+import {withoutEffects} from '../host/read-only.ts';
+import {resolveSources,resolveRequested} from '../host/source-content.ts';
 import {cellsWithReceipts} from '../host/cell-receipts.ts';
+import {renderCells} from '@lapxo/topos/cells-view';
 import {releasePolicyLines} from '../fold/release-policy.ts';
 import {admittedObjects} from '../host/objects.ts';
 import {objectFold} from '../fold/object.ts';
@@ -16,7 +18,7 @@ import { eraOf, signaturesOf } from '../fold/digests.ts';
 import { fullDigest as bootstrapDigest } from '../host/digest.ts';
 import { canonical } from '@lapxo/topos/wire';
 import { EXTENSION, LOCK, fieldOf, foldClaims, isWire, selfName } from '../fold/claims.ts';
-import { observedClaims } from '../fold/observed.ts';
+import { observedClaims, readerRefusals } from '../fold/observed.ts';
 import { rolesOf } from '../fold/roles.ts';
 import { authorityFor, releaseSigner, rootSigner, writerFor } from '../fold/signers.ts';
 import { land, ledgerLines, storeOf } from '../land/ledger.ts';
@@ -180,15 +182,35 @@ async function view(root: string, under: string | undefined, asked: string, told
   const ledger = told.filter((line) => authority.of(line).kind === 'admitted');
   const rest = told.filter((line) => !ledger.includes(line));
   if (place && rest.length) tellOwn(place, rest);
+  if (name === NAMED_VIEWS.lines && (told.length || depth === undefined)) {
+    const text = standingOf(root, under, ledger).standing.filter(isWire).join('\n');
+    process.stdout.write(text ? `${text}\n` : '');
+    return EXIT.closed;
+  }
+  if (told.length) {
+    const selected = viewsOf(standingOf(root, under, ledger).standing).get(name);
+    if (selected && !selected.shape && selected.regions.some(region => region.name === 'cells')) {
+      const history = [...signedOwnerLines(storeOf(root)), ...ledger];
+      const held = await admittedObjects(root, history);
+      process.stdout.write(`TOLD     ${told.length} lines folded as if landed · nothing written\n`);
+      for (const line of renderCells(objectFold(held.records, held.context))) process.stdout.write(line + '\n');
+      return EXIT.closed;
+    }
+  }
   const own = place ? rest.filter((line) => admittedIn(root, place, line)) : [];
   const fold = told.length
-    ? foldPlace(root, entryOf(root), under, false, { standing: standingOf(root, under, ledger), observed: observedClaims(root, storeOf(root), { wait: false }) })
-    : foldPlace(root, entryOf(root), under, false);
+    ? foldPlace(root, entryOf(root), under, false, { standing: standingOf(root, under, ledger), observed: observedClaims(root, storeOf(root), { wait: false }), free: true })
+    : foldPlace(root, entryOf(root), under, true);
+  if (!told.length && readerRefusals().length) {
+    for (const why of readerRefusals()) process.stderr.write(`${selfName()}: ${why}\n`);
+    return EXIT.refuse;
+  }
   if (coord) askWhy(fold, coord);
   if (name === NAMED_VIEWS.lines) {
     if (!told.length) beat(root, fold, Date.now() - at);
     const text = fold.standing.filter(isWire).join('\n');
     process.stdout.write(text ? `${text}\n` : '');
+    if (depth === '1') for (const line of readingsIn([...fold.standing.filter(isCeiling), ...ownCeilings(under)], fold)) process.stdout.write(`${line}\n`);
     return EXIT.closed;
   }
   const views = viewsOf(fold.standing);
@@ -346,7 +368,7 @@ function foldFile(at: string): number {
   return EXIT.closed;
 }
 
-function foldVerb(_root: string, rest: readonly string[]): number | Promise<number> {
+function foldVerb(root: string, rest: readonly string[]): number | Promise<number> {
   const files = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory() && one.endsWith(EXTENSION));
   const places = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
   if (files.length === 1 && !places.length && valueOf(rest, FLAGS.as) === undefined) {
@@ -355,20 +377,31 @@ function foldVerb(_root: string, rest: readonly string[]): number | Promise<numb
     return foldAt(dirname(at), undefined, rest);
   }
   const under = places[0];
-  const tree = files.length === 1 ? dirname(resolve(files[0]!)) : resolve('.');
+  // A prospective lot is data, not the place whose authority admits it.
+  const tree = files.length ? root : resolve('.');
   const place = under ? relative(tree, resolve(under)).split(sep).join('/') : '';
   return foldAt(tree, place ? `${place}/` : undefined, rest);
 }
 
 async function foldAt(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
+  const prospective = as !== undefined && positionalsOf(argv).some(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
+  if(as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
+  return resolveRequested(digest=>resolveSources(standingOf(root,under).standing,[digest]),()=>foldResolved(root,under,argv));
+}
+
+async function foldResolved(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
+  const as = valueOf(argv, FLAGS.as);
+  const inputs = positionalsOf(argv).filter(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
   // Public content is authenticated by its digest, independently of owner history.
   // A named view does not request mounting every release of the instrument.
-  if(as !== NAMED_VIEWS.help && lockLines(storeOf(root)).length) await resolveSources(standingOf(root,under).standing,as===undefined);
+  const receiptCheck = as === undefined && argv.includes(FLAGS.check);
+
   if(as===OBJECT_VIEW){const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));const cells=objectFold(held.records,held.context);for(const c of cells)process.stdout.write('CELL '+JSON.stringify(c)+'\n');process.stdout.write(`FACT     object fold ${cells.length} cells\n`);return EXIT.closed;}
   const key = valueOf(argv, FLAGS.key);
   if (as === undefined) {
     const exit=await pass(root, entryOf(root), under, argv.includes(FLAGS.check));
+    if (receiptCheck) return exit;
     if(exit!==0)return exit;
     const history=signedOwnerLines(storeOf(root));
     const {objectHistory}=await import('@lapxo/topos/wire');
@@ -381,14 +414,14 @@ async function foldAt(root: string, under: string | undefined, argv: readonly st
     }
     return exit;
   }
-  const named = positionalsOf(argv).filter((one) => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
+  const named = inputs;
   const coord = positionalsOf(argv).find((one) => one !== under?.replace(/\/$/, '') && !one.startsWith('-') && !(existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory()));
   if ((as === 'why' || as === NAMED_VIEWS.because || as.split('@')[0] === 'why') && coord !== undefined) return view(root, under, as === NAMED_VIEWS.because ? 'why' : as, [], coord, key);
   if (!named.length) return view(root, under, as, [], undefined, key);
   const batch = await signedBatch(root, argv, named);
   if (batch.kind === 'exit') return batch.code;
   if (batch.kind === 'once') process.stdout.write(`ONCE     ${batch.proposed.length} lines · every one already landed: the view folds the tree as it stands\n`);
-  return view(root, under, as, batch.kind === 'signed' ? batch.signed : [], undefined, key);
+  return withoutEffects(() => view(root, under, as, batch.kind === 'signed' ? batch.signed : batch.proposed, undefined, key));
 }
 
 const VERBS: Readonly<Record<VerbName, (root: string, rest: readonly string[], argv: readonly string[]) => number | Promise<number>>> = {

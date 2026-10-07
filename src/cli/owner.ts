@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import { keyFor, lockLines, releaseOf, signedLockLines } from '../fold/keys.ts';
 import { existsSync, renameSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -100,6 +101,7 @@ export function renderedLock(root: string, store: string, told: readonly string[
   if (released && !told.length) return readRelease(released);
   const owned = [...lockLines(store), ...told];
   const render = (): ReturnType<typeof renderTarget> => renderTarget(owned, undefined, authorityFor(owned, rootSigner(root), signaturesOf(store, told).admitted).of, forkReceipts(store, owned));
+  if (readOnly()) return render();
   if (told.length) {
     const byLock = rendered.get(lockLines(store)) ?? rendered.set(lockLines(store), new Map()).get(lockLines(store))!;
     return byLock.get(told) ?? byLock.set(told, render()).get(told)!;

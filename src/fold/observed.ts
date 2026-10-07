@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import { basename, dirname, existsSync, mkdirSync, resolve, rmSync, spawn, statSync, writeFileSync } from '../host/io.ts';
 import { bundleOf, processOf } from '../observe/runner.ts';
 import { canonical, parse, PROTOCOL } from '@lapxo/topos/wire';
@@ -16,7 +17,7 @@ import type { Offer, ReaderClaim } from './readers.ts';
 import { runReader, runs } from '../observe/run.ts';
 import { LEVEL, OBSERVED, keepObservation, keyOf, legacyOf, observation, observed as observedAt, opened, pointer, readerOf, regionIn, setAside, sha, trimmed } from './shards.ts';
 import { saidDigest } from './kept.ts';
-import { carriedIn } from './resolved.ts';
+import { carriedIn, carriedFrom } from './resolved.ts';
 
 export const cased = (question: string): boolean => /^(?:vector|sample)\//.test(question);
 
@@ -104,6 +105,8 @@ function takeReadings(observed: readonly string[]): readonly Placed[] {
 
 const behind: { module: string; places: number }[] = [];
 export const readersBehind = (): readonly { readonly module: string; readonly places: number }[] => behind;
+const refused: string[] = [];
+export const readerRefusals = (): readonly string[] => refused;
 
 const alive = (pid: number): boolean => { try { return process.kill(pid, 0); } catch { return false; } };
 function travelled(store: string, speaker: string): void {
@@ -179,6 +182,13 @@ export function readerReaches(reach: readonly string[] | undefined, where: reado
 }
 
 export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string> } = {}): readonly string[] {
+  refused.length = 0;
+  if (readOnly()) {
+    const carried = (observeText(resolve(root, 'receipts.bound')) ?? '').split('\n').filter(isWire);
+    const evidence = carriedFrom(store, carried);
+    if (evidence === undefined) throw Error('REFUSE·preview native receipt bytes unavailable; fold the declared inputs first');
+    return evidence;
+  }
   const wait = options.wait ?? true;
   const standing = lockStanding(store);
   const lines = readersOf(store);
@@ -250,7 +260,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
     const module = resolve(root, reader.module);
     const asked = reader.capsule === undefined ? undefined : capsuleAt(reader.capsule.digest, reader.capsule.entry);
     const source = reader.capsule === undefined ? observeFile(module) : asked === undefined ? undefined : new Uint8Array();
-    const bundle = source && reader.capsule === undefined ? bundleOf(module) ?? 'unbundled' : 'none';
+    const bundle = source && reader.capsule === undefined ? bundleOf(module) ?? bytesDigest(store, source) : 'none';
     const offered = offersOf(root, store, reader, roleOf, look, (where) => reached(trimmed(where)));
     const vectors = reader.capsule === undefined ? observeText(resolve(root, vectorsOf(reader.module, standing))) : undefined;
     const kept = whole && legacy === undefined && answered === undefined && source ? sha([
@@ -339,7 +349,10 @@ export function observedClaims(root: string, store: string, options: { readonly 
       }
       return [];
     };
-    if (due.length && !source) return false;
+    if (due.length && !source) {
+      refused.push(`REFUSE·reader ${reader.module} unavailable · ${due.length} readings remain due`);
+      return false;
+    }
     if (due.length && !wait) {
       for (const plan of plans) {
         if (plan.said !== undefined) {
@@ -380,11 +393,15 @@ export function observedClaims(root: string, store: string, options: { readonly 
           })
           : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })));
       } catch (error) {
-        process.stderr.write(`REFUSE reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}\n`);
+        const why = `REFUSE·reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}`;
+        refused.push(why);
+        process.stderr.write(`${why}\n`);
         return false;
       }
       if (rows.every((mine) => !mine.length)) {
-        process.stderr.write(`REFUSE   reader ${reader.module} · answered none of ${due.length} places · nothing landed, they stay due\n`);
+        const why = `REFUSE·reader ${reader.module} · answered none of ${due.length} places · nothing landed, they stay due`;
+        refused.push(why);
+        process.stderr.write(`${why}\n`);
         return false;
       }
       ran += due.length;

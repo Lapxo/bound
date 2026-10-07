@@ -1,3 +1,4 @@
+import {requireEffects} from '../host/read-only.ts';
 import { appendFileSync, closeSync, dirname, existsSync, join, linkSync, mkdirSync, openSync, readFileSync, readSync, renameSync, rmSync, statSync, writeFileSync } from '../host/io.ts';
 import { storeRoot } from '../host/ports/store.ts';
 import { canonical, EXTENSION, PROTOCOL } from '@lapxo/topos/wire';
@@ -92,6 +93,7 @@ function landWhole(at: string, bytes: Uint8Array | string): string {
 
 /** A file replaced whole: the bytes land in a temp beside it and the name moves in one rename, so a killed write keeps the temp, never a torn file under the name a later read parses. */
 export function replaceWhole(at: string, bytes: Uint8Array | string): void {
+  requireEffects('persistent replacement');
   mkdirSync(dirname(at), { recursive: true });
   const part = `${at}.${process.pid}.part`;
   writeFileSync(part, bytes);
@@ -141,6 +143,7 @@ export function land(
   writer: string,
   lines: readonly string[],
 ): { readonly at: string; readonly appended: number } {
+  requireEffects('ledger admission');
   const at = writerFile(store, writer);
   return { at, appended: appendNew(at, lines) };
 }

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
+import { createHash, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { canonical } from '@lapxo/topos/wire';
+import { canonical, parse, signedBytes, formatSignature, parseSignature } from '@lapxo/topos/wire';
 import { carriedFrom, carriedIn, keepCarried, receiptsOf } from '../src/fold/resolved.ts';
 import { closeReceipts, fileRegionDigest, meets, receiptPlaces } from '../src/fold/closed.ts';
 
@@ -181,4 +181,39 @@ test('declared foreign trees keep consumed inputs without sealing unrelated depe
   const second=fileRegionDigest(root,'','receipts/.','sha256',[input]);
   writeFileSync(join(root,'new-source.txt'),'new owned input\n');
   assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256',[input]),second,'new owned files remain part of the place');
+}));
+
+
+test('native evidence retains signed messages, including their coordinates, through child projection and transfer', () => fixture((root,store) => {
+  for (const under of ['', 'child/']) {
+    const observations:string[]=[];
+    const keys=new Map<string,ReturnType<typeof generateKeyPairSync>>();
+    const at='place:sha256:'+createHash('sha256').update('measured input').digest('hex');
+    for (const device of ['device-a','device-b']) {
+      const pair=generateKeyPairSync('ed25519');keys.set(device,pair);
+      for (const fields of [
+        {scope:'child/src/input',role:'writes',form:'alphabet',measure:'observed',value:'complete-input-reference'},
+        {scope:'measurement/child/extent',role:'writes',form:'interval',measure:'lines',value:'7..7'},
+      ]) {
+        const body={...fields,by:device,at,epoch:'3'};
+        observations.push(canonical({...body,sig:formatSignature('ed25519:test',sign(null,Buffer.from(signedBytes(body)),pair.privateKey).toString('base64'))}));
+      }
+    }
+    const fold={root,store,under,standing:[],observed:[...observations,...observations],paid:[]} as unknown as import('../src/cli/place.ts').PlaceFold;
+    const native=receiptsOf(fold);
+    assert.deepEqual(new Set(native),new Set(observations),'projection neither edits signed evidence nor duplicates delivery');
+    const authentic=(line:string) => {
+      const got=parse(line);assert.equal(got.kind,'fact');
+      if(got.kind!=='fact')return false;
+      const signature=parseSignature(got.value.fields.sig!);assert.ok(signature);
+      return verify(null,Buffer.from(signedBytes(got.value.fields)),keys.get(got.value.fields.by!)!.publicKey,Buffer.from(signature.raw,'base64'));
+    };
+    assert.ok(native.every(authentic));
+    assert.equal(authentic(native[0]!.replace('complete-input-reference','changed-input-reference')),false);
+    const digest=keepCarried(store,native);
+    const empty=join(root,under?'empty-child':'empty-root');
+    // The native inline carrier is portable without a ledger or private key.
+    assert.deepEqual(carriedFrom(empty,[...native,rootLine(digest)]),native);
+    assert.deepEqual(carriedIn(empty),[]);
+  }
 }));

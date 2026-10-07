@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import { createHash, dirname, existsSync, join, linkSync, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { canonical, parse } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, isWire } from './claims.ts';
@@ -13,6 +14,9 @@ import type { PlaceFold } from '../cli/place.ts';
 
 export const bytesOnly = (line: string): string => {
   const got = parse(line);
+  // Authenticated evidence is delivered verbatim. A shortened observation is
+  // a different signed message, even when it describes the same input.
+  if (got.kind === 'fact' && got.value.fields.sig) return line;
   return got.kind === 'fact' && fieldOf(line, 'measure') === 'observed' ? canonical({ ...got.value.fields, value: fieldOf(line, 'at').replace(/^.*:/, '').slice(0, 16) }) : line;
 };
 
@@ -47,7 +51,8 @@ export function receiptsOf(fold: PlaceFold): readonly string[] {
     return canonical({ scope: `${sourced(fold.standing)}/${place}${shape}`, role: 'writes', form: 'alphabet', measure: 'digest', value: digest, by: writerFor(fold.standing, 'fold') ?? '', at: `place:${digest}` });
   });
   const place = under.replace(/\/$/, '');
-  const lines = [...named, ...[...cones].sort(), ...[...ran].sort(), ...paid].map((line) => (place ? zoomed(line, place) : line));
+  const lines = [...named, ...[...cones].sort(), ...[...ran].sort(), ...paid]
+    .map((line) => (place && !fieldOf(line, 'sig') ? zoomed(line, place) : line));
   if (!lines.length) {
     const shipped = (observeText(join(fold.root, under, RECEIPTS)) ?? '').split('\n').filter(isWire);
     const carried = carriedFrom(fold.store, shipped);
@@ -65,6 +70,7 @@ export function keepCarried(store: string, lines: readonly string[], from?: stri
   if (existsSync(at)) {
     verifiedCarried(at, digest);
   } else {
+    if (readOnly()) return `sha256:${digest}`;
     mkdirSync(dirname(at), { recursive: true });
     const src = from === undefined ? '' : storeAt(from, 'cas', 'carried', digest);
     if (src && existsSync(src)) {
