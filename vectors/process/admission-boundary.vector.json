@@ -1,0 +1,18 @@
+{
+  "scope": "admission/one-boundary",
+  "measure": "count",
+  "result": "failures",
+  "cases": [{
+    "program": "runtime",
+    "args": ["vectors/process/source-tests.mjs", "test/admission-boundary.test.ts"],
+    "cwd": ".",
+    "timeoutMs": 70000,
+    "maxBytes": 4194304,
+    "exit": 0,
+    "matches": [
+      {"stream":"stdout","pattern":"# fail 0(?:\\n|$)"},
+      {"stream":"stdout","pattern":"# pass [1-9][0-9]*(?:\\n|$)"}
+    ],
+    "inputs": ["vectors/process/source-tests.mjs", "src/cli/verb.ts", "src/cli/accept.ts", "src/host/selected-topos.ts", "test/admission-boundary.test.ts", "samples/admission/yes/one-boundary.json", "samples/admission/no/one-boundary.json", "TARGET.bound", "package.json"]
+  }]
+}

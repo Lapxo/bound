@@ -27,6 +27,7 @@ import { ownLock } from './runner.ts';
 import type { PlaceFold } from '../cli/place.ts';
 import { nameOf } from '../render/page.ts';
 import { placeLines, takenFor } from '../fold/place-inputs.ts';
+import { isRegionDeclaration } from '../fold/region-declarations.ts';
 
 type Asking = { readonly name: string; readonly at: number };
 type Placed = Pick<PlaceFold, 'root' | 'store' | 'standing' | 'observed'> & { readonly under?: string; readonly second?: PlaceFold['second'] };
@@ -35,8 +36,7 @@ type Row = { readonly scope: string; readonly measure: string; readonly role: st
 const fact = (scope: string, value: string, form = 'alphabet', measure = 'fact'): string => canonical({ scope, role: 'writes', form, measure, value, by: 'fold', at: 'place:fold' });
 const described = (local: readonly string[] = []): readonly string[] => {
   const lock = ownLock();
-  const measures = ['lines', 'receipts', 'reads', wordOn(lock, 'region-coordinate', lock), wordOn(lock, 'region-leaf', lock)];
-  const eligible = (line: string): boolean => fieldOf(line, 'scope').startsWith('region/') && measures.includes(fieldOf(line, 'measure')) && fieldOf(line, 'value') !== 'withdraw';
+  const eligible = (line: string): boolean => isRegionDeclaration(line, lock);
   const key = (line: string): string => `${fieldOf(line, 'scope')} ${fieldOf(line, 'measure')}`;
   const supplied = local.filter(eligible);
   const overridden = new Set(supplied.map(key));

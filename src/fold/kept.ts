@@ -1,3 +1,4 @@
+import {readOnly} from '../host/read-only.ts';
 import { createHash, dirname, existsSync, join, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { bytesDigest, coordinateDigest } from './digests.ts';
 import { viewsOf } from './views.ts';
@@ -159,9 +160,10 @@ export function keptPlace(store: string, under?: string): PlaceFold | undefined 
 
 export const keptRender = (store: string, key: string, name: string): string | undefined => observeText(memoAt(store, `render/${key}/${name}`));
 
-export const keepRender = (store: string, _signer: string, key: string, name: string, _epoch: number, text_: string): void => { landMemo(store, `render/${key}/${name}`, text(text_)); };
+export const keepRender = (store: string, _signer: string, key: string, name: string, _epoch: number, text_: string): void => { if (!readOnly()) landMemo(store, `render/${key}/${name}`, text(text_)); };
 
 export function keepFold(store: string, key: string, fold: PlaceFold, points: readonly string[], instrument = ''): void {
+  if (readOnly()) return;
   const packed: Packed = {
     ...fold,
     standing: joined(fold.standing),

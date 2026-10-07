@@ -1,3 +1,5 @@
+import {readOnly} from '../host/read-only.ts';
+import {meets} from '../fold/closed.ts';
 import { fieldOf } from '../fold/claims.ts';
 import { sourced } from './vouched.ts';
 import { observedClaims } from '../fold/observed.ts';
@@ -14,6 +16,7 @@ export function coordinatesWithdrawn(root: string, store: string, signed: readon
   const asked = signed.filter((line) => fieldOf(line, 'scope').startsWith(`${family}/`) && fieldOf(line, 'value') === 'withdraw')
     .map((line) => fieldOf(line, 'scope').slice(family.length + 1));
   if (!asked.length) return { taken: [], refused: [] };
+  if (readOnly() && !meets(root, store, '')) throw Error('REFUSE·withdraw current native receipts are required to judge file removal; fold the declared inputs first');
   /** A run rewrites every block of a test file under one observation, so a block whose title moved still holds a row
    * from an older one: what reads a file now is what the latest run of each test file wrote, and nothing older. */
   const memo = observedClaims(root, store, { wait: false }).filter((line) => fieldOf(line, 'measure') === 'memo');

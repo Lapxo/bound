@@ -4,6 +4,8 @@ import { isReaderLock } from './observed.ts';
 import { isRoleLock } from './roles.ts';
 import { isSignerLock } from './signers.ts';
 import {isReleaseBinding} from '../host/release.ts';
+import { isRegionDeclaration } from './region-declarations.ts';
+import { ownLock } from '../observe/runner.ts';
 
 function isEffectLock(line: string): boolean {
   const got = parse(line);
@@ -13,7 +15,7 @@ function isEffectLock(line: string): boolean {
 /** A lock line the instrument itself consumes — an effect it runs, a reader it loads, a role it walks by, a signer it admits, the wire it reads by. */
 function configures(line: string): boolean {
   const got = parse(line);
-  return isReleaseBinding(line) || isEffectLock(line) || isReaderLock(line) || isRoleLock(line) || isSignerLock(line) || (got.kind === 'fact' && isWireClaim(got.value.fields));
+  return isReleaseBinding(line) || isEffectLock(line) || isReaderLock(line) || isRoleLock(line) || isSignerLock(line) || (got.kind === 'fact' && isWireClaim(got.value.fields)) || isRegionDeclaration(line, ownLock());
 }
 
 /** Every reads line that configures nothing is a ceiling: a bound some reading has to meet. */

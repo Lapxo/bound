@@ -1,0 +1,7 @@
+{
+  "lot": [
+    {"scope":"sample/retract","form":"alphabet","role":"writes","measure":"id","value":"withdraw","at":"policy:sample"},
+    {"scope":"sample/retract","form":"alphabet","role":"writes","measure":"id","value":"new","at":"policy:sample"}
+  ],
+  "expected": "REFUSE·withdraw"
+}

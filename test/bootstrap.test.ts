@@ -63,6 +63,25 @@ test('first land admits a valid ephemeral root and reports no failed signatures'
   } finally { rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('a receipt-only check never acquires an unasked selected world', () => {
+  const {dir,original} = sandbox('valid');
+  try {
+    const row = (scope:string,value:string) => canonical({scope,value,form:'alphabet',measure:'id',role:'writes',at:'policy:fixture',by:'target'});
+    writeFileSync(join(dir,'TARGET.bound'),original + [row('uses/unasked','sha256:'+createHash('sha256').update('unavailable standing').digest('hex')),row('sources/unasked','https://unasked.invalid/standing')].join('\n')+'\n');
+    const admitted = spawnSync(process.execPath,[verb,'land','--key-file',join(dir,'key.pem')],{cwd:dir,encoding:'utf8',timeout:10000});
+    strictEqual(admitted.status,0,admitted.stderr);
+    const probe = join(dir,'transport.mjs');
+    writeFileSync(probe,"globalThis.fetch = async () => { console.error('UNASKED_TRANSPORT'); throw Error('unexpected transport'); };\n");
+    const lines = spawnSync(process.execPath,['--import',probe,verb,'fold','--as','lines'],{cwd:dir,encoding:'utf8',timeout:10000});
+    strictEqual(lines.status,0,lines.stderr);match(lines.stdout,/scope=uses\/unasked/);strictEqual(lines.stderr.includes('UNASKED_TRANSPORT'),false,lines.stderr);
+    const checked = spawnSync(process.execPath,['--import',probe,verb,'fold','--check'],{cwd:dir,encoding:'utf8',timeout:10000});
+    strictEqual(checked.status,1,checked.stderr);
+    match(checked.stderr,/REFUSE·check receipts are open/);
+    strictEqual(checked.stdout,'');
+    strictEqual(checked.stderr.includes('UNASKED_TRANSPORT'),false,checked.stderr);
+  } finally {rmSync(dir,{recursive:true,force:true});}
+});
+
 test('concurrent first lands commit one bootstrap and retain one signed owner ledger across ten fresh stores', async () => {
   const { spawn } = await import('node:child_process');
   for (let iteration = 0; iteration < 10; iteration += 1) {

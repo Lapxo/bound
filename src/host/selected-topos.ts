@@ -1,3 +1,4 @@
+import {ContentNeeded} from './content-needed.ts';
 import {createHash} from 'node:crypto';
 import {readStanding} from '@lapxo/topos/standing';
 import type {StandingTopos} from '@lapxo/topos/standing';
@@ -5,10 +6,7 @@ import {parse,wireAt} from '@lapxo/topos/wire';
 import {fieldOf} from '../fold/claims.ts';
 import {blobAt} from '../land/ledger.ts';
 import {observeFile} from '../observe/files.ts';
-import {ownRoot,ownStore,ownLock} from '../observe/runner.ts';
-import {lockStanding} from '../fold/keys.ts';
-import {replaceWhole} from '../land/ledger.ts';
-import {join} from 'node:path';
+import {ownStore,ownLock} from '../observe/runner.ts';
 
 export interface SelectedTopos {readonly digest:string; readonly topos:StandingTopos}
 export type ToposResolver=(digest:string)=>StandingTopos;
@@ -16,7 +14,6 @@ export type ToposResolver=(digest:string)=>StandingTopos;
 /** Resolve content using the instrument wire's admitted digest algorithms. No transport interpretation. */
 export function toposAt(digest:string):StandingTopos {
   const topos=readStanding(Buffer.from(contentAt(digest)).toString('utf8'));
-  for(const dependency of topos.dependencies)contentAt(dependency);
   return topos;
 }
 
@@ -29,7 +26,7 @@ export function contentAt(digest:string):Uint8Array {
     const split=name.indexOf(':');const algorithm=name.slice(0,split),hex=name.slice(split+1);
     if(split<1||!algorithms.has(algorithm)||! /^[a-f0-9]+$/.test(hex))throw Error(`REFUSE·pin ${name} digest is not admitted`);
     const bytes=observeFile(blobAt(ownStore(),name));
-    if(bytes===undefined)throw Error(`REFUSE·pin ${name} content unavailable · not laid`);
+    if(bytes===undefined)throw new ContentNeeded(name);
     if(createHash(algorithm).update(bytes).digest('hex')!==hex)throw Error(`REFUSE·pin ${name} content hash mismatch · not laid`);
     return bytes;
   };
@@ -38,13 +35,11 @@ export function contentAt(digest:string):Uint8Array {
 
 /** A declared JS context offer uses this host adapter only after selection; execution is not selection. */
 export function contextModuleAt(digest:string):string {
-  const bytes=contentAt(digest);
-  const at=join(ownStore(),'cas','runtime',digest.replace(':','_')+'.mjs');
-  replaceWhole(at,bytes);
-  return at;
+  contentAt(digest);
+  return blobAt(ownStore(),digest);
 }
 
-/** Selection verifies the standing and its directly declared closure. It does not request any capability. */
+/** Selection verifies standing identity. Requested capabilities verify their artifact bytes separately. */
 export function selectedTopoi(pins:readonly string[],resolve:ToposResolver=toposAt):readonly SelectedTopos[] {
   return [...new Set(pins.map(pin=>fieldOf(pin,'value')))].map(digest=>({digest,topos:resolve(digest)}));
 }

@@ -1,3 +1,5 @@
+import {ContentNeeded} from './content-needed.ts';
+import {readOnly} from './read-only.ts';
 import { sha } from './hash.ts';
 import { wireLinesOf as linesOf } from '../fold/claims.ts';
 import { createHash } from 'node:crypto';
@@ -52,7 +54,8 @@ export function capsuleAt(digest: string, entry: string, store?: string): Capsul
   const held = capsules.get(identity);
   if (held !== undefined) return held;
   const bytes = observeFile(blobAt(store ?? ownStore(), digest));
-  if (bytes === undefined || `sha256:${createHash('sha256').update(bytes).digest('hex')}` !== digest) return undefined;
+  if (bytes === undefined) throw new ContentNeeded(digest, `REFUSE·pin ${digest} offered capsule unavailable · not laid`);
+  if (`sha256:${createHash('sha256').update(bytes).digest('hex')}` !== digest) throw Error(`REFUSE·pin ${digest} content hash mismatch · not laid`);
   const known = declared.get(digest) ?? ((lines) => ({ lines, declaration: declarationOf(lines) }))(linesOf(observeText(join(unpacked(digest, bytes), CAPSULE))));
   declared.set(digest, known);
   const names = Object.keys(known.declaration.regions);
@@ -112,6 +115,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
     }
   });
   const missing = requests.filter((_, i) => held[i] === undefined);
+  if (missing.length && readOnly()) throw Error(`REFUSE·preview capsule ${digest} has no verified answer for the proposed inputs; fold the declared inputs first`);
   if (missing.length) process.stderr.write(`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
   const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing);
