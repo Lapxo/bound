@@ -1,4 +1,5 @@
-import {ContentNeeded} from './content-needed.ts';
+import {readerLifetime,parse} from '@lapxo/topos/wire';
+import {contentStore,verifiedContent,contentPolicy} from './content-store.ts';
 import {readOnly} from './read-only.ts';
 import { sha } from './hash.ts';
 import { wireLinesOf as linesOf } from '../fold/claims.ts';
@@ -12,13 +13,14 @@ import type { Declaration } from '@lapxo/topos/capsule';
 import type { Request, Response } from '@lapxo/topos/contract';
 import { unpack } from './archive.ts';
 import { executeCapsule, validResponse } from './capsule-process.ts';
-import { blobAt, holdStore, replaceWhole, storeAt } from '../land/ledger.ts';
+import { holdStore, replaceWhole, storeAt } from '../land/ledger.ts';
 import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts';
 import { hostOf } from '../observe/run.ts';
 import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { said } from '../fold/wire.ts';
 
 export interface Capsule {
+  readonly selection?: string;
   readonly digest: string;
   readonly declaration: Declaration;
   readonly lines: readonly string[];
@@ -50,12 +52,11 @@ const capsules = new Map<string, Capsule>();
 
 /** A blob is loaded once in an act. A later ask for the same digest reads that capsule, and does not hash or unpack it again. */
 export function capsuleAt(digest: string, entry: string, store?: string): Capsule | undefined {
-  const identity = `${store ?? ownStore()}\0${digest}\0${entry}`;
+  const cacheStore = store ?? contentStore();
+  const {bytes} = verifiedContent(digest,cacheStore);
+  const identity = `${cacheStore}\0${digest}\0${entry}`;
   const held = capsules.get(identity);
   if (held !== undefined) return held;
-  const bytes = observeFile(blobAt(store ?? ownStore(), digest));
-  if (bytes === undefined) throw new ContentNeeded(digest, `REFUSE·pin ${digest} offered capsule unavailable · not laid`);
-  if (`sha256:${createHash('sha256').update(bytes).digest('hex')}` !== digest) throw Error(`REFUSE·pin ${digest} content hash mismatch · not laid`);
   const known = declared.get(digest) ?? ((lines) => ({ lines, declaration: declarationOf(lines) }))(linesOf(observeText(join(unpacked(digest, bytes), CAPSULE))));
   declared.set(digest, known);
   const names = Object.keys(known.declaration.regions);
@@ -67,7 +68,7 @@ export function capsuleAt(digest: string, entry: string, store?: string): Capsul
   }
   const capsule = { digest, ...known, ask: (requests: readonly Request[]) => {
     if (!statSync(module, { throwIfNoEntry: false })?.isFile()) throw new Error(`REFUSE·capsule ${digest} declared entry ${entry} unavailable`);
-    return answered(digest, bytes, requests, names, root, store ?? ownStore(), module);
+    return answered(digest, bytes, requests, names, root, cacheStore, module);
   } };
   capsules.set(identity, capsule);
   return capsule;
@@ -118,7 +119,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   if (missing.length && readOnly()) throw Error(`REFUSE·preview capsule ${digest} has no verified answer for the proposed inputs; fold the declared inputs first`);
   if (missing.length) process.stderr.write(`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
-  const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing);
+  const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing, {}, readerLifetime(contentPolicy().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];}),digest));
   return requests.map((request, i) => {
     if (held[i] !== undefined) return held[i];
     const said = ran[missing.indexOf(request)];

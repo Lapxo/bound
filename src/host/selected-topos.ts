@@ -1,42 +1,25 @@
-import {ContentNeeded} from './content-needed.ts';
-import {createHash} from 'node:crypto';
+import {verifiedContent} from './content-store.ts';
 import {readStanding} from '@lapxo/topos/standing';
 import type {StandingTopos} from '@lapxo/topos/standing';
 import {parse,wireAt} from '@lapxo/topos/wire';
 import {fieldOf} from '../fold/claims.ts';
-import {blobAt} from '../land/ledger.ts';
-import {observeFile} from '../observe/files.ts';
-import {ownStore,ownLock} from '../observe/runner.ts';
 
 export interface SelectedTopos {readonly digest:string; readonly topos:StandingTopos}
 export type ToposResolver=(digest:string)=>StandingTopos;
 
 /** Resolve content using the instrument wire's admitted digest algorithms. No transport interpretation. */
-export function toposAt(digest:string):StandingTopos {
-  const topos=readStanding(Buffer.from(contentAt(digest)).toString('utf8'));
+export function toposAt(digest:string,store?:string):StandingTopos {
+  const topos=readStanding(Buffer.from(contentAt(digest,store)).toString('utf8'));
   return topos;
 }
 
-export function contentAt(digest:string):Uint8Array {
-  const fields=ownLock().flatMap(line=>{const got=parse(line);return got.kind==='fact'?[got.value.fields]:[];});
-  const wire=wireAt(fields,Number.MAX_SAFE_INTEGER);
-  if(wire===null)throw Error('REFUSE·pin instrument has no admitted wire');
-  const algorithms=wire.digests;
-  const bytesAt=(name:string):Uint8Array=>{
-    const split=name.indexOf(':');const algorithm=name.slice(0,split),hex=name.slice(split+1);
-    if(split<1||!algorithms.has(algorithm)||! /^[a-f0-9]+$/.test(hex))throw Error(`REFUSE·pin ${name} digest is not admitted`);
-    const bytes=observeFile(blobAt(ownStore(),name));
-    if(bytes===undefined)throw new ContentNeeded(name);
-    if(createHash(algorithm).update(bytes).digest('hex')!==hex)throw Error(`REFUSE·pin ${name} content hash mismatch · not laid`);
-    return bytes;
-  };
-  return bytesAt(digest);
+export function contentAt(digest:string,store?:string):Uint8Array {
+  return verifiedContent(digest,store).bytes;
 }
 
-/** A declared JS context offer uses this host adapter only after selection; execution is not selection. */
-export function contextModuleAt(digest:string):string {
-  contentAt(digest);
-  return blobAt(ownStore(),digest);
+/** The declared module runs from the store that supplied its verified bytes. No copy or live-checkout fallback. */
+export function contextModuleAt(digest:string,store?:string):string {
+  return verifiedContent(digest,store).path;
 }
 
 /** Selection verifies standing identity. Requested capabilities verify their artifact bytes separately. */

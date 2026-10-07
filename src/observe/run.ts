@@ -1,3 +1,5 @@
+import {boundedProcess} from '../host/process-lifetime.ts';
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { PROTOCOL } from '@lapxo/topos/wire';
@@ -33,7 +35,7 @@ export const hostOf = (): string => processOf('host');
  * the file it is handed or alone when it reads the place by running it, as the region it was matched for when its
  * capsule reads with several, and answers one list of claims per place.
  */
-export function runReader(module: string, root: string, inputs: readonly Input[]): readonly (readonly Row[])[] {
+export function runReader(module: string, root: string, inputs: readonly Input[], limits?:ReaderLifetime): readonly (readonly Row[])[] {
   if (!inputs.length) return [];
   const requests: readonly Request[] = inputs.map((input) => ({
     protocol: PROTOCOL, verb: 'read', rootScope: input.place, files: input.text === undefined ? [] : [{ place: input.place, text: input.text }], ...(input.held ? { held: input.held } : {}),
@@ -41,8 +43,9 @@ export function runReader(module: string, root: string, inputs: readonly Input[]
   }));
   const reader = readerOf(module);
   if (!existsSync(reader.path)) throw new Error(`REFUSE·reader ${module} unavailable; its declared capability needs an admitted provider`);
-  const ran = spawnSync(process.execPath, [...reader.flags, hostOf(), reader.path, module], { cwd: root, input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 28 });
-  if (ran.error) throw Object.assign(new Error(`${module}: reader process failed: ${ran.error.message}`), { cause: ran.error });
+  const args=[...reader.flags, hostOf(), reader.path, module];
+  const ran = limits===undefined?spawnSync(process.execPath, args, { cwd: root, input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 28 }):boundedProcess(process.execPath,args,JSON.stringify(requests),limits,root);
+  if ('error' in ran && ran.error) throw Object.assign(new Error(`${module}: reader process failed: ${ran.error.message}`), { cause: ran.error });
   if (ran.status !== 0) throw new Error(`${module}: reader exited ${ran.status ?? `with signal ${ran.signal}`}\n${ran.stderr ?? ''}${ran.stdout ?? ''}`);
   if (ran.stderr) process.stderr.write(ran.stderr);
   return responsesOf(ran.stdout ?? '', inputs.length).map((answer) => {

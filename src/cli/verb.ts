@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {withContentStore} from '../host/content-store.ts';
 import {withoutEffects} from '../host/read-only.ts';
 import {resolveSources,resolveRequested} from '../host/source-content.ts';
 import {cellsWithReceipts} from '../host/cell-receipts.ts';
@@ -384,6 +385,10 @@ function foldVerb(root: string, rest: readonly string[]): number | Promise<numbe
 }
 
 async function foldAt(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
+  return withContentStore(storeOf(root),()=>foldRequested(root,under,argv),()=>standingOf(root,under).standing);
+}
+
+async function foldRequested(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
   const prospective = as !== undefined && positionalsOf(argv).some(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
   if(as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
@@ -449,7 +454,10 @@ function main(argv: readonly string[]): number | Promise<number> {
   const verb = argv[0] ?? '';
   const run = verb in VERBS ? VERBS[verb as VerbName] : undefined;
   const places = positionalsOf(run === undefined ? argv : argv.slice(1)).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
-  if (run !== undefined) return run(resolve(places[0] ?? '.'), argv.slice(1), argv);
+  if (run !== undefined) {
+    const root=resolve(places[0] ?? '.');
+    return withContentStore(storeOf(root),()=>run(root,argv.slice(1),argv));
+  }
   const under = argv[0] ?? '';
   if (under && !under.startsWith('-') && places.includes(under)) {
     const root = resolve('.');

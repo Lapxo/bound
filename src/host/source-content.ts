@@ -1,14 +1,15 @@
+import {transportBytes} from './ports/transport.ts';
+import {contentStore,verifiedContent} from './content-store.ts';
 import {ContentNeeded} from './content-needed.ts';
 import {createHash} from 'node:crypto';
 import {parse,wireAt} from '@lapxo/topos/wire';
-import {blobAt,landBlob} from '../land/ledger.ts';
-import {observeFile} from '../observe/files.ts';
-import {ownLock,ownStore} from '../observe/runner.ts';
+import {landBlob} from '../land/ledger.ts';
+import {ownLock} from '../observe/runner.ts';
 export interface ContentPort {
  readonly algorithms: ReadonlySet<string>;
  readonly read: (digest:string)=>Uint8Array|undefined;
  readonly write: (digest:string,bytes:Uint8Array)=>void;
- readonly fetch: (url:string)=>Promise<Uint8Array>;
+ readonly fetch: (url:string,digest?:string)=>Promise<Uint8Array>;
 }
 /** Transport uses declared locations; only the requested digest admits bytes into the cache. */
 export async function resolveSelectedContent(lines:readonly string[],port:ContentPort,requested:readonly string[]):Promise<readonly string[]> {
@@ -42,10 +43,8 @@ export async function resolveSelectedContent(lines:readonly string[],port:Conten
   if(!urls.length)throw Error(`REFUSE·pin ${digest} content unavailable · no declared source · not laid`);
   let last:unknown;
   for(const url of urls){
-   const parsed=new URL(url);
-   if(!['https:','http:'].includes(parsed.protocol))throw Error(`REFUSE·source ${url} needs an explicit transport adapter`);
    let bytes:Uint8Array;
-   try{bytes=await port.fetch(url);}catch(error){last=error;continue;}
+   try{bytes=await port.fetch(url,digest);}catch(error){last=error;continue;}
    verify(bytes);port.write(digest,bytes);received.push(digest);return bytes;
   }
   throw Error(`REFUSE·source ${digest} ${last instanceof Error?last.message:'declared sources unavailable'}`);
@@ -65,13 +64,9 @@ export async function resolveSources(standing:readonly string[],requested:readon
  });
  const received=await resolveSelectedContent([...standing,...bindings],{
   algorithms:wire.digests,
-  read:digest=>observeFile(blobAt(ownStore(),digest)),
-  write:(digest,bytes)=>{landBlob(ownStore(),digest,bytes);},
-  fetch:async url=>{
-   const response=await fetch(url,{signal:AbortSignal.timeout(30000)});
-   if(!response.ok)throw Error(`HTTP ${response.status}`);
-   return new Uint8Array(await response.arrayBuffer());
-  },
+  read:digest=>{try{return verifiedContent(digest).bytes;}catch(error){if(error instanceof ContentNeeded)return undefined;throw error;}},
+  write:(digest,bytes)=>{landBlob(contentStore(),digest,bytes);},
+  fetch:async (url,digest)=>transportBytes(url,digest!,[...ownLock(),...standing]),
  },requested);
  for(const digest of received)process.stdout.write(`FETCHED  ${digest} · verified\n`);
 }

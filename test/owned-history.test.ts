@@ -20,7 +20,7 @@ test('publishing an owned lock keeps authenticated delivery history and the next
   const pair=generateKeyPairSync('ed25519');const key=join(base,'device.pem');
   writeFileSync(key,pair.privateKey.export({type:'pkcs8',format:'pem'}));
   const row=(scope:string,measure:string,value:string)=>canonical({scope,role:'writes',form:'alphabet',measure,value,by:'target',at:'policy:fixture'});
-  const wire=readFileSync(new URL('../node_modules/@lapxo/topos/TARGET.bound',import.meta.url),'utf8').split('\n').filter(l=>/ scope=audit\/wire\//.test(l));
+  const wire=publicationOf(readFileSync(new URL('../node_modules/@lapxo/topos/TARGET.bound',import.meta.url),'utf8').split('\n').filter(l=>/ scope=audit\/wire\//.test(l)));
   writeFileSync(join(root,'TARGET.bound'),[...wire,row('keys/root','signer','file'),canonical({scope:'signer/timeout',measure:'milliseconds',value:'1000..1000',form:'interval',role:'writes',at:'policy:fixture',by:'target'}),canonical({scope:'signer/response-bytes',measure:'bytes',value:'65536..65536',form:'interval',role:'writes',at:'policy:fixture',by:'target'}),row('keys/root','class','authorize'),row('keys/root','public-key',pair.publicKey.export({type:'spki',format:'der'}).toString('base64')),row('keys/root','coverage','*'),row('wire/digest-algorithms','id','sha256'),row('wire/signature-algorithms','id','ed25519:fixture'),row('wire/era','id','fixture'),row('wire/families','id','region|reader|tree|write|leaf|view')].join('\n')+'\n');
   const run=(args:string[])=>spawnSync(process.execPath,[reader,...args],{cwd:root,encoding:'utf8',timeout:20000});
   let result=run(['land','--key-file',key]);assert.equal(result.status,0,result.stdout+result.stderr);

@@ -37,7 +37,7 @@ export async function cellsWithReceipts(root:string,history:readonly string[],em
  const inputs=cellInputs(parsed.value.objects),semantic=new Map<string,string>(),inputBytes=new Map<string,string>();
  const pins=new Map<string,readonly string[]>();
  for(const record of parsed.value.objects.filter(r=>r.record==='cell')){
-  const pin=record.fields.topos!;if(!pins.has(pin)){const top=toposAt(pin);pins.set(pin,[pin,...top.dependencies]);}
+  const pin=record.fields.topos!;if(!pins.has(pin)){const top=toposAt(pin,store);pins.set(pin,[pin,...top.dependencies]);}
   const scope=`receipts/cells/${record.fields.scope!}`;
   const bytes=[...inputs.get(record.fields.scope!)!,...pins.get(pin)!,...code,'resolution=1'].sort(byBytes).join('\n');
   inputBytes.set(scope,bytes);semantic.set(scope,fullDigest(bytes,algorithm));

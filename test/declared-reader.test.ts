@@ -57,3 +57,10 @@ test('declared readers use the place own selection without adopting another plac
  assert.deepEqual(capsuleReadersOf(root,store,[...wire,foreign],[],resolver),[]);
  function readOwn(){return canonical({scope:'region/surface',form:'alphabet',measure:'coordinates',value:'*.input',role:'reads',at:'policy:region',by:'target'})+'\n';}
 }));
+
+test('two selected standings sharing an artifact retain distinct reader context and identity',()=>fixture((root,store)=>{
+ writeFileSync(join(root,'TARGET.bound'),canonical({scope:'region/surface',form:'alphabet',measure:'coordinates',value:'src/*.input',role:'reads',at:'policy:region',by:'target'})+'\n');
+ const resolver:typeof capsulesFor=(standing,place)=>selected(standing,place,root).map(one=>({...one,capsule:{...one.capsule,selection:`standing:${place||'root'}`,ask:()=>[]}}));
+ const got=capsuleReadersOf(root,store,wire,[],resolver);assert.equal(got.length,2);
+ assert.deepEqual(got.map(one=>one.capsule?.selected?.selection).sort(),['standing:place','standing:root']);
+}));

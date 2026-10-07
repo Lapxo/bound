@@ -1,3 +1,4 @@
+import type {Capsule} from '../host/capsule.ts';
 import { resolve } from '../host/io.ts';
 import { canonical, fields, matches } from '@lapxo/topos/wire';
 import { namesAt, wordOn, wordsOf, wireLine } from './wire.ts';
@@ -19,7 +20,7 @@ export interface ReaderClaim {
   readonly where: readonly string[];
   readonly module: string;
   readonly kind: Kind;
-  readonly capsule?: { readonly digest: string; readonly entry: string; readonly region: string; readonly reads: readonly string[]; readonly globs: ReadonlyMap<string, readonly string[]> };
+  readonly capsule?: { readonly selected?:Capsule; readonly digest: string; readonly entry: string; readonly region: string; readonly reads: readonly string[]; readonly globs: ReadonlyMap<string, readonly string[]> };
 }
 
 export type Offer = { readonly place: string; readonly seen: string; readonly bytes: () => Uint8Array; readonly digest?: () => string };
@@ -66,7 +67,7 @@ export function capsuleReadersOf(root: string, store: string, standing: readonly
   const measures = localMeasures.length || !pins.length ? localMeasures
     : selectedWireList(standing, Number.MAX_SAFE_INTEGER, pins, 'region-measures');
   const world = fields(fieldOf(wireLine(standing, 'offers/world') ?? '', 'value')).map(([region, globs]) => canonical({ scope: `region/${region}`, measure: wordOn(standing, 'region-coordinate', ownLock()), value: globs }));
-  const groups = new Map<string, { module: string; digest: string; entry: string; region: string; reads: readonly string[]; globs: Map<string, readonly string[]> }>();
+  const groups = new Map<string, { module: string; digest: string; entry: string; selected:Capsule; region: string; reads: readonly string[]; globs: Map<string, readonly string[]> }>();
   for (const place of ['', ...placesIn(root)]) {
     const where = place ? `${place}/` : '';
     const own = ownLockOf(root, place).filter((line) => fieldOf(line, 'scope').startsWith('region/') && measures.includes(fieldOf(line, 'measure')) && fieldOf(line, 'value') !== 'withdraw');
@@ -78,13 +79,13 @@ export function capsuleReadersOf(root: string, store: string, standing: readonly
       const by = capsules.find(({ capsule }) => capsule.lines.some((one) => fieldOf(one, 'scope') === `region/${region}` && fieldOf(one, 'measure') === 'writes'));
       const pkg = fieldOf(by?.offer ?? '', 'scope').split('/')[1] ?? '';
       if (by === undefined || reaching.has(`${pkg} ${region} ${where || '/'}`)) continue;
-      const key = `${by.capsule.digest} ${region}`;
-      const group = groups.get(key) ?? groups.set(key, { module: `${pkg}/${region}`, digest: by.capsule.digest, entry: fieldOf(by.offer, 'shape'), region, reads: by.capsule.declaration.regions[region] ?? [], globs: new Map() }).get(key)!;
+      const key = `${by.capsule.selection??by.capsule.digest} ${region}`;
+      const group = groups.get(key) ?? groups.set(key, { module: `${pkg}/${region}`, digest: by.capsule.digest, entry: fieldOf(by.offer, 'shape'), selected:by.capsule, region, reads: by.capsule.declaration.regions[region] ?? [], globs: new Map() }).get(key)!;
       group.globs.set(where, fieldOf(line, 'value').split('|').filter(Boolean));
     }
   }
   return [...groups.values()].map((group) => ({ id: group.module, shape: ['run'], where: [...group.globs.keys()], module: group.module, kind: 'process' as const,
-    capsule: { digest: group.digest, entry: group.entry, region: group.region, reads: group.reads, globs: group.globs } }));
+    capsule: { selected:group.selected,digest: group.digest, entry: group.entry, region: group.region, reads: group.reads, globs: group.globs } }));
 }
 
 export function handedAt(root: string, reader: ReaderClaim, roleOf: (coordinate: string) => CoordinateRole, look: Look, place: string): readonly string[] {
