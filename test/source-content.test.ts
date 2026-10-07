@@ -68,3 +68,13 @@ test('fold resolution retries only after the specifically requested digest chang
  let attempts=0;await assert.rejects(resolveRequested(async()=>{attempts++;},async()=>{throw new ContentNeeded(pin);}),/not laid/);assert.equal(attempts,1);
  attempts=0;await assert.rejects(resolveRequested(async()=>{attempts++;},async()=>{throw Error('REFUSE·context absent witness');}),/absent witness/);assert.equal(attempts,0);
 });
+
+test('declared alternate locations recover availability but cannot hide a hash mismatch',async()=>{
+ const cache=new Map<string,Uint8Array>(),calls:string[]=[];
+ const declarations=[line('uses/world',pin),line('sources/world','test:unavailable'),line('sources/world','test:authentic'),line('sources/world','test:unasked')];
+ const port={algorithms:new Set(['sha256']),read:(d:string)=>cache.get(d),write:(d:string,b:Uint8Array)=>{cache.set(d,b);},fetch:async(location:string)=>{calls.push(location);if(location==='test:unavailable')throw Error('unavailable');return standing;}};
+ await resolveSelectedContent(declarations,port,[pin]);assert.deepEqual(calls,['test:unavailable','test:authentic']);
+ cache.clear();calls.length=0;
+ await assert.rejects(resolveSelectedContent(declarations,{...port,fetch:async location=>{calls.push(location);return artifact;}},[pin]),/hash mismatch/);
+ assert.deepEqual(calls,['test:unavailable']);assert.equal(cache.size,0);
+});

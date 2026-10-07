@@ -7,10 +7,11 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical,parse,signedBytes,parseSignature} from '@lapxo/topos/wire';
 
-test('native lines retain two device signatures, exclude exact withdrawals, and refuse altered evidence',()=>{
+for(const keyClass of ['authorize','read','access'])test(`native lines preserve admitted ${keyClass} evidence, exact withdrawals and signature refusals`,()=>{
  const reader=process.env.BOUND_TEST_READER??new URL('../src/cli/verb.ts',import.meta.url).pathname;
  const temp=mkdtempSync(join(tmpdir(),'bound-device-evidence-')),root=join(temp,'place');
  const devices=['north','south'].map(id=>({id,pair:generateKeyPairSync('ed25519'),key:join(temp,`${id}.pem`)}));
+ devices.push({id:'alias',pair:devices[1].pair,key:join(temp,'alias.pem')});
  const row=(scope,measure,value)=>canonical({scope,measure,value,form:'alphabet',role:'writes',at:'policy:evidence',by:'target'});
  const captures=[];const run=args=>{const started=Date.now(),p=spawnSync(process.execPath,[reader,...args],{cwd:root,encoding:'utf8',timeout:20000});captures.push({reader,args:args.map(arg=>arg.endsWith('.pem')?'[ephemeral key path]':arg),status:p.status,stdout:p.stdout,stderr:p.stderr,runtimeMs:Date.now()-started});return p;};
  const rows=text=>text.split('\n').map(line=>parse(line)).filter(p=>p.kind==='fact').map(p=>p.value.fields);
@@ -18,7 +19,7 @@ test('native lines retain two device signatures, exclude exact withdrawals, and 
   mkdirSync(root);
   const seed=[row('wire/era','id','sample'),row('wire/signature-algorithms','id','ed25519:sample'),row('wire/digest-algorithms','id','sha256')];
   for(const [name,value] of [['fields','scope|role|form|measure|value|by|at|epoch|sig'],['required','scope|role|form|measure|value|by|at'],['forms','alphabet|interval'],['roles','reads|writes|demands'],['at-classes','policy|place|origin|witness|receipt'],['families','keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region']])seed.push(row(`wire/${name}`,'id',value));
-  for(const d of devices){writeFileSync(d.key,d.pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});seed.push(row(`keys/${d.id}`,'class','authorize'),row(`keys/${d.id}`,'coverage',d.id==='north'?'*':'sample/south'),row(`keys/${d.id}`,'public-key',d.pair.publicKey.export({type:'spki',format:'der'}).toString('base64')),row(`keys/${d.id}`,'signer','file'),canonical({scope:`keys/${d.id}`,role:'writes',form:'interval',measure:'resolution',value:'1..16',by:'target',at:'policy:evidence'}));}
+  for(const d of devices){writeFileSync(d.key,d.pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});seed.push(row(`keys/${d.id}`,'class',d.id==='north'?'authorize':keyClass),row(`keys/${d.id}`,'coverage',d.id==='north'?'*':`sample/${d.id}`),row(`keys/${d.id}`,'public-key',d.pair.publicKey.export({type:'spki',format:'der'}).toString('base64')),row(`keys/${d.id}`,'signer','file'),canonical({scope:`keys/${d.id}`,role:'writes',form:'interval',measure:'resolution',value:'1..16',by:'target',at:'policy:evidence'}));}
   seed.push(canonical({scope:'signer/timeout',form:'interval',measure:'milliseconds',value:'5000..5000',role:'writes',at:'policy:evidence',by:'target'}),canonical({scope:'signer/response-bytes',form:'interval',measure:'bytes',value:'65536..65536',role:'writes',at:'policy:evidence',by:'target'}));
   writeFileSync(join(root,'TARGET.bound'),seed.join('\n')+'\n');
   const boot=run(['land','--key','north','--key-file',devices[0].key]);assert.equal(boot.status,0,boot.stderr);
@@ -30,6 +31,6 @@ test('native lines retain two device signatures, exclude exact withdrawals, and 
   const tampered=join(temp,'altered.bound');writeFileSync(tampered,signed[1].replace('evidence-south','altered'));const bad=run(['land',tampered]);assert.equal(bad.status,1);assert.match(bad.stderr,/REFUSE·signed/);
   const f=rows(signed[0])[0],{sig,epoch,by,...selector}=f;
   const withdraw=join(temp,'withdraw.proposal');writeFileSync(withdraw,canonical({...selector,value:'withdraw',by:'target'})+'\n');const taken=run(['land',withdraw,'--key','north','--key-file',devices[0].key]);assert.equal(taken.status,0,taken.stderr);
-  const after=run(['fold','--as','lines']);assert.equal(after.status,0,after.stderr);assert.equal(rows(after.stdout).filter(f=>f.scope==='sample/north'&&f.value!=='withdraw').length,0);assert.equal(rows(after.stdout).filter(f=>f.scope==='sample/south').length,1);
- }finally {if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE,JSON.stringify(captures,null,2)+'\n');rmSync(temp,{recursive:true,force:true});}
+  const after=run(['fold','--as','lines']);assert.equal(after.status,0,after.stderr);assert.equal(rows(after.stdout).filter(f=>f.scope==='sample/north'&&f.value!=='withdraw').length,0);assert.equal(rows(after.stdout).filter(f=>f.scope==='sample/south').length,1);assert.equal(rows(after.stdout).filter(f=>f.scope==='sample/alias').length,1);assert.deepEqual(devices[1].pair.publicKey.export({type:'spki',format:'der'}),devices[2].pair.publicKey.export({type:'spki',format:'der'}));
+ }finally {if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE+'.'+keyClass+'.json',JSON.stringify(captures,null,2)+'\n');rmSync(temp,{recursive:true,force:true});}
 });

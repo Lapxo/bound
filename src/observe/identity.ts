@@ -1,3 +1,4 @@
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -28,7 +29,7 @@ export function resetsOnEqualEmits(lines: readonly string[]): number {
   return [...named.values()].filter((ats) => ats.size > 1).length;
 }
 
-function emitted(store: string, root: string, module: string, kind: Kind, cases: readonly Case[]): string | undefined {
+function emitted(store: string, root: string, module: string, kind: Kind, cases: readonly Case[],lifetime?:ReaderLifetime): string | undefined {
   const laid = kind === 'process' ? mkdtempSync(join(tmpdir(), `${selfName()}-vectors-`)) : root;
   try {
     for (const one of kind === 'process' ? cases : []) {
@@ -37,7 +38,7 @@ function emitted(store: string, root: string, module: string, kind: Kind, cases:
         writeFileSync(join(laid, one.place, name), text);
       }
     }
-    const rows = runReader(resolve(root, module), laid, cases.map((one) => ({ place: one.place, ...(kind === 'js' ? { text: one.text ?? '' } : {}) })));
+    const rows = runReader(resolve(root, module), laid, cases.map((one) => ({ place: one.place, ...(kind === 'js' ? { text: one.text ?? '' } : {}) })),lifetime);
     if (cases.length && rows.every((mine) => !mine.length)) return undefined;
     const said = rows.map((mine) => mine.filter((row) => !/^(cost|derived|vector-memo)\//.test(row.scope)).map((row) => JSON.stringify(row)).sort());
     return bytesDigest(store, new TextEncoder().encode(JSON.stringify(said))).replace(/^[^:]*:/, '');
@@ -56,6 +57,7 @@ export function identityOf(input: {
   readonly code: string;
   readonly lineage: readonly string[];
   readonly kept: readonly string[];
+  readonly lifetime?:ReaderLifetime;
 }): { readonly by: string; readonly lines: readonly string[] } {
   const text = observeText(resolve(input.root, vectorsOf(input.module, lockStanding(input.store))));
   if (text === undefined) return { by: input.code, lines: [] };
@@ -64,7 +66,7 @@ export function identityOf(input: {
   const mine = input.kept.filter((line) => fieldOf(line, 'scope') === `reader/${input.module}`);
   const known = mine.find((line) => fieldOf(line, 'measure') === 'extension' && fieldOf(line, 'at') === `place:${key}`);
   if (known !== undefined && fieldOf(known, 'value') === input.code) return { by: input.code, lines: [] };
-  const emits = emitted(input.store, input.root, input.module, input.kind, (JSON.parse(text) as { readonly cases?: readonly Case[] }).cases ?? []);
+  const emits = emitted(input.store, input.root, input.module, input.kind, (JSON.parse(text) as { readonly cases?: readonly Case[] }).cases ?? [], input.lifetime);
   if (emits === undefined) return { by: input.code, lines: [] };
   const by = input.code;
   const line = (measure: string, value: string, at: string): string => canonical({

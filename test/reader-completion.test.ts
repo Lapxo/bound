@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical} from '@lapxo/topos/wire';
 
-test('a requested native view waits for its declared delayed reading and reuses the unchanged answer',()=>{
+for(const bounded of [false,true])test(`a requested native view waits for its ${bounded?'bounded':'historical'} declared reading and reuses the unchanged answer`,()=>{
  const reader=process.env.BOUND_TEST_READER ?? new URL('../src/cli/verb.ts',import.meta.url).pathname;
  const temp=mkdtempSync(join(tmpdir(),'bound-completion-')),root=join(temp,'place'),pair=generateKeyPairSync('ed25519');
  const key=join(temp,'key.pem');writeFileSync(key,pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});
@@ -23,6 +23,7 @@ test('a requested native view waits for its declared delayed reading and reuses 
  try{
   mkdirSync(join(root,'src'),{recursive:true});writeFileSync(join(root,'src/input.txt'),'first');
   writeFileSync(join(root,'extent.mjs'),String.raw`import {appendFileSync} from 'node:fs'; export const observe = bytes => { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,120); appendFileSync('calls','run\n'); return [{scope:'extent',role:'writes',measure:'bytes',bound:{kind:'interval',lo:bytes.length,hi:bytes.length}}]; };`);
+  if(bounded)seed.push(row('wire/reader-lifetime','id','bounded-process@1'),row('reader/timeout','milliseconds','0..1000','interval'),row('reader/response-bytes','bytes','0..65536','interval'),row('wire/reader-empty','id','declared-empty@1'),row('wire/reader-inputs','id','declared-presence@1'),row('reader/inputs','id','required'));
   writeFileSync(join(root,'TARGET.bound'),seed.join('\n')+'\n');
   const bootstrap=run(['land','--key','device','--key-file',key]);assert.equal(bootstrap.status,0,bootstrap.stderr);
   const first=run(['fold','--as','evidence']);assert.equal(first.status,0,first.stderr);assert.match(first.stdout,/scope=extent .*value=5\.\.5/,first.stderr);assert.equal(first.stderr.includes('GREY     reading:'),false,first.stderr);
@@ -32,5 +33,16 @@ test('a requested native view waits for its declared delayed reading and reuses 
   const changed=run(['fold','--as','evidence']);assert.equal(changed.status,0,changed.stderr);assert.match(changed.stdout,/scope=extent .*value=7\.\.7/);assert.equal(readFileSync(join(root,'calls'),'utf8'),calls+'run\n');
   writeFileSync(join(root,'extent.mjs'),"export const observe = () => { throw Error('declared reading refused'); };");
   const refused=run(['fold','--as','evidence']);assert.equal(refused.status,1,refused.stderr);assert.match(refused.stderr,/REFUSE·reader .*declared reading refused/);assert.equal(refused.stdout.includes('scope=extent'),false,'no stale result is presented as a completed reading');
- }finally{if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE,JSON.stringify(captures,null,2)+'\n');rmSync(temp,{recursive:true,force:true});}
+  if(bounded){
+   writeFileSync(join(root,'extent.mjs'),"export const observe = () => { process.stdout.write('partial');setInterval(()=>{},1000);Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,100000);return []; }; ");
+   const timed=run(['fold','--as','evidence']);assert.equal(timed.status,1,timed.stderr);assert.match(timed.stderr,/declared timeout exhausted/);assert.doesNotMatch(timed.stdout,/scope=extent/);
+   writeFileSync(join(root,'extent.mjs'),"export const observe = () => []; ");
+   const emptyRequired=run(['fold','--as','evidence']);assert.equal(emptyRequired.status,1,emptyRequired.stderr);assert.match(emptyRequired.stderr,/REFUSE·reader/);
+   const permission=join(temp,'empty.proposal');writeFileSync(permission,row('reader/empty','id','allow')+'\n');
+   const admitted=run(['land',permission,'--key','device','--key-file',key]);assert.equal(admitted.status,0,admitted.stderr);
+   const emptyAllowed=run(['fold','--as','evidence']);assert.equal(emptyAllowed.status,0,emptyAllowed.stderr);assert.doesNotMatch(emptyAllowed.stdout,/scope=extent/);
+   rmSync(join(root,'src/input.txt'));const missing=run(['fold','--as','evidence']);assert.equal(missing.status,1,missing.stderr);assert.match(missing.stderr,/required input selection is empty/);
+
+  }
+ }finally{if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE+(bounded?'.bounded':'.historical')+'.json',JSON.stringify(captures,null,2)+'\n');rmSync(temp,{recursive:true,force:true});}
 });

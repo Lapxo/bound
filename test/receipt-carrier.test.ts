@@ -7,6 +7,10 @@ import { test } from 'node:test';
 import { canonical, parse, signedBytes, formatSignature, parseSignature } from '@lapxo/topos/wire';
 import { carriedFrom, carriedIn, keepCarried, receiptsOf } from '../src/fold/resolved.ts';
 import { closeReceipts, fileRegionDigest, meets, receiptPlaces } from '../src/fold/closed.ts';
+import {receiptRegion} from '../src/render/receipts.ts';
+import {ownLock} from '../src/observe/runner.ts';
+import {fieldOf} from '../src/fold/claims.ts';
+import {wireLine} from '../src/fold/wire.ts';
 
 const line = canonical({scope:'write/place/receipts.bound', role:'writes', form:'alphabet', measure:'digest', value:'sha256:'+'a'.repeat(64), by:'bound', at:'place:receipt'});
 const rootLine = (digest: string) => canonical({scope:'receipts', role:'writes', form:'alphabet', measure:'digest', value:digest, by:'bound', at:`place:${digest}`});
@@ -16,6 +20,25 @@ function fixture(run: (root: string, store: string) => void) {
   const root = mkdtempSync(join(tmpdir(), 'bound-receipt-carrier-'));
   try { run(root, join(root, '.bound')); } finally { rmSync(root, {recursive:true, force:true}); }
 }
+
+test('a regenerated native receipt carries observations but replaces its old implementation metadata',()=>fixture((root,store)=>{
+ const contract=wireLine(ownLock(),'receipt-instrument');assert.ok(contract);
+ const coordinate=fieldOf(contract!,'value');
+ const old=canonical({scope:coordinate,role:'writes',form:'alphabet',measure:'digest',value:'sha256:'+'a'.repeat(64),by:'bound',at:'place:old'});
+ const observation=canonical({scope:'reading/extent',role:'writes',form:'interval',measure:'bytes',value:'3..3',by:'reader',at:'place:input'});
+ const wire=canonical({scope:'wire/receipt-fields',role:'writes',form:'alphabet',measure:'id',value:'scope|role|form|measure|value|by|at',by:'target',at:'policy:receipt'});
+ const algorithm=canonical({scope:'wire/digest-algorithms',role:'writes',form:'alphabet',measure:'id',value:'sha256',by:'target',at:'policy:receipt'});
+ const families=canonical({scope:'wire/families',role:'writes',form:'alphabet',measure:'id',value:'reader|read|uses|dep|sources|region|view|receipts',by:'target',at:'policy:receipt'});
+ const published=canonical({scope:'publish/bootstrap',role:'writes',form:'alphabet',measure:'id',value:'present',by:'target',at:'policy:receipt'});
+ const standing=[wire,algorithm,families,published];
+ writeFileSync(join(root,'TARGET.bound'),standing.join('\n')+'\n');keepCarried(store,[old,observation]);
+ const fold={root,store,standing,epoch:1,observed:[],paid:[]} as unknown as import('../src/cli/place.ts').PlaceFold;
+ const emitted=receiptRegion(fold,8);
+ assert.equal(emitted.filter(line=>fieldOf(line,'scope')===coordinate).length,1);
+ assert.equal(emitted.includes(observation),true);
+ assert.equal(emitted.includes(old),false);
+ assert.equal(carriedIn(store).some(file=>readFileSync(file,'utf8').includes(old)),true,'the previous authenticated carrier remains history');
+}));
 
 test('a native carrier resolves its named child only while its exact bytes authenticate', () => fixture((root, store) => {
   const digest = keepCarried(store, [line]);

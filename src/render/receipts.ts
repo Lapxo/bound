@@ -24,7 +24,8 @@ export function receiptRegion(fold: PlaceFold, at: number): readonly string[] {
   const contract = wireLine(ownLock(), 'receipt-instrument');
   const coordinate = contract === undefined ? undefined : fieldOf(contract, 'value');
   const implementation = coordinate === undefined ? undefined : instrumentDigest(fold.store,sourceOf(),[],ownRoot(),ownLock());
-  const observed = [...receiptsOf(fold), ...(coordinate && implementation ? [canonical({scope:coordinate,role:'writes',form:'alphabet',measure:'digest',value:implementation,at:`place:${implementation}`,by:'bound'})] : [])];
+  // The current implementation seal is metadata, not an observation carried from a previous fold.
+  const observed = [...receiptsOf(fold).filter(line => !coordinate || fieldOf(line,'scope') !== coordinate), ...(coordinate && implementation ? [canonical({scope:coordinate,role:'writes',form:'alphabet',measure:'digest',value:implementation,at:`place:${implementation}`,by:'bound'})] : [])];
   const hash = (bytes: string): string => bytesDigest(fold.store, new TextEncoder().encode(bytes));
   const head = keyOf(fold.store, 'attest');
   const projection = receiptProjection(observed, fields, hash, head ? [head] : []);

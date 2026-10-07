@@ -8,7 +8,7 @@ import {toposAt,contextModuleAt} from './selected-topos.ts';
 export async function admittedObjects(root:string,lines:readonly string[],emit:(text:string)=>void=()=>{}){
  const history=objectHistory(lines);if(history.kind!=='fact')throw Error(`REFUSE·wire ${history.why}`);
  const authority=authorityFor(lines,rootSigner(root),signaturesOf(storeOf(root)).admitted);
- const context=await objectProvider(history.value.objects,history.value.configuration,{admit:fields=>authority.of(canonical(fields)).kind==='admitted',emit,topos:toposAt,module:contextModuleAt});
+ const context=await objectProvider(history.value.objects,history.value.configuration,{admit:fields=>authority.of(canonical(fields)).kind==='admitted',emit,topos:digest=>toposAt(digest,storeOf(root)),module:digest=>contextModuleAt(digest,storeOf(root))});
  const checked=validateObjectContext(history.value.objects,context);if(checked.kind!=='fact')throw Error(`REFUSE·context ${checked.why}`);
  return {records:checked.value,context};
 }

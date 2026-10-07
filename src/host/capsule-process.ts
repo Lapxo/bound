@@ -1,3 +1,5 @@
+import {boundedProcess} from './process-lifetime.ts';
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { spawnSync } from 'node:child_process';
 import type { SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
 import { PROTOCOL } from '@lapxo/topos/wire';
@@ -36,9 +38,9 @@ export function validResponse(value: unknown, request: Request): value is Respon
 }
 
 /** Last-line JSON is the wire framing. No partial batch, failed exit or synthetic missing response is accepted. */
-export function executeCapsule(command: string, args: readonly string[], requests: readonly Request[], limits: Pick<SpawnSyncOptionsWithStringEncoding, 'timeout' | 'maxBuffer'> = {}): readonly Response[] {
-  const run = spawnSync(command, args, { input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 26, ...limits });
-  if (run.error) throw new CapsuleProcessError(`failed: ${run.error.message}`, run);
+export function executeCapsule(command: string, args: readonly string[], requests: readonly Request[], limits: Pick<SpawnSyncOptionsWithStringEncoding, 'timeout' | 'maxBuffer'> = {}, lifetime?:ReaderLifetime): readonly Response[] {
+  const run = lifetime===undefined?spawnSync(command, args, { input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 26, ...limits }):boundedProcess(command,args,JSON.stringify(requests),lifetime);
+  if ('error' in run && run.error) throw new CapsuleProcessError(`failed: ${run.error.message}`, run);
   if (run.signal !== null || run.status !== 0) throw new CapsuleProcessError(`exited ${run.status ?? `with signal ${run.signal}`}`, run);
   const last = /(?:^|\n)([^\n]*)$/.exec(run.stdout.trimEnd())?.[1] ?? '';
   let values: unknown;

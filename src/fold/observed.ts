@@ -1,3 +1,4 @@
+import {readerLifetime,readerAllowsEmpty,assertReaderInputs,parse as parseLifetime} from '@lapxo/topos/wire';
 import {readOnly} from '../host/read-only.ts';
 import { basename, dirname, existsSync, mkdirSync, resolve, rmSync, spawn, statSync, writeFileSync } from '../host/io.ts';
 import { bundleOf, processOf } from '../observe/runner.ts';
@@ -258,14 +259,15 @@ export function observedClaims(root: string, store: string, options: { readonly 
   }
   function observeOne(reader: ReaderClaim, started: number): boolean {
     const module = resolve(root, reader.module);
-    const asked = reader.capsule === undefined ? undefined : capsuleAt(reader.capsule.digest, reader.capsule.entry);
+    const asked = reader.capsule === undefined ? undefined : reader.capsule.selected??capsuleAt(reader.capsule.digest, reader.capsule.entry);
     const source = reader.capsule === undefined ? observeFile(module) : asked === undefined ? undefined : new Uint8Array();
     const bundle = source && reader.capsule === undefined ? bundleOf(module) ?? bytesDigest(store, source) : 'none';
     const offered = offersOf(root, store, reader, roleOf, look, (where) => reached(trimmed(where)));
+    assertReaderInputs(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module,offered.length);
     const vectors = reader.capsule === undefined ? observeText(resolve(root, vectorsOf(reader.module, standing))) : undefined;
     const kept = whole && legacy === undefined && answered === undefined && source ? sha([
       speaker, reader.module, reader.kind, reader.shape.join('|'), reader.where.join('|'), bundle, vectors === undefined ? 'no vectors' : sha(vectors),
-      reader.capsule === undefined ? '' : `${reader.capsule.digest} ${reader.capsule.region} ${reader.capsule.reads.join('|')} ${[...reader.capsule.globs].map(([place, globs]) => `${place}${globs.join('|')}`).join(' ')}`,
+      reader.capsule === undefined ? '' : `${reader.capsule.selected?.selection??reader.capsule.digest} ${reader.capsule.region} ${reader.capsule.reads.join('|')} ${[...reader.capsule.globs].map(([place, globs]) => `${place}${globs.join('|')}`).join(' ')}`,
       ...offered.map((offer) => `${offer.place} ${offer.digest?.() ?? bytesDigest(store, offer.bytes())}`),
     ].join('\n')) : undefined;
     const stored = kept === undefined ? undefined : observeText(memoAt(store, `observed/${kept}`));
@@ -280,8 +282,8 @@ export function observedClaims(root: string, store: string, options: { readonly 
     const own = shardLines(store, speaker, home).filter((line) => fieldOf(line, 'scope') === `reader/${reader.module}`);
     const lineage = own.filter((line) => fieldOf(line, 'measure') === 'identity').map((line) => fieldOf(line, 'value'));
     const sum = source && reader.capsule === undefined ? bytesDigest(store, new TextEncoder().encode(`${reader.module} ${bundle}`)).replace(/^sha256:/, '').slice(0, 12) : 'none';
-    const measured = reader.capsule !== undefined ? { by: source ? sha(`${reader.capsule.digest}\n${reader.capsule.region}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
-      : source ? identityOf({ store, root, speaker, module: reader.module, kind: reader.kind, code: sum, lineage, kept: own.filter((line) => /(?:^|\s)measure=(?:extension|emits)\s/.test(line)) })
+    const measured = reader.capsule !== undefined ? { by: source ? sha(`${reader.capsule.selected?.selection??reader.capsule.digest}\n${reader.capsule.region}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
+      : source ? identityOf({ store, root, speaker, module: reader.module, kind: reader.kind, code: sum, lineage, lifetime:readerLifetime(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module), kept: own.filter((line) => /(?:^|\s)measure=(?:extension|emits)\s/.test(line)) })
       : { by: 'none', lines: [] };
     const by = measured.by;
     const level: string[] = [...measured.lines];
@@ -391,14 +393,14 @@ export function observedClaims(root: string, store: string, options: { readonly 
             if (answer?.kind !== 'fact') throw new Error(`REFUSE·reader ${reader.module} · ${answer?.why ?? 'no capsule answer'}`);
             return (answer.claims ?? []) as ReturnType<typeof runReader>[number];
           })
-          : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })));
+          : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })),readerLifetime(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module));
       } catch (error) {
         const why = `REFUSE·reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}`;
         refused.push(why);
         process.stderr.write(`${why}\n`);
         return false;
       }
-      if (rows.every((mine) => !mine.length)) {
+      if (rows.every((mine) => !mine.length) && !readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module)) {
         const why = `REFUSE·reader ${reader.module} · answered none of ${due.length} places · nothing landed, they stay due`;
         refused.push(why);
         process.stderr.write(`${why}\n`);
