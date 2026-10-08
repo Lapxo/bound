@@ -7,6 +7,7 @@ import { gzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { canonical } from '@lapxo/topos/wire';
 import { capsuleAt } from '../src/host/capsule.ts';
+import {withContentStore} from '../src/host/content-store.ts';
 import { blobAt } from '../src/land/ledger.ts';
 const record = (name: string, text: string, type = '0'): Buffer => {
   const body = Buffer.from(text);
@@ -47,5 +48,22 @@ test('render requests retain independent receipts by digest, across another view
   const bytes=tar(record('capsule.bound',canonical({scope:'region/prose',role:'render',form:'alphabet',measure:'reads',value:'**',by:'fixture',at:'policy:test'})+'\n'),record('entry.js',module)),digest=sha(bytes);save(store,digest,bytes);const capsule=capsuleAt(digest,'entry.js',store)!;
   const ask=(shape:string)=>capsule.ask([{protocol:'bound-lock/1',verb:'render',rootScope:'fixture',region:'prose',files:[],shape}]);
   const first=ask('first'),second=ask('second');assert.deepEqual(ask('first'),first);assert.deepEqual(ask('second'),second);assert.equal(readFileSync(calls,'utf8'),'11','an intervening view cannot evict a closed render');
+ }finally{process.argv[1]=prior;rmSync(store,{recursive:true,force:true});}
+});
+
+for(const id of ['calibration','inventory'])test('capsule cache obeys current declared reader policy: '+id,()=>{
+ const store=mkdtempSync(join(tmpdir(),'capsule-policy-')),prior=process.argv[1];process.argv[1]=new URL('../src/cli/verb.ts',import.meta.url).pathname;
+ try{
+  const calls=join(store,'calls'),body="import{appendFileSync}from'node:fs';export const render=()=>{appendFileSync("+JSON.stringify(calls)+",'1');return ['same'];};";
+  const bytes=tar(record('capsule.bound',canonical({scope:'region/result',role:'render',form:'alphabet',measure:'reads',value:'**',by:'fixture',at:'policy:test'})+'\n'),record('entry.js',body)),digest=sha(bytes);save(store,digest,bytes);
+  const capsule=capsuleAt(digest,'entry.js',store)!,reference={id,module:'provider/result'};
+  const row=(scope:string,value:string,measure='milliseconds',form='interval')=>canonical({scope,role:'writes',form,measure,value,by:'fixture',at:'policy:test'});
+  let local='0..1800';
+  const policy=()=>[row('wire/reader-lifetime','bounded-process@2','id','alphabet'),row('reader/timeout','0..2000'),row('reader/response-bytes','0..65536','bytes'),row('reader/'+id+'/timeout',local)];
+  const ask=()=>withContentStore(store,()=>capsule.ask([{protocol:'bound-lock/1',verb:'render',rootScope:'',region:'result',files:[]}],reference),policy);
+  const first=ask();assert.deepEqual(ask(),first);assert.equal(readFileSync(calls,'utf8'),'1');
+  local='0..1600';assert.deepEqual(ask(),first);assert.equal(readFileSync(calls,'utf8'),'11','a changed lifetime cannot use the previous answer');assert.deepEqual(ask(),first);assert.equal(readFileSync(calls,'utf8'),'11');
+  local='3000..4000';assert.throws(ask,new RegExp('REFUSE·reader '+id+' conflicting timeout'));assert.equal(readFileSync(calls,'utf8'),'11','a cache hit cannot bypass a conflicting policy');
+  local='0..1600';assert.deepEqual(ask(),first);assert.equal(readFileSync(calls,'utf8'),'11','retained evidence is reusable again only under its matching current policy');
  }finally{process.argv[1]=prior;rmSync(store,{recursive:true,force:true});}
 });

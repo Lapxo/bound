@@ -50,11 +50,11 @@ export function ownedOf(root: string, signed: readonly string[], admits: (line: 
 }
 
 /** A place's own lock gains the lines a batch landed there, appended whole: a reader never meets half of it, and every line already there keeps its bytes as they were. */
-export function landOwned(root: string, place: string, lines: readonly string[]): void {
+export function landOwned(root: string, place: string, lines: readonly string[], committed=false): void {
   if (!lines.length) return tellOwn(place, []);
   const at = join(root, place, LOCK);
   const text = observeText(at) ?? '';
-  for (const by of new Set(lines.map(line => fieldOf(line, 'by')))) {
+  if(!committed) for (const by of new Set(lines.map(line => fieldOf(line, 'by')))) {
     landShard(storeOf(root), by, `${place}/${LOCK}`, lines.filter(line => fieldOf(line, 'by') === by));
   }
   writeFileSync(`${at}.${process.pid}.landing`, `${text.replace(/\n*$/, '\n')}${lines.join('\n')}\n`);

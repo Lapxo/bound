@@ -261,12 +261,13 @@ export function observedClaims(root: string, store: string, options: { readonly 
   }
   function observeOne(reader: ReaderClaim, started: number): boolean {
     const module = resolve(root, reader.module);
+    const lifetime = readerLifetime(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}), {id:reader.id,module:reader.module});
     const asked = reader.capsule === undefined ? undefined : reader.capsule.selected??capsuleAt(reader.capsule.digest, reader.capsule.entry);
     const projection = reader.capsule === undefined ? [] : (asked?.lines ?? []).filter(line=>fieldOf(line,'scope')===`region/${reader.capsule!.region}`&&fieldOf(line,'measure')==='input-projection'&&fieldOf(line,'value')!=='withdraw');
     if(projection.length){
       if(projection.length!==1||!asked)throw Error('REFUSE·input projection is ambiguous '+reader.module);
       const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>({place,text:observeText(resolve(root,place))??''}));
-      const result=readingClosures({root,store,reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),allowsEmpty:readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module),files,emit:line=>process.stderr.write(line+'\n')});
+      const result=readingClosures({root,store,reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty:readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module),files,emit:line=>process.stderr.write(line+'\n')});
       out.push(...result.lines);ran+=result.executed;read+=result.read-result.opened;
       return false;
     }
@@ -277,7 +278,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
     assertReaderInputs(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module,offered.length);
     const vectors = reader.capsule === undefined ? observeText(resolve(root, vectorsOf(reader.module, standing))) : undefined;
     const kept = whole && legacy === undefined && answered === undefined && source ? sha([
-      speaker, reader.module, reader.kind, reader.shape.join('|'), reader.where.join('|'), bundle, vectors === undefined ? 'no vectors' : sha(vectors),
+      speaker, reader.module, JSON.stringify(lifetime), reader.kind, reader.shape.join('|'), reader.where.join('|'), bundle, vectors === undefined ? 'no vectors' : sha(vectors),
       reader.capsule === undefined ? '' : `${reader.capsule.selected?.selection??reader.capsule.digest} ${reader.capsule.region} ${reader.capsule.reads.join('|')} ${[...reader.capsule.globs].map(([place, globs]) => `${place}${globs.join('|')}`).join(' ')}`,
       ...offered.map((offer) => `${offer.place} ${offer.digest?.() ?? bytesDigest(store, offer.bytes())}`),
     ].join('\n')) : undefined;
@@ -292,9 +293,9 @@ export function observedClaims(root: string, store: string, options: { readonly 
     const home = regionIn(regions, reader.module);
     const own = shardLines(store, speaker, home).filter((line) => fieldOf(line, 'scope') === `reader/${reader.module}`);
     const lineage = own.filter((line) => fieldOf(line, 'measure') === 'identity').map((line) => fieldOf(line, 'value'));
-    const sum = source && reader.capsule === undefined ? bytesDigest(store, new TextEncoder().encode(`${reader.module} ${bundle}`)).replace(/^sha256:/, '').slice(0, 12) : 'none';
-    const measured = reader.capsule !== undefined ? { by: source ? sha(`${reader.capsule.selected?.selection??reader.capsule.digest}\n${reader.capsule.region}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
-      : source ? identityOf({ store, root, speaker, module: reader.module, kind: reader.kind, code: sum, lineage, lifetime:readerLifetime(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module), kept: own.filter((line) => /(?:^|\s)measure=(?:extension|emits)\s/.test(line)) })
+    const sum = source && reader.capsule === undefined ? bytesDigest(store, new TextEncoder().encode(`${reader.module} ${bundle}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`)).replace(/^sha256:/, '').slice(0, 12) : 'none';
+    const measured = reader.capsule !== undefined ? { by: source ? sha(`${reader.capsule.selected?.selection??reader.capsule.digest}\n${reader.capsule.region}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
+      : source ? identityOf({ store, root, speaker, module: reader.module, kind: reader.kind, code: sum, lineage, lifetime, kept: own.filter((line) => /(?:^|\s)measure=(?:extension|emits)\s/.test(line)) })
       : { by: 'none', lines: [] };
     const by = measured.by;
     const level: string[] = [...measured.lines];
@@ -400,11 +401,11 @@ export function observedClaims(root: string, store: string, options: { readonly 
           ? asked.ask(due.map((d) => ({
             protocol: PROTOCOL, verb: 'read' as const, rootScope: d.place, region: reader.capsule!.region, held: heldOf(d.place, d.region),
             files: (reader.capsule!.reads.some((read) => read.includes('@')) ? handedAt(root, reader, roleOf, look, d.place) : [d.place]).map((coordinate) => ({ place: coordinate, text: observeText(resolve(root, coordinate)) ?? '' })),
-          }))).map((answer) => {
+          })), {id:reader.id,module:reader.module}).map((answer) => {
             if (answer?.kind !== 'fact') throw new Error(`REFUSE·reader ${reader.module} · ${answer?.why ?? 'no capsule answer'}`);
             return (answer.claims ?? []) as ReturnType<typeof runReader>[number];
           })
-          : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })),readerLifetime(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module));
+          : runReader(module, root, due.map((d) => ({ place: d.place, ...(reader.kind === 'js' ? { text: new TextDecoder().decode(d.bytes) } : {}), held: heldOf(d.place, d.region) })),lifetime);
       } catch (error) {
         const why = `REFUSE·reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}`;
         refused.push(why);

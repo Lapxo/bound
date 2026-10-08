@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, readFileSync, readdirSync, readlinkSync } from 'node:fs';
+import { existsSync, lstatSync, statSync, readFileSync, readdirSync, readlinkSync } from 'node:fs';
 import type { Stats } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 
@@ -10,7 +10,12 @@ const seen = new Map<string, { readonly stamp: string; readonly bytes: Buffer }>
 
 /** A coordinate read once is kept by its stamp — its inode, size and time — and read again only when the stamp moves. */
 function bytesAt(at: string): Buffer | undefined {
-  const st = stampable(at);
+  // Reading follows a link, so its cache stamp must describe the same target.
+  // Directory links have no file bytes; traversal keeps its separate link policy.
+  let st = stampable(at);
+  if (st?.isSymbolicLink()) {
+    try { st = statSync(at); } catch { return undefined; }
+  }
   if (st === undefined || st.isDirectory() || !existsSync(at)) return undefined;
   const stamp = `${st.ino}-${st.size}-${st.mtimeMs}`;
   const held = seen.get(at);

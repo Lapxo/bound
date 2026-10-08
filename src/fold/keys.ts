@@ -1,11 +1,12 @@
 import { dirname, existsSync, join } from '../host/io.ts';
-import { ledgerLines, signedLines } from '../land/ledger.ts';
+import { ledgerLines, ledgerWriters, signedLines } from '../land/ledger.ts';
 import { EXTENSION, fieldOf, foldClaims, isWire, LOCK, selfName } from './claims.ts';
 import { entriesIn, observeText } from '../observe/files.ts';
 
 type Keys = { readonly classes: ReadonlyMap<string, readonly string[]>; readonly signers: readonly string[] };
 
 const held = new Map<string, Keys>();
+const keyInputs=new Map<string,string>();
 const merged = new Map<string, { readonly parts: readonly (readonly string[])[]; readonly lines: readonly string[] }>();
 
 /**
@@ -55,13 +56,14 @@ export function signedLockLines(store: string, told: readonly string[] = []): st
 }
 
 function keysOf(store: string, told: readonly string[]): Keys {
-  const mine = told.length ? read(store, told) : held.get(store) ?? read(store);
+  const input=ledgerKeyLines(store).join('\n');
+  const mine = told.length ? read(store, told) : keyInputs.get(store)===input ? held.get(store)??read(store) : read(store);
+  if(!told.length)keyInputs.set(store,input);
   if (!told.length) held.set(store, mine);
   return mine;
 }
 
-const ledgerKeyLines = (store: string): readonly string[] => (existsSync(join(store, 'ledger')) ? entriesIn(join(store, 'ledger')).map((entry) => entry.name) : [])
-  .filter((name) => name.endsWith(EXTENSION)).flatMap((name) => ledgerLines(store, name.slice(0, -EXTENSION.length)))
+const ledgerKeyLines = (store:string):readonly string[]=>ledgerWriters(store).flatMap(writer=>ledgerLines(store,writer))
   .filter((line) => /\bsig=/.test(line) && /(?:^|\s)scope=keys\/[^/\s]+\s/.test(line));
 
 const releases = new Map<string, readonly string[] | undefined>();

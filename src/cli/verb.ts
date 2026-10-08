@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printActResult} from './act-result.ts';
 import {withContentStore} from '../host/content-store.ts';
 import {withoutEffects} from '../host/read-only.ts';
 import {resolveSources,resolveRequested} from '../host/source-content.ts';
@@ -179,6 +180,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     process.stderr.write(`${selfName()}: the owner ledger is empty; land it before rendering a view\n`);
     return EXIT.refuse;
   }
+  if(name==='act'){if(under||told.length)throw Error('REFUSE·act committed identity query only');printActResult(root,coord);return EXIT.closed;}
   if(name==='evidence'&&!under&&!told.length&&ingressBundles(storeOf(root)).length){
     const declared=viewsOf(lockStanding(storeOf(root))).get(name);
     if(!declared||declared.shape||!declared.regions.some(region=>region.name==='evidence'))throw Error('REFUSE·view foreign evidence requires a declared evidence view');
@@ -408,7 +410,7 @@ async function foldAt(root: string, under: string | undefined, argv: readonly st
 async function foldRequested(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
   const prospective = as !== undefined && positionalsOf(argv).some(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
-  if(as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
+  if(as?.split('@')[0]==='act'||as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
   return resolveRequested(digest=>resolveSources(standingOf(root,under).standing,[digest]),()=>foldResolved(root,under,argv));
 }
 
@@ -447,6 +449,7 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
   }
   const named = inputs;
   const coord = positionalsOf(argv).find((one) => one !== under?.replace(/\/$/, '') && !one.startsWith('-') && !(existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory()));
+  if(as==='act'){if(positionalsOf(argv).length!==1)throw Error('REFUSE·act name one committed identity');return view(root,under,as,[],coord);}
   if ((as === 'why' || as === NAMED_VIEWS.because || as.split('@')[0] === 'why') && coord !== undefined) return view(root, under, as === NAMED_VIEWS.because ? 'why' : as, [], coord, key);
   if (!named.length) return view(root, under, as, [], undefined, key);
   const batch = await signedBatch(root, argv, named);

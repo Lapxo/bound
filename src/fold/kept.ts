@@ -1,8 +1,9 @@
+import {actLines,committedLocalActs} from '../host/ports/local-act.ts';
 import {readOnly} from '../host/read-only.ts';
 import { createHash, dirname, existsSync, join, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { bytesDigest, coordinateDigest } from './digests.ts';
 import { viewsOf } from './views.ts';
-import { landMemo, ledgerLines, memoAt, shardFile, writerFile } from '../land/ledger.ts';
+import { landMemo, ledgerLines, ledgerWriters, memoAt, shardFile, writerFile } from '../land/ledger.ts';
 import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts';
 import type { PlaceFold } from '../cli/place.ts';
 import { EXTENSION, fieldOf } from './claims.ts';
@@ -46,7 +47,7 @@ export function foldPoints(store: string, standing: readonly string[], under: st
     `take ${digestOf(ledgerLines(store, 'take').filter((line) => reads.scopes.has(fieldOf(line, 'scope').replace(/^take\//, ''))))}`,
     `tree ${digestOf(ledgerLines(store, tree ?? '').filter((line) => (sourceOf(line) ?? '').startsWith(reads.place)))}`,
   ];
-  const heads = (existsSync(join(store, 'ledger')) ? readdirSync(join(store, 'ledger')) : []).filter((name) => name.endsWith(EXTENSION)).map((name) => name.slice(0, -EXTENSION.length))
+  const heads = ledgerWriters(store)
     .filter((writer) => writer !== keeper && writer !== 'gate' && !writer.startsWith('reader') && !(reads && (signers.has(writer) || writer === 'judge' || writer === 'take' || writer === tree)))
     .map((writer) => `${writer} ${writer === liveWriter(store, standing) ? lastWord(store, writer) : bytesDigest(store, text(ledgerLines(store, writer).join('\n')))}`);
   const written = [...new Set([...viewsOf(standing).values()].flatMap((view) => ('regions' in view && view.shape ? [view.shape] : [])))].sort()
@@ -130,8 +131,12 @@ function readingContext(store: string): string {
   const speaker = keyOf(store, 'read');
   const files = speaker === undefined ? [] : [writerFile(store, speaker), ...coordinatesUnder(dirname(shardFile(store, speaker, '')), store)
     .filter(file => file.endsWith(EXTENSION)).map(file => join(store, file))];
-  return bytesDigest(store, text(files.filter(file => existsSync(file)).sort()
-    .map(file => bytesDigest(store, observeFile(file) ?? new Uint8Array())).join('\n')));
+  const segments=speaker===undefined?[]:committedLocalActs(store).flatMap(act=>act.bundle.placements?.flatMap(placement=>{
+    const records=actLines(placement.records).filter(line=>fieldOf(line,'by')===speaker);
+    return records.length?[placement.place+'\n'+records.join('\n')]:[];
+  })??[]);
+  return bytesDigest(store, text([...files.filter(file => existsSync(file)).sort()
+    .map(file => bytesDigest(store, observeFile(file) ?? new Uint8Array())),...segments].join('\n')));
 }
 
 export function keptPlace(store: string, under?: string): PlaceFold | undefined {

@@ -17,7 +17,7 @@ const told = new Map<string, readonly string[]>();
 /** Lines told to a place's own lock for a preview: folded as if the file held them, and standing only as its signed lines do. */
 export const tellOwn = (place: string, lines: readonly string[]): void => void told.set(place, lines);
 
-function verified(root: string, place: string): Verified {
+function verified(root: string, place: string, preview=true): Verified {
   const store = storeOf(root);
   const lock = lockLines(store);
   const publicText = observeText(join(root, place, LOCK)) ?? '';
@@ -25,7 +25,7 @@ function verified(root: string, place: string): Verified {
   const algorithms = hasAuthority ? signaturesOf(store).admitted : [];
   const signers = algorithms.length ? authorityFor(lock, rootSigner(root), algorithms).admitted : [];
   const history = signers.flatMap(signer => place ? shardLines(store, signer.id, `${place}/${LOCK}`) : ledgerLines(store, signer.id)).filter(line => fieldOf(line, 'sig') !== '');
-  const text = [publicText, ...history, ...(told.get(place) ?? [])].join('\n');
+  const text = [publicText, ...history, ...(preview?told.get(place)??[]:[])].join('\n');
   const key = `${root} ${place}`;
   const last = held.get(key);
   if (last !== undefined && last.text === text && last.lock === lock) return last;
@@ -33,17 +33,7 @@ function verified(root: string, place: string): Verified {
   // Unrestricted coverage does not construct a region coordinate. Restricted
   // coverage still requires the lock's declared namespace before comparison.
   const family = signers.some(signer => !signer.coverage.includes('*')) ? wordOf(lockStanding(store), 'families', 'region') : '';
-  const stands = (line: string): boolean => {
-    const got = parse(line);
-    if (got.kind !== 'fact' || got.value.fields['sig'] === undefined) return false;
-    const fields = got.value.fields;
-    const signer = signers.find((one) => one.id === fields['by']);
-    const epoch = Number(fields['epoch']) || 0;
-    if (signer === undefined || !verifiesFields(fields, signer.publicKey, algorithms)) return false;
-    const window = windowAt(signer, epoch);
-    return epoch >= window.start && (window.close === null || epoch <= window.close)
-      && signer.coverage.some((prefix) => prefix === '*' || within(region(`${family}/${place}/${fields['scope'] ?? ''}`, './'), region(prefix, './')));
-  };
+  const stands=(line:string):boolean=>ownRecordAdmitted(line,place,family,signers,algorithms);
   const applied = new Set(lines.filter(stands));
   // A published copy of an authenticated delivery is not another inscription.
   const projected = new Set([...applied].map(sayingOf));
@@ -80,3 +70,19 @@ export const appliedIn = (root: string, place: string): readonly string[] => [..
 export const forksIn = (root: string, place: string): readonly string[] => ((got) => foldClaims(got.lines.filter((line) => got.applied.has(line) || (!/ sig=/.test(line) && !got.projected.has(sayingOf(line))))).forks.map((fork) => fork.key))(verified(root, place));
 
 export const writtenIn = (root: string, place: string): number => ((got) => got.lines.filter((line) => !got.applied.has(line)).length)(verified(root, place));
+
+/** Authenticated history excludes prospective lines told only for admission. */
+export const appliedHistoryIn=(root:string,place:string):readonly string[]=>[...verified(root,place,false).applied];
+
+/** Shared signature/window/coordinate coverage boundary for own history. */
+export function ownRecordAdmitted(line:string,place:string,family:string,signers:ReturnType<typeof authorityFor>['admitted'],algorithms:readonly string[]):boolean{
+    const got = parse(line);
+    if (got.kind !== 'fact' || got.value.fields['sig'] === undefined) return false;
+    const fields = got.value.fields;
+    const signer = signers.find((one) => one.id === fields['by']);
+    const epoch = Number(fields['epoch']) || 0;
+    if (signer === undefined || !verifiesFields(fields, signer.publicKey, algorithms)) return false;
+    const window = windowAt(signer, epoch);
+    return epoch >= window.start && (window.close === null || epoch <= window.close)
+      && signer.coverage.some((prefix) => prefix === '*' || within(region(`${family}/${place}/${fields['scope'] ?? ''}`, './'), region(prefix, './')));
+}

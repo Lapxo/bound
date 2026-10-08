@@ -1,5 +1,6 @@
+import {ledgerLines,ledgerWriters} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
-import { appendFileSync, dirname, join, mkdirSync, readdirSync, relative, resolve } from '../host/io.ts';
+import { appendFileSync, dirname, join, mkdirSync, readdirSync, realpathSync, relative, resolve } from '../host/io.ts';
 import { bytesDigest as bytesWith, fullDigest as fullWith } from '../host/digest.ts';
 import { coordinatesUnder, observeFile, observeText, stampOf } from '../observe/files.ts';
 import { releaseOf, signedLockLines } from './keys.ts';
@@ -35,9 +36,8 @@ function namedAlgorithm(store: string): string | undefined {
     const contract = published === undefined ? undefined : wireLine(published, 'digest-algorithms');
     return contract === undefined ? undefined : fieldOf(contract, 'value').split('|')[0]?.split(':')[0];
   }
-  for (const entry of readdirSync(join(store, 'ledger'), { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(EXTENSION)) continue;
-    const text = observeText(join(store, 'ledger', entry.name)) ?? '';
+  for (const writer of ledgerWriters(store)) {
+    const text = ledgerLines(store,writer).join('\n');
     let from = 0;
     while (from < text.length) {
       const at = (() => {
@@ -168,11 +168,15 @@ export function instrumentCoordinates(store: string, entry: string, standing: re
     if (seen.has(at)) return;
     const digest = coordinateDigest(store, at);
     if (digest === undefined) return;
-    seen.set(at, digest);
-    for (const one of importsOf(store, at, digest)) {
+    // The host loader resolves links before loading a module. Count that module
+    // once, while retaining distinct modules even when their bytes are equal.
+    const module = realpathSync(at);
+    if (seen.has(module)) return;
+    seen.set(module, digest);
+    for (const one of importsOf(store, module, digest)) {
       if (one.startsWith('node:') || builtinModules.includes(one)) continue;
-      if (one.startsWith('.')) walk(resolve(dirname(at), one));
-      else walk(createRequire(at).resolve(one));
+      if (one.startsWith('.')) walk(resolve(dirname(module), one));
+      else walk(createRequire(module).resolve(one));
     }
   };
   walk(resolve(entry));
