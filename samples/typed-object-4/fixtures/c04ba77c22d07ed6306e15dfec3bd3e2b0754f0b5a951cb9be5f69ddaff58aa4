@@ -1,8 +1,0 @@
-import { chain } from "./6012b65e035d4704e45d833f4e9e957e55e8f99e649ac9bacfd5f4d03729e059";
-import { compose, unit } from "./e295db71d2fef138330904a6943ff8bfbed2cf86e43410a0536d6b068d404421";
-export const METHODS = ['declared', 'statistics', 'sample', 'exact'];
-export function weakest(methods) {
-    const c = chain(METHODS);
-    const units = [...methods].map((m) => unit('evidence', { floor: METHODS[0], ceiling: m }));
-    return units.length === 0 ? 'exact' : compose(c, units).ceiling;
-}

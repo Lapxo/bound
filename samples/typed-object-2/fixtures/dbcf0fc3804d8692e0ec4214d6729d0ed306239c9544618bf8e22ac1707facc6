@@ -1,5 +1,0 @@
-import { parts } from "./c5ea96de0d62bb3fe447647c806140ce140de412f58d4c4907f80ad7ad3cdf3d";
-export function meet(L, c, world = new Map()) {
-    const { floor, ceiling } = parts(L, c, world);
-    return L.meet(floor, ceiling);
-}

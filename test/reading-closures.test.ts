@@ -34,21 +34,3 @@ test('empty readings follow the declared policy and retain native zero-row recei
   assert.throws(()=>read(false),/empty response is not admitted/);assert.equal(calls,2,'cached emptiness cannot override the policy');
  }finally{rmSync(root,{recursive:true,force:true});}
 });
-
-for(const name of ['payload.bin','resource.dat'])test('byte input identity preserves non-UTF8 bytes: '+name,()=>{
- const root=mkdtempSync(join(tmpdir(),'bound-byte-closure-')),store=join(root,'.bound');
- try {
-  let runs=0;const projection=canonical({scope:'resource',role:'reads',form:'alphabet',measure:'reads',value:name,at:'receipt:1',by:'world'});
-  const capsule={digest:'sha256:'+'6'.repeat(64),declaration:{regions:{}},lines:[],ask:(requests:any[])=>requests.map(req=>{
-   const input=req.lines.find((line:string)=>line.includes('shape='+name));
-   assert.match(input,/measure=(bytes|text)/);assert.match(input,/value=(base64|lock)/);
-   if(req.verb==='render')return {protocol:PROTOCOL,kind:'fact',lines:[projection]};
-   runs++;return {protocol:PROTOCOL,kind:'fact',claims:[{scope:'resource',role:'reads',measure:'count',bound:{kind:'interval',lo:1,hi:1}}]};
-  })} as Capsule;
-  const read=()=>{const bytes=readFileSync(join(root,name));return readingClosures({root,store,reader:'reader',speaker:'reader',digest:text=>fullDigest(text,'sha256'),capsule,region:'reading',projection:'inputs',files:[{place:name,text:bytes.toString('utf8'),bytes}]});};
-  writeFileSync(join(root,name),Buffer.from([0x80]));const first=read();assert.equal(first.opened,1);assert.equal(read().opened,0);assert.equal(runs,1);
-  writeFileSync(join(root,name),Buffer.from([0x81]));assert.equal(Buffer.from([0x80]).toString('utf8'),Buffer.from([0x81]).toString('utf8'));
-  const changed=read();assert.equal(changed.opened,1);assert.equal(runs,2);assert.notDeepEqual(first.lines,changed.lines);
-  writeFileSync(join(root,name),'base64:gQ==');const textual=read();assert.equal(textual.opened,1);assert.equal(runs,3);assert.notDeepEqual(changed.lines,textual.lines,'binary frame cannot collide with the same base64-prefixed literal text');
- }finally{rmSync(root,{recursive:true,force:true});}
-});

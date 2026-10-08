@@ -1,5 +1,5 @@
 {
-  "scope": "signing-port/conformance",
+  "scope": "prose-views/conformance",
   "measure": "count",
   "result": "failures",
   "cases": [
@@ -7,22 +7,22 @@
       "program": "runtime",
       "args": [
         "tools/samples/check-publication.mjs",
-        "signing",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json"
+        "prose-views",
+        "samples/yes/prose-views.json",
+        "samples/no/prose-views.json"
       ],
       "cwd": ".",
-      "timeoutMs": 15000,
+      "timeoutMs": 25000,
       "maxBytes": 1048576,
       "exit": 0,
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "SIGNING file-command-equivalent; one invocation per lot; atomic refusals"
+          "pattern": "PROSE three named views; two places; two exact readings; disagreement refused"
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE"
+          "pattern": "REFUSE\u00b7view conflicting prose"
         }
       ],
       "inputs": [
@@ -130,16 +130,21 @@
         "dist/render/target.js",
         "dist/render/view.js",
         "tools/samples/check-publication.mjs",
+        "tools/samples/evidence-worker.mjs",
         "tools/samples/module-closure.mjs",
         "tools/samples/run-evidence.mjs",
+        "tools/samples/run-prose-views.mjs",
+        "tools/samples/run-query-views.mjs",
         "tools/samples/run-signing.mjs",
         "tools/samples/run-typed-walk.mjs",
         "tools/samples/run-typed.mjs",
         "tools/samples/run-walk-refinement.mjs",
         "tools/samples/run-walk.mjs",
         "tools/samples/typed-provider.mjs",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json",
+        "samples/yes/prose-views.json",
+        "samples/no/prose-views.json",
+        "tools/samples/program-worker.mjs",
+        "tools/samples/prose-worker.mjs",
         "tools/samples/public-instrument.mjs",
         "TARGET.bound",
         "dist/host/act-cost.js"

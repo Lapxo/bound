@@ -1,2 +1,0 @@
-bound-lock/1 at=policy:fixture by=device epoch=2 form=alphabet measure=id role=writes scope=sample/a sig="ed25519:fixture:JYK0QeJmSvsH+ePLMtD0rwza49+QlHVaScD0QEzKr3YUfg7Ikjj8z94Vxe0vFRpjAdKTTshRvdno4JY4ao3YAg==" value=yes
-bound-lock/1 at=policy:fixture by=device epoch=2 form=alphabet measure=id role=writes scope=sample/b sig="ed25519:fixture:hjQXzXhxteHqvDf4TOzbsPJX19i3ef+ndEAZMBuJI7q46rpUyHnK46af/wknU8TOO4ImCwU32TTBqjK7rFlCAw==" value=yes

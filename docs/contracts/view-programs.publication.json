@@ -8,18 +8,18 @@
     },
     {
       "role": "yes",
-      "path": "samples/program-views-1/TARGET.bound",
-      "digest": "sha256:cc81e5435e4f8ae5040c6343910a48b77270b0a3d9ecf6d5418735b511a6013f"
+      "path": "samples/yes/program-views.json",
+      "digest": "sha256:b1e8feb6839050a09410dade936cbb827ac438ff8c7b962e5fefd50f601d1b15"
     },
     {
       "role": "no",
-      "path": "samples/program-views-2/TARGET.bound",
-      "digest": "sha256:99b083e5b47b891f3bbd9615d268259b504c63afa0c70a4b90f8a910e84be63b"
+      "path": "samples/no/program-views.json",
+      "digest": "sha256:bf6b2fbd11290920e31f46c18012be2230ffdab47dc7013d3a0aafae1fd6cbe7"
     },
     {
       "role": "vector",
       "path": "vectors/program-views.json",
-      "digest": "sha256:edca38d4a1d10998d94dbdd97dec7f4655e94af49afd03d2b40f59eacc721255"
+      "digest": "sha256:a10f688f48b2a9686cfe9ebc3908fa06d04cb0d3e86602a51d47511076f81f71"
     }
   ]
 }

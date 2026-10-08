@@ -1,5 +1,5 @@
 {
-  "scope": "signing-port/conformance",
+  "scope": "contract/published/attest-evidence-view",
   "measure": "count",
   "result": "failures",
   "cases": [
@@ -7,22 +7,30 @@
       "program": "runtime",
       "args": [
         "tools/samples/check-publication.mjs",
-        "signing",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json"
+        "evidence",
+        "samples/yes/attest-evidence.json",
+        "samples/no/attest-evidence.json"
       ],
       "cwd": ".",
-      "timeoutMs": 15000,
+      "timeoutMs": 25000,
       "maxBytes": 1048576,
       "exit": 0,
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "SIGNING file-command-equivalent; one invocation per lot; atomic refusals"
+          "pattern": "KEY-CLASS attest"
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE"
+          "pattern": "REFUSE\u00b7signer south uncovered"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "REFUSE\u00b7signed"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "ONCE"
         }
       ],
       "inputs": [
@@ -132,19 +140,24 @@
         "tools/samples/check-publication.mjs",
         "tools/samples/module-closure.mjs",
         "tools/samples/run-evidence.mjs",
-        "tools/samples/run-signing.mjs",
         "tools/samples/run-typed-walk.mjs",
         "tools/samples/run-typed.mjs",
         "tools/samples/run-walk-refinement.mjs",
         "tools/samples/run-walk.mjs",
         "tools/samples/typed-provider.mjs",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json",
+        "samples/typed/artifacts.json",
+        "samples/typed/artifacts.vector.json",
+        "samples/typed/contract.json",
+        "samples/typed/no.json",
+        "samples/typed/range.vector.json",
+        "samples/typed/wire.json",
+        "samples/typed/yes.json",
+        "samples/yes/attest-evidence.json",
+        "samples/no/attest-evidence.json",
         "tools/samples/public-instrument.mjs",
         "TARGET.bound",
         "dist/host/act-cost.js"
       ]
     }
-  ],
-  "execution": "independent"
+  ]
 }

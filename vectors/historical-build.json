@@ -1,5 +1,6 @@
 {
-  "scope": "signing-port/conformance",
+  "scope": "historical-build/conformance",
+  "execution": "independent",
   "measure": "count",
   "result": "failures",
   "cases": [
@@ -7,9 +8,9 @@
       "program": "runtime",
       "args": [
         "tools/samples/check-publication.mjs",
-        "signing",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json"
+        "historical-build",
+        "samples/yes/historical-build.json",
+        "samples/no/historical-build.json"
       ],
       "cwd": ".",
       "timeoutMs": 15000,
@@ -18,11 +19,15 @@
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "SIGNING file-command-equivalent; one invocation per lot; atomic refusals"
+          "pattern": "RENDERED tsconfig.json \u00b7 view/tsconfig"
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE"
+          "pattern": "REFUSE\u00b7view view/unoffered"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "BUILD two places; exact configuration; two equal readings; unoffered view refused"
         }
       ],
       "inputs": [
@@ -130,21 +135,30 @@
         "dist/render/target.js",
         "dist/render/view.js",
         "tools/samples/check-publication.mjs",
+        "tools/samples/evidence-worker.mjs",
+        "tools/samples/historical-build-worker.mjs",
+        "tools/samples/historical-document-worker.mjs",
         "tools/samples/module-closure.mjs",
+        "tools/samples/program-worker.mjs",
+        "tools/samples/prose-worker.mjs",
         "tools/samples/run-evidence.mjs",
+        "tools/samples/run-historical-build.mjs",
+        "tools/samples/run-historical-document-views.mjs",
+        "tools/samples/run-program-views.mjs",
+        "tools/samples/run-prose-views.mjs",
+        "tools/samples/run-query-views.mjs",
         "tools/samples/run-signing.mjs",
         "tools/samples/run-typed-walk.mjs",
         "tools/samples/run-typed.mjs",
         "tools/samples/run-walk-refinement.mjs",
         "tools/samples/run-walk.mjs",
         "tools/samples/typed-provider.mjs",
-        "samples/yes/signing-port.json",
-        "samples/no/signing-port.json",
+        "samples/yes/historical-build.json",
+        "samples/no/historical-build.json",
         "tools/samples/public-instrument.mjs",
         "TARGET.bound",
         "dist/host/act-cost.js"
       ]
     }
-  ],
-  "execution": "independent"
+  ]
 }

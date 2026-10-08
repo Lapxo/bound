@@ -8,18 +8,18 @@
     },
     {
       "role": "yes",
-      "path": "samples/signing-port/file-1/TARGET.bound",
-      "digest": "sha256:2bb37c9ef367c011823b421d9f335ecdb8e3df6c4a14b80bc66fa3667e54518f"
+      "path": "samples/yes/signing-port.json",
+      "digest": "sha256:2bbf951b29ba00e715443c1ea24884a46296ee2a5bf7fd03f6fd681ea0eacb69"
     },
     {
       "role": "no",
-      "path": "samples/signing-port/inputs/004-invalid.proposal",
-      "digest": "sha256:ff12e46709bb66c0d73db3230bb3cc93fad7a280097f0125bfb8271b351acc2f"
+      "path": "samples/no/signing-port.json",
+      "digest": "sha256:bb45e5385c5efad77607edfcd79af5faa5cb064d30b2d27a0b9c79de807bca15"
     },
     {
       "role": "vector",
       "path": "vectors/signing-port.json",
-      "digest": "sha256:32eb52e0426ec47cd24d189158a3e151d259bbcd16bfdbed4f0582b216b202d1"
+      "digest": "sha256:53cc8abaccbcb37385fdc1acd1d251c4d3d77ca44df4f8436ee498acf40d4fde"
     }
   ]
 }

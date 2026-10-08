@@ -4,22 +4,22 @@
     {
       "role": "contract",
       "path": "docs/contracts/typed-object.md",
-      "digest": "sha256:d6ee08ec2b339c9d9ca969452b8ed160b72c7aeb3904fd29b7259c0eecc008b3"
+      "digest": "sha256:a8efed013faafc6f01e02ba760c17fc0d2dbe0e3448c1e244730c7d183501c05"
     },
     {
       "role": "yes",
-      "path": "samples/typed-object-1/TARGET.bound",
-      "digest": "sha256:20ffddf05e09a2d4e9c71c344de687ded6bbe59534a842b2a1ef24e4a7cadabe"
+      "path": "samples/yes/typed-object.json",
+      "digest": "sha256:b54bac71e89800f09cb55331a4cebde2e280d5240b062a317ffabbc02edcfa7d"
     },
     {
       "role": "vector",
       "path": "vectors/typed-object.json",
-      "digest": "sha256:df8a4e35a2ac0dc5679ce1416860931c98d8ed565b27fb28fb676a81f06bbe92"
+      "digest": "sha256:32f8b095f4a240c6a3c640797a9f0fbc05506fa623e7cb61f0d9fd8c8bd9124a"
     },
     {
       "role": "no",
-      "path": "samples/typed-object-7/TARGET.bound",
-      "digest": "sha256:8fbf56bc1bb119fcbe05cc158e55317092867b1a64c4acc10a91084d7143a898"
+      "path": "samples/no/typed-object.json",
+      "digest": "sha256:03ac2a40efbea4232025e99d37f06bca03292fcfe3c41c8c27dd5647080951a0"
     }
   ]
 }

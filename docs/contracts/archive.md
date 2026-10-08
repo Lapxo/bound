@@ -1,7 +1,11 @@
 # Exact release artifact
 
-An archive digest names its exact bytes. It is distinct from a Topos standing identity. The pipeline produces one archive for the registry and forge; it does not pack a second file and assume equality.
+Packing is a host operation. An archive digest names those archive bytes; it is not the identity of a Topos standing. The release pipeline makes one archive and transfers that same file to its destinations. Repeating a pack operation is not a proof of identical bytes.
 
-The public conformance vector uses only the installed instrument. Two unrelated formed places resolve their named standing and artifacts, then print their cells. A changed artifact with the retained digest refuses before execution. This proves the host materialization boundary; it does not claim that file presence is an installed-release receipt.
+The archive conformance vector declares the host package command, digest algorithm, execution deadline, response bound and its sample packages. It packs each sample once, hashes the resulting bytes, verifies both destination copies, installs offline without package scripts and compares every listed installed member with the input bytes. It executes the installed entry and checks its declared output. Changed archive bytes refuse by digest before they can be treated as the named artifact. The negative control fails when that verification is removed.
 
-Acceptance of the candidate additionally requires its exact member list, archive hash, clean installation and product captures from that archive, without source conditions or a checkout ledger. Changed implementation bytes require a new candidate capture. Packing, installing and publishing are host acts; the vector does not authenticate to a registry or publish. The owner approves that exact archive after verification.
+The samples use independent packages with different contents. Their outputs and member digests are captured by the executable vector; their file presence alone is not evidence. The selected publication reader measures this quartet through the existing process contract, and native receipts supply its member status to the plan.
+
+This is conformance of the packaging recipe. Acceptance of a particular Bound candidate additionally requires the exact archive audit, clean installation and product CLI captures for that archive. A previous archive's captures cannot certify changed implementation bytes. The final candidate must be rebuilt after admitted metadata changes, with every changed member accounted for. The product witness uses the installed reader directly, without a checkout ledger or source conditions.
+
+Rendering and installation are different boundaries. README, the manifest and the standard MIT text remain native renders. Publication to a registry or forge is a later owner action; this vector does not publish, authenticate to an account, create a tag or infer an external release from a local file.

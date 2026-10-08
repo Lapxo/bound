@@ -1,5 +1,0 @@
-import { region, within } from './820abaed1d422fdb89c759ca31f3732b6bea6ff7bd1a5b20f2114c1626979880';
-/** Segment boundary, not string prefix — `acme/user` must not bind `acme/userdata`. */
-export function under(prefix, scope) {
-    return prefix !== '' && within(region(scope, './'), region(prefix, './'));
-}

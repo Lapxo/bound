@@ -8,18 +8,18 @@
     },
     {
       "role": "yes",
-      "path": "samples/walk-publication/left-1/TARGET.bound",
-      "digest": "sha256:d7e7e89d222c81ec003ceccd095b3f5aaa30a3b19b2d2972c5c89554f3549e03"
+      "path": "samples/yes/walk.json",
+      "digest": "sha256:d316e1ca1d07ee2a70038d1ee0df1d6e0d318f71d6364fd13377d2b9ee26a0ac"
     },
     {
       "role": "vector",
       "path": "vectors/walk-publication.json",
-      "digest": "sha256:b89667bfd666d39a2432ba236144c98ff30c885adec6525fa658d08fc281ede9"
+      "digest": "sha256:d31a059a2eb8b137ec026d0c5b7b2aea5de809f349526c6bc4a916abe14a0113"
     },
     {
       "role": "no",
-      "path": "samples/walk-publication/inputs/049-undeclared-context-lineage.bound",
-      "digest": "sha256:205584e98246abb9f6e273c26ee83e145640b5d3f64ec2f513c847c909d66e4f"
+      "path": "samples/no/walk.json",
+      "digest": "sha256:9e1b17f0e99285b1d89cf1967158422836ebdcd6542b2eea3cee074c5c26c233"
     }
   ]
 }

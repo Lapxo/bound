@@ -4,22 +4,22 @@
     {
       "role": "contract",
       "path": "docs/contracts/archive.md",
-      "digest": "sha256:55540a934b3fe26d87d65e608754e50554424ea1e6d79bc7138bdeb4612c97c4"
+      "digest": "sha256:eedbd0ca544377080763c035053e532bfc46ddd496c3794e0cac2e0d6286e3a9"
     },
     {
       "role": "yes",
-      "path": "samples/artifacts/TARGET.bound",
-      "digest": "sha256:6d4ab83e68cd8482f54877003d445909154b177632f33eb97bebb642561eddba"
+      "path": "samples/yes/archive-conformance.json",
+      "digest": "sha256:1e2a1ce055edb12da86e1ddbbf78e1f9cb910ad6fe14f57fc3e360751e604a4c"
     },
     {
       "role": "vector",
       "path": "vectors/archive-conformance.json",
-      "digest": "sha256:2b7ed94d33ef033a2e883665657202220638e17f868db67114fde6a2c84e9011"
+      "digest": "sha256:c9e9566f19db9feb6a8a7619315bdb19d66f2cd7bba90f911fc047b89f4ebd8f"
     },
     {
       "role": "no",
-      "path": "samples/artifacts-changed/TARGET.bound",
-      "digest": "sha256:6d4ab83e68cd8482f54877003d445909154b177632f33eb97bebb642561eddba"
+      "path": "samples/no/archive-conformance.json",
+      "digest": "sha256:e14e5007e6b097be39964a749a09fb7143f652129869a8902743eee3ec9b89ea"
     }
   ]
 }
