@@ -4,22 +4,22 @@
     {
       "role": "contract",
       "path": "docs/contracts/evidence-view.md",
-      "digest": "sha256:af2f28c0b8e68b9000a110760b8cb9cfd331d725c0f363e88847e24c958291f7"
+      "digest": "sha256:c601e3b472960cfcf46bc4b6dd356716ddd490969686068d894ab246a92a5e30"
     },
     {
       "role": "yes",
-      "path": "samples/yes/native-views.json",
-      "digest": "sha256:888de96de74e6944d18d425245093845c54dd8374adc6c56f589c3e40da9f2e3"
+      "path": "samples/native-views/place-1/TARGET.bound",
+      "digest": "sha256:460ed79a0dac60f551c1635eb61f58c10e7e50a51e64b4bc618462bd3eed2eac"
     },
     {
       "role": "no",
-      "path": "samples/no/native-views.json",
-      "digest": "sha256:7750551a70599cbecb37ee5659797ba8ff1dd84a11e17cbbe0c77ff62aecb3a5"
+      "path": "samples/native-views/inputs/037-altered.bound",
+      "digest": "sha256:3b059746039c8b73e34bb4bc238f8a4346150b928ad4e64cc7478150b371737b"
     },
     {
       "role": "vector",
       "path": "vectors/native-views.json",
-      "digest": "sha256:1f17bde653377103acf8888717b0ad5c2b83b79860a4833be93270532b76c0dc"
+      "digest": "sha256:6d0b20d0fd54c7468f31cdd23719dc24b22a4d6dbc6468a5e1d82eeebc59e9c0"
     }
   ]
 }

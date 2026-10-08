@@ -6,6 +6,7 @@ import {cellsWithReceipts} from '../host/cell-receipts.ts';
 import {renderCells} from '@lapxo/topos/cells-view';
 import {releasePolicyLines} from '../fold/release-policy.ts';
 import {admittedObjects} from '../host/objects.ts';
+import {historyInput} from '../host/history-input.ts';
 import {objectFold} from '../fold/object.ts';
 import {OBJECT_VIEW} from '@lapxo/topos/wire';
 import {toposStanding} from '@lapxo/topos/standing';
@@ -229,7 +230,7 @@ async function view(root: string, under: string | undefined, asked: string, told
   const views = viewsOf(fold.standing);
   const cellsView = [...views.entries()].find(([, one]) => !one.shape && one.regions.some((region) => region.name === 'cells'));
   if (cellsView && name === cellsView[0]) {
-    const history=signedOwnerLines(storeOf(root));
+    const history=historyInput(root,fold.standing,name,signedOwnerLines(storeOf(root)));
     const {objectHistory}=await import('@lapxo/topos/wire');
     const parsed=objectHistory(history);
     if(parsed.kind!=='fact')throw Error(`REFUSE·wire ${parsed.why}`);
@@ -387,6 +388,21 @@ function foldFile(at: string): number {
 }
 
 function foldVerb(root: string, rest: readonly string[]): number | Promise<number> {
+  const targets = positionalsOf(rest);
+  const query = valueOf(rest, FLAGS.as)?.split('@')[0];
+  if (query === undefined && targets.length > 1)
+    throw Error(`REFUSE·target ${targets.join(' ')} names more than one fold input`);
+  // A question's coordinate is not an input file. Every other positional must
+  // actually name an input; dropping one silently would fold a different place.
+  for (const target of targets) {
+    if (query === 'why' || query === NAMED_VIEWS.because) continue;
+    if (!existsSync(resolve(target))) throw Error(`REFUSE·target ${target} does not name an available place or .bound file`);
+    const stat = lstatSync(resolve(target));
+    if (!stat.isDirectory() && (!stat.isFile() || !target.endsWith(EXTENSION)))
+      throw Error(`REFUSE·target ${target} is not a place or .bound file`);
+    if (stat.isDirectory() && !existsSync(join(resolve(target), LOCK)))
+      throw Error(`REFUSE·target ${target} holds no ${LOCK}`);
+  }
   const files = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory() && one.endsWith(EXTENSION));
   const places = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
   if (files.length === 1 && !places.length && valueOf(rest, FLAGS.as) === undefined) {
@@ -395,6 +411,10 @@ function foldVerb(root: string, rest: readonly string[]): number | Promise<numbe
     return foldAt(dirname(at), undefined, rest);
   }
   const under = places[0];
+  if (under && !files.length) {
+    const restAtPlace = rest.filter(one => one !== under);
+    return foldAt(resolve(under), undefined, restAtPlace);
+  }
   // A prospective lot is data, not the place whose authority admits it.
   const tree = files.length ? root : resolve('.');
   const place = under ? relative(tree, resolve(under)).split(sep).join('/') : '';
@@ -431,15 +451,21 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
   if(as===OBJECT_VIEW){const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));const cells=objectFold(held.records,held.context);for(const c of cells)process.stdout.write('CELL '+JSON.stringify(c)+'\n');process.stdout.write(`FACT     object fold ${cells.length} cells\n`);return EXIT.closed;}
   const key = valueOf(argv, FLAGS.key);
   if (as === undefined) {
+    const published=releaseOf(storeOf(root));
+    const declared=published?[...viewsOf(published).values()]:[];
+    const inputView=declared.find(one=>!one.shape&&one.regions.some(region=>region.name==='cells')&&published!.some(line=>fieldOf(line,'scope')===`view/${one.name}`&&fieldOf(line,'needs')!==''));
+    if(inputView&&declared.every(one=>!one.shape)&&!receiptCheck)
+      return view(root,under,inputView.name);
     const exit=await pass(root, entryOf(root), under, argv.includes(FLAGS.check));
     if (receiptCheck) return exit;
     if(exit!==0)return exit;
-    const history=signedOwnerLines(storeOf(root));
+    const local=signedOwnerLines(storeOf(root));
+    const signedCells=[...viewsOf(lockStanding(storeOf(root))).values()].find(one=>!one.shape&&one.regions.some(region=>region.name==='cells'));
+    const history=signedCells?historyInput(root,lockStanding(storeOf(root)),signedCells.name,local):local;
     const {objectHistory}=await import('@lapxo/topos/wire');
     const parsed=objectHistory(history);
     if(parsed.kind!=='fact')throw Error(`REFUSE·wire ${parsed.why}`);
     if(parsed.value.objects.length){
-      const signedCells=[...viewsOf(history).values()].find(one=>!one.shape&&one.regions.some(region=>region.name==='cells'));
       if(!signedCells)throw Error('REFUSE·view object cells require a signed cells view');
       return view(root,under,signedCells.name, [], undefined, undefined, false);
     }
@@ -482,13 +508,12 @@ function main(argv: readonly string[]): number | Promise<number> {
   const places = positionalsOf(run === undefined ? argv : argv.slice(1)).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
   if (run !== undefined) {
     const root=resolve(places[0] ?? '.');
-    return withContentStore(storeOf(root),()=>run(root,argv.slice(1),argv));
+    return withContentStore(storeOf(root),()=>run(root,argv.slice(1),argv),()=>standingOf(root).standing);
   }
   const under = argv[0] ?? '';
-  if (under && !under.startsWith('-') && places.includes(under)) {
+  if (under && !under.startsWith('-')) {
     const root = resolve('.');
-    const place = relative(root, resolve(under)).split(sep).join('/');
-    return foldAt(root, place ? `${place}/` : undefined, argv);
+    return foldVerb(root, argv);
   }
   process.stderr.write(`${selfName()}: ${helpLines().join(' · ')}\n`);
   return EXIT.usage;

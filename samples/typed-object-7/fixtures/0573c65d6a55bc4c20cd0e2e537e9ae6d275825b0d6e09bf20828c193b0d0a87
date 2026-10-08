@@ -1,0 +1,41 @@
+const STATES = ['REQUIRED', 'FREE', 'FORBIDDEN', 'CONFLICT'];
+export const DANGEROUS = STATES.filter((s) => s !== 'CONFLICT').map((s) => [s, 'CONFLICT']);
+const zero = () => {
+    const m = {};
+    for (const a of STATES) {
+        m[a] = {};
+        for (const b of STATES)
+            m[a][b] = 0;
+    }
+    return m;
+};
+export function transitions(before, after, width) {
+    const at = (q, bit) => {
+        for (const s of STATES)
+            if (q[s].has(bit))
+                return s;
+        return null;
+    };
+    const m = zero();
+    for (let bit = 0; bit < width; bit++) {
+        const a = at(before, bit);
+        const b = at(after, bit);
+        if (a === null || b === null)
+            continue;
+        m[a][b] += 1;
+    }
+    return m;
+}
+export function dangerous(m) {
+    return DANGEROUS
+        .map(([from, to]) => ({ from, to, n: m[from][to] }))
+        .filter((x) => x.n > 0);
+}
+export function moved(m) {
+    let n = 0;
+    for (const a of STATES)
+        for (const b of STATES)
+            if (a !== b)
+                n += m[a][b];
+    return n;
+}

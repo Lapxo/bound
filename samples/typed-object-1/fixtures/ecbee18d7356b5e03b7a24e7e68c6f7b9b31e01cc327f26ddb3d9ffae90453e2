@@ -1,0 +1,2 @@
+/** How a claim knows what it says is the algebra's order of evidence; the wire speaks it and does not keep a copy. */
+export { weakest } from './0a5e879b024f10d8b895c9e574caa2141a59dac07eed8a384fb6e903ff069828';

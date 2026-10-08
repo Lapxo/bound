@@ -1,0 +1,16 @@
+import { origins } from "./f5a1c7b4ee0994930d721f00e2a2444be3fd6ee35287c50a5c916b1165caa6c5";
+import { resolution } from "./820abaed1d422fdb89c759ca31f3732b6bea6ff7bd1a5b20f2114c1626979880";
+import { premium } from "./3c8e7a61164f5dd2416112baa791ed401922afeafe06239c597113bb2b5f78ff";
+export function frontier(c, value, asked) {
+    return asked.filter((one) => origins(one.at) === 0).map((one) => {
+        const cheapest = [...one.closers].sort((a, b) => (a.cost === b.cost ? (a.by < b.by ? -1 : 1) : a.cost - b.cost))[0];
+        return {
+            at: one.at.at.join('/'),
+            resolution: resolution(one.at),
+            premium: premium(c, value, c.rank(one.bound.floor), c.rank(one.bound.ceiling)),
+            dependents: one.dependents.length,
+            closer: cheapest?.by ?? null,
+            cost: cheapest?.cost ?? null,
+        };
+    });
+}

@@ -1,0 +1,63 @@
+import { canonical, parse, signedBytes } from "./95104b64ec90be292aef9ca63581abb213a0ac35c71078ba4da246d13dd5216c";
+import { parseSignature } from "./103d41dd0dc8fc9386fac861b6f0392b05183945b4a9c6e9f46dffb976c20d9c";
+import { boundOf } from "./5b883395c0dc4ecde724a91d6a263c68d180a8e53fac6319daf51087af214d62";
+/** Proposed transport vector, not an admitted object/configuration record. */
+export function requestBytes(lot) {
+    if (!lot.bytes.length)
+        throw new Error('REFUSE·signer empty lot');
+    for (const bytes of lot.bytes) {
+        const got = parse(bytes);
+        if (got.kind !== 'fact' || got.value.fields['sig'] !== undefined
+            || got.value.fields['by'] !== lot.keyId || signedBytes(got.value.fields) !== bytes) {
+            throw new Error('REFUSE·signer noncanonical payload');
+        }
+    }
+    return lot.bytes.join('\n') + '\n';
+}
+export function responseBytes(records) {
+    return records.map(record => canonical({ by: record.keyId, sig: record.signature })).join('\n') + '\n';
+}
+/** The existing lexical envelope carries exactly by/sig, in lot order. No authority is minted. */
+export function responseOf(text, lot) {
+    if (!text.endsWith('\n'))
+        throw new Error('REFUSE·signer truncated response');
+    const rows = text.slice(0, -1).split('\n');
+    if (rows.length !== lot.bytes.length)
+        throw new Error('REFUSE·signer response count');
+    return rows.map(row => {
+        const got = parse(row);
+        if (got.kind !== 'fact')
+            throw new Error('REFUSE·signer response grammar');
+        const fields = got.value.fields;
+        const signature = parseSignature(fields['sig'] ?? '');
+        if (Object.keys(fields).length !== 2 || fields['by'] !== lot.keyId || !signature
+            || signature.algorithm !== lot.algorithm || canonical(fields) !== row) {
+            throw new Error('REFUSE·signer response identity or signature form');
+        }
+        return { keyId: fields['by'], signature: fields['sig'] };
+    });
+}
+/** Caller supplies live admitted configuration; host resolves the logical name separately. */
+export function signerSelection(lines, keyId) {
+    const value = (scope, measure) => {
+        const rows = lines.filter(f => f['scope'] === scope && f['measure'] === measure
+            && f['role'] === 'writes' && f['value'] !== 'withdraw');
+        const values = [...new Set(rows.map(f => f['value']))];
+        if (values.length !== 1 || !values[0])
+            throw new Error(`REFUSE·signer ${keyId} missing or conflicting ${scope}`);
+        return values[0];
+    };
+    const exact = (scope, measure) => {
+        if (lines.some(f => f['scope'] === scope && f['measure'] === measure
+            && f['role'] === 'writes' && f['value'] !== 'withdraw' && f['form'] !== 'interval')) {
+            throw new Error(`REFUSE·signer ${keyId} invalid ${scope}`);
+        }
+        const bound = boundOf('interval', value(scope, measure));
+        if (!bound || bound.kind !== 'interval' || bound.lo === null || bound.lo !== bound.hi || !Number.isSafeInteger(bound.lo) || bound.lo <= 0) {
+            throw new Error(`REFUSE·signer ${keyId} invalid ${scope}`);
+        }
+        return bound.lo;
+    };
+    return { name: value(`keys/${keyId}`, 'signer'), timeoutMs: exact('signer/timeout', 'milliseconds'),
+        responseBytes: exact('signer/response-bytes', 'bytes') };
+}

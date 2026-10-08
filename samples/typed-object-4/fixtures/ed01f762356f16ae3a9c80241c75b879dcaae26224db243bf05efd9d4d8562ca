@@ -1,0 +1,95 @@
+import { UnitError } from "./0cc476498db21b2aab91e90cc0172bb34373cbe2876a21a21efdc8ba088112b0";
+import { WIDTH } from "./f3339de56e4216105532771167d9b1f2b6488b554deb4c57722ec0afa2a3a994";
+export function chunkCount(n) {
+    if (n <= 0)
+        return 0;
+    return Math.ceil(n / WIDTH);
+}
+export class WideMask {
+    words;
+    width;
+    constructor(width, words) {
+        this.width = width;
+        this.words = words ?? new Uint32Array(chunkCount(width));
+    }
+    static fromTokens(tokens, allowed) {
+        const m = new WideMask(tokens.length);
+        tokens.forEach((t, i) => {
+            if (allowed.has(t))
+                m.set(i);
+        });
+        return m;
+    }
+    set(bit) {
+        if (bit < 0 || bit >= this.width) {
+            throw new UnitError('MALFORMED', `bit ${bit} is outside a mask of width ${this.width}`, {
+                bit,
+                width: this.width,
+            });
+        }
+        this.words[bit >> 5] |= 1 << (bit & 31);
+    }
+    has(bit) {
+        if (bit < 0 || bit >= this.width)
+            return false;
+        return (this.words[bit >> 5] & (1 << (bit & 31))) !== 0;
+    }
+    and(other) {
+        const w = Math.max(this.width, other.width);
+        const out = new WideMask(w);
+        const n = Math.min(this.words.length, other.words.length);
+        for (let i = 0; i < n; i++)
+            out.words[i] = this.words[i] & other.words[i];
+        return out;
+    }
+    or(other) {
+        const w = Math.max(this.width, other.width);
+        const out = new WideMask(w);
+        for (let i = 0; i < out.words.length; i++) {
+            out.words[i] = (this.words[i] ?? 0) | (other.words[i] ?? 0);
+        }
+        return out;
+    }
+    difference(other) {
+        const w = Math.max(this.width, other.width);
+        const out = new WideMask(w);
+        for (let i = 0; i < out.words.length; i++) {
+            out.words[i] = (this.words[i] ?? 0) & ~(other.words[i] ?? 0);
+        }
+        const spare = w % 32;
+        if (spare !== 0 && out.words.length > 0) {
+            out.words[out.words.length - 1] &= (1 << spare) - 1;
+        }
+        return out;
+    }
+    subsetOf(other) {
+        const n = Math.max(this.words.length, other.words.length);
+        for (let i = 0; i < n; i++) {
+            const a = this.words[i] ?? 0;
+            const b = other.words[i] ?? 0;
+            if ((a & ~b) !== 0)
+                return false;
+        }
+        return true;
+    }
+    size() {
+        let n = 0;
+        for (let i = 0; i < this.width; i++)
+            if (this.has(i))
+                n++;
+        return n;
+    }
+    members(tokens) {
+        return tokens.filter((_, i) => this.has(i));
+    }
+    static filled(width) {
+        const m = new WideMask(width);
+        if (width <= 0)
+            return m;
+        m.words.fill(0xffffffff);
+        const spare = width % 32;
+        if (spare !== 0)
+            m.words[m.words.length - 1] = (1 << spare) - 1;
+        return m;
+    }
+}

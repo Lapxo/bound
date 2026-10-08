@@ -80,8 +80,11 @@ export function releaseOf(store: string): readonly string[] | undefined {
 }
 
 function read(store: string, told: readonly string[] = []): Keys {
-  const said = [...ledgerKeyLines(store), ...releaseOf(store) ?? [], ...told]
-    .filter((line) => /\bsig=/.test(line) && /(?:^|\s)scope=keys\/[^/\s]+\s/.test(line));
+  const delivered = [...ledgerKeyLines(store), ...told].filter(line => /\bsig=/.test(line));
+  // Public locks declare local journal classes without delivery envelopes.
+  // This names journals; authority still verifies the admitted public keys.
+  const said = [...delivered, ...releaseOf(store) ?? []]
+    .filter((line) => /(?:^|\s)scope=keys\/[^/\s]+\s/.test(line));
   const standing = foldClaims(said).standing.filter((line) => fieldOf(line, 'value') !== 'withdraw')
     .sort((a, b) => (Number(fieldOf(a, 'epoch')) || 0) - (Number(fieldOf(b, 'epoch')) || 0));
   const idOf = (line: string): string => fieldOf(line, 'scope').slice('keys/'.length);

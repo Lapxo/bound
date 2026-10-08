@@ -1,0 +1,55 @@
+import { unitStream } from "./8dfd76ebab3d7bedec1e686cb371cfc96b4195c04e7f689df21cad5bd3d5726c";
+export function isMonotone(c, value) {
+    for (let a = 0; a < c.levels.length; a++) {
+        for (let b = 0; b < c.levels.length; b++) {
+            if (c.leq(a, b) && value(a) > value(b) + 1e-12)
+                return false;
+        }
+    }
+    return true;
+}
+export function vacuityOf(predicate, structure, c, test, opts = {}) {
+    const samples = opts.samples ?? 2000;
+    const spread = opts.spread ?? 20;
+    const next = unitStream(1);
+    const n = c.levels.length;
+    let yes = 0;
+    let no = 0;
+    let sawYes;
+    let sawNo;
+    let read = false;
+    for (let i = 0; i < samples; i++) {
+        const v = [];
+        for (let k = 0; k < n; k++)
+            v.push(Math.round(next() * spread));
+        if (opts.monotone) {
+            v.sort((a, b) => a - b);
+            if (!isMonotone(c, (x) => v[x]))
+                continue;
+        }
+        const probe = (x) => {
+            read = true;
+            return v[x];
+        };
+        if (test(c, probe)) {
+            yes += 1;
+            if (!sawYes)
+                sawYes = [...v];
+        }
+        else {
+            no += 1;
+            if (!sawNo)
+                sawNo = [...v];
+        }
+    }
+    const both = yes > 0 && no > 0;
+    return {
+        predicate,
+        structure,
+        samples: yes + no,
+        yes,
+        no,
+        verdict: both ? 'DISCRIMINATES' : read ? 'CONSTANT' : 'INDEPENDENT',
+        ...(both ? { witnesses: { yes: sawYes, no: sawNo } } : {}),
+    };
+}

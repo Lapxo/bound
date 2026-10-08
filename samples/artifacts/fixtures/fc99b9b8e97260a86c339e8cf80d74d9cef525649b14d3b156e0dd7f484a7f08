@@ -1,0 +1,35 @@
+import { WideMask } from "./ed01f762356f16ae3a9c80241c75b879dcaae26224db243bf05efd9d4d8562ca";
+import { entails, fuse, permitAll, state } from "./e295db71d2fef138330904a6943ff8bfbed2cf86e43410a0536d6b068d404421";
+export function fromScale(c) {
+    const inhabited = (x) => state(c, x) !== 'CONFLICT';
+    return {
+        top: permitAll(c, ''),
+        bottom: { subject: '', floor: c.levels[c.topIx] ?? '', ceiling: c.levels[c.bottomIx] ?? '' },
+        leq: (a, b) => entails(c, a, b),
+        meet: (a, b) => fuse(c, [a, b]),
+        join: (a, b) => {
+            if (!inhabited(a))
+                return b;
+            if (!inhabited(b))
+                return a;
+            return {
+                subject: a.subject || b.subject,
+                floor: c.levels[c.lower(c.rank(a.floor), c.rank(b.floor))] ?? a.floor,
+                ceiling: c.levels[c.higher(c.rank(a.ceiling), c.rank(b.ceiling))] ?? a.ceiling,
+            };
+        },
+        show: (x) => `[${x.floor}, ${x.ceiling}]`,
+        inhabited,
+    };
+}
+export function subsets(tokens) {
+    return {
+        bottom: new WideMask(tokens.length),
+        top: WideMask.filled(tokens.length),
+        leq: (a, b) => a.subsetOf(b),
+        meet: (a, b) => a.and(b),
+        join: (a, b) => a.or(b),
+        show: (x) => x.members(tokens).join(','),
+        inhabited: (x) => x.size() > 0,
+    };
+}

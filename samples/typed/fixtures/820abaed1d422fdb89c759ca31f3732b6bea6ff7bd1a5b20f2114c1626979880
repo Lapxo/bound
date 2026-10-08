@@ -1,0 +1,79 @@
+export function coordinate(name, steps = '/') {
+    const at = name.split(new RegExp(`[${steps.replace(/[.*+?^${}()|[\]\\-]/g, '\\$&')}]`)).filter((s) => s !== '');
+    while (at[at.length - 1] === '*' || at[at.length - 1] === '**')
+        at.pop();
+    return at;
+}
+export function point(name, epoch = 0, seen = [], steps = '/') {
+    return { at: coordinate(name, steps), epoch, seen };
+}
+export function region(name, steps = '/') {
+    return { at: coordinate(name, steps) };
+}
+export function coarsen(place, steps) {
+    return { at: place.at.slice(0, Math.max(0, steps)), epoch: place.epoch, seen: place.seen };
+}
+export function passes(place, step) {
+    return step.startsWith('*') ? place.at.some((s) => s.endsWith(step.slice(1))) : place.at.includes(step);
+}
+export function resolution(place) {
+    return place.at.length;
+}
+export function within(inner, outer) {
+    const refines = (i, j) => j === outer.at.length
+        || (outer.at[j] === '**'
+            ? refines(i, j + 1) || (i < inner.at.length && refines(i + 1, j))
+            : i < inner.at.length && (outer.at[j] === '*' || outer.at[j] === inner.at[i]) && refines(i + 1, j + 1));
+    return refines(0, 0);
+}
+export function exclusive(mine, others) {
+    return mine.filter((one) => !others.some((other) => other.some((theirs) => resolution(theirs) === resolution(one) && within(one, theirs))));
+}
+export function contracts(regions, touched) {
+    return !regions.some((one) => touched.some((p) => within(p, one)));
+}
+export function key(regions) {
+    return [...new Set(regions.map((one) => one.at.join('/')))].sort().join('|');
+}
+const inside = (one, of) => one >= of.lo && one <= of.hi;
+export function foldRegion(places, where, f) {
+    const gathered = new Map();
+    for (const place of places) {
+        if (!within(place, where))
+            continue;
+        const at = place.at.join('/');
+        gathered.set(at, [...(gathered.get(at) ?? []), place]);
+    }
+    return [...gathered].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([at, met]) => ({ at, value: f(met) }));
+}
+export function covers(met, of) {
+    return met.every((place) => of.where.some((one) => within(place, one))
+        && inside(resolution(place), of.steps)
+        && inside(place.epoch, of.when));
+}
+export function outranks(met, named, order) {
+    const matched = named.filter(([step]) => met.some((place) => passes(place, step))).map(([, kind]) => kind);
+    return order.find((kind) => matched.includes(kind)) ?? null;
+}
+export function answers(met, where) {
+    return met.length > 0 && met.every((place) => where.some((one) => within(place, one)));
+}
+export function verified(met, green) {
+    return met.some((place) => green(place));
+}
+export function retracted(met, by) {
+    return met.filter((place) => by.some((one) => within(place, one)));
+}
+export function size(at, steps) {
+    return new Set(at.map((name) => {
+        const place = point(name);
+        return (steps === undefined ? place : coarsen(place, steps)).at.join('/');
+    })).size;
+}
+export function sufficientResolution(finest, verdict, same = Object.is) {
+    const whole = verdict(finest);
+    for (let steps = 1; steps < finest; steps += 1)
+        if (same(verdict(steps), whole))
+            return steps;
+    return finest;
+}

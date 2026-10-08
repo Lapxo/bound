@@ -7,16 +7,19 @@ import {replaceWhole,landShard,shardLines} from '../land/ledger.ts';
 import {fieldOf} from '../fold/claims.ts';
 import {readOnly} from './read-only.ts';
 
-type File={readonly place:string;readonly text:string};
+type File={readonly place:string;readonly text:string;readonly bytes?:Uint8Array};
+const fileBytes=(file:File):Buffer=>Buffer.from(file.bytes??Buffer.from(file.text));
+const byteEncoded=(file:File):boolean=>!fileBytes(file).equals(Buffer.from(file.text));
+const semanticInput=(file:File):string=>byteEncoded(file)?'base64:'+fileBytes(file).toString('base64'):file.text;
 type Plan={scope:string;inputs:readonly string[];needs:readonly string[];resolution:number;line:string};
 const fields=(line:string)=>{const got=parse(line);if(got.kind!=='fact')throw Error('REFUSE·input projection contains a non-wire line');return got.value.fields;};
-export const inputLines=(files:readonly File[]):readonly string[]=>files.map(file=>canonical({scope:file.place,form:'alphabet',measure:'text',role:'writes',value:'lock',shape:file.place,about:file.text,by:'host',at:'policy:handed-input'}));
+export const inputLines=(files:readonly File[]):readonly string[]=>files.map(file=>canonical({scope:file.place,form:'alphabet',measure:byteEncoded(file)?'bytes':'text',role:'writes',value:byteEncoded(file)?'base64':'lock',shape:file.place,about:byteEncoded(file)?fileBytes(file).toString('base64'):file.text,by:'host',at:'policy:handed-input'}));
 /** The selected world owns input projection and reading. The host only verifies closures and keeps native count/bytes receipts. */
 export function readingClosures(options:{root:string;store:string;reader:string;speaker:string;digest:(text:string)=>string;capsule:Capsule;region:string;projection:string;allowsEmpty?:boolean;files:readonly File[];emit?:(line:string)=>void}):{lines:readonly string[];read:number;opened:number;executed:number}{
  const {root,store,reader,speaker,digest:hash,capsule,region,projection,files}=options,emit=options.emit??(()=>{});
- const algorithm=hash('').split(':')[0]!,handed=new Map(files.map(file=>[file.place,file.text]));
+ const algorithm=hash('').split(':')[0]!,handed=new Map(files.map(file=>[file.place,file]));
  if(handed.size!==files.length)throw Error('REFUSE·input projection has duplicate handed coordinates');
- const verify=()=>{for(const file of files)if(!readFileSync(join(root,file.place)).equals(Buffer.from(file.text)))throw Error('REFUSE·input changed '+file.place);};
+ const verify=()=>{for(const file of files)if(!readFileSync(join(root,file.place)).equals(fileBytes(file)))throw Error('REFUSE·input changed '+file.place);};
  verify();
  const projected=capsule.ask([{protocol:PROTOCOL,verb:'render',rootScope:'',region:projection,at:1,reads:['**'],lines:inputLines(files),files:[]}])[0];
  if(projected?.kind!=='fact'||!Array.isArray(projected.lines))throw Error('REFUSE·input projection '+(projected?.why??'no lines'));
@@ -39,7 +42,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
  const load=(digest:string)=>{if(!digest.startsWith(algorithm+':')||! /^[a-f0-9]+$/.test(digest.split(':')[1]??''))return;const path=carried(digest);if(!existsSync(path))return;const text=readFileSync(path,'utf8');return hash(text)===digest?text:undefined;};
  let read=0,opened=0,executed=0;
  for(const plan of ordered){actCosts.measure(()=>{
-  const closure=[plan.line,canonical({scope:'implementation',role:'writes',form:'alphabet',measure:'digest',value:identity,by:'host',at:'policy:input-identity'}),...plan.inputs.map(input=>canonical({scope:input,role:'writes',form:'alphabet',measure:'digest',value:hash(handed.get(input)!),by:'host',at:'policy:input-identity'})),...plan.needs.map(need=>canonical({scope:need,role:'writes',form:'alphabet',measure:'digest',value:results.get(need)!.digest,by:'host',at:'policy:input-identity'}))].sort(byBytes).join('\n')+'\n';
+  const closure=[plan.line,canonical({scope:'implementation',role:'writes',form:'alphabet',measure:'digest',value:identity,by:'host',at:'policy:input-identity'}),...plan.inputs.map(input=>canonical({scope:input,role:'writes',form:'alphabet',measure:'digest',value:hash(semanticInput(handed.get(input)!)),...(byteEncoded(handed.get(input)!)?{about:'input:base64'}:{}),by:'host',at:'policy:input-identity'})),...plan.needs.map(need=>canonical({scope:need,role:'writes',form:'alphabet',measure:'digest',value:results.get(need)!.digest,by:'host',at:'policy:input-identity'}))].sort(byBytes).join('\n')+'\n';
   const input=hash(closure),scope='receipts/readings/'+hash(plan.scope).split(':')[1]+'/'+input.split(':')[1],matching=prior.filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='bytes'&&fieldOf(line,'value')===input).at(-1);
   const count=matching&&prior.filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='count'&&fieldOf(line,'by')===by).at(-1);
   const heldOutput=count&&load(fieldOf(count,'at').replace(/^place:/,''));
@@ -50,7 +53,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
   else {
    if(readOnly())throw Error('REFUSE·preview reading closure is unpaid '+plan.scope);
    const started=process.hrtime.bigint();
-   const dependencies=plan.needs.flatMap(need=>results.get(need)!.lines),answer=capsule.ask([{protocol:PROTOCOL,verb:'read',rootScope:plan.scope,name:plan.scope,region,at:plan.resolution,reads:['**'],lines:[...inputLines(plan.inputs.map(place=>({place,text:handed.get(place)!}))),...dependencies],files:[]}])[0];
+   const dependencies=plan.needs.flatMap(need=>results.get(need)!.lines),answer=capsule.ask([{protocol:PROTOCOL,verb:'read',rootScope:plan.scope,name:plan.scope,region,at:plan.resolution,reads:['**'],lines:[...inputLines(plan.inputs.map(place=>handed.get(place)!)),...dependencies],files:[]}])[0];
    if(answer?.kind!=='fact'||!Array.isArray(answer.claims))throw Error('REFUSE·reading '+plan.scope+' · '+(answer?.why??'no claims'));
    lines=answer.claims.map((unknown:any)=>{if(typeof unknown?.scope!=='string'||typeof unknown?.measure!=='string'||typeof unknown?.role!=='string'||!unknown.bound||!['interval','enumerated'].includes(unknown.bound.kind))throw Error('REFUSE·reading malformed claim '+plan.scope);const span=unknown.bound;const text=canonical({scope:unknown.scope,measure:unknown.measure,role:unknown.role,form:span.kind==='interval'?'interval':'alphabet',value:span.kind==='interval'?`${span.lo}..${span.hi}`:Array.isArray(span.values)?span.values.join('|'):'',by,at:'place:'+input});fields(text);return text;});
    if(!lines.length&&!options.allowsEmpty)throw Error('REFUSE·reading empty response is not admitted '+plan.scope);

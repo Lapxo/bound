@@ -1,0 +1,1 @@
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=digest role=writes scope=uses/alternate value=sha256:cc97880fa0c6081a41a849d5a07f36175d88337d0ac9c467eec7d4559b956ef7

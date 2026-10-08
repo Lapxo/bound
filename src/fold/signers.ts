@@ -3,7 +3,7 @@ import { authorityOf, isKeyClaim, parse, signersOf } from '@lapxo/topos/wire';
 import type { Published, Signer, SignerVerdict } from '@lapxo/topos/wire';
 import { verifiesFields } from '../land/sign.ts';
 import { fieldOf, selfName } from './claims.ts';
-import { keyFor, lockStanding } from './keys.ts';
+import { keyFor, lockStanding, releaseOf } from './keys.ts';
 import { storeRoot } from '../host/ports/store.ts';
 import { storeOf } from '../land/ledger.ts';
 import { observeText } from '../observe/files.ts';
@@ -62,6 +62,11 @@ export function releaseSigner(lines: readonly string[]): Signer {
 }
 
 export function rootSigner(root: string): { id: string; keyClass: 'authorize'; publicKey: string; coverage: string[]; depth: { lo: number; hi: number }; admittedBy: string[] } {
+  const published = releaseOf(storeOf(root));
+  if (published) {
+    const signer = releaseSigner(published);
+    return {id:signer.id,keyClass:'authorize',publicKey:signer.publicKey,coverage:[...signer.coverage],depth:{lo:1,hi:16},admittedBy:[]};
+  }
   const id = keyFor(storeOf(root), 'authorize');
   return { id, keyClass: 'authorize', publicKey: publicKeyOf(root, id) ?? '', coverage: ['*'], depth: { lo: 1, hi: 16 }, admittedBy: [] };
 }

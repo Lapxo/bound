@@ -1,0 +1,6 @@
+cff-version: 1.2.0
+message: "Cite route-notes."
+type: software
+title: "route-notes"
+version: "3.2.1"
+license: "MIT"

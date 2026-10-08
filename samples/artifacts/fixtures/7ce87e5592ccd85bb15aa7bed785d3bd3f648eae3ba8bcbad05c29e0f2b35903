@@ -1,0 +1,11 @@
+import { continuousForm } from './0a5e879b024f10d8b895c9e574caa2141a59dac07eed8a384fb6e903ff069828';
+import { bandOf, bandText, numberAt } from "./fb458d5e2009c772f9af99ab71f38ea363fb95e93dc44187f30357dfa777dd3d";
+const span = (params) => ({ lo: numberAt('phase', params, 'lo'), hi: numberAt('phase', params, 'hi') });
+export const phaseForm = {
+    id: 'phase',
+    lattice: (params) => continuousForm.lattice(span(params)),
+    parse: (params, text) => bandOf('phase', span(params), text),
+    emit: (_params, value) => bandText(value),
+    show: (params, value) => continuousForm.lattice(span(params)).show(value),
+    points: (params, seed, n) => continuousForm.points(span(params), seed, n),
+};

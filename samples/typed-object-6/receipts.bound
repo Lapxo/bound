@@ -1,0 +1,9 @@
+bound-lock/1 at=place:sha256:0e667e85bc8c97d6858b444b7b86af2ccdea233e1ad4cf07bf33f4917c92a63d by=bound form=alphabet measure=digest role=writes scope=receipts value=sha256:e44f9ad38dfa3bab0043c07937d1c1c80e4e58fa1165f7012b04002cf2a0e2fe
+bound-lock/1 at=place:sha256:06ad0e39e34e6c6b3cf48d103d7d5b637b449b8bae89c949e7209c8e81d4ffb3 by=bound form=alphabet measure=bytes role=writes scope=receipts/cells/D value=sha256:06ad0e39e34e6c6b3cf48d103d7d5b637b449b8bae89c949e7209c8e81d4ffb3
+bound-lock/1 at=place:sha256:243789281935be918094ae0e376ddee05430077c762ea3a6af915669f8cce09c by=bound form=interval measure=count role=writes scope=receipts/cells/D value=1..1
+bound-lock/1 at=place:sha256:2d9addb30c9fb61b9d94d7e780784218dd77c5cfe228f3340d277847b520b4d0 by=bound form=alphabet measure=bytes role=writes scope=receipts/cells/C value=sha256:2d9addb30c9fb61b9d94d7e780784218dd77c5cfe228f3340d277847b520b4d0
+bound-lock/1 at=place:sha256:6b3d9ee8fa1ed42d33717982bdd9c5a82c5ff03e1bfd654c40f56f3577114fa3 by=bound form=interval measure=count role=writes scope=receipts/cells/G value=1..1
+bound-lock/1 at=place:sha256:7c83c3954ba9a355573f179fcd267598f46567ce80d249324c6832c6c74e0a38 by=bound form=interval measure=count role=writes scope=receipts/cells/C value=1..1
+bound-lock/1 at=place:sha256:87ad8e34d3622c1125a4eeb0610d3785a01ad3afdc7222f7e0c9422ed4022b33 by=bound form=interval measure=count role=writes scope=receipts/cells/B value=1..1
+bound-lock/1 at=place:sha256:9d664273454e5ce554288f74a09564b7f94a4a9d3355ded03287c72f7fade342 by=bound form=alphabet measure=bytes role=writes scope=receipts/cells/B value=sha256:9d664273454e5ce554288f74a09564b7f94a4a9d3355ded03287c72f7fade342
+bound-lock/1 at=place:sha256:c1a9a78d3db7821ef85021169fc5627ca41af7a04ea2210ab20de88795fc80e0 by=bound form=alphabet measure=bytes role=writes scope=receipts/cells/G value=sha256:c1a9a78d3db7821ef85021169fc5627ca41af7a04ea2210ab20de88795fc80e0

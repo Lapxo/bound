@@ -1,0 +1,6 @@
+cff-version: 1.2.0
+message: "Cite specimen-register."
+type: software
+title: "specimen-register"
+version: "1.4.2"
+license: "MIT"

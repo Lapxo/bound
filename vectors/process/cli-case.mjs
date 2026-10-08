@@ -12,7 +12,7 @@ try {
     writeFileSync(input, 'bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=fixture value=present\n');
     args = ['fold', input];
   } else if (mode === 'check') args = ['fold', '--check'];
-  else if (mode === 'usage') args = ['unsupported-verb'];
+  else if (mode === 'usage') args = [];
   else throw new Error('Undeclared CLI case');
   const result = spawnSync(process.execPath, [reader, ...args], { cwd: root, encoding: 'utf8', timeout: 15000 });
   if (result.error || result.signal || result.status === null) throw result.error ?? new Error(result.signal ?? 'No process status');

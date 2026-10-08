@@ -16,14 +16,13 @@ Use this flow to review a project change or check a dependency's declared contra
 
 For observations from independent origins, use the typed cells view. In the shipped interval example, B's travelling ceiling is `0..50` and its travelling floor is `40..*`. A witnessed local join widens B to `0..100` while C and G keep the travelling ceiling `0..50`. Observations `42..48` and `44..47` on C meet at `44..47`; the native view reads FREE. Withdrawing one exact claim leaves one origin and reads REQUIRED.
 
-Run the executable example with the installed CLI:
+After cloning this repository, fold the example place with the instrument:
 
 ```sh
-npm install @lapxo/bound@0.1.5
-node node_modules/@lapxo/bound/tools/samples/run-typed.mjs
+npx @lapxo/bound@0.1.5 samples/typed
 ```
 
-The sample creates a temporary place with its own key and declared provider, signs and lands the exact sample records, then prints each `SCENE` and `CELL`. It includes both conflict causes, an encounter outside the bounds, exact-ID withdrawals and receipt reuse. It removes that temporary place afterwards; its key grants no authority to your project. [Typed records and sample](https://github.com/Lapxo/bound/blob/main/docs/contracts/typed-object.md).
+The folder carries its own TARGET.bound, receipts.bound and hash-verified fixture data. It prints B, C, G and D through the native cells view; repeating the fold reuses their receipts. It needs no private key and admits nothing into your project. B owns the travelling sign, local join and travelling floor; C reads FREE from two compatible independent observations; G and D read REQUIRED. The artifact-set example uses the same instrument at `samples/artifacts`. [Typed records and sample](https://github.com/Lapxo/bound/blob/main/docs/contracts/typed-object.md).
 
 A selected form can instead describe a set of artifacts, a delivery interval or another domain's values. The project declares the form, origin evidence and views; Bound does not infer them from filenames or units.
 

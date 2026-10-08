@@ -1,0 +1,14 @@
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=class role=writes scope=keys/device value=authorize
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=coverage role=writes scope=keys/device value=*
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=public-key role=writes scope=keys/device value="MCowBQYDK2VwAyEA5Q2fugVOo49cLFa7WfmnfQwXSC+ESKNx9KmErLWZIFc="
+bound-lock/1 at=policy:fixture by=target form=interval measure=milliseconds role=writes scope=signer/timeout value=500..500
+bound-lock/1 at=policy:fixture by=target form=interval measure=bytes role=writes scope=signer/response-bytes value=65536..65536
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/digest-algorithms value=sha256
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/signature-algorithms value=ed25519:fixture
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/era value=fixture
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/families value=keys|signer|wire|tree|write|leaf|read|fold|receipts|rendered|resolved|beat|view|region|sample
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/fields value=scope|role|form|measure|value|by|at|needs|sig|epoch|shape|restsOn|condition|about|kind|view
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/required value=scope|role|form|measure|value|by|at
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/forms value=alphabet|interval
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/roles value=reads|writes|demands
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=wire/at-classes value=origin|place|receipt|witness|policy

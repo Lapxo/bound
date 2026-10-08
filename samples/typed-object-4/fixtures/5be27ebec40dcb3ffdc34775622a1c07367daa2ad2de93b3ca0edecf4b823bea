@@ -1,0 +1,54 @@
+export function buildGraph(edges) {
+    const index = new Map();
+    const names = [];
+    const intern = (s) => {
+        const hit = index.get(s);
+        if (hit !== undefined)
+            return hit;
+        const i = names.length;
+        names.push(s);
+        index.set(s, i);
+        return i;
+    };
+    const pairs = [];
+    for (const [a, b] of edges)
+        pairs.push([intern(a), intern(b)]);
+    const size = names.length;
+    const counts = new Int32Array(size);
+    for (const [a] of pairs)
+        counts[a]++;
+    const heads = new Int32Array(size + 1);
+    for (let i = 0; i < size; i++)
+        heads[i + 1] = heads[i] + counts[i];
+    const tails = new Int32Array(pairs.length);
+    const cursor = heads.slice();
+    for (const [a, b] of pairs)
+        tails[cursor[a]++] = b;
+    return {
+        size,
+        id: (name) => index.get(name) ?? -1,
+        name: (id) => names[id] ?? '',
+        heads,
+        tails,
+    };
+}
+export function reachIds(g, from, scratch) {
+    const seen = scratch ?? new Uint8Array(g.size);
+    if (scratch)
+        seen.fill(0);
+    if (from < 0 || from >= g.size)
+        return seen;
+    const queue = [from];
+    seen[from] = 1;
+    while (queue.length > 0) {
+        const v = queue.pop();
+        for (let i = g.heads[v]; i < g.heads[v + 1]; i++) {
+            const n = g.tails[i];
+            if (!seen[n]) {
+                seen[n] = 1;
+                queue.push(n);
+            }
+        }
+    }
+    return seen;
+}

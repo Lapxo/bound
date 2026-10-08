@@ -1,0 +1,18 @@
+import { meetAt, potential } from "./f5a1c7b4ee0994930d721f00e2a2444be3fd6ee35287c50a5c916b1165caa6c5";
+export function present(place) {
+    if (potential(place))
+        return 'potential';
+    const held = meetAt(place);
+    return held.lo > held.hi ? null : held;
+}
+export function converge(width, maturation, forgetting, epochs) {
+    let at = width;
+    for (let epoch = 0; epoch < epochs; epoch += 1)
+        at = Math.max(0, at + maturation - forgetting);
+    return { width: at, trend: at === 0 && width > 0 ? 'zero' : at > width ? 'widens' : at < width ? 'narrows' : 'holds' };
+}
+export function endsBeforeNow(now, leading, lagging) {
+    const ends = [...leading, ...lagging].map(([, hi]) => hi);
+    const end = ends.length ? Math.max(...ends) : 0;
+    return leading.length === 0 && end < now;
+}

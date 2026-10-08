@@ -265,7 +265,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
     const projection = reader.capsule === undefined ? [] : (asked?.lines ?? []).filter(line=>fieldOf(line,'scope')===`region/${reader.capsule!.region}`&&fieldOf(line,'measure')==='input-projection'&&fieldOf(line,'value')!=='withdraw');
     if(projection.length){
       if(projection.length!==1||!asked)throw Error('REFUSE·input projection is ambiguous '+reader.module);
-      const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>({place,text:observeText(resolve(root,place))??''}));
+      const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>{const bytes=observeFile(resolve(root,place))??new Uint8Array();return {place,text:Buffer.from(bytes).toString('utf8'),bytes};});
       const result=readingClosures({root,store,reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),allowsEmpty:readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module),files,emit:line=>process.stderr.write(line+'\n')});
       out.push(...result.lines);ran+=result.executed;read+=result.read-result.opened;
       return false;

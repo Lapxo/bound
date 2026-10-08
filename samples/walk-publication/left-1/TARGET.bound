@@ -1,0 +1,32 @@
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/digest-algorithms value=sha256
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/signature-algorithms value=ed25519:sample
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/era value=sample
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/families value=keys|signer|wire|tree|write|leaf|reader|read|fold|receipts|rendered|resolved|beat|view|region|uses|walk|sample
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/fields value=scope|role|form|measure|value|by|at|epoch|sig|condition|needs
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/required value=scope|role|form|measure|value|by|at
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/forms value=alphabet|interval
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/roles value=reads|writes|demands
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/at-classes value=origin|place|receipt|witness|policy
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/walk/contract value=whole-region@1
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/walk/fields value=scope|role|form|measure|value|by|at|epoch|condition|needs
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/walk/metadata-fields value=at|by|condition|epoch|form|measure|role|scope|sig|value
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/walk/resolutions value=0|1|4|6|8
+bound-lock/1 at=policy:walk-fixture by=target form=interval measure=milliseconds role=writes scope=signer/timeout value=5000..5000
+bound-lock/1 at=policy:walk-fixture by=target form=interval measure=bytes role=writes scope=signer/response-bytes value=65536..65536
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=wire/walk/projections value=0:inventory|1:summary|4:summary|6:history|8:history
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=writes scope=walk/origin value=left-ledger
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=class role=writes scope=keys/left value=authorize
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=coverage role=writes scope=keys/left value=*
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=public-key role=writes scope=keys/left value="MCowBQYDK2VwAyEAirfUMiSly/w6z4Budu4i3QtPz8Y8IQMv62ZntjL8VNg="
+bound-lock/1 at=policy:walk-fixture by=target form=interval measure=resolution role=writes scope=keys/left value=1..16
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=signer role=writes scope=keys/left value=file
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=class role=writes scope=keys/local-reader value=read
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=digest role=writes scope=walk/context value=sha256:2889411cc4f7fe0fd9e2fbb407cc7c77c5c28b43e49aebf69265f608c42bdfaf
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=digest role=writes scope=uses/peer value=sha256:702b7f3b69d4f201ec22f22a476f53228bba1cf6d356554b1e533d0ee83e6793
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id needs=sample/** role=demands scope=view/walk value=walk@*
+bound-lock/1 at=policy:walk-fixture by=target form=alphabet measure=id role=demands scope=view/evidence value=evidence@8
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/2889411cc4f7fe0fd9e2fbb407cc7c77c5c28b43e49aebf69265f608c42bdfaf role=writes scope=dep/2889411cc4f7fe0fd9e2fbb407cc7c77c5c28b43e49aebf69265f608c42bdfaf value=sha256:2889411cc4f7fe0fd9e2fbb407cc7c77c5c28b43e49aebf69265f608c42bdfaf
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/702b7f3b69d4f201ec22f22a476f53228bba1cf6d356554b1e533d0ee83e6793 role=writes scope=dep/702b7f3b69d4f201ec22f22a476f53228bba1cf6d356554b1e533d0ee83e6793 value=sha256:702b7f3b69d4f201ec22f22a476f53228bba1cf6d356554b1e533d0ee83e6793
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/9ee56983b5b4c2565c6e9738d977ec95b92d30c03e0c6b045628b13a9c3aba68 role=writes scope=dep/9ee56983b5b4c2565c6e9738d977ec95b92d30c03e0c6b045628b13a9c3aba68 value=sha256:9ee56983b5b4c2565c6e9738d977ec95b92d30c03e0c6b045628b13a9c3aba68
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/375f2f655d4fc1451f8f68cdcc42910468abc441233bd0f111b7d6518050a7ca role=writes scope=dep/375f2f655d4fc1451f8f68cdcc42910468abc441233bd0f111b7d6518050a7ca value=sha256:375f2f655d4fc1451f8f68cdcc42910468abc441233bd0f111b7d6518050a7ca
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/a077a5eed41a0db57851d1225dd9066f545fc932a900c0b620a1a84deb2346c7 role=writes scope=dep/a077a5eed41a0db57851d1225dd9066f545fc932a900c0b620a1a84deb2346c7 value=sha256:a077a5eed41a0db57851d1225dd9066f545fc932a900c0b620a1a84deb2346c7

@@ -1,0 +1,53 @@
+import { byBytes, canonical, parse } from "./95104b64ec90be292aef9ca63581abb213a0ac35c71078ba4da246d13dd5216c";
+import { ENVELOPE } from "./5f7686080ceb6ba2eef54a81c0602470e9e557da35431c4cbeed5f5c5c9fcb9e";
+/**
+ * Project already admitted, folded configuration claims for publication.
+ * This does not admit claims or fold history. The containing artifact supplies integrity;
+ * public-key records retain their signatures, while other claims lose delivery envelopes.
+ */
+export function publicationOf(live) {
+    return live.map(line => {
+        const got = parse(line);
+        if (got.kind !== 'fact')
+            throw Error(`REFUSE·publication ${got.why}`);
+        const fields = got.value.fields;
+        if (fields.value === 'withdraw')
+            throw Error('REFUSE·publication a withdrawal is history, not standing');
+        if (fields.type !== undefined)
+            throw Error('REFUSE·publication object history needs its semantic projection');
+        if (isPublicKey(fields))
+            return canonical(fields);
+        const semantic = Object.fromEntries(Object.entries(fields).filter(([name]) => !ENVELOPE.has(name)));
+        return canonical({ ...semantic, by: 'target' });
+    }).sort(byBytes);
+}
+/**
+ * Recognize a public lock without granting authority or verifying public keys.
+ * Signed delivery history returns undefined for the ordinary authority reader.
+ */
+export function publicLock(lines) {
+    const fields = lines.map(line => {
+        const got = parse(line);
+        if (got.kind !== 'fact')
+            throw Error(`REFUSE·publication ${got.why}`);
+        return got.value.fields;
+    });
+    if (fields.some(record => record.sig !== undefined && !isPublicKey(record)))
+        return undefined;
+    for (const record of fields) {
+        if (record.type !== undefined)
+            throw Error('REFUSE·publication object history needs its semantic projection');
+        if (record.sig === undefined && record.by !== undefined && record.by !== 'target') {
+            throw Error('REFUSE·publication unsigned delivery signer');
+        }
+        if (record.value === 'withdraw')
+            throw Error('REFUSE·publication withdrawal in a public lock');
+        if (record.sig === undefined && [...ENVELOPE].some(name => name !== 'by' && record[name] !== undefined)) {
+            throw Error('REFUSE·publication delivery envelope in a public lock');
+        }
+    }
+    return [...lines];
+}
+function isPublicKey(fields) {
+    return fields.scope?.startsWith('keys/') === true && fields.measure === 'public-key';
+}

@@ -1,0 +1,42 @@
+import { violationsIn as lawsBrokenIn } from './0a5e879b024f10d8b895c9e574caa2141a59dac07eed8a384fb6e903ff069828';
+import { alphabet } from "./bcc67baa5b704ec527390f62f2cf829e82550bfdf2bd9e3728c0e67ae5223670";
+import { fromLine } from "./5f7686080ceb6ba2eef54a81c0602470e9e557da35431c4cbeed5f5c5c9fcb9e";
+import { byBytes, canonical } from "./95104b64ec90be292aef9ca63581abb213a0ac35c71078ba4da246d13dd5216c";
+import { decimal } from "./5b883395c0dc4ecde724a91d6a263c68d180a8e53fac6319daf51087af214d62";
+export const violationsIn = (lattice, points) => lawsBrokenIn(lattice, points);
+export const paramsOf = (params) => (params !== null && typeof params === 'object' ? params : {});
+export function refuseForm(id, why) {
+    throw new Error(`REFUSE·form ${id}: ${why}`);
+}
+export function numberAt(id, params, name) {
+    const held = paramsOf(params)[name];
+    if (typeof held !== 'number' || !isFinite(held))
+        refuseForm(id, `takes ${name} as a number, and a value it is not given is not invented`);
+    return held;
+}
+export function wordsAt(id, params, name) {
+    const held = paramsOf(params)[name];
+    if (!Array.isArray(held) || !held.length || held.some((one) => typeof one !== 'string'))
+        refuseForm(id, `takes ${name} as a list of words`);
+    return held;
+}
+export const written = (words) => alphabet({ polarity: 'permit', members: [...new Set(words)].sort(byBytes) });
+/**
+ * A band a line writes over an interval it is given: `lo..hi`, one end alone, `*` for an end left open, or `empty`.
+ * Its ends are read by the wire's own interval form, the one a claim's value is read by, and one end alone is that end twice.
+ */
+export function bandOf(id, whole, text) {
+    if (text === 'empty')
+        return { lo: whole.hi, hi: whole.lo };
+    const read = (value) => ((got) => (got.kind === 'fact' && got.value.bound.kind === 'interval' ? { lo: got.value.bound.lo ?? whole.lo, hi: got.value.bound.hi ?? whole.hi } : undefined))(fromLine(canonical({ form: 'interval', value }), null));
+    return read(text) ?? read(`${text}..${text}`) ?? refuseForm(id, `\`${text}\` is not a band: lo..hi or one end, each a number or *`);
+}
+export const bandText = (value) => ((end) => (value.lo > value.hi ? 'empty' : `${end(value.lo)}..${end(value.hi)}`))((n) => (isFinite(n) ? decimal(n) : '*'));
+/** A band a line writes over levels it is given, `lo..hi` or one level alone: the band of them whose written text it is. */
+export function levelsOf(id, held, text) {
+    if (held.some((level) => level.includes('..')))
+        refuseForm(id, 'a level holds no band mark `..`');
+    const band = held.flatMap((floor) => held.map((ceiling) => ({ subject: '', floor, ceiling }))).find(({ floor, ceiling }) => text === `${floor}..${ceiling}`)
+        ?? (text.includes('..') ? undefined : held.filter((level) => level === text).map((level) => ({ subject: '', floor: level, ceiling: level }))[0]);
+    return band ?? refuseForm(id, `\`${text}\` is not one of its levels, nor two of them as lo..hi`);
+}

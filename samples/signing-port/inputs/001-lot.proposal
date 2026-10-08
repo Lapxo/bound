@@ -1,0 +1,2 @@
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=sample/a value=yes
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=id role=writes scope=sample/b value=yes

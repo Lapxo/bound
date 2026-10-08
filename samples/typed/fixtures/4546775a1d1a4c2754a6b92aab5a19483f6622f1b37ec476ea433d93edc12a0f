@@ -1,0 +1,11 @@
+import { ladderForm } from './0a5e879b024f10d8b895c9e574caa2141a59dac07eed8a384fb6e903ff069828';
+import { levelsOf, wordsAt } from "./fb458d5e2009c772f9af99ab71f38ea363fb95e93dc44187f30357dfa777dd3d";
+const over = (params) => ({ levels: wordsAt('ladder', params, 'levels') });
+export const ladderOfForm = {
+    id: 'ladder',
+    lattice: (params) => ladderForm.lattice(over(params)),
+    parse: (params, text) => levelsOf('ladder', over(params).levels, text),
+    emit: (_params, value) => (value.floor === value.ceiling ? value.floor : `${value.floor}..${value.ceiling}`),
+    show: (params, value) => ladderForm.lattice(over(params)).show(value),
+    points: (params, seed, n) => ladderForm.points(over(params), seed, n),
+};

@@ -1,0 +1,38 @@
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/era value=sample
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/signature-algorithms value=ed25519:sample
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/digest-algorithms value=sha256
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/evidence value=evidence@8
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/local-reader value=read
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/local-fold value=fold
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/receipt-fields value=scope|role|form|measure|value|by|at
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/fields value=scope|role|form|measure|value|by|at|epoch|sig
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/required value=scope|role|form|measure|value|by|at
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/forms value=alphabet|interval
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/roles value=reads|writes|demands
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/at-classes value=policy|place|origin|witness|receipt
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/families value=keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/north value=authorize
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=coverage role=writes scope=keys/north value=*
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=public-key role=writes scope=keys/north value="MCowBQYDK2VwAyEAaKPadiTlTrLMCHIV8X7YzBfx4UdJzooaoJfIMM1Bhgo="
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=signer role=writes scope=keys/north value=file
+bound-lock/1 at=policy:evidence by=target form=interval measure=resolution role=writes scope=keys/north value=1..16
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/south value=attest
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=coverage role=writes scope=keys/south value=sample/south|receipts
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=public-key role=writes scope=keys/south value="MCowBQYDK2VwAyEAz55v5rXSogtq30NuflmbIUpHp8vbIKEHbTekEHwJzUQ="
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=signer role=writes scope=keys/south value=file
+bound-lock/1 at=policy:evidence by=target form=interval measure=resolution role=writes scope=keys/south value=1..16
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/alias value=attest
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=coverage role=writes scope=keys/alias value=sample/alias|receipts
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=public-key role=writes scope=keys/alias value="MCowBQYDK2VwAyEAz55v5rXSogtq30NuflmbIUpHp8vbIKEHbTekEHwJzUQ="
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=signer role=writes scope=keys/alias value=file
+bound-lock/1 at=policy:evidence by=target form=interval measure=resolution role=writes scope=keys/alias value=1..16
+bound-lock/1 at=policy:evidence by=target form=interval measure=milliseconds role=writes scope=signer/timeout value=5000..5000
+bound-lock/1 at=policy:evidence by=target form=interval measure=bytes role=writes scope=signer/response-bytes value=65536..65536
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/views-fold value=fold
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/help value=help
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/lines value=lines
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/receipts value=receipts@8|receipts@0|receipts@1
+bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/not-provided-by-this-place value=never-offered
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/4f1f7af2b52835ab48acce37b6a85777c04066c532fc6549a658c60f5519e46b role=writes scope=dep/4f1f7af2b52835ab48acce37b6a85777c04066c532fc6549a658c60f5519e46b value=sha256:4f1f7af2b52835ab48acce37b6a85777c04066c532fc6549a658c60f5519e46b
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/1a6f504aeb5c9c094161c51849aec6ec84acc38f3dded97e6661254537c4ea7a role=writes scope=dep/1a6f504aeb5c9c094161c51849aec6ec84acc38f3dded97e6661254537c4ea7a value=sha256:1a6f504aeb5c9c094161c51849aec6ec84acc38f3dded97e6661254537c4ea7a
+bound-lock/1 at=policy:fixture by=target form=alphabet measure=digest needs=fixtures/4b46f14486c9915dc8ab2f06fec867bd0c61af89c08e70b11c7740bc560f9a39 role=writes scope=dep/4b46f14486c9915dc8ab2f06fec867bd0c61af89c08e70b11c7740bc560f9a39 value=sha256:4b46f14486c9915dc8ab2f06fec867bd0c61af89c08e70b11c7740bc560f9a39

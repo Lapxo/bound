@@ -1,0 +1,36 @@
+import { alphabetForm, alphabets, intervals } from './76ec001e026205987712d3550ff240efb475980b7b06aacc59dcbae66abb5b2e';
+/** Historical configuration adapters. Typed records use their selected form provider. */
+export const INTERVALS = intervals(-Infinity, Infinity);
+export const ALPHABETS = alphabets();
+const UNIT = { K: 1e3, M: 1e6, G: 1e9 };
+/** An interval as the wire writes it: `lo..hi`, optional K/M/G, and `*` for an open end. */
+export function spanOf(value) {
+    const m = /^(-?\d+(?:\.\d+)?)([KMG])?\.\.((-?\d+(?:\.\d+)?)([KMG])?|\*)$/.exec(value);
+    if (!m)
+        return null;
+    const n = (num, u) => Number(num) * (u ? UNIT[u] : 1);
+    return { lo: n(m[1], m[2]), hi: m[3] === '*' ? Infinity : n(m[4], m[5]) };
+}
+/** An alphabet as the wire writes it: `a|b`, `none`, or `not:a|b`. */
+export function idsOf(value) {
+    const forbid = value.startsWith('not:');
+    return {
+        polarity: forbid ? 'forbid' : 'permit',
+        values: new Set((forbid ? value.slice(4) : value).split('|').filter((one) => one !== '' && one !== 'none')),
+    };
+}
+/** Values of the historical configuration forms; no typed object projection or object valuation. */
+export function configurationValues(values) {
+    if (!values.length)
+        return undefined;
+    if (values[0].form === 'interval') {
+        const read = values.map(one => spanOf(one.value));
+        return read.every(one => one !== null) ? { L: INTERVALS, spans: read } : undefined;
+    }
+    if (values[0].form !== 'alphabet')
+        return undefined;
+    const rest = '\u0000';
+    const named = values.map(one => ({ forbid: one.value.startsWith('not:'), names: (one.value.startsWith('not:') ? one.value.slice(4) : one.value).split('|').filter(Boolean) }));
+    const params = { tokens: [...new Set([rest, ...named.flatMap(one => one.names)])].sort() };
+    return { L: alphabetForm.lattice(params), spans: named.map(one => alphabetForm.parse(params, { want: one.forbid ? params.tokens.filter(token => !one.names.includes(token)) : one.names })) };
+}

@@ -1,0 +1,31 @@
+import { parse } from "./95104b64ec90be292aef9ca63581abb213a0ac35c71078ba4da246d13dd5216c";
+import { recordKind } from "./5e5c85105c2701f991bb4236cadc16df2af6e1cf2c3ca299647843e21d035128";
+import { fromLine, wireAt } from "./5f7686080ceb6ba2eef54a81c0602470e9e557da35431c4cbeed5f5c5c9fcb9e";
+import { fact } from "./deab53c58c078862088ac4bf424fb13ed68793913e399815871031e3a7e41a9a";
+/** Historical grammar is selected by each record's epoch, before context admission. */
+export function objectHistory(lines) {
+    const parsed = [];
+    for (const text of lines) {
+        const p = parse(text);
+        if (p.kind !== 'fact')
+            return p;
+        parsed.push(p.value.fields);
+    }
+    const objects = [], configuration = [];
+    for (let i = 0; i < lines.length; i++) {
+        const k = recordKind(lines[i]);
+        if (k.kind !== 'fact')
+            return k;
+        if (k.value === 'config') {
+            configuration.push(parsed[i]);
+            continue;
+        }
+        const got = fromLine(lines[i], wireAt(parsed, Number(parsed[i].epoch)));
+        if (got.kind !== 'fact')
+            return got;
+        if (!('record' in got.value))
+            throw Error('typed history returned configuration');
+        objects.push(got.value);
+    }
+    return fact({ objects, configuration });
+}

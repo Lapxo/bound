@@ -8,18 +8,18 @@
     },
     {
       "role": "yes",
-      "path": "samples/yes/historical-document-views.json",
-      "digest": "sha256:1e375ddc0be9538404e7258e862a60fc5454cd2b7dde1afe27b28de0228467bc"
+      "path": "samples/historical-document-views-1/TARGET.bound",
+      "digest": "sha256:7f200413e233fd960678b56b2d9caadde3d59e472e4320e2649437e1ea1d755e"
     },
     {
       "role": "no",
-      "path": "samples/no/historical-document-views.json",
-      "digest": "sha256:85d091dd6fbf4c3438e7f04700d70bbded4260eb38804e049a1bc9c301bbedb9"
+      "path": "samples/historical-document-views-2/TARGET.bound",
+      "digest": "sha256:ca6e3d0703356b94fb0035dc15233c3479542f39fe17b891f64a9c2cf6d5056c"
     },
     {
       "role": "vector",
       "path": "vectors/historical-document-views.json",
-      "digest": "sha256:6a40dad06f119dee45834bf4252c138c7368c07c5a814068a573da7f4bc72a94"
+      "digest": "sha256:64dd138ff0b17950cd9a22d3b4d0cbf9de2e3699a562dab3d73039eea14262f0"
     }
   ]
 }

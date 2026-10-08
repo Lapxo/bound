@@ -1,0 +1,37 @@
+bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=public-key role=writes scope=keys/device sig="ed25519:sample:JMza0TeLHbm1ooL3QhBDuz9O8nL1AvAbPFLtpBXTr9Q7YW68nJwG6vIHLtXxn3wiBJbSgDSL1nvzVOnNVMgADw==" value="MCowBQYDK2VwAyEAynHvXZ9fxH6cFG46+Hci/LJJxFIpn0XznlI/TA2T3MU="
+bound-lock/1 at=policy:sample by=target form=alphabet measure=class role=writes scope=keys/device value=authorize
+bound-lock/1 at=policy:sample by=target form=alphabet measure=class role=writes scope=keys/fold value=fold
+bound-lock/1 at=policy:sample by=target form=alphabet measure=class role=writes scope=keys/reader value=read
+bound-lock/1 at=policy:sample by=target form=alphabet measure=coverage role=writes scope=keys/device value=*
+bound-lock/1 at=policy:sample by=target form=alphabet measure=digest needs=fixtures/85416f13411412e5fd2bc50cf20149f24ec9c82e3515ee5a9c2ec52fbba08cfc role=writes scope=dep/programs shape=1388ab8a6ea378b880a02f876a8983a7acd761501a2f6ef87f7dcd8582c639d1 value=sha256:85416f13411412e5fd2bc50cf20149f24ec9c82e3515ee5a9c2ec52fbba08cfc
+bound-lock/1 at=policy:sample by=target form=alphabet measure=digest role=writes scope=uses/programs value=sha256:20e2f4c205e096255c3dbf64376aac86baeb34509b532dd88507a8dcaa92782b
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=demands scope=view/card value=demand-card@8
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=demands scope=view/programs value=demand-status@8
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=reader/empty value=refuse
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=reader/inputs value=required
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=tasks/minimum value=tasks/collect|tasks/catalogue
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=tasks/selection value=tasks/collect|tasks/catalogue
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/at-classes value=policy|place|origin|witness|receipt
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/digest-algorithms value=sha256
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/era value=sample
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/families value=keys|signer|wire|tree|write|leaf|view|region|uses|dep|tasks|clock|reader|read|fold|receipts|rendered|resolved|beat
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/fields value=scope|role|form|measure|value|by|at|epoch|sig|needs|shape|about|kind|restsOn
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/forms value=alphabet|interval
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/kinds value=capsule
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/region-measures value=receipts|reads|coordinates
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/required value=scope|role|form|measure|value|by|at
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/roles value=reads|writes|demands
+bound-lock/1 at=policy:sample by=target form=alphabet measure=id role=writes scope=wire/signature-algorithms value=ed25519:sample
+bound-lock/1 at=policy:sample by=target form=alphabet measure=receipts role=writes scope=region/proofs value=proof/**
+bound-lock/1 at=policy:sample by=target form=alphabet measure=signer role=writes scope=keys/device value=file
+bound-lock/1 at=policy:sample by=target form=alphabet measure=status needs=proof/catalogue restsOn=tasks/collect role=demands scope=tasks/catalogue value=present
+bound-lock/1 at=policy:sample by=target form=alphabet measure=status needs=proof/collect restsOn=tasks/catalogue role=demands scope=tasks/collect value=present
+bound-lock/1 at=policy:sample by=target form=interval measure=bytes role=writes scope=reader/response-bytes value=67108864..67108864
+bound-lock/1 at=policy:sample by=target form=interval measure=bytes role=writes scope=signer/response-bytes value=65536..65536
+bound-lock/1 at=policy:sample by=target form=interval measure=days role=demands scope=clock/ceiling value=0..14
+bound-lock/1 at=policy:sample by=target form=interval measure=milliseconds role=writes scope=reader/timeout value=30000..30000
+bound-lock/1 at=policy:sample by=target form=interval measure=milliseconds role=writes scope=signer/timeout value=5000..5000
+bound-lock/1 at=policy:sample by=target form=interval measure=resolution role=writes scope=keys/device value=1..16
+bound-lock/1 at=policy:formed-place by=target form=alphabet measure=id role=writes scope=publish/bootstrap value=present
+bound-lock/1 at=policy:formed-place by=target form=alphabet measure=digest needs=fixtures/20e2f4c205e096255c3dbf64376aac86baeb34509b532dd88507a8dcaa92782b role=writes scope=dep/20e2f4c205e096255c3dbf64376aac86baeb34509b532dd88507a8dcaa92782b value=sha256:20e2f4c205e096255c3dbf64376aac86baeb34509b532dd88507a8dcaa92782b
+bound-lock/1 at=policy:formed-place by=target form=alphabet measure=digest needs=fixtures/39ad10fd8571cec896f2945648d2ce5011f9fa9fb4be504d10e663a226d45eca role=writes scope=dep/39ad10fd8571cec896f2945648d2ce5011f9fa9fb4be504d10e663a226d45eca value=sha256:39ad10fd8571cec896f2945648d2ce5011f9fa9fb4be504d10e663a226d45eca

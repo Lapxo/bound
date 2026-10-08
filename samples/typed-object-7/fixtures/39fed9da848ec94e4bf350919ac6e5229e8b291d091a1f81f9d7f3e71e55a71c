@@ -1,0 +1,38 @@
+import { isDistributive } from "./6012b65e035d4704e45d833f4e9e957e55e8f99e649ac9bacfd5f4d03729e059";
+import { isSupermodular, premium } from "./3c8e7a61164f5dd2416112baa791ed401922afeafe06239c597113bb2b5f78ff";
+import { state, unit } from "./e295db71d2fef138330904a6943ff8bfbed2cf86e43410a0536d6b068d404421";
+import { statesPerDebit } from "./6bee16d1e7c5eb0b56fd2f2721284f155d268b3ea89584beef5bbcfcddfead95";
+import { STATES } from "./79a3d3e9102f755ee0a2c04ad77329089866b4e3c65750fa0f1bbdcefca61771";
+export function declarationOf(c, place) {
+    return place.seen.reduce((held, s) => ({ demand: c.higher(held.demand, s.span.lo), limit: c.lower(held.limit, s.span.hi) }), { demand: c.bottomIx, limit: c.topIx });
+}
+export function unitOf(c, place) {
+    const { demand, limit } = declarationOf(c, place);
+    return unit(place.at.join('/'), { floor: c.levels[demand] ?? c.bottom, ceiling: c.levels[limit] ?? c.top });
+}
+export function stateOf(c, place) {
+    return state(c, unitOf(c, place));
+}
+export function registerOf(c, place) {
+    return statesPerDebit(c, unitOf(c, place));
+}
+export function premiumOf(c, value, place) {
+    const { demand, limit } = declarationOf(c, place);
+    return premium(c, value, demand, limit);
+}
+export function degenerate(c, value) {
+    return isSupermodular(c, value);
+}
+export function withdrawsExactly(c) {
+    return isDistributive(c);
+}
+export function movesOf(c, before, after) {
+    const moves = Object.fromEntries(STATES.map((a) => [a, Object.fromEntries(STATES.map((b) => [b, 0]))]));
+    const was = new Map(registerOf(c, before));
+    for (const [debit, now] of registerOf(c, after)) {
+        const then = was.get(debit);
+        if (then)
+            moves[then][now] += 1;
+    }
+    return moves;
+}

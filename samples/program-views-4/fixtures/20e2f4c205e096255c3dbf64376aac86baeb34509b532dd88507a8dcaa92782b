@@ -1,0 +1,11 @@
+bound-lock/1 at=policy:sample form=alphabet kind=capsule measure=digest restsOn=sha256:85416f13411412e5fd2bc50cf20149f24ec9c82e3515ee5a9c2ec52fbba08cfc role=writes scope=offers/programs value=sha256:85416f13411412e5fd2bc50cf20149f24ec9c82e3515ee5a9c2ec52fbba08cfc
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/ceiling value=clock/ceiling
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/elapsed value=clock/elapsed
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/evidence value=proofs
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/minimum value=tasks/minimum
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/profile value=admitted-demands@1
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/programs/selection value=tasks/selection
+bound-lock/1 at=policy:sample form=alphabet measure=id role=writes scope=wire/provider-inputs value=standing-projection@1
+bound-lock/1 at=policy:sample form=alphabet measure=reads role=demands scope=offers/programs/inputs/demand-card value=wire/programs/**
+bound-lock/1 at=policy:sample form=alphabet measure=reads role=demands scope=offers/programs/inputs/demand-status value=wire/programs/**
+bound-lock/1 at=policy:sample form=alphabet measure=reads role=writes scope=region/world value=wire/**|offers/**
