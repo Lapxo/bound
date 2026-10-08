@@ -1,3 +1,5 @@
+import {actLines,committedLocalActs} from '../host/ports/local-act.ts';
+import {readdirSync} from 'node:fs';
 import {requireEffects} from '../host/read-only.ts';
 import { appendFileSync, closeSync, dirname, existsSync, join, linkSync, mkdirSync, openSync, readFileSync, readSync, renameSync, rmSync, statSync, writeFileSync } from '../host/io.ts';
 import { storeRoot } from '../host/ports/store.ts';
@@ -26,14 +28,29 @@ export function writerFile(store: string, writer: string): string {
 const held = new Map<string, { readonly stamp: string; readonly size: number; readonly lines: readonly string[] }>();
 
 export function ledgerLines(store: string, writer: string): readonly string[] {
-  return linesAt(writerFile(store, writer));
+  return journalLines(store,writer,'.',linesAt(writerFile(store, writer)));
 }
 
 export function shardFile(store: string, writer: string, region: string): string {
   return storeAt(store, 'ledger', writer.replace(/[^a-zA-Z0-9_-]/g, ''), `${region.replace(/\/+$/, '') || '@'}${EXTENSION}`);
 }
 
-export const shardLines = (store: string, writer: string, region: string): readonly string[] => linesAt(shardFile(store, writer, region));
+export const shardLines = (store: string, writer: string, region: string): readonly string[] => journalLines(store,writer,region,linesAt(shardFile(store, writer, region)));
+
+const journalMemo=new Map<string,readonly string[]>();
+function journalLines(store:string,writer:string,place:string,legacy:readonly string[]):readonly string[]{
+  const fresh=committedLocalActs(store).flatMap(act=>act.bundle.placements?.filter(p=>p.place===place).flatMap(p=>actLines(p.records).filter(line=>fieldOf(line,'by')===writer))??[]);
+  if(!fresh.length)return legacy;
+  const lines=[...new Set([...legacy,...fresh])],key=store+'\0'+writer+'\0'+place,last=journalMemo.get(key);
+  if(last?.length===lines.length&&last.every((line,i)=>line===lines[i]))return last;
+  journalMemo.set(key,lines);return lines;
+}
+export function ledgerWriters(store:string):readonly string[]{
+  const at=join(store,'ledger');
+  const legacy=existsSync(at)?readdirSync(at).filter(name=>name.endsWith(EXTENSION)).map(name=>name.slice(0,-EXTENSION.length)):[];
+  const committed=committedLocalActs(store).flatMap(act=>act.bundle.placements?.filter(p=>p.place==='.').flatMap(p=>actLines(p.records).map(line=>fieldOf(line,'by')))??[]);
+  return [...new Set([...legacy,...committed])];
+}
 
 export function landShard(store: string, writer: string, region: string, lines: readonly string[]): number {
   return appendNew(shardFile(store, writer, region), lines);

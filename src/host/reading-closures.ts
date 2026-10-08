@@ -2,6 +2,7 @@ import {actCosts} from './act-cost.ts';
 import {mkdirSync,readFileSync,existsSync} from 'node:fs';
 import {join,dirname} from 'node:path';
 import {canonical,parse,PROTOCOL,byBytes} from '@lapxo/topos/wire';
+import type {ReaderLifetime,ReaderReference} from '@lapxo/topos/wire';
 import type {Capsule} from './capsule.ts';
 import {replaceWhole,landShard,shardLines} from '../land/ledger.ts';
 import {fieldOf} from '../fold/claims.ts';
@@ -12,13 +13,13 @@ type Plan={scope:string;inputs:readonly string[];needs:readonly string[];resolut
 const fields=(line:string)=>{const got=parse(line);if(got.kind!=='fact')throw Error('REFUSE·input projection contains a non-wire line');return got.value.fields;};
 export const inputLines=(files:readonly File[]):readonly string[]=>files.map(file=>canonical({scope:file.place,form:'alphabet',measure:'text',role:'writes',value:'lock',shape:file.place,about:file.text,by:'host',at:'policy:handed-input'}));
 /** The selected world owns input projection and reading. The host only verifies closures and keeps native count/bytes receipts. */
-export function readingClosures(options:{root:string;store:string;reader:string;speaker:string;digest:(text:string)=>string;capsule:Capsule;region:string;projection:string;allowsEmpty?:boolean;files:readonly File[];emit?:(line:string)=>void}):{lines:readonly string[];read:number;opened:number;executed:number}{
+export function readingClosures(options:{root:string;store:string;reader:string;speaker:string;digest:(text:string)=>string;capsule:Capsule;region:string;projection:string;readerReference?:ReaderReference;lifetime?:ReaderLifetime;allowsEmpty?:boolean;files:readonly File[];emit?:(line:string)=>void}):{lines:readonly string[];read:number;opened:number;executed:number}{
  const {root,store,reader,speaker,digest:hash,capsule,region,projection,files}=options,emit=options.emit??(()=>{});
  const algorithm=hash('').split(':')[0]!,handed=new Map(files.map(file=>[file.place,file.text]));
  if(handed.size!==files.length)throw Error('REFUSE·input projection has duplicate handed coordinates');
  const verify=()=>{for(const file of files)if(!readFileSync(join(root,file.place)).equals(Buffer.from(file.text)))throw Error('REFUSE·input changed '+file.place);};
  verify();
- const projected=capsule.ask([{protocol:PROTOCOL,verb:'render',rootScope:'',region:projection,at:1,reads:['**'],lines:inputLines(files),files:[]}])[0];
+ const projected=capsule.ask([{protocol:PROTOCOL,verb:'render',rootScope:'',region:projection,at:1,reads:['**'],lines:inputLines(files),files:[]}],options.readerReference)[0];
  if(projected?.kind!=='fact'||!Array.isArray(projected.lines))throw Error('REFUSE·input projection '+(projected?.why??'no lines'));
  const plans=new Map<string,Plan>();
  for(const line of projected.lines){const f=fields(line),scope=f.scope??'',resolution=/^receipt:(\d+)$/.exec(f.at??'');
@@ -32,7 +33,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
  const ordered:Plan[]=[],visiting=new Set<string>(),done=new Set<string>();
  const visit=(scope:string)=>{if(done.has(scope))return;if(visiting.has(scope))throw Error('REFUSE·input projection dependency cycle '+scope);const p=plans.get(scope);if(!p)throw Error('REFUSE·input projection missing reading '+scope);visiting.add(scope);for(const need of p.needs)visit(need);visiting.delete(scope);done.add(scope);ordered.push(p);};
  for(const scope of plans.keys())visit(scope);
- const identity=hash([capsule.selection??'',capsule.digest,region,projection].join('\n')),by=speaker+':'+identity.split(':')[1]!.slice(0,12),journal='reading-closures/'+identity.split(':')[1];
+ const identity=hash([capsule.selection??'',capsule.digest,region,projection,...(options.lifetime===undefined?[]:[JSON.stringify(options.lifetime)])].join('\n')),by=speaker+':'+identity.split(':')[1]!.slice(0,12),journal='reading-closures/'+identity.split(':')[1];
  const prior=shardLines(store,speaker,journal),results=new Map<string,{digest:string;lines:readonly string[]}>(),out:string[]=[];
  const carried=(digest:string)=>join(store,'cas','carried',digest.split(':')[1]??'');
  const saved=(text:string)=>{const digest=hash(text),path=carried(digest);mkdirSync(dirname(path),{recursive:true});if(!existsSync(path)||hash(readFileSync(path,'utf8'))!==digest)replaceWhole(path,text);return digest;};
@@ -50,7 +51,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
   else {
    if(readOnly())throw Error('REFUSE·preview reading closure is unpaid '+plan.scope);
    const started=process.hrtime.bigint();
-   const dependencies=plan.needs.flatMap(need=>results.get(need)!.lines),answer=capsule.ask([{protocol:PROTOCOL,verb:'read',rootScope:plan.scope,name:plan.scope,region,at:plan.resolution,reads:['**'],lines:[...inputLines(plan.inputs.map(place=>({place,text:handed.get(place)!}))),...dependencies],files:[]}])[0];
+   const dependencies=plan.needs.flatMap(need=>results.get(need)!.lines),answer=capsule.ask([{protocol:PROTOCOL,verb:'read',rootScope:plan.scope,name:plan.scope,region,at:plan.resolution,reads:['**'],lines:[...inputLines(plan.inputs.map(place=>({place,text:handed.get(place)!}))),...dependencies],files:[]}],options.readerReference)[0];
    if(answer?.kind!=='fact'||!Array.isArray(answer.claims))throw Error('REFUSE·reading '+plan.scope+' · '+(answer?.why??'no claims'));
    lines=answer.claims.map((unknown:any)=>{if(typeof unknown?.scope!=='string'||typeof unknown?.measure!=='string'||typeof unknown?.role!=='string'||!unknown.bound||!['interval','enumerated'].includes(unknown.bound.kind))throw Error('REFUSE·reading malformed claim '+plan.scope);const span=unknown.bound;const text=canonical({scope:unknown.scope,measure:unknown.measure,role:unknown.role,form:span.kind==='interval'?'interval':'alphabet',value:span.kind==='interval'?`${span.lo}..${span.hi}`:Array.isArray(span.values)?span.values.join('|'):'',by,at:'place:'+input});fields(text);return text;});
    if(!lines.length&&!options.allowsEmpty)throw Error('REFUSE·reading empty response is not admitted '+plan.scope);

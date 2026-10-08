@@ -3,7 +3,7 @@ export { spawn, spawnSync } from 'node:child_process';
 export { createHash } from 'node:crypto';
 export {
   appendFileSync, closeSync, existsSync, linkSync, lstatSync, mkdirSync, mkdtempSync, openSync,
-  readFileSync, readSync, readdirSync, renameSync, rmSync, statSync, writeFileSync,
+  readFileSync, readSync, readdirSync, realpathSync, renameSync, rmSync, statSync, writeFileSync,
 } from 'node:fs';
 export { tmpdir } from 'node:os';
 export { basename, dirname, join, relative, resolve } from 'node:path';

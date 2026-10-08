@@ -1,3 +1,4 @@
+import type {ReaderReference} from '@lapxo/topos/wire';
 import {readerLifetime,parse} from '@lapxo/topos/wire';
 import {contentStore,verifiedContent,contentPolicy} from './content-store.ts';
 import {readOnly} from './read-only.ts';
@@ -24,7 +25,7 @@ export interface Capsule {
   readonly digest: string;
   readonly declaration: Declaration;
   readonly lines: readonly string[];
-  readonly ask: (requests: readonly Request[]) => readonly (Response | undefined)[];
+  readonly ask: (requests: readonly Request[], reader?: ReaderReference) => readonly (Response | undefined)[];
 }
 
 const declared = new Map<string, { readonly lines: readonly string[]; readonly declaration: Declaration }>();
@@ -66,9 +67,9 @@ export function capsuleAt(digest: string, entry: string, store?: string): Capsul
   if (!entry || isAbsolute(entry) || (coordinate === '..' || coordinate.startsWith(`..${sep}`)) || entry.split(/[\\/]/).includes('..')) {
     throw new Error(`REFUSE·capsule ${digest} declared entry ${entry || '(absent)'} unavailable`);
   }
-  const capsule = { digest, ...known, ask: (requests: readonly Request[]) => {
+  const capsule = { digest, ...known, ask: (requests: readonly Request[], reader?: ReaderReference) => {
     if (!statSync(module, { throwIfNoEntry: false })?.isFile()) throw new Error(`REFUSE·capsule ${digest} declared entry ${entry} unavailable`);
-    return answered(digest, bytes, requests, names, root, cacheStore, module);
+    return answered(digest, bytes, requests, names, root, cacheStore, module, reader);
   } };
   capsules.set(identity, capsule);
   return capsule;
@@ -94,14 +95,16 @@ const spawnOf = (at: string, names: readonly string[]): readonly string[] => {
 export const childFlags = (argv: readonly string[] = process.execArgv): readonly string[] =>
   argv.filter((flag, i) => !/^(-e|-p|--eval|--print)$/.test(argv[i - 1] ?? '') && !/^(-e|-p|--eval|--print|--input-type)(=|$)/.test(flag));
 
-function answered(digest: string, bytes: Uint8Array, requests: readonly Request[], names: readonly string[], tree?: string, cacheStore: string = ownStore(), entry?: string): readonly (Response | undefined)[] {
+function answered(digest: string, bytes: Uint8Array, requests: readonly Request[], names: readonly string[], tree?: string, cacheStore: string = ownStore(), entry?: string, reader?: ReaderReference): readonly (Response | undefined)[] {
   const child = entry === undefined ? spawnOf(tree ?? unpacked(digest, bytes), names) : [entry];
   if (!child.length) {
     process.stderr.write(`LOAD     regions · none of ${names.length} under the directories release/layout names\n`);
     return requests.map(() => undefined);
   }
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
-  const hitOf = (request: Request): string => sha(`${digest}\n${loader}${JSON.stringify(request)}`);
+  const lifetime = readerLifetime(contentPolicy().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];}), reader ?? digest);
+  const policy = lifetime === undefined ? '' : JSON.stringify(lifetime)+'\n';
+  const hitOf = (request: Request): string => sha(`${digest}\n${loader}${policy}${JSON.stringify(request)}`);
   const hits = requests.map(hitOf);
   const kept = hits.map(hit => storeAt(cacheStore, 'cas', 'answers', hit));
   const held = kept.map((at, i) => {
@@ -118,7 +121,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   if (missing.length && readOnly()) throw Error(`REFUSE·preview capsule ${digest} has no verified answer for the proposed inputs; fold the declared inputs first`);
   if (missing.length) process.stderr.write(`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
-  const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing, {}, readerLifetime(contentPolicy().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];}),digest));
+  const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing, {}, lifetime);
   return requests.map((request, i) => {
     if (held[i] !== undefined) return held[i];
     const said = ran[missing.indexOf(request)];
@@ -146,5 +149,5 @@ export function locatedAt(tree: string, place: string, cacheStore: string = ownS
     if (bytes !== undefined) { hash.update(bytes); break; }
   }
   const digest = `sha256:${hash.digest('hex')}`;
-  return { digest, ...known, ask: (requests) => answered(digest, new Uint8Array(), requests, names, at, cacheStore) };
+  return { digest, ...known, ask: (requests, reader) => answered(digest, new Uint8Array(), requests, names, at, cacheStore, undefined, reader) };
 }

@@ -1,0 +1,72 @@
+import assert from 'node:assert/strict';
+import {test} from 'node:test';
+import {generateKeyPairSync} from 'node:crypto';
+import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {spawnSync} from 'node:child_process';
+import {canonical, parse} from '@lapxo/topos/wire';
+
+const reader = process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js', import.meta.url).pathname;
+const row = (scope: string, measure: string, value: string) => canonical({scope, measure, value, form:'alphabet', role:'writes', by:'target', at:'policy:race'});
+
+for (const place of ['observations', 'inventory']) test(`committed CLI results survive replay in ${place}`, {timeout:30_000}, async () => {
+  const temp = mkdtempSync(join(tmpdir(), 'bound-base-'));
+  const root = join(temp, place), key = join(temp, 'ephemeral.pem');
+  const captures:unknown[]=[];
+  try {
+    mkdirSync(root);
+    const pair = generateKeyPairSync('ed25519'),device=generateKeyPairSync('ed25519');
+    const deviceKey=join(temp,'device.pem');writeFileSync(deviceKey,device.privateKey.export({format:'pem',type:'pkcs8'}),{mode:0o600});
+    writeFileSync(key, pair.privateKey.export({format:'pem', type:'pkcs8'}), {mode:0o600});
+    const lines = [row('wire/era','id','sample'), row('wire/signature-algorithms','id','ed25519:sample'), row('wire/digest-algorithms','id','sha256')];
+    for (const [name, value] of Object.entries({fields:'scope|role|form|measure|value|by|at|epoch|sig', required:'scope|role|form|measure|value|by|at', forms:'alphabet|interval', roles:'reads|writes|demands', 'at-classes':'policy|place|origin|witness|receipt', families:'keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region'})) lines.push(row(`wire/${name}`,'id',value));
+    lines.push(row('keys/owner','class','authorize'), row('keys/owner','coverage','*'), row('keys/owner','public-key',pair.publicKey.export({format:'der',type:'spki'}).toString('base64')), row('keys/owner','signer','file'), row('keys/reader','class','read'));
+    lines.push(row('keys/device','class','read'),row('keys/device','coverage','sample/reading|sample/next'),row('keys/device','public-key',device.publicKey.export({format:'der',type:'spki'}).toString('base64')),row('keys/device','signer','file'));
+    for (const [scope, measure, value] of [['keys/device','resolution','1..16'], ['keys/owner','resolution','1..16'], ['signer/timeout','milliseconds','5000..5000'], ['signer/response-bytes','bytes','65536..65536']]) lines.push(canonical({scope:scope!,measure:measure!,value:value!,form:'interval',role:'writes',by:'target',at:'policy:race'}));
+    lines.push(row('wire/act-result','id','local-act@1'),row('wire/act-result-scope','id','receipts'),row('wire/act-result-context','id','receipt:local-act'),row('keys/folder','class','fold'),canonical({scope:'view/act',measure:'id',value:'act',role:'demands',form:'alphabet',by:'target',at:'policy:race'}));
+    writeFileSync(join(root,'TARGET.bound'),lines.join('\n')+'\n');
+    const run = (args: string[]) => {
+      const started=Date.now(),result=spawnSync(process.execPath,[reader,...args],{cwd:root,env:{...process.env,NODE_OPTIONS:'',NODE_PATH:''},encoding:'utf8',timeout:15_000});
+      captures.push({args:args.map(arg=>arg.replaceAll(temp,'[fixture]')),status:result.status,stdout:result.stdout,stderr:result.stderr,runtimeMs:Date.now()-started});
+      return result;
+    };
+    const boot = run(['land','--key','owner','--key-file',key]);
+    assert.equal(boot.status,0,boot.stderr);
+    const lot=join(temp,'lot.bound');
+    writeFileSync(lot,row('sample/reading','observed','retained')+'\n');
+    const sign=run(['sign',lot,'--key','device','--key-file',deviceKey]);
+    assert.equal(sign.status,0,sign.stderr);
+    const signed=sign.stdout.split('\n').filter(line=>parse(line).kind==='fact').join('\n')+'\n';
+    writeFileSync(lot,signed);
+    const land=run(['land',lot]);
+    assert.equal(land.status,0,land.stdout+land.stderr);
+    const identity=/^ACT (\S+)/m.exec(land.stdout)?.[1];assert.ok(identity,land.stdout);
+    const query=run(['fold','--as','act',identity]);
+    assert.equal(query.status,0,query.stdout+query.stderr);
+    assert.ok(query.stdout.includes(signed));
+    assert.match(query.stdout,/epoch 2 · admitted · conformance not asserted/);
+    const rendered=run(['fold','--as','lines']);assert.equal(rendered.status,0,rendered.stderr);assert.match(rendered.stdout,/scope=sample\/reading/);
+    const replay=run(['land',lot]);assert.equal(replay.status,0,replay.stderr);assert.match(replay.stdout,/ONCE/);assert.ok(replay.stdout.includes(identity));
+    const again=run(['fold','--as','act',identity]);assert.equal(again.status,0,again.stderr);assert.equal(again.stdout,query.stdout);
+    const next=join(temp,'next.bound');writeFileSync(next,row('sample/next','observed','next')+'\n');
+    const nextSign=run(['sign',next,'--key','device','--key-file',deviceKey]);assert.equal(nextSign.status,0,nextSign.stderr);assert.match(nextSign.stdout,/epoch=3/);
+    mkdirSync(join(root,'child'));writeFileSync(join(root,'child','TARGET.bound'),row('sample/title','id','child')+'\n');
+    const own=join(temp,'own.bound');writeFileSync(own,row('sample/own','id','child-act')+'\n');
+    const ownSigned=run(['sign',own,'--place','child','--key','owner','--key-file',key]);assert.equal(ownSigned.status,0,ownSigned.stderr);
+    writeFileSync(own,ownSigned.stdout.split('\n').filter(line=>parse(line).kind==='fact').join('\n')+'\n');
+    const ownLand=run(['land',own,'--place','child']);assert.equal(ownLand.status,0,ownLand.stdout+ownLand.stderr);
+    const ownIdentity=/^ACT (\S+)/m.exec(ownLand.stdout)?.[1];assert.ok(ownIdentity,ownLand.stdout);
+    const ownQuery=run(['fold','--as','act',ownIdentity]);assert.equal(ownQuery.status,0,ownQuery.stdout+ownQuery.stderr);assert.match(ownQuery.stdout,/value=child-act/);
+    const ownReplay=run(['land',own,'--place','child']);assert.equal(ownReplay.status,0,ownReplay.stderr);assert.match(ownReplay.stdout,/ONCE/);assert.ok(ownReplay.stdout.includes(ownIdentity));
+    const retire=join(temp,'retire.bound');
+    writeFileSync(retire,[row('keys/device','class','withdraw'),row('keys/folder','class','withdraw'),row('keys/replacement','class','fold'),row('wire/act-result-context','id','receipt:changed')].join('\n')+'\n');
+    const retired=run(['land',retire,'--key','owner','--key-file',key]);assert.equal(retired.status,0,retired.stdout+retired.stderr);
+    const historical=run(['fold','--as','act',identity]);assert.equal(historical.status,0,historical.stdout+historical.stderr);assert.equal(historical.stdout,query.stdout,'historical result survives retirement and changed profile');
+    const refused=run(['sign',next,'--key','device','--key-file',deviceKey]);assert.notEqual(refused.status,0,'retired evidence never authorizes a new act');assert.match(refused.stderr,/device/);
+    console.log('HISTORY '+place+' · original result retained · retired key cannot sign new delivery');
+    const missing=run(['fold','--as','act','sha256:'+'0'.repeat(64)]);assert.equal(missing.status,1);assert.match(missing.stderr,/REFUSE·act no committed result/);
+    console.log(query.stdout.trim());console.log(`ONCE ${place} · same identity and epoch · public result unchanged`);
+    if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE+'.'+place+'.json',JSON.stringify(captures,null,2)+'\n');
+  }finally{rmSync(temp,{recursive:true,force:true});}
+});

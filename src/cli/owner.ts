@@ -1,3 +1,4 @@
+import {committedLocalActs} from '../host/ports/local-act.ts';
 import {fileURLToPath} from 'node:url';
 import {ingressReceipts} from '../host/ports/ingress.ts';
 import {readOnly} from '../host/read-only.ts';
@@ -12,7 +13,7 @@ import { authorityFor, releaseSigner, rootSigner } from '../fold/signers.ts';
 import { storeRoot } from '../host/ports/store.ts';
 import { blobAt, landBlob, ledgerLines, storeOf } from '../land/ledger.ts';
 import { observeText } from '../observe/files.ts';
-import {appliedIn} from '../fold/signed.ts';
+import {appliedHistoryIn} from '../fold/signed.ts';
 import { everLanded, inside, locationsOf } from '../land/vouched.ts';
 import { renderTarget } from '../render/target.ts';
 
@@ -67,7 +68,7 @@ export function localActLines(root: string, placed: readonly string[] = []): rea
       if(fieldOf(receipt,'scope')!=='receipts'||fieldOf(receipt,'role')!=='writes'||fieldOf(receipt,'form')!=='alphabet'||fieldOf(receipt,'measure')!=='digest'||authority.of(receipt).kind!=='admitted')throw Error('REFUSE·ingress local import receipt is not admitted');
     }
   }
-  return [...local,...receipts,...placed.flatMap(place=>appliedIn(root,place))];
+  return [...local,...receipts,...committedLocalActs(store).map(act=>act.bundle.receipt.trim()),...placed.flatMap(place=>appliedHistoryIn(root,place))];
 }
 
 export function epochOf(lines: readonly string[]): number {

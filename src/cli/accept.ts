@@ -1,3 +1,4 @@
+import {commitLocalAct,intactLocalAct,committedLocalActs} from '../host/ports/local-act.ts';
 import {withoutEffects} from '../host/read-only.ts';
 import {selectedWireAt} from '../host/selected-topos.ts';
 import { timing } from '../host/timing.ts';
@@ -6,7 +7,7 @@ import { existsSync, rmdirSync, rmSync } from 'node:fs';
 import { dirname, join, basename } from 'node:path';
 import { closeReceipts, instrumentKeep, instrumentKept } from '../fold/closed.ts';
 import { bytesDigest, fullDigest, instrumentOf, signaturesOf } from '../fold/digests.ts';
-import { canonical, fromLine, LOCK, parse } from '@lapxo/topos/wire';
+import { canonical, fromLine, LOCK, parse, actIdentity, actResultProfile } from '@lapxo/topos/wire';
 import { fieldOf, isConfig, foldClaims, sayingOf, selfName } from '../fold/claims.ts';
 import { isReaderLock } from '../fold/observed.ts';
 import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signers.ts';
@@ -43,7 +44,7 @@ import { FLAGS } from './names.ts';
 import { judgeDemand, landTake } from './takes.ts';
 import type { Judged } from './takes.ts';
 
-export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly epoch: number; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
+export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly records?:readonly string[]; readonly epoch: number; readonly base: { readonly digest: string; readonly places: readonly string[] }; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
 
 /** Admission reads an existing evidence snapshot; acquiring observations belongs to fold. */
 function admissionEvidence(root: string, signed: readonly string[], standing: readonly string[]) {
@@ -133,7 +134,9 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     process.stderr.write(`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
     return {kind:'exit',code:2};
   }
-  const epoch = epochOf(localActLines(root,destinations)) + 1;
+  const local = localActLines(root, destinations);
+  const base = { digest: fullDigest(store, local), places: destinations };
+  const epoch = epochOf(local) + 1;
   const stale = proposed.filter((line) => fieldOf(line, 'sig')).flatMap((line) => ((by, key) => (key === undefined || !verifiesOwnerLine(line, key, signaturesOf(store).admitted)
     ? [`${fieldOf(line, 'scope')} · the signature does not hold for ${by || '∅'}`]
     : []))(fieldOf(line, 'by'), publicKeyOf(root, fieldOf(line, 'by'))));
@@ -224,7 +227,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>process.stdout.write(text+'\n'));}catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
   try { admissionEvidence(root, ownership.ledger, lockStanding(store)); }
   catch(error) {process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return {kind:'exit',code:1};}
-  return { kind: 'signed', signed, epoch, ...(drafted.length ? { keyId } : {}) };
+  return { kind: 'signed', signed, epoch, base, ...(drafted.length ? { keyId } : {}) };
 }
 
 /**
@@ -258,7 +261,7 @@ export async function accept(root: string, args: readonly string[]): Promise<num
   const where = every ? 'every place · then the root, where the places join' : regions.length ? regions.map((one) => `${one}/`).join(' · ') : 'the root alone, where the places join';
   process.stdout.write(`ACTS     ${where} · ${owned.ledger.length} lines to the ledger${[...owned.own].map(([place, lines]) => ` · ${lines.length} to ${place}'s own lock`).join('')} · before the lock\n`);
   const asked = Date.now();
-  return underTheRegions(store, every ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger }, started, owned, asked, regions));
+  return underTheRegions(store, every ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger, records:batch.signed }, started, owned, asked, regions));
 }
 
 async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 'signed' }>, started: number, owned: Owned, asked = started, descent: readonly string[] = []): Promise<number> {
@@ -268,6 +271,11 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const took = timing(spent);
   const { signed, epoch } = batch;
   const store = storeOf(root);
+  const currentBase = fullDigest(store, localActLines(root, batch.base.places));
+  if (currentBase !== batch.base.digest) {
+    process.stderr.write(`${selfName()}: REFUSE·base moved ${batch.base.digest} → ${currentBase} · nothing landed\n`);
+    return 1;
+  }
   if(signed.some(line=>!isConfig(line))) {
     try {await admittedObjects(root,[...signedOwnerLines(store),...signed]);}
     catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return 1;}
@@ -306,8 +314,26 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const told = took('told', () => standingOf(root, undefined, signed));
   for (const name of openedBy(descent, told.standing, signed)) process.stderr.write(`OPEN     ${name}\n`);
   if (owned.own.size) layReleases(store, root, told.standing, store);
-  const landed = took('land', () => [...new Set(signed.map((line) => fieldOf(line, 'by')))].map((by) => land(store, by, signed.filter((line) => fieldOf(line, 'by') === by))));
-  for (const [place, lines] of owned.own) landOwned(root, place, lines);
+  const resultProfile=actResultProfile(snapshot.standing);
+  let landed:readonly {at:string;appended:number}[]=[];
+  if(resultProfile){
+    const records=batch.records??signed;
+    const placements=[...(signed.length?[{place:'.',records:signed}]:[]),...[...owned.own].map(([place,records])=>({place:`${place}/${LOCK}`,records}))];
+    const digest=(bytes:string)=>bytesDigest(store,new TextEncoder().encode(bytes));
+    const identity=actIdentity(records,{...resultProfile,digest,placements,localEpoch:epoch});
+    const folder=writerFor(snapshot.standing,'fold');
+    if(!folder)throw Error('REFUSE·act native result requires a declared fold identity');
+    const receipt=canonical({scope:resultProfile.scope,at:resultProfile.context,role:'writes',form:'alphabet',measure:'digest',value:identity,by:folder,epoch:String(epoch)});
+    const bundle={records:records.join('\n')+'\n',receipt:receipt+'\n',placements:placements.map(p=>({place:p.place,records:p.records.join('\n')+'\n'}))};
+    await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct);
+    // Commitment precedes projections and conformance work. If either fails,
+    // this public identity still names the admitted act; it is never rollback.
+    process.stdout.write(`ACT ${identity} · epoch ${epoch} · admitted · conformance not asserted\n`);
+    for(const line of records)process.stdout.write(line+'\n');
+    process.stdout.write(receipt+'\n');
+    landed=[{at:'committed act '+identity,appended:records.length}];
+  }else landed=took('land',()=>[...new Set(signed.map(line=>fieldOf(line,'by')))].map(by=>land(store,by,signed.filter(line=>fieldOf(line,'by')===by))));
+  for (const [place, lines] of owned.own) landOwned(root, place, lines,resultProfile!==undefined);
   landSaid(store, writerFor(told.standing, 'fold'), []);
   for (const line of signed) {
     const value = fieldOf(line, 'value');
@@ -368,6 +394,8 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
  */
 function repaid(root: string, proposed: readonly string[], started: number): number {
   const store = storeOf(root);
+  const prior=committedLocalActs(store).find(act=>{const lines=act.bundle.records.trimEnd().split('\n');return lines.length===proposed.length&&lines.every((line,i)=>line===proposed[i])});
+  if(prior){process.stdout.write(`ACT ${prior.identity} · epoch ${fieldOf(prior.bundle.receipt.trim(),'epoch')} · admitted · replay\n`+prior.bundle.records+prior.bundle.receipt);}
   const asked = new Set(proposed.filter((line) => fieldOf(line, 'role') === 'demands').map((line) => fieldOf(line, 'scope')));
   const view = `${wordOf(foldClaims(signedOwnerLines(store)).standing, 'families', 'view')}/`;
   const standingAsked = signedDemands(store).filter((line) => asked.has(fieldOf(line, 'scope')) && !fieldOf(line, 'scope').startsWith(view));

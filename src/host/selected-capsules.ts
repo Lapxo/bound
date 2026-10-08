@@ -25,10 +25,10 @@ export function selectedCapsules(pins: readonly string[], resolve: typeof capsul
     const descriptor=capsuleDescriptor(topos,offer.scope??'');
     const loaded=descriptor===undefined?load():undefined;
     const capsule:Capsule=loaded?.capsule??{
-      digest:offer.value!,selection:`${digest} ${offer.scope}`, ...descriptor!,ask:requests=>{
+      digest:offer.value!,selection:`${digest} ${offer.scope}`, ...descriptor!,ask:(requests,reader)=>{
         if(!requests.length)return [];
         const actual=load();assertCapsuleDescriptor(descriptor!.lines,actual.capsule.lines);
-        return actual.capsule.ask(requests);
+        return actual.capsule.ask(requests,reader);
       },
     };
     const projected=loaded?.offer??canonical(offer);
@@ -36,10 +36,10 @@ export function selectedCapsules(pins: readonly string[], resolve: typeof capsul
     const fields=ownLock().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];});
     const wire=wireAt(fields,Number.MAX_SAFE_INTEGER),algorithm=wire&&[...wire.digests][0];
     if(!algorithm)throw Error('REFUSE·input instrument has no admitted digest algorithm');
-    const selected:Capsule={...capsule,selection:`${digest} ${offer.scope}`,ask:requests=>capsule.ask(requests.map(request=>{
+    const selected:Capsule={...capsule,selection:`${digest} ${offer.scope}`,ask:(requests,reader)=>capsule.ask(requests.map(request=>{
       const provider=providerInputs(topos,digest,offer.scope??'',offer.value!,request.region??'',bytes=>fullDigest(bytes,algorithm));
       return provider===undefined?request:{...request,provider};
-    }))};
+    }),reader)};
     return {capsule:selected,offer:projected};
   }));
 }

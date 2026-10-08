@@ -1,8 +1,8 @@
-import {randomUUID} from 'node:crypto';
-import {closeSync,existsSync,fsyncSync,mkdirSync,openSync,readFileSync,readdirSync,renameSync,rmSync,writeFileSync} from 'node:fs';
+import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {requireEffects} from '../read-only.ts';
 import {underTheLock} from '../../land/act.ts';
+import {nativePublicationStorage,publishBundle} from './publication.ts';
 
 /** Prepared by the admitted Topos contract and receiver signer. The host does not infer origins, coverage or epochs. */
 export interface IngressBundle {readonly evidence: string; readonly receipt: string}
@@ -10,10 +10,8 @@ export interface IngressResult extends IngressBundle {readonly kind: 'landed' | 
 export interface IngressStorage {
  publish(staged: string, committed: string): void;
 }
-const syncDirectory = (path: string): void => {const fd=openSync(path,'r');try{fsyncSync(fd)}finally{closeSync(fd)}};
-const durableFile = (path: string, text: string): void => {const fd=openSync(path,'wx',0o600);try{writeFileSync(fd,text);fsyncSync(fd)}finally{closeSync(fd)}};
 /** Directory publication makes the pair visible together; there is no later ledger append that can expose half. */
-export const nativeIngressStorage: IngressStorage = {publish(staged,committed){renameSync(staged,committed);syncDirectory(join(committed,'..'))}};
+export const nativeIngressStorage: IngressStorage = nativePublicationStorage;
 const directory = (store: string): string => join(store,'ingress');
 const nameOf = (identity: string): string => {
  if(!identity||identity.includes('\0'))throw Error('REFUSE·ingress missing import identity');
@@ -48,14 +46,7 @@ export async function commitIngress(store: string, identity: string,
   if(existsSync(at)){const prior=read(at);if(verify(prior)!==true)throw Error('REFUSE·ingress committed bytes do not verify');return measured('once',prior)}
   const bundle=await prepare(ingressReceipts(store));
   if(!bundle.evidence||!bundle.receipt||verify(bundle)!==true)throw Error('REFUSE·ingress evidence and receipt do not verify');
-  mkdirSync(root,{recursive:true});
-  const staged=join(root,'.stage-'+randomUUID());mkdirSync(staged,{mode:0o700});
-  try {
-   durableFile(join(staged,'evidence.bound'),bundle.evidence);
-   durableFile(join(staged,'receipt.bound'),bundle.receipt);
-   syncDirectory(staged);
-   storage.publish(staged,at);
-  }finally{rmSync(staged,{recursive:true,force:true})}
+  publishBundle(at,{'evidence.bound':bundle.evidence,'receipt.bound':bundle.receipt},storage);
   return measured('landed',bundle);
  });
 }

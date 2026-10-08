@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,rmSync,writeFileSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {test} from 'node:test';
 import {canonical} from '@lapxo/topos/wire';
-import {instrumentDigest} from '../src/fold/digests.ts';
+import {instrumentCoordinates,instrumentDigest} from '../src/fold/digests.ts';
 
 test('implementation identity follows compiled imports, package exports and declared subprocesses, independently of location', () => {
   const root=mkdtempSync(join(tmpdir(),'bound-implementation-'));
@@ -29,5 +29,22 @@ test('implementation identity follows compiled imports, package exports and decl
     const third=digest(); assert.notEqual(third,second,'a declared child process is implementation');
     writeFileSync(join(root,'helper.js'),'export const helper=200;\n');
     assert.notEqual(digest(),third,'a literal dynamic import is implementation');
+  } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+test('implementation follows loader aliases without merging distinct equal-byte modules', () => {
+  const root=mkdtempSync(join(tmpdir(),'bound-module-alias-'));
+  try {
+    const store=join(root,'.bound');
+    writeFileSync(join(root,'TARGET.bound'),canonical({scope:'wire/digest-algorithms',role:'writes',form:'alphabet',measure:'id',value:'sha256',by:'target',at:'policy:wire'})+'\n');
+    mkdirSync(join(root,'modules'));
+    writeFileSync(join(root,'modules','one.js'),'export const value=1;\n');
+    symlinkSync(join(root,'modules'),join(root,'alias'),'dir');
+    const entry=join(root,'entry.js');
+    writeFileSync(entry,'import "./modules/one.js"; import "./alias/one.js";\n');
+    assert.equal(instrumentCoordinates(store,entry,[],root).size,2);
+    writeFileSync(join(root,'modules','two.js'),'export const value=1;\n');
+    writeFileSync(entry,'import "./modules/one.js"; import "./modules/two.js";\n');
+    assert.equal(instrumentCoordinates(store,entry,[],root).size,3);
   } finally {rmSync(root,{recursive:true,force:true});}
 });
