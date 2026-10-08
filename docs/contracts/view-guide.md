@@ -1,3 +1,0 @@
-# Guide — historical profile
-
-The declared view asks seq from the pinned historical document provider. The place owns page/seq lines and their heading. Canonical input order supplies the steps; the provider numbers that order and writes the requested shape. The executable sample uses two unrelated procedures, checks their complete Markdown and reads each view twice without differences. A declared view with an unoffered region refuses by name. An empty step set may have an empty answer; it is not invented evidence. A rendered instruction does not prove that instruction was executed. The implementation bytes remain the existing pinned profile, not a document grammar inside Bound.

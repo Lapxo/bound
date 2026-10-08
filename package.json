@@ -31,7 +31,9 @@
     "tools/samples/*.mjs",
     "samples/walk/*.json",
     "vectors/native-walk.json",
-    "docs/contracts/**/*",
+    "docs/contracts/*.md",
+    "docs/contracts/*.publication.json",
+    "docs/contracts/publication.inventory.json",
     "samples/yes/typed-object.json",
     "samples/no/typed-object.json",
     "samples/yes/attest-evidence.json",
@@ -65,9 +67,9 @@
     "samples/yes/walk.json",
     "samples/no/walk.json",
     "vectors/walk-publication.json",
-    "samples/yes/015-stage-10.json",
-    "vectors/015-stage-10.json",
-    "samples/no/015-stage-10.json"
+    "samples/yes/archive-conformance.json",
+    "vectors/archive-conformance.json",
+    "samples/no/archive-conformance.json"
   ],
   "author": "Lapxo",
   "license": "MIT",

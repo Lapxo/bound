@@ -8,8 +8,8 @@
       "program": "runtime",
       "args": [
         "tools/samples/run-archive.mjs",
-        "samples/yes/015-stage-10.json",
-        "samples/no/015-stage-10.json"
+        "samples/yes/archive-conformance.json",
+        "samples/no/archive-conformance.json"
       ],
       "cwd": ".",
       "timeoutMs": 15000,
@@ -39,8 +39,8 @@
       ],
       "inputs": [
         "tools/samples/run-archive.mjs",
-        "samples/yes/015-stage-10.json",
-        "samples/no/015-stage-10.json"
+        "samples/yes/archive-conformance.json",
+        "samples/no/archive-conformance.json"
       ]
     }
   ]

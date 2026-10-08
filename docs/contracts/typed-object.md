@@ -26,7 +26,7 @@ The cell's `topos` names folded standing, and its `params` identifies declared p
 
 After admission, the instrument projects the acts into Obligations. Sign and require travel along declared rest; a witnessed join is local. Descendants inherit travelling marks without local widening. Live exact-ID withdrawals remain confined to their authenticated history. Keys, snapshots, signing devices and repeated receipts do not create independent origins. Compatible meets are not forks. Object states and their precedence come from Obligations; configuration folds do not compute object encounters.
 
-The package's `samples/walk/interval.json`, `interval.no.json`, `alphabet.json` and `alphabet.no.json` carry exact historical wire declarations and signed positive/negative exchange records. They are examples of declared profiles, not a production activation epoch or a promise that their keys authorize another place. Host-native object output remains a separate product vector.
+The shipped `samples/typed/wire.json` declares the reference grammar. The interval and alphabet places in `samples/typed` exercise distinct forms through the same admission path. Their fixture authority does not authorize another place.
 
 ## Running the published place
 

@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/cli-land.md",
-      "digest": "sha256:6872833e6f7bb9a5d7ed040c197e6cb306dda978a28fd4b286fa3e2bd5589228"
+      "path": "docs/contracts/cli.md",
+      "digest": "sha256:97cddb7dac0c426b40c51d852d6176ae8f389351cc3366206f8acb0e58c7117a"
     },
     {
       "role": "yes",

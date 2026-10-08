@@ -1,3 +1,0 @@
-# Citation file — historical profile
-
-The declared view asks the pinned document provider for cff at resolution 3. It projects the place name, version and optional citation metadata into CFF text. The sample uses the exact implementation member from the admitted historical artifact, names its hash and license, and exercises two unrelated places through the compiled CLI. It checks complete citation bytes and two equal readings; title and version follow each place. An unoffered region refuses by view name. Missing optional metadata is omitted; missing name can produce an empty answer under this historical profile. Rendering is not verification of a scientific claim or an external DOI. This pinned profile does not implement the pending general document contract.

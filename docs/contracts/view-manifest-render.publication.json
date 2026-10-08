@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/view-manifest-render.md",
-      "digest": "sha256:ce6f18c8ceb8fb732af44375139fc26104550f874cc3131db383af8a0c73540c"
+      "path": "docs/contracts/documents.md",
+      "digest": "sha256:a22d9b27c7be1c168ea985d703a9c86c19157c8e24193e7dcc34d3f33ea44375"
     },
     {
       "role": "yes",

@@ -1,3 +1,0 @@
-# README — historical profile
-
-The declared view selects hero@3, commands@3 and idea@3 from the byte-pinned historical document provider. The place supplies its name, tagline, language, sentence rule and idea. Commands and measured badges are absent in the sample: no command, number or success is invented to fill them. Two unrelated places check the generated README, a second unchanged product fold and the named view; a declared unoffered region refuses by name. The implementation member is verified against the admitted historical artifact. This quartet proves the selected prose profile, not command execution, badges with measured values or a general document grammar. The eight text@3 demands remain unpaid.

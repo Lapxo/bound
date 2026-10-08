@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/cli-fold.md",
-      "digest": "sha256:588a70d9c20de5f34a26ce68074537605dda71bbaeb98643b25d96f6e9d6a8f3"
+      "path": "docs/contracts/cli.md",
+      "digest": "sha256:97cddb7dac0c426b40c51d852d6176ae8f389351cc3366206f8acb0e58c7117a"
     },
     {
       "role": "yes",

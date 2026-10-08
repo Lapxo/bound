@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/view-readme-historical.md",
-      "digest": "sha256:a13e1c60e2ebf362705b65cd2eaacb469371f38625f65b7e2b7e7dcf0ed644c7"
+      "path": "docs/contracts/documents.md",
+      "digest": "sha256:a22d9b27c7be1c168ea985d703a9c86c19157c8e24193e7dcc34d3f33ea44375"
     },
     {
       "role": "yes",

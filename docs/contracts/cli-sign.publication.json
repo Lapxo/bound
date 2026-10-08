@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/cli-sign.md",
-      "digest": "sha256:83eafc31e923994f262b78bcbac97d5d4a7701826d3420a9b3ad29ac427ade56"
+      "path": "docs/contracts/cli.md",
+      "digest": "sha256:97cddb7dac0c426b40c51d852d6176ae8f389351cc3366206f8acb0e58c7117a"
     },
     {
       "role": "yes",

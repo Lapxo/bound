@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/view-release-workflow-render.md",
-      "digest": "sha256:0ee65259e5ac8873431344f5c3977b7f9c38ea23887f31caae1229a097151bb2"
+      "path": "docs/contracts/documents.md",
+      "digest": "sha256:a22d9b27c7be1c168ea985d703a9c86c19157c8e24193e7dcc34d3f33ea44375"
     },
     {
       "role": "yes",

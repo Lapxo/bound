@@ -3,8 +3,8 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/view-tsconfig.md",
-      "digest": "sha256:7bd9dc32793491718589c92a3c844c5018b9252724ede1b8cd474b5d2e6779f4"
+      "path": "docs/contracts/documents.md",
+      "digest": "sha256:a22d9b27c7be1c168ea985d703a9c86c19157c8e24193e7dcc34d3f33ea44375"
     },
     {
       "role": "yes",

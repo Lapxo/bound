@@ -13,6 +13,32 @@ npx @lapxo/bound@0.1.5 fold
 
 Bound reads a project's admitted statements and observations through its selected Topos, then renders the declared views and records their inputs in receipts. The example below explains the object; a file-fold alone does not calculate its intervals.
 
+## Use Bound in a project
+
+From a project with an admitted lock and selected views, inspect its standing, ask for its evidence, then verify the committed outputs:
+
+```sh
+npx @lapxo/bound@0.1.5 fold --as lines
+npx @lapxo/bound@0.1.5 fold --as receipts@1
+npx @lapxo/bound@0.1.5 fold --check
+```
+
+Use this flow to review a project change or check a dependency's declared contract. `--check` verifies existing evidence; it does not execute a missing reading. A file fold names readings and explicitly says that it computed no encounters.
+
+For observations from independent origins, use the typed cells view. In the shipped interval example, B's travelling ceiling is `0..50` and its travelling floor is `40..*`. A witnessed local join widens B to `0..100` while C and G keep the travelling ceiling `0..50`. Observations `42..48` and `44..47` on C meet at `44..47`; the native view reads FREE. Withdrawing one exact claim leaves one origin and reads REQUIRED.
+
+Run the executable example with the installed CLI:
+
+```sh
+npm install @lapxo/bound@0.1.5
+node node_modules/@lapxo/bound/tools/samples/run-typed.mjs
+```
+
+The sample creates a temporary place with its own key and declared provider, signs and lands the exact sample records, then prints each `SCENE` and `CELL`. It includes both conflict causes, an encounter outside the bounds, exact-ID withdrawals and receipt reuse. It removes that temporary place afterwards; its key grants no authority to your project. [Typed records and sample](https://github.com/Lapxo/bound/blob/main/docs/contracts/typed-object.md).
+
+A selected form can instead describe a set of artifacts, a delivery interval or another domain's values. The project declares the form, origin evidence and views; Bound does not infer them from filenames or units.
+
+
 ## A meeting everyone can understand
 
 Ana is available from 10 to 14, Luis from 12 to 16, and the room from 10 to 13. Their common availability is 12 to 13. A boss available from 18 to 20 makes the encounter incompatible. Withdrawing that exact reading restores the overlap; Ana, Luis and the room remain.
@@ -97,3 +123,7 @@ A pin names standing, not a download URL or runtime entry. Its declared artifact
 Use Bound where independently attributed observations must be judged against an accepted contract: compatibility between components, operational limits, or a team's project requirements. The selected topos must supply the actual measurements; a digest identifies the evidence without declaring it true.
 
 [Contribute a counterexample or a proposed lot](CONTRIBUTING.md).
+
+## Foundations and related libraries
+
+The two-sided constraint object is described in Nahum Ochoa's [Two-Sided Constraints on a Valued Lattice](https://doi.org/10.5281/zenodo.21858428), DOI `10.5281/zenodo.21858428`. Bound uses the object through [Obligations](https://github.com/Lapxo/obligations); [Topos](https://github.com/Lapxo/topos) supplies the wire and contracts for forms, views and selected worlds. Bound admits, folds and retains evidence across those declared boundaries. A digest identifies bytes; it does not certify that an observation is true.

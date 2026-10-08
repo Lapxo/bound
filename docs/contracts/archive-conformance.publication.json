@@ -3,22 +3,22 @@
   "members": [
     {
       "role": "contract",
-      "path": "docs/contracts/015-stage-10.md",
+      "path": "docs/contracts/archive.md",
       "digest": "sha256:eedbd0ca544377080763c035053e532bfc46ddd496c3794e0cac2e0d6286e3a9"
     },
     {
       "role": "yes",
-      "path": "samples/yes/015-stage-10.json",
+      "path": "samples/yes/archive-conformance.json",
       "digest": "sha256:1e2a1ce055edb12da86e1ddbbf78e1f9cb910ad6fe14f57fc3e360751e604a4c"
     },
     {
       "role": "vector",
-      "path": "vectors/015-stage-10.json",
-      "digest": "sha256:a39cb8d552ccb7122b7d30d823238922f4f5ea5f68ea1a78f0c2fa6a3117a696"
+      "path": "vectors/archive-conformance.json",
+      "digest": "sha256:c9e9566f19db9feb6a8a7619315bdb19d66f2cd7bba90f911fc047b89f4ebd8f"
     },
     {
       "role": "no",
-      "path": "samples/no/015-stage-10.json",
+      "path": "samples/no/archive-conformance.json",
       "digest": "sha256:e14e5007e6b097be39964a749a09fb7143f652129869a8902743eee3ec9b89ea"
     }
   ]
