@@ -31,5 +31,6 @@
         "package.json"
       ]
     }
-  ]
+  ],
+  "execution": "independent"
 }

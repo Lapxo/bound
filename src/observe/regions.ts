@@ -7,13 +7,11 @@ import { CAPSULE, LOCK, canonical, matches, PROTOCOL } from '@lapxo/topos/wire';
 import { handed, readsOf } from '@lapxo/topos/capsule';
 import type { Declaration } from '@lapxo/topos/capsule';
 import type { Request } from '@lapxo/topos/contract';
-import { STATES } from '@lapxo/obligations';
 import { foldCeilings } from '../fold/ceilings.ts';
 import { fieldOf, wireLinesOf as linesOf } from '../fold/claims.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { keyFor } from '../fold/keys.ts';
 import { casesHeld, placedReadings } from '../fold/observed.ts';
-import { verdictsFor } from '../fold/paid.ts';
 import { capsuleAt as isWorld, placesIn, spoken } from '../fold/places.ts';
 import { rolesOf } from '../fold/roles.ts';
 import { ownLockOf } from '../fold/signed.ts';
@@ -86,9 +84,8 @@ function askedOf(fold: PlaceFold): readonly string[] {
     .map((name) => ((n) => fact(`asked/${name}`, `${n}..${n}`, 'interval', 'count'))(pinnersOf(fold).map(at).filter((names) => names.has(name)).length)) : [];
 }
 
-/** The place's verdict line as counts: what the fold lands, forks and refuses, each of the object's four states, and the ceilings it meets. */
+/** File-fold readings and their ceilings; this path computes no object encounters. */
 function verdictOf(fold: PlaceFold): readonly string[] {
-  const states = Object.values(verdictsFor(fold));
   const named = (line: string): readonly [string, string] => ((cut) => [line.slice(0, cut < 0 ? line.length : cut).trim(), line.slice(cut < 0 ? line.length : cut + 3).trim() || line] as const)(line.indexOf(' · '));
   const here = (fold.under ?? '').replace(/\/$/, '');
   const others = new Set(here ? placesIn(fold.root).filter((place) => place !== here) : []);
@@ -99,7 +96,8 @@ function verdictOf(fold: PlaceFold): readonly string[] {
     return !others.has(head);
   };
   return ([['claims', fold.claims], ['forks', fold.forks.length + (fold.second.verdict === 'forks' ? 1 : 0)], ['refused', fold.refused.length], ['vacuous', fold.vacuous], ['history', fold.history.length],
-    ['met', fold.ceilings.read], ['short', fold.ceilings.short.length], ['over', fold.ceilings.over.length], ...STATES.map((one) => [one, states.filter((state) => state === one).length])] as const).map(([name, n]) => fact(`verdict/${name}`, `${n}..${n}`, 'interval', 'count'))
+    ['met', fold.ceilings.read], ['short', fold.ceilings.short.length], ['over', fold.ceilings.over.length]] as const).map(([name, n]) => fact(`verdict/${name}`, `${n}..${n}`, 'interval', 'count'))
+    .concat([fact('verdict/computation', 'readings'), fact('verdict/encounters', 'uncomputed')])
     .concat(fold.ceilings.short.filter((one) => mine(named(one)[0])).map((one) => (([scope, reading]) => fact(`unpaid/${scope}`, reading))(named(one))))
     .concat(fold.ceilings.over.filter((one) => mine(named(one)[0])).map((one) => (([scope, reading]) => fact(`outside/${scope}`, reading))(named(one))))
     .concat(fold.ceilings.unread.filter(mine).map((scope) => fact(`unpaid/${scope}`, 'unread')))

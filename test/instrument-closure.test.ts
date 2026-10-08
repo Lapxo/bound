@@ -16,7 +16,8 @@ test('implementation identity follows compiled imports, package exports and decl
     writeFileSync(join(root,'node_modules','fixture-provider','package.json'),'{"type":"module","exports":"./index.js"}');
     const provider=join(root,'node_modules','fixture-provider','index.js');
     writeFileSync(provider,'export const value=1;\n');
-    writeFileSync(join(root,'entry.js'),'import "node:fs"; export {value} from "fixture-provider"; import("./helper.js");\n');
+    writeFileSync(join(root,'entry.js'),`import "node:fs"; export {value} from "fixture-provider"; import("./helper.js"); const record={scope: 'receipts/import', role: 'writes'}; const text="import 'missing-string'"; const pattern=/import 'missing-regex'/; // import 'missing-comment'
+`);
     writeFileSync(join(root,'helper.js'),'export const helper=1;\n');
     writeFileSync(join(root,'worker.js'),'export const worker=1;\n');
     const process=canonical({scope:'process/test',kind:'process',role:'writes',form:'alphabet',measure:'id',value:'present',needs:'worker.js',by:'target',at:'policy:process'});

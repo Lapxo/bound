@@ -1,0 +1,28 @@
+{
+  "algorithm": "sha256",
+  "packageProgram": "npm",
+  "timeoutMs": 5000,
+  "maxBytes": 1048576,
+  "places": [
+    {
+      "name": "specimen-index",
+      "version": "1.0.0",
+      "files": {
+        "README.md": "A specimen index.\n",
+        "LICENSE": "MIT License\n",
+        "entry.mjs": "console.log('specimens: stored');\n"
+      },
+      "stdout": "specimens: stored\n"
+    },
+    {
+      "name": "route-notes",
+      "version": "1.0.0",
+      "files": {
+        "README.md": "Route observations.\n",
+        "LICENSE": "MIT License\n",
+        "entry.mjs": "console.log('routes: recorded');\n"
+      },
+      "stdout": "routes: recorded\n"
+    }
+  ]
+}

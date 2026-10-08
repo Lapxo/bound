@@ -1,8 +1,10 @@
+import {fileURLToPath} from 'node:url';
+import {ingressReceipts} from '../host/ports/ingress.ts';
 import {readOnly} from '../host/read-only.ts';
 import { keyFor, lockLines, releaseOf, signedLockLines } from '../fold/keys.ts';
 import { existsSync, renameSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { bytesDigest, fullDigest, memoized, signaturesOf } from '../fold/digests.ts';
+import { bytesDigest, fullDigest, memoized, signaturesOf, instrumentDigest } from '../fold/digests.ts';
 import { claimKey, isConfig, fieldOf, foldClaims, LOCK, selfName } from '../fold/claims.ts';
 import { asksThePlace } from '../fold/configures.ts';
 import { receiptsIn } from '../fold/receipts.ts';
@@ -10,6 +12,7 @@ import { authorityFor, releaseSigner, rootSigner } from '../fold/signers.ts';
 import { storeRoot } from '../host/ports/store.ts';
 import { blobAt, landBlob, ledgerLines, storeOf } from '../land/ledger.ts';
 import { observeText } from '../observe/files.ts';
+import {appliedIn} from '../fold/signed.ts';
 import { everLanded, inside, locationsOf } from '../land/vouched.ts';
 import { renderTarget } from '../render/target.ts';
 
@@ -53,6 +56,18 @@ export function signedDemands(store: string, root = resolve('.')): string[] {
 export function forkedScopes(store: string): Set<string> {
   const lines = signedOwnerLines(store);
   return new Set(foldClaims(lines, forkReceipts(store, lines)).forks.flatMap((f) => f.lines.map((line) => fieldOf(line, 'scope'))));
+}
+
+/** Import receipts are local acts; foreign evidence and sender epochs never enter this input. */
+export function localActLines(root: string, placed: readonly string[] = []): readonly string[] {
+  const store=storeOf(root),local=lockLines(store),receipts=ingressReceipts(store);
+  if(receipts.length){
+    const authority=authorityFor(local,rootSigner(root),signaturesOf(store).admitted);
+    for(const receipt of receipts){
+      if(fieldOf(receipt,'scope')!=='receipts'||fieldOf(receipt,'role')!=='writes'||fieldOf(receipt,'form')!=='alphabet'||fieldOf(receipt,'measure')!=='digest'||authority.of(receipt).kind!=='admitted')throw Error('REFUSE·ingress local import receipt is not admitted');
+    }
+  }
+  return [...local,...receipts,...placed.flatMap(place=>appliedIn(root,place))];
 }
 
 export function epochOf(lines: readonly string[]): number {
@@ -108,7 +123,7 @@ export function renderedLock(root: string, store: string, told: readonly string[
   }
   const anchor = [join(storeRoot(root), `${selfName()}.keys`), join(storeOf(root), `${selfName()}.keys`)].map((at) => observeText(at) ?? '').join('\n');
   const judged = ledgerLines(store, 'judge');
-  const key = `lock ${fullDigest(store, [new Date().toISOString().slice(0, 10), anchor, `${judged.length} ${judged.at(-1) ?? ''}`, ...owned])}`;
+  const key = `lock ${fullDigest(store, [instrumentDigest(store, fileURLToPath(import.meta.url), [], root), new Date().toISOString().slice(0, 10), anchor, `${judged.length} ${judged.at(-1) ?? ''}`, ...owned])}`;
   const held = memoized(store, key, () => {
     const bytes = new TextEncoder().encode(JSON.stringify(render()));
     const digest = bytesDigest(store, bytes);

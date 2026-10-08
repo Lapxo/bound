@@ -1,0 +1,11 @@
+{
+  "view": "unoffered",
+  "region": "not-offered",
+  "conflict": {
+    "path": "disagreement.txt",
+    "bodies": [
+      "One reading.\n",
+      "Another reading.\n"
+    ]
+  }
+}

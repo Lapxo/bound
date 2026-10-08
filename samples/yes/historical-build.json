@@ -1,0 +1,78 @@
+{
+  "profile": "historical-build@1",
+  "providerSource": "var __defProp = Object.defineProperty;\nvar __getOwnPropDesc = Object.getOwnPropertyDescriptor;\nvar __getOwnPropNames = Object.getOwnPropertyNames;\nvar __hasOwnProp = Object.prototype.hasOwnProperty;\nvar __export = (target, all) => {\n  for (var name in all)\n    __defProp(target, name, { get: all[name], enumerable: true });\n};\nvar __copyProps = (to, from, except, desc) => {\n  if (from && typeof from === \"object\" || typeof from === \"function\") {\n    for (let key of __getOwnPropNames(from))\n      if (!__hasOwnProp.call(to, key) && key !== except)\n        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });\n  }\n  return to;\n};\nvar __toCommonJS = (mod) => __copyProps(__defProp({}, \"__esModule\", { value: true }), mod);\n\n// src/index.ts\nvar index_exports = {};\n__export(index_exports, {\n  render: () => render\n});\nmodule.exports = __toCommonJS(index_exports);\n\n// node_modules/@lapxo/topos/dist/capsule/asked.js\nvar of = (line, field) => line?.[field] ?? \"\";\nvar found = (asked, scope) => asked.lines.find((line) => of(line, \"scope\") === scope);\nvar value = (asked, scope) => found(asked, scope) === void 0 ? void 0 : of(found(asked, scope), \"value\");\nvar listed = (asked, scope) => (value(asked, scope) ?? \"\").split(\"|\").filter(Boolean);\nvar lang = (asked) => value(asked, \"lang\") ?? \"\";\nvar at = (asked, scope) => ((line) => line === void 0 ? void 0 : of(line, \"value\"))(asked.lines.find((line) => of(line, \"scope\") === scope && of(line, \"shape\") === asked.shape));\nvar under = (asked, head) => asked.lines.filter((line) => of(line, \"shape\") === asked.shape && (of(line, \"scope\") === head || of(line, \"scope\").startsWith(`${head}/`))).map((line) => [of(line, \"scope\").slice(head.length + (of(line, \"scope\") === head ? 0 : 1)), of(line, \"value\")]).sort((a, b) => a[0] === \"\" ? -1 : b[0] === \"\" ? 1 : a[0].localeCompare(b[0]));\nvar json = (held) => `${JSON.stringify(held, null, 2)}\n`.split(\"\\n\").slice(0, -1);\nvar truth = (text) => text === \"true\" ? true : text === \"false\" ? false : text;\nvar sentence = (asked, text) => {\n  const rule = listed(asked, `form/prose/${lang(asked)}/sentence`);\n  let end = text.length;\n  while (end > 0 && \".;:, \\n\".includes(text.charAt(end - 1)))\n    end -= 1;\n  const start = rule.includes(\"capital\") ? `${text.charAt(0).toUpperCase()}${text.slice(1, end)}` : text.slice(0, end);\n  return rule.includes(\"period\") ? `${start}.` : start;\n};\n\n// node_modules/@lapxo/topos/dist/capsule/shell.js\nfunction shell(regions) {\n  return (asked) => {\n    const one = regions[asked.region];\n    if (one === void 0)\n      throw new Error(`REFUSE\\xB7region ${asked.region}: no line of this capsule renders it`);\n    const short = one.reads.filter((read) => !asked.reads.includes(read));\n    if (short.length)\n      throw new Error(`REFUSE\\xB7region ${asked.region}: handed less than it declares, without ${short.join(\" \\xB7 \")}`);\n    return one.region(asked);\n  };\n}\n\n// src/regions/build.ts\nvar build = (asked) => {\n  const options = under(asked, \"build\").filter(([name]) => name !== \"\");\n  const include = options.find(([name]) => name === \"include\")?.[1];\n  return json({ compilerOptions: Object.fromEntries(options.filter(([name]) => name !== \"include\").map(([name, held]) => [name, truth(held)])), ...include === void 0 ? {} : { include: include.split(\"|\") } });\n};\n\n// src/regions/manifest.ts\nvar versioned = (text) => Object.fromEntries((text ?? \"\").split(\"|\").filter(Boolean).map((one) => [one.slice(0, one.lastIndexOf(\"@\")), one.slice(one.lastIndexOf(\"@\") + 1)]));\nvar manifest = (asked) => {\n  const [subpaths, bins, source, what] = [under(asked, \"exports\"), under(asked, \"bin\").filter(([name]) => name !== \"\"), at(asked, \"source\"), found(asked, `prose/${lang(asked)}/what`)];\n  const resolved = (built) => ({ ...source ? { source: `./${source}${built.slice(built.indexOf(\"/\"))}.ts` } : {}, types: `./${built}.d.ts`, default: `./${built}.js` });\n  const [repository, kind, side] = [at(asked, \"repository\"), at(asked, \"type\"), at(asked, \"sideEffects\")];\n  return json({\n    name: at(asked, \"name\"),\n    version: at(asked, \"version\"),\n    description: what === void 0 ? void 0 : sentence(asked, of(what, \"about\")),\n    ...kind ? { type: kind } : {},\n    license: at(asked, \"license\"),\n    author: at(asked, \"author\"),\n    ...repository ? { repository: { type: \"git\", url: `git+${repository}.git` } } : {},\n    keywords: (at(asked, \"keywords\") ?? \"\").split(\"|\").filter(Boolean),\n    ...side === void 0 ? {} : { sideEffects: truth(side) },\n    engines: { node: at(asked, \"engines\") },\n    exports: { ...Object.fromEntries(subpaths.map(([sub, built]) => [sub === \"\" ? \".\" : `./${sub}`, resolved(built)])), [`./${asked.shape}`]: `./${asked.shape}` },\n    ...bins.length ? { bin: Object.fromEntries(bins.map(([name, built]) => [name, `./${built}.js`])) } : {},\n    files: listed(asked, \"audit/wire/ships\"),\n    scripts: Object.fromEntries(under(asked, \"scripts\").filter(([name]) => name !== \"\")),\n    ...at(asked, \"dependencies\") === void 0 ? {} : { dependencies: versioned(at(asked, \"dependencies\")) },\n    ...at(asked, \"devDependencies\") === void 0 ? {} : { devDependencies: versioned(at(asked, \"devDependencies\")) }\n  });\n};\n\n// src/regions/published-manifest.ts\nvar publishedManifest = (asked) => {\n  const held = JSON.parse(manifest(asked).join(\"\\n\"));\n  for (const one of Object.values(held[\"exports\"])) if (typeof one === \"object\" && one !== null) delete one[\"source\"];\n  return json(held);\n};\n\n// src/index.ts\nvar render = shell({\n  build: { reads: [\"build/**\"], region: build },\n  manifest: { reads: [\"name\", \"version\", \"type\", \"license\", \"author\", \"repository\", \"keywords\", \"sideEffects\", \"engines\", \"exports/**\", \"bin/**\", \"scripts/**\", \"dependencies\", \"devDependencies\", \"source\", \"lang\", \"prose/*/what\", \"form/prose/*/sentence\", \"audit/wire/ships\"], region: manifest },\n  \"published-manifest\": { reads: [\"name\", \"version\", \"type\", \"license\", \"author\", \"repository\", \"keywords\", \"sideEffects\", \"engines\", \"exports/**\", \"bin/**\", \"scripts/**\", \"dependencies\", \"devDependencies\", \"source\", \"lang\", \"prose/*/what\", \"form/prose/*/sentence\", \"audit/wire/ships\"], region: publishedManifest }\n});\n// Annotate the CommonJS export names for ESM import in node:\n0 && (module.exports = {\n  render\n});\n",
+  "providerDigest": "sha256:53c974b95957f654f13398bd6b2f781cb4b86f9f93a54d7a59fb2e4d38a7e017",
+  "provenance": {
+    "artifact": "sha256:384a74b07eb8c7235e584b2801dbda1d78acd7ef6dac933ab05400a40658c55b",
+    "member": "dist/index.js",
+    "fixtureOnly": true
+  },
+  "regions": [
+    {
+      "name": "build",
+      "reads": "build/**"
+    }
+  ],
+  "wire": [
+    [
+      "fields",
+      "scope|role|form|measure|value|by|at|epoch|sig|needs|shape|about|kind|restsOn"
+    ],
+    [
+      "required",
+      "scope|role|form|measure|value|by|at"
+    ],
+    [
+      "forms",
+      "alphabet|interval"
+    ],
+    [
+      "families",
+      "keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|prose|uses|dep|name|version|author|repository|license|lang|form|page|term|sources|build"
+    ],
+    [
+      "roles",
+      "reads|writes|demands"
+    ],
+    [
+      "at-classes",
+      "policy|place|origin|witness|receipt"
+    ],
+    [
+      "era",
+      "sample"
+    ],
+    [
+      "signature-algorithms",
+      "ed25519:sample"
+    ],
+    [
+      "digest-algorithms",
+      "sha256"
+    ],
+    [
+      "region-measures",
+      "coordinates|leaves|reads|receipts"
+    ]
+  ],
+  "places": [
+    {
+      "name": "sensor-types",
+      "options": {
+        "target": "ES2022",
+        "strict": "true",
+        "declaration": "true",
+        "include": "src/**/*.ts|types/**/*.ts"
+      }
+    },
+    {
+      "name": "route-types",
+      "options": {
+        "target": "ES2020",
+        "strict": "false",
+        "module": "NodeNext",
+        "include": "lib/**/*.ts"
+      }
+    }
+  ]
+}

@@ -7,9 +7,9 @@ import type { PlaceFold } from './place.ts';
 import { fieldOf, selfName } from '../fold/claims.ts';
 import { observedClaims } from '../fold/observed.ts';
 import { layReleases, resolvedOf } from '../host/release.ts';
-import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
+import { ownLock, ownRoot, processOf } from '../observe/runner.ts';
 import { landLaid } from '../fold/laid.ts';
-import { actSeconds, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
+import { actSeconds, closeReceipts, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
 import { algorithmCost, instrumentOf, instrumentDigest } from '../fold/digests.ts';
 import { writerFor } from '../fold/signers.ts';
 import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
@@ -26,6 +26,7 @@ import { releasePolicyLines } from '../fold/release-policy.ts';
 import { carriedFrom } from '../fold/resolved.ts';
 import { wireLine } from '../fold/wire.ts';
 import { isWire, RECEIPTS } from '../fold/claims.ts';
+import {withoutEffects} from '../host/read-only.ts';
 
 /**
  * The pass of a place, in one process: the releases its instrument names are laid out first, its readers observe
@@ -76,7 +77,7 @@ async function checked(root: string, entry: string, under: string | undefined): 
 export async function pass(root: string, entry: string, under: string | undefined, check: boolean): Promise<number> {
   if (check) {
     // Verification reads existing evidence; it grants no admission authority.
-    return emptyLedger(storeOf(root)) ? checked(root, entry, under) : underTheLock(storeOf(root), 'check', () => checked(root, entry, under));
+    return withoutEffects(() => emptyLedger(storeOf(root)) ? checked(root, entry, under) : underTheLock(storeOf(root), 'check', () => checked(root, entry, under)));
   }
   if (!under && emptyLedger(storeOf(root))) {
     sayStranger(root);
@@ -86,8 +87,10 @@ export async function pass(root: string, entry: string, under: string | undefine
   const run = async (): Promise<number> => {
     const swept = await sweep(root, entry, under, check, []);
     for (const coordinate of check ? swept.written : []) process.stdout.write(`DIFFERS  ${coordinate}\n`);
+    // Byte seals describe the completed render pass, not its intermediate outputs.
+    if (!swept.written.length) await closeReceipts(root, storeOf(root));
     const closed = meets(root, storeOf(root), under ?? '') && !swept.written.length;
-    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }), free: true });
+    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), observed: swept.settled ? [] : swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }), free: !swept.settled });
     for (const line of releasePolicyLines(fold.release)) process.stdout.write(`${line}\n`);
     if (closed) {
       instrumentKeep(storeOf(root), instrumentOf(storeOf(root), entry, standingOf(root).standing, root, ownLock()));
@@ -119,6 +122,7 @@ async function sweep(root: string, entry: string, under: string | undefined, che
   readonly standingAt: ReadonlyMap<string, ReturnType<typeof standingOf>>;
   readonly folds: ReadonlyMap<string, PlaceFold>;
   readonly said: readonly string[];
+  readonly settled: boolean;
 }> {
   const store = storeOf(root);
   const digestAt = Date.now();
@@ -147,14 +151,15 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     else process.stderr.write(`CLOSED   ${under} · lock ${lock} ms · hash ${hash} ms\n`);
     const seconds = actSeconds();
     process.stderr.write(`COST     act ${seconds} s\n`);
-    return { same: 0, written: [], places: under === undefined ? read.count : 1, observed: [], standingAt: new Map(), folds: new Map(), said: [] };
+    return { same: 0, written: [], places: under === undefined ? read.count : 1, observed: [], standingAt: new Map(), folds: new Map(), said: [], settled: true };
   }
-  layReleases(store, ownRoot(), ownLock(), ownStore());
+  const lock = standingOf(root, undefined, told);
+  // A place asks for its own mounts; the instrument catalog is not a consumer dependency.
+  layReleases(store, root, lock.standing, store);
   const descent = reach ?? (under ? [under.replace(/\/$/, '')] : undefined);
   const limited = descent !== undefined;
   const observed = given ?? observedClaims(root, store, { wait: true, ...(descent !== undefined ? { reach: descent } : {}) });
-  const lock = standingOf(root, undefined, told);
-  landLaid(store, ownRoot(), ownLock(), writerFor(lock.standing, 'fold'));
+  landLaid(store, root, lock.standing, writerFor(lock.standing, 'fold'));
   const shaped = (standing: readonly string[]): readonly View[] => [...viewsOf(standing).values()].flatMap((view) => ('regions' in view && view.shape ? [view] : []));
   const views = shaped(lock.standing);
   const tree = viewsOf(lock.lock);
@@ -257,8 +262,8 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     }
   }
   const said = [...answered.values()].flat();
-  if (!check && journal === undefined) landSaid(store, writerFor(lock.standing, 'fold'), [...resolvedOf(store, ownRoot(), ownLock(), ownStore()), ...said]);
-  return { same, written, places: places.length + (under ? 0 : 1), observed, standingAt, folds, said: journal === undefined ? [] : said };
+  if (!check && journal === undefined) landSaid(store, writerFor(lock.standing, 'fold'), [...resolvedOf(store, root, lock.standing, store), ...said]);
+  return { same, written, places: places.length + (under ? 0 : 1), observed, standingAt, folds, said: journal === undefined ? [] : said, settled: false };
 }
 
 type Drawn = { readonly shape: string; readonly missing: readonly string[]; readonly text: string; readonly said: readonly string[] };

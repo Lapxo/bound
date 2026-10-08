@@ -1,0 +1,22 @@
+[
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/fields value=about|at|by|condition|epoch|form|id|kind|measure|needs|origin|params|pole|reach|restsOn|role|scope|shape|sig|sign|takes|topos|type|value|view|widens",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/required value=at|by|form|measure|role|scope|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/types value=cell|claim|mark",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/common value=by|epoch|id|scope|sig|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/reserved value=id|origin|params|pole|reach|sign|takes|topos|type|widens",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/config value=about|at|by|condition|epoch|form|kind|measure|needs|restsOn|role|scope|shape|sig|value|view",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/cell value=by|epoch|form|id|measure|params|restsOn|scope|sig|topos|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/cell value=by|epoch|form|id|measure|params|restsOn|scope|sig|topos|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/claim/positive value=by|epoch|id|origin|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/claim/positive value=by|epoch|id|origin|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/claim/negative value=by|epoch|id|scope|sig|sign|takes|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/claim/negative value=by|epoch|id|scope|sig|sign|takes|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/mark/travelling value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/mark/travelling value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/mark/local value=by|epoch|id|pole|reach|scope|sig|sign|type|value|widens",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/mark/local value=by|epoch|id|pole|reach|scope|sig|sign|type|value|widens",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/mark/floor-travelling value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/mark/floor-travelling value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/required/mark/negative value=by|epoch|id|scope|sig|sign|takes|type",
+  "bound-lock/1 at=policy:topos/fold by=target form=alphabet measure=id role=reads scope=wire/object/allowed/mark/negative value=by|epoch|id|scope|sig|sign|takes|type"
+]

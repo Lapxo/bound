@@ -8,7 +8,7 @@ import {spawnSync} from 'node:child_process';
 import {canonical} from '@lapxo/topos/wire';
 
 for(const bounded of [false,true])test(`a requested native view waits for its ${bounded?'bounded':'historical'} declared reading and reuses the unchanged answer`,()=>{
- const reader=process.env.BOUND_TEST_READER ?? new URL('../src/cli/verb.ts',import.meta.url).pathname;
+ const reader=process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js',import.meta.url).pathname;
  const temp=mkdtempSync(join(tmpdir(),'bound-completion-')),root=join(temp,'place'),pair=generateKeyPairSync('ed25519');
  const key=join(temp,'key.pem');writeFileSync(key,pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});
  const row=(scope,measure,value,form='alphabet')=>canonical({scope,measure,value,form,role:'writes',at:'policy:sample',by:'target'});
@@ -31,6 +31,11 @@ for(const bounded of [false,true])test(`a requested native view waits for its ${
   const second=run(['fold','--as','evidence']);assert.equal(second.status,0,second.stderr);assert.match(second.stdout,/scope=extent .*value=5\.\.5/);assert.equal(readFileSync(join(root,'calls'),'utf8'),calls);assert.match(second.stderr,/OBSERVE\s+0 run/);
   writeFileSync(join(root,'src/input.txt'),'changed');
   const changed=run(['fold','--as','evidence']);assert.equal(changed.status,0,changed.stderr);assert.match(changed.stdout,/scope=extent .*value=7\.\.7/);assert.equal(readFileSync(join(root,'calls'),'utf8'),calls+'run\n');
+  // An operational refusal cannot seal unchanged inputs as a completed fold.
+  writeFileSync(join(root,'extent.mjs'),"import {existsSync,writeFileSync} from 'node:fs'; export const observe = bytes => {if(!existsSync('attempt')){writeFileSync('attempt','started');throw Error('temporary reader unavailable');}return [{scope:'extent',role:'writes',measure:'bytes',bound:{kind:'interval',lo:bytes.length,hi:bytes.length}}];};");
+  const failedPass=run(['fold']);assert.equal(failedPass.status,1,failedPass.stderr);assert.match(failedPass.stderr,/temporary reader unavailable/);assert.doesNotMatch(failedPass.stdout,/PASS\s+closed/);
+  const recoveredPass=run(['fold']);assert.equal(recoveredPass.status,0,recoveredPass.stderr);assert.doesNotMatch(recoveredPass.stderr,/temporary reader unavailable/);
+  const recoveredView=run(['fold','--as','evidence']);assert.equal(recoveredView.status,0,recoveredView.stderr);assert.match(recoveredView.stdout,/scope=extent .*value=7\.\.7/);
   writeFileSync(join(root,'extent.mjs'),"export const observe = () => { throw Error('declared reading refused'); };");
   const refused=run(['fold','--as','evidence']);assert.equal(refused.status,1,refused.stderr);assert.match(refused.stderr,/REFUSE·reader .*declared reading refused/);assert.equal(refused.stdout.includes('scope=extent'),false,'no stale result is presented as a completed reading');
   if(bounded){

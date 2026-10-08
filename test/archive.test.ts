@@ -1,3 +1,4 @@
+import {spawn} from 'node:child_process';
 import { strict as assert } from 'node:assert';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -193,4 +194,23 @@ test('reading authentic capsule declarations needs no runtime; asking a missing 
     assert.equal(existsSync(join(root,'cas','answers')),false);
     assert.throws(()=>capsuleAt(digest,'../escape.js',root),/REFUSE·capsule .* unavailable/);
   } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+
+test('two processes publish the same verified runtime tree without replacing its winner', async () => {
+ const root=mkdtempSync(join(tmpdir(),'runtime-publication-')),store=join(root,'store'),barrier=join(root,'barrier');
+ try {
+  mkdirSync(barrier);const bytes=tar(record('dist/member.js','export const value=7;')),digest=sha(bytes);save(store,digest,bytes);
+  const destination=join(store,'cas/runtime/sha256',digest.slice('sha256:'.length)),helper=join(root,'reader.mjs');
+  writeFileSync(helper,`import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';
+   const [store,digest,destination,barrier]=process.argv.slice(2),rename=fs.renameSync;
+   fs.renameSync=(from,to)=>{if(to===destination){fs.writeFileSync(barrier+'/'+process.pid,'ready');const deadline=Date.now()+5000;while(fs.readdirSync(barrier).length<2){if(Date.now()>deadline)throw Error('test publication barrier timed out');Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,5);}}return rename(from,to);};syncBuiltinESMExports();
+   const {runtimeTreeAt}=await import(${JSON.stringify(new URL('../src/host/release.ts',import.meta.url).href)});
+   const at=runtimeTreeAt(store,store,digest,store);console.log(fs.readFileSync(at+'/dist/member.js','utf8'));
+  `);
+  const run=()=>new Promise<{status:number|null;out:string;err:string}>((resolve,reject)=>{const child=spawn(process.execPath,[helper,store,digest,destination,barrier],{stdio:['ignore','pipe','pipe']});let out='',err='';child.stdout.on('data',b=>out+=b);child.stderr.on('data',b=>err+=b);child.once('error',reject);child.once('close',status=>resolve({status,out,err}));});
+  for(const got of await Promise.all([run(),run()])){assert.equal(got.status,0,got.err);assert.equal(got.out.trim(),'export const value=7;');}
+  assert.equal(readFileSync(join(destination,'.laid'),'utf8'),digest);assert.equal(readFileSync(join(destination,'dist/member.js'),'utf8'),'export const value=7;');
+  assert.deepEqual(readdirSync(join(store,'cas/runtime/sha256')),[digest.slice('sha256:'.length)]);
+ }finally{rmSync(root,{recursive:true,force:true});}
 });

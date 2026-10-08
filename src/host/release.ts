@@ -51,10 +51,22 @@ function layDir(from: string, into: string): void {
   }
 }
 
-function swapPlace(place: string, next: string, digest: string): void {
+function swapPlace(place: string, next: string, digest: string, ready?: () => boolean): void {
   const old = `${next}.old`;
   if (lstatSync(old, { throwIfNoEntry: false }) !== undefined) throw new Error(`REFUSE·release recovery required for ${old}`);
   writeFileSync(join(next, laidMark), digest, { flag: 'wx' });
+  if (ready !== undefined) {
+    // Digest-addressed trees publish once. A verified concurrent winner is reused,
+    // never moved aside while another process may be importing its members.
+    if (ready()) { rmSync(next, { recursive: true, force: true }); return; }
+    try { renameSync(next, place); return; }
+    catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== 'EEXIST' && code !== 'ENOTEMPTY') throw error;
+      if (ready()) { rmSync(next, { recursive: true, force: true }); return; }
+      // An existing invalid cache retains the repair/rollback path below.
+    }
+  }
   let moved = false;
   try {
     if (lstatSync(place, { throwIfNoEntry: false }) !== undefined) { renameSync(place, old); moved = true; }
@@ -204,7 +216,7 @@ export function runtimeTreeAt(store: string, own: string, digest: string, conten
   if (observeText(join(place, laidMark)) === digest && layoutMatches(place, files)) return selected;
   for (const member of members(bytes)) landBlob(store, digestOf(member.bytes), member.bytes);
   const next = nextPlace(place);
-  try { layFiles(store, own, files, next); swapPlace(place, next, digest); }
+  try { layFiles(store, own, files, next); swapPlace(place, next, digest, () => observeText(join(place, laidMark)) === digest && layoutMatches(place, files)); }
   catch (error) { rmSync(next, { recursive: true, force: true }); throw error; }
   return selected;
 }

@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/cli/sign",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/cli.md",
+      "digest": "sha256:97cddb7dac0c426b40c51d852d6176ae8f389351cc3366206f8acb0e58c7117a"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/signing-port.json",
+      "digest": "sha256:2bbf951b29ba00e715443c1ea24884a46296ee2a5bf7fd03f6fd681ea0eacb69"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/signing-port.json",
+      "digest": "sha256:bb45e5385c5efad77607edfcd79af5faa5cb064d30b2d27a0b9c79de807bca15"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/signing-port.json",
+      "digest": "sha256:53cc8abaccbcb37385fdc1acd1d251c4d3d77ca44df4f8436ee498acf40d4fde"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "uncovered": {
+    "scope": "sample/north",
+    "value": "uncovered"
+  },
+  "tamperedValue": "altered",
+  "missingView": "not-provided-by-this-place"
+}

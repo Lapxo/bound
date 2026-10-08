@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/view/manifest-render",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/documents.md",
+      "digest": "sha256:a22d9b27c7be1c168ea985d703a9c86c19157c8e24193e7dcc34d3f33ea44375"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/historical-document-views.json",
+      "digest": "sha256:1e375ddc0be9538404e7258e862a60fc5454cd2b7dde1afe27b28de0228467bc"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/historical-document-views.json",
+      "digest": "sha256:85d091dd6fbf4c3438e7f04700d70bbded4260eb38804e049a1bc9c301bbedb9"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/historical-document-views.json",
+      "digest": "sha256:6a40dad06f119dee45834bf4252c138c7368c07c5a814068a573da7f4bc72a94"
+    }
+  ]
+}

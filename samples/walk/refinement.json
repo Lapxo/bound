@@ -1,0 +1,9 @@
+[
+  "bound-lock/1 at=policy:whole-region-walk-contract by=target form=alphabet measure=id role=writes scope=wire/walk/contract value=whole-region@1",
+  "bound-lock/1 at=policy:whole-region-walk-contract by=target form=alphabet measure=id role=writes scope=wire/walk/fields value=about|at|by|condition|epoch|form|id|kind|measure|needs|origin|params|pole|reach|restsOn|role|scope|shape|sign|takes|topos|type|value|view|widens",
+  "bound-lock/1 at=policy:whole-region-walk-contract by=target form=alphabet measure=id role=writes scope=wire/walk/metadata-fields value=at|by|condition|epoch|form|measure|role|scope|sig|value",
+  "bound-lock/1 at=policy:whole-region-walk-contract by=target form=alphabet measure=id role=writes scope=wire/walk/resolutions value=0|1|4|5|6|8",
+  "bound-lock/1 at=policy:whole-region-walk-contract by=target form=alphabet measure=id role=writes scope=wire/walk/projections value=0:inventory|1:summary|4:summary|5:summary|6:history|8:history",
+  "bound-lock/1 at=policy:coordinate-refinement by=target form=alphabet measure=id role=writes scope=wire/walk/partition value=scope-coordinates@1",
+  "bound-lock/1 at=policy:coordinate-refinement by=target form=alphabet measure=id role=writes scope=wire/walk/refinements value=0:1|1:1|4:3|5:all|6:all|8:all"
+]

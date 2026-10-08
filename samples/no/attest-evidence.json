@@ -1,0 +1,7 @@
+{
+  "uncovered": {
+    "scope": "sample/north",
+    "value": "uncovered"
+  },
+  "tamperedValue": "altered"
+}
