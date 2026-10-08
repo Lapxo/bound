@@ -4,7 +4,7 @@ The object profile is selected by admitted `wire/object/*` claims in a historica
 
 `fromLine` selects grammar before validating required fields: a record without `type` remains configuration, retaining its required `at`, `role`, `form`, `measure` and `value`; a typed record selects its exact required/allowed row. Configuration cannot carry object-only fields. An incomplete typed record receives no configuration defaults. The parse result distinguishes configuration from cell/claim/mark. `sign=+1|-1` is an object act, `sig` its signature envelope, and a host sign operation produces that envelope.
 
-The common object envelope is `type`, `scope`, `id`, `epoch`, `by`, `sig`. Object records reject `at`: epoch orders acts, and `widens` names a local join witness. The following is the shipped reference profile. The admitted row alphabets, not this table or a host decoder, are the source of required/allowed field permission.
+The common object envelope is `type`, `scope`, `id`, `epoch`, `by`, `sig`. Object records reject `at`: epoch orders acts, and `widens` names a local join witness. The following is the declared reference profile. The admitted row alphabets, not this table or a host decoder, are the source of required/allowed field permission.
 
 | Row | Fields in addition to the common envelope | Meaning |
 | --- | --- | --- |
@@ -25,11 +25,3 @@ The cell's `topos` names folded standing, and its `params` identifies declared p
 `objectHistory` preserves typed history separately from configuration; `validateObjectContext` checks IDs, cell ownership, exact takes, witness order and declared rest under the selected context. Exact redelivery is idempotent; one ID with different canonical content refuses. Signature-envelope differences never bypass verification.
 
 After admission, the instrument projects the acts into Obligations. Sign and require travel along declared rest; a witnessed join is local. Descendants inherit travelling marks without local widening. Live exact-ID withdrawals remain confined to their authenticated history. Keys, snapshots, signing devices and repeated receipts do not create independent origins. Compatible meets are not forks. Object states and their precedence come from Obligations; configuration folds do not compute object encounters.
-
-The shipped `samples/typed/wire.json` declares the reference grammar. The interval and alphabet places in `samples/typed` exercise distinct forms through the same admission path. Their fixture authority does not authorize another place.
-
-## Running the published place
-
-Run `node tools/samples/check-publication.mjs typed-object samples/yes/typed-object.json samples/no/typed-object.json` from the installed package directory. The executable sample creates an isolated place with ephemeral authority and the selected provider closure before defining cells. It captures native cells@1 output and compares each scene to direct Obligations operations. No production activation is implied.
-
-The accepted scene includes travelling sign and require, a local join that retains the sign, all four states, both conflict causes and exact-ID withdrawals. The refusal sample names rejected rows; each refusal must leave the ledger unchanged. The negative sample is executed, not displayed as a list. Receipt replay must be idle. The alphabet sample under samples/typed demonstrates the same contract with another form.
