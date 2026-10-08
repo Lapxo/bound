@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical, parse} from '@lapxo/topos/wire';
 
-const reader = process.env.BOUND_TEST_READER ?? new URL('../src/cli/verb.ts', import.meta.url).pathname;
+const reader = process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js', import.meta.url).pathname;
 const row = (scope: string, measure: string, value: string) => canonical({scope, measure, value, form:'alphabet', role:'writes', by:'target', at:'policy:race'});
 
 for (const place of ['observations', 'inventory']) test(`committed CLI results survive replay in ${place}`, {timeout:30_000}, async () => {
@@ -27,7 +27,7 @@ for (const place of ['observations', 'inventory']) test(`committed CLI results s
     lines.push(row('wire/act-result','id','local-act@1'),row('wire/act-result-scope','id','receipts'),row('wire/act-result-context','id','receipt:local-act'),row('keys/folder','class','fold'),canonical({scope:'view/act',measure:'id',value:'act',role:'demands',form:'alphabet',by:'target',at:'policy:race'}));
     writeFileSync(join(root,'TARGET.bound'),lines.join('\n')+'\n');
     const run = (args: string[]) => {
-      const started=Date.now(),result=spawnSync(process.execPath,[...(process.env.BOUND_TEST_INSTALLED==='1'?[]:['--conditions=source']),reader,...args],{cwd:root,env:{...process.env,NODE_OPTIONS:'',NODE_PATH:''},encoding:'utf8',timeout:15_000});
+      const started=Date.now(),result=spawnSync(process.execPath,[reader,...args],{cwd:root,env:{...process.env,NODE_OPTIONS:'',NODE_PATH:''},encoding:'utf8',timeout:15_000});
       captures.push({args:args.map(arg=>arg.replaceAll(temp,'[fixture]')),status:result.status,stdout:result.stdout,stderr:result.stderr,runtimeMs:Date.now()-started});
       return result;
     };

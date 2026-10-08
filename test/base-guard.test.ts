@@ -7,7 +7,7 @@ import {join} from 'node:path';
 import {spawn, spawnSync} from 'node:child_process';
 import {canonical, parse} from '@lapxo/topos/wire';
 
-const reader = process.env.BOUND_TEST_READER ?? new URL('../src/cli/verb.ts', import.meta.url).pathname;
+const reader = process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js', import.meta.url).pathname;
 const row = (scope: string, measure: string, value: string) => canonical({scope, measure, value, form:'alphabet', role:'writes', by:'target', at:'policy:race'});
 const native=process.env.BOUND_TEST_NATIVE_RESULT==='1';
 const pause = () => new Promise(resolve => setTimeout(resolve, 10));
@@ -27,7 +27,7 @@ for (const place of ['observations', 'inventory']) test(`concurrent CLI acts pre
     if(native)lines.push(row('wire/act-result','id','local-act@1'),row('wire/act-result-scope','id','receipts'),row('wire/act-result-context','id','receipt:local-act'),row('keys/folder','class','fold'));
     if(native)lines.push(canonical({scope:'view/act',measure:'id',value:'act',role:'demands',form:'alphabet',by:'target',at:'policy:race'}));
     writeFileSync(join(root,'TARGET.bound'),lines.join('\n')+'\n');
-    const run = (args: string[]) => spawnSync(process.execPath,[...(process.env.BOUND_TEST_INSTALLED==='1'?[]:['--conditions=source']),reader,...args],{cwd:root,encoding:'utf8',timeout:15_000});
+    const run = (args: string[]) => spawnSync(process.execPath,[reader,...args],{cwd:root,encoding:'utf8',timeout:15_000});
     const boot = run(['land','--key','owner','--key-file',key]);
     assert.equal(boot.status,0,boot.stderr);
     const baseline = readFileSync(join(root,'.bound','ledger','owner.bound'),'utf8');
@@ -44,7 +44,7 @@ for (const place of ['observations', 'inventory']) test(`concurrent CLI acts pre
     mkdirSync(join(root,'.bound','locks'),{recursive:true});
     writeFileSync(lock,`${process.pid} race ${new Date().toISOString()} test-owner\n`,{flag:'wx'});
     const acts = lots.map(file => {
-      const child = spawn(process.execPath,[...(process.env.BOUND_TEST_INSTALLED==='1'?[]:['--conditions=source']),reader,'land',file],{cwd:root,stdio:['ignore','pipe','pipe']});
+      const child = spawn(process.execPath,[reader,'land',file],{cwd:root,stdio:['ignore','pipe','pipe']});
       children.push(child);
       const result = {out:'',err:''};
       child.stdout!.on('data',bytes=>result.out+=bytes);
