@@ -1,0 +1,3 @@
+# Why a coordinate
+
+`bound fold <coordinate> --as why` explains the live declarations whose exact `needs` member or `shape` names that coordinate. It prints the selector, witness and value. It does not compute an object encounter or infer authority from a path. The published sample bootstraps two independent places, explains each declared source coordinate and prints `OPEN` for a coordinate no declaration names. That absence is not zero, green or a state. A declared view with no provider refuses by name with a nonzero status. Calling why without a coordinate is not this sample’s acceptance vector; its empty historical capture pays nothing.

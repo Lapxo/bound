@@ -1,0 +1,14 @@
+{
+  "contract": "whole-region@1 typed foreign evidence",
+  "places": ["interval measurements", "repository artifact membership"],
+  "runner": "tools/samples/run-typed-walk.mjs",
+  "required": [
+    "Origin context declares its complete semantic history fields, public authority resolution and the selected object provider",
+    "The native CLI admits authenticated cell/claim/mark histories as foreign evidence",
+    "A foreign claim withdrawal and a local claim sharing its target ID coexist",
+    "Foreign withdrawal stays in the evidence view; local claim stays live",
+    "Local cells and native cell receipts remain unchanged and idle",
+    "Replay prints ONCE, retaining one import receipt and no new local lines"
+  ],
+  "excludes": "This vector does not certify reconstruction of one object from several origin histories. Foreign evidence is never concatenated into local authority or a global epoch order."
+}

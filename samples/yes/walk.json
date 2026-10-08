@@ -1,0 +1,100 @@
+{
+  "contract": "whole-region@1",
+  "places": [
+    "measurement",
+    "artifact"
+  ],
+  "declarations": [
+    [
+      "wire/digest-algorithms",
+      "id",
+      "sha256"
+    ],
+    [
+      "wire/signature-algorithms",
+      "id",
+      "ed25519:sample"
+    ],
+    [
+      "wire/era",
+      "id",
+      "sample"
+    ],
+    [
+      "wire/families",
+      "id",
+      "keys|signer|wire|tree|write|leaf|reader|read|fold|receipts|rendered|resolved|beat|view|region|uses|walk|sample"
+    ],
+    [
+      "wire/fields",
+      "id",
+      "scope|role|form|measure|value|by|at|epoch|sig|condition|needs"
+    ],
+    [
+      "wire/required",
+      "id",
+      "scope|role|form|measure|value|by|at"
+    ],
+    [
+      "wire/forms",
+      "id",
+      "alphabet|interval"
+    ],
+    [
+      "wire/roles",
+      "id",
+      "reads|writes|demands"
+    ],
+    [
+      "wire/at-classes",
+      "id",
+      "origin|place|receipt|witness|policy"
+    ],
+    [
+      "wire/walk/contract",
+      "id",
+      "whole-region@1"
+    ],
+    [
+      "wire/walk/fields",
+      "id",
+      "scope|role|form|measure|value|by|at|epoch|condition|needs"
+    ],
+    [
+      "wire/walk/metadata-fields",
+      "id",
+      "at|by|condition|epoch|form|measure|role|scope|sig|value"
+    ],
+    [
+      "wire/walk/resolutions",
+      "id",
+      "0|1|4|6|8"
+    ],
+    [
+      "signer/timeout",
+      "milliseconds",
+      "5000..5000",
+      "interval"
+    ],
+    [
+      "signer/response-bytes",
+      "bytes",
+      "65536..65536",
+      "interval"
+    ],
+    [
+      "wire/walk/projections",
+      "id",
+      "0:inventory|1:summary|4:summary|6:history|8:history"
+    ]
+  ],
+  "requirements": [
+    "@0/@1/@8 escalation",
+    "authenticated whole-region prefixes",
+    "two clocks",
+    "union retains both origins",
+    "unchanged exchange zero payload",
+    "atomic native receipt",
+    "replay zero writes"
+  ]
+}

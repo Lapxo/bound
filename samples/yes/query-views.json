@@ -1,0 +1,56 @@
+{
+  "wire": [
+    [
+      "fields",
+      "scope|role|form|measure|value|by|at|epoch|sig|needs"
+    ],
+    [
+      "required",
+      "scope|role|form|measure|value|by|at"
+    ],
+    [
+      "forms",
+      "alphabet|interval"
+    ],
+    [
+      "families",
+      "keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region"
+    ],
+    [
+      "roles",
+      "reads|writes|demands"
+    ],
+    [
+      "at-classes",
+      "policy|place|origin|witness|receipt"
+    ],
+    [
+      "era",
+      "sample"
+    ],
+    [
+      "signature-algorithms",
+      "ed25519:sample"
+    ],
+    [
+      "digest-algorithms",
+      "sha256"
+    ]
+  ],
+  "places": [
+    {
+      "name": "source-review",
+      "scope": "sample/selection",
+      "value": "source",
+      "coordinate": "source.txt",
+      "content": "Source input\\n"
+    },
+    {
+      "name": "release-review",
+      "scope": "sample/package",
+      "value": "release",
+      "coordinate": "release.txt",
+      "content": "Release input\\n"
+    }
+  ]
+}

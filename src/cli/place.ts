@@ -10,7 +10,7 @@ import { observeText } from '../observe/files.ts';
 import { placesOf, viewsOf } from '../fold/views.ts';
 import type { View } from '../fold/views.ts';
 import { prerender, viewOf } from '../render/view.ts';
-import { meets } from '../fold/closed.ts';
+import { meets, instrumentKept } from '../fold/closed.ts';
 import { foldPoints, keepFold, keptPlace } from '../fold/kept.ts';
 import { openCells } from '../render/open.ts';
 import { boundOf, packRegions, regionsNamed, regionsOf, unlikeReplay } from '../fold/region.ts';
@@ -221,6 +221,12 @@ function inheritedOf(root: string, standing: readonly string[]): readonly string
 export function coneOf(root: string, entry: string, ceilings: readonly string[], descent?: readonly string[]): { readonly standing: readonly string[]; readonly observed: readonly string[]; readonly own: Readonly<Record<string, number>>; readonly kept: boolean } {
   const store = storeOf(root);
   const { standing, rendered } = standingOf(root);
+  // Admission consumes the verified completed fold; it does not ask providers again.
+  // Receipt bytes, reader history and instrument identity must all still agree.
+  if (meets(root, store, '') && instrumentKept(store) === instrumentOf(store, entry, standing, root, ownLock())) {
+    const held = keptPlace(store);
+    if (held !== undefined) return { standing, observed: held.observed, own: held.own, kept: true };
+  }
   const named = regionsNamed(standing);
   const reach = descent !== undefined && descent.length ? [...descent] : [...new Set(ceilings.map((line) => boundOf(named, line).region))];
   const read = observedClaims(root, store, { wait: false, ...(reach.includes('') ? {} : { reach }) });

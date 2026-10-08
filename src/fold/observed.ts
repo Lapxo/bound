@@ -1,3 +1,5 @@
+import {actCosts} from '../host/act-cost.ts';
+import {readingClosures} from '../host/reading-closures.ts';
 import {readerLifetime,readerAllowsEmpty,assertReaderInputs,parse as parseLifetime} from '@lapxo/topos/wire';
 import {readOnly} from '../host/read-only.ts';
 import { basename, dirname, existsSync, mkdirSync, resolve, rmSync, spawn, statSync, writeFileSync } from '../host/io.ts';
@@ -260,6 +262,15 @@ export function observedClaims(root: string, store: string, options: { readonly 
   function observeOne(reader: ReaderClaim, started: number): boolean {
     const module = resolve(root, reader.module);
     const asked = reader.capsule === undefined ? undefined : reader.capsule.selected??capsuleAt(reader.capsule.digest, reader.capsule.entry);
+    const projection = reader.capsule === undefined ? [] : (asked?.lines ?? []).filter(line=>fieldOf(line,'scope')===`region/${reader.capsule!.region}`&&fieldOf(line,'measure')==='input-projection'&&fieldOf(line,'value')!=='withdraw');
+    if(projection.length){
+      if(projection.length!==1||!asked)throw Error('REFUSE·input projection is ambiguous '+reader.module);
+      const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>({place,text:observeText(resolve(root,place))??''}));
+      const result=readingClosures({root,store,reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),allowsEmpty:readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module),files,emit:line=>process.stderr.write(line+'\n')});
+      out.push(...result.lines);ran+=result.executed;read+=result.read-result.opened;
+      return false;
+    }
+    const endAct=actCosts.begin();try{
     const source = reader.capsule === undefined ? observeFile(module) : asked === undefined ? undefined : new Uint8Array();
     const bundle = source && reader.capsule === undefined ? bundleOf(module) ?? bytesDigest(store, source) : 'none';
     const offered = offersOf(root, store, reader, roleOf, look, (where) => reached(trimmed(where)));
@@ -435,9 +446,11 @@ export function observedClaims(root: string, store: string, options: { readonly 
     if (Date.now() - started > 250) spent.push(`${reader.module.split('/').pop()} ${identified - started}+${Date.now() - identified}`);
     if (kept !== undefined) landMemo(store, `observed/${kept}`, new TextEncoder().encode(out.slice(mark).join('\n')));
     return false;
+    }finally{endAct();}
   }
   if (spent.length) process.stderr.write(`SPENT    observe ${spent.join(' · ')} ms\n`);
   if (legacy) setAside(store, speaker);
   process.stderr.write(`OBSERVE  ${ran} run · ${read} read by key${whole_ ? ` · ${whole_} readers kept whole` : ''} · ${Date.now() - began} ms\n`);
+  if (wait && refused.length) throw new Error(refused.join('\n'));
   return [...new Set(out)].sort();
 }

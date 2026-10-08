@@ -96,7 +96,7 @@ test('a failed actual capsule ask leaves its answer cache slot absent', async ()
     const sha = (text: string | Uint8Array): string => createHash('sha256').update(text).digest('hex');
     const loader = sha(readFileSync(processOf('located', 'host')));
     const request = { ...requests[0]!, rootScope: root };
-    const slot = sha(`${capsule.digest}\n${loader}\n${request.verb}\n${request.rootScope}\n${request.region ?? ''}`);
+    const slot = sha(`${capsule.digest}\n${loader}\n${JSON.stringify(request)}`);
     const cache = join(cacheStore, 'cas', 'answers', slot);
     equal(existsSync(cache), false);
     throws(() => capsule.ask([request]), CapsuleProcessError);

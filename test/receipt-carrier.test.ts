@@ -66,7 +66,7 @@ test('resolution 8 authenticates an inline carrier in an empty store; summaries 
   const digest='sha256:'+createHash('sha256').update(line+'\n').digest('hex');
   assert.deepEqual(carriedFrom(store,[line,rootLine(digest)]),[line]);
   assert.equal(carriedFrom(store,[rootLine(digest)]),undefined);
-  assert.equal(carriedFrom(store,[line.replace('place/receipts','other/receipts'),rootLine(digest)]),undefined);
+  assert.throws(()=>carriedFrom(store,[line.replace('place/receipts','other/receipts'),rootLine(digest)]),/REFUSE·receipt public carrier bytes mismatch/);
   assert.deepEqual(carriedIn(store),[],'public verification does not manufacture a private carrier');
 }));
 

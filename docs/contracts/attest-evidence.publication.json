@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/attest-evidence-view",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/evidence-view.md",
+      "digest": "sha256:af2f28c0b8e68b9000a110760b8cb9cfd331d725c0f363e88847e24c958291f7"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/native-views.json",
+      "digest": "sha256:888de96de74e6944d18d425245093845c54dd8374adc6c56f589c3e40da9f2e3"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/native-views.json",
+      "digest": "sha256:7750551a70599cbecb37ee5659797ba8ff1dd84a11e17cbbe0c77ff62aecb3a5"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native-views.json",
+      "digest": "sha256:1f17bde653377103acf8888717b0ad5c2b83b79860a4833be93270532b76c0dc"
+    }
+  ]
+}

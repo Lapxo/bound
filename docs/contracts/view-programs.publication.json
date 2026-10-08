@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/view/programs",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/view-programs.md",
+      "digest": "sha256:b6e5db4157005e786f0e5a402c42a1d9fcbdd1fa0fc87aa6f22d89d59e2a6c29"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/program-views.json",
+      "digest": "sha256:b1e8feb6839050a09410dade936cbb827ac438ff8c7b962e5fefd50f601d1b15"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/program-views.json",
+      "digest": "sha256:bf6b2fbd11290920e31f46c18012be2230ffdab47dc7013d3a0aafae1fd6cbe7"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/program-views.json",
+      "digest": "sha256:a10f688f48b2a9686cfe9ebc3908fa06d04cb0d3e86602a51d47511076f81f71"
+    }
+  ]
+}

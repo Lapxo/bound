@@ -29,5 +29,6 @@
         "dist/cli/verb.js"
       ]
     }
-  ]
+  ],
+  "execution": "independent"
 }

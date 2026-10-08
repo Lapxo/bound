@@ -1,0 +1,66 @@
+{
+  "wire": [
+    [
+      "fields",
+      "scope|role|form|measure|value|by|at|epoch|sig|needs|shape|about|kind|restsOn"
+    ],
+    [
+      "required",
+      "scope|role|form|measure|value|by|at"
+    ],
+    [
+      "forms",
+      "alphabet|interval"
+    ],
+    [
+      "families",
+      "keys|signer|wire|tree|write|leaf|view|region|uses|dep|tasks|clock|reader|read|fold|receipts|rendered|resolved|beat"
+    ],
+    [
+      "roles",
+      "reads|writes|demands"
+    ],
+    [
+      "at-classes",
+      "policy|place|origin|witness|receipt"
+    ],
+    [
+      "era",
+      "sample"
+    ],
+    [
+      "signature-algorithms",
+      "ed25519:sample"
+    ],
+    [
+      "digest-algorithms",
+      "sha256"
+    ],
+    [
+      "kinds",
+      "capsule"
+    ],
+    [
+      "region-measures",
+      "receipts|reads|coordinates"
+    ]
+  ],
+  "providerMember": "dist/views/programs.js",
+  "providerDigest": "sha256:abe30bfa3bebf8131b10789de963ca3498a313cdbba6055397cbff5869c5cc10",
+  "places": [
+    {
+      "name": "collection-review",
+      "steps": [
+        "collect",
+        "catalogue"
+      ]
+    },
+    {
+      "name": "transformation-review",
+      "steps": [
+        "prepare",
+        "transform"
+      ]
+    }
+  ]
+}

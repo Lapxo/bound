@@ -1,0 +1,3 @@
+# fold
+
+`bound fold` reads the admitted place. Configuration output names readings and says no encounters computed; its counts are not independent-origin states. A declared cells view projects admitted typed history into Obligations. A selected world defines other views; its contract decides when empty output is valid. A refusal or nonzero status wins over any parseable diagnostic stdout. `--check` verifies receipts without inventing a missing reading. The published evidence vector folds fresh places, preserves admitted key attribution, reads a native receipt and checks exact withdrawals. The typed-object quartet covers object states separately.

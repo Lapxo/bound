@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/view/readme-historical",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/view-readme-historical.md",
+      "digest": "sha256:a13e1c60e2ebf362705b65cd2eaacb469371f38625f65b7e2b7e7dcf0ed644c7"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/historical-document-views.json",
+      "digest": "sha256:1e375ddc0be9538404e7258e862a60fc5454cd2b7dde1afe27b28de0228467bc"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/historical-document-views.json",
+      "digest": "sha256:85d091dd6fbf4c3438e7f04700d70bbded4260eb38804e049a1bc9c301bbedb9"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/historical-document-views.json",
+      "digest": "sha256:6a40dad06f119dee45834bf4252c138c7368c07c5a814068a573da7f4bc72a94"
+    }
+  ]
+}

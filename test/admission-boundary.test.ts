@@ -18,6 +18,8 @@ test('a prospective lot uses the consumer authority, preserves bytes, and cannot
  const seed=[['keys/device','class','authorize'],['keys/device','coverage','*'],['keys/device','public-key',pub],['keys/device','signer','file'],['keys/reader','class','read'],['keys/folder','class','fold'],['signer/timeout','milliseconds','5000..5000','interval'],['signer/response-bytes','bytes','65536..65536','interval'],['wire/digest-algorithms','id','sha256'],['wire/signature-algorithms','id','ed25519:sample'],['wire/era','id','sample'],['wire/families','id','keys|signer|wire|tree|write|leaf|reader|read|fold|receipts|rendered|resolved|beat|view|region|sample'],['wire/fields','id','scope|role|form|measure|value|by|at|needs|sig|epoch|shape|restsOn|condition|about|kind|view'],['wire/required','id','scope|role|form|measure|value|by|at'],['wire/forms','id','alphabet|interval'],['wire/roles','id','reads|writes|demands'],['wire/at-classes','id','origin|place|receipt|witness|policy']].map(v=>row(...v));
  for(const [name,shape] of [['summary',''],['page','summary.md']]) seed.push(canonical({scope:`view/${name}`,role:'demands',form:'alphabet',measure:'id',value:'field@3',shape,at:'policy:sample',by:'target'}));
  seed.push(canonical({scope:'sample/limit',form:'interval',role:'reads',measure:'count',value:'0..5',at:'policy:sample',by:'target'}));
+ // This negative attempts to discharge an existing obligation, not declare a new one.
+ seed.push(canonical({scope:'sample/required',form:'alphabet',role:'demands',measure:'id',value:'present',needs:'missing.txt',at:'policy:sample',by:'target'}));
  const run=(cwd,args)=>spawnSync(process.execPath,[reader,...args],{cwd,encoding:'utf8',timeout:20000});
  const digest=root=>{const all=[];const visit=(dir,base='')=>{for(const n of readdirSync(dir).sort()){const at=join(dir,n),rel=join(base,n);if(statSync(at).isDirectory())visit(at,rel);else all.push([rel,createHash('sha256').update(readFileSync(at)).digest('hex')]);}};visit(root);return all;};
  const stamp=(line)=>{const got=parse(line);assert.equal(got.kind,'fact');const fields={...got.value.fields,by:'device',epoch:'2'};return canonical({...fields,sig:formatSignature('ed25519:sample',sign(null,Buffer.from(signedBytes(fields)),pair.privateKey).toString('base64'))});};
@@ -38,7 +40,7 @@ test('a prospective lot uses the consumer authority, preserves bytes, and cannot
   for(const root of roots){const before=digest(root);for(const args of[['fold',root,'--as','lines',invalid],['land',invalid]]){const p=run(root,args);assert.equal(p.status,1,p.stderr);assert.match(p.stderr,/REFUSE·widening/);assert.deepEqual(digest(root),before);}}
   for(const fields of [
     {scope:'write/src/removed.txt',form:'alphabet',role:'writes',measure:'digest',value:'withdraw',at:'policy:sample',by:'target'},
-    {scope:'sample/required',form:'alphabet',role:'demands',measure:'id',value:'present',needs:'missing.txt',at:'policy:sample',by:'target'},
+    {scope:'sample/required',form:'alphabet',role:'demands',measure:'id',value:'present',needs:'missing-revision.txt',at:'policy:sample',by:'target'},
   ]) {
     writeFileSync(invalid,stamp(canonical(fields))+'\n');
     for(const root of roots){const before=digest(root);for(const args of [['fold',root,'--as','lines',invalid],['land',invalid]]){const p=run(root,args);assert.equal(p.status,1,p.stderr);assert.match(p.stderr,/REFUSE·(?:withdraw|takes)/);assert.deepEqual(digest(root),before,'evidence-based admission refuses identically without acquiring readings');}}

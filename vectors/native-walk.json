@@ -1,0 +1,1058 @@
+{
+  "status": "Native compiled development CLI captures; not release acceptance",
+  "reader": "dist/cli/verb.js",
+  "sourceConditions": false,
+  "receiptSource": "Native signed import receipt; no harness-written receipt",
+  "places": [
+    {
+      "place": "measurement",
+      "captureSha256": "91b8ab4ddcb3ace3c800b6dd58d53bfc80a26bf4a13e66c2aa6873a8b6e16d62",
+      "commands": [
+        {
+          "args": [
+            "fold",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/left-conflicting-wire.bound"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7document wire/fields writes id \u00b7 target has two live inscriptions without withdrawal\n"
+        },
+        {
+          "args": [
+            "fold",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-conflicting-wire.bound"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7document wire/fields writes id \u00b7 target has two live inscriptions without withdrawal\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@1",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 235 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/altered.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk region digest or count mismatch receipts/left-ledger/sample\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/partial-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk partial or extra payload\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/outside-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign epoch is outside the authenticated prefix\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/unauthorized-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk metadata is not authenticated\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/stale-base.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk stale receiver base\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@2",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk unsupported resolution\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/left-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "INGRESS 1 new evidence lines \u00b7 1 signed local import receipt",
+            "EXCHANGE 235 payload bytes \u00b7 1311 protocol bytes \u00b7 1546 new evidence bytes \u00b7 357 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/left-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 1 retained import receipt",
+            "EXCHANGE 235 payload bytes \u00b7 1311 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/missing-earlier-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign history is not an extension of its verified prefix\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/inserted-at-verified-epoch.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign epoch does not match the verified prefix\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-acknowledged.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/no-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 0 import receipts \u00b7 no regions offered",
+            "EXCHANGE 0 payload bytes \u00b7 439 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/left-inventory.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 237 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-payload.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "INGRESS 1 new evidence lines \u00b7 1 signed local import receipt",
+            "EXCHANGE 237 payload bytes \u00b7 1316 protocol bytes \u00b7 1553 new evidence bytes \u00b7 356 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "evidence"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "FACT authenticated histories \u00b7 readings \u00b7 no encounters computed"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/left-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 1 retained import receipt",
+            "EXCHANGE 235 payload bytes \u00b7 1311 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/undeclared-context-lineage.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk origin context changed without declared lineage\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/right-final-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 462 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "<walk-payload>",
+            "--key",
+            "importer"
+          ],
+          "status": null,
+          "signal": "SIGKILL",
+          "stdout": [],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-R6lbBD/interruption-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7crash source: REFUSE\u00b7stale the store belongs to exited process 13710; host recovery required\n"
+        }
+      ]
+    },
+    {
+      "place": "artifact",
+      "captureSha256": "4c8fe9c46cd8cc0111631c411b471cfca5688c4174fb18c75a400ee395ca9134",
+      "commands": [
+        {
+          "args": [
+            "fold",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/left-conflicting-wire.bound"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7document wire/fields writes id \u00b7 target has two live inscriptions without withdrawal\n"
+        },
+        {
+          "args": [
+            "fold",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-conflicting-wire.bound"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7document wire/fields writes id \u00b7 target has two live inscriptions without withdrawal\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@1",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 232 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/altered.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk region digest or count mismatch receipts/left-ledger/sample\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/partial-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk partial or extra payload\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/outside-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign epoch is outside the authenticated prefix\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/unauthorized-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk metadata is not authenticated\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/stale-base.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk stale receiver base\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@2",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk unsupported resolution\n"
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/left-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "INGRESS 1 new evidence lines \u00b7 1 signed local import receipt",
+            "EXCHANGE 232 payload bytes \u00b7 1311 protocol bytes \u00b7 1543 new evidence bytes \u00b7 357 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/left-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 1 retained import receipt",
+            "EXCHANGE 232 payload bytes \u00b7 1311 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/missing-earlier-prefix.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign history is not an extension of its verified prefix\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/inserted-at-verified-epoch.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk foreign epoch does not match the verified prefix\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-acknowledged.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 0 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/no-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 0 import receipts \u00b7 no regions offered",
+            "EXCHANGE 0 payload bytes \u00b7 439 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 1 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/left-inventory.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 234 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-payload.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "INGRESS 1 new evidence lines \u00b7 1 signed local import receipt",
+            "EXCHANGE 234 payload bytes \u00b7 1316 protocol bytes \u00b7 1550 new evidence bytes \u00b7 356 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "evidence"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "FACT authenticated histories \u00b7 readings \u00b7 no encounters computed"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/left-payload.bound"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "ONCE 0 new evidence lines \u00b7 1 retained import receipt",
+            "EXCHANGE 232 payload bytes \u00b7 1311 protocol bytes \u00b7 0 new evidence bytes \u00b7 0 new receipt bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/undeclared-context-lineage.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7walk origin context changed without declared lineage\n"
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@0",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 0 touched regions \u00b7 2 open regions \u00b7 0 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "fold",
+            "--as",
+            "walk@8",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/right-final-inventory.bound",
+            "--key",
+            "left",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 0,
+          "signal": null,
+          "stdout": [
+            "EXCHANGE 1 touched regions \u00b7 1 open regions \u00b7 459 payload bytes"
+          ],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "<walk-payload>",
+            "--key",
+            "importer"
+          ],
+          "status": null,
+          "signal": "SIGKILL",
+          "stdout": [],
+          "stderr": ""
+        },
+        {
+          "args": [
+            "land",
+            "/var/folders/tp/mb5pflh94rxbjrtbkvwpg8v00000gn/T/bound-native-walk-sVHJP2/interruption-payload.bound",
+            "--key",
+            "right",
+            "--key-file",
+            "[ephemeral key]"
+          ],
+          "status": 1,
+          "signal": null,
+          "stdout": [],
+          "stderr": "source: REFUSE\u00b7crash source: REFUSE\u00b7stale the store belongs to exited process 13770; host recovery required\n"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "contract": "whole-region@1",
+  "cases": [
+    "conflicting wire/fields",
+    "altered payload",
+    "missing payload",
+    "epoch outside signed cut",
+    "unauthorized signer",
+    "stale receiver base",
+    "unsupported resolution",
+    "omitted earlier records",
+    "insertion at an already verified epoch",
+    "interrupted receiver signer"
+  ],
+  "invariant": "No rejected or interrupted lot adds admitted evidence or a local import receipt. Dead-owner lock requires separate host recovery."
+}

@@ -1,0 +1,47 @@
+{
+  "scope": "pipeline/archive-conformance",
+  "execution": "independent",
+  "measure": "count",
+  "result": "failures",
+  "cases": [
+    {
+      "program": "runtime",
+      "args": [
+        "tools/samples/run-archive.mjs",
+        "samples/yes/015-stage-10.json",
+        "samples/no/015-stage-10.json"
+      ],
+      "cwd": ".",
+      "timeoutMs": 15000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "ARCHIVE specimen-index"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "ARCHIVE route-notes"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "members equal \u00b7 one archive, two destinations"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "REFUSE\u00b7artifact digest-mismatch"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "ARTIFACT two unrelated places"
+        }
+      ],
+      "inputs": [
+        "tools/samples/run-archive.mjs",
+        "samples/yes/015-stage-10.json",
+        "samples/no/015-stage-10.json"
+      ]
+    }
+  ]
+}

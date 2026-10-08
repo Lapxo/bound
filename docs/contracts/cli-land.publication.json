@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/cli/land",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/cli-land.md",
+      "digest": "sha256:6872833e6f7bb9a5d7ed040c197e6cb306dda978a28fd4b286fa3e2bd5589228"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/native-views.json",
+      "digest": "sha256:888de96de74e6944d18d425245093845c54dd8374adc6c56f589c3e40da9f2e3"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/native-views.json",
+      "digest": "sha256:7750551a70599cbecb37ee5659797ba8ff1dd84a11e17cbbe0c77ff62aecb3a5"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native-views.json",
+      "digest": "sha256:1f17bde653377103acf8888717b0ad5c2b83b79860a4833be93270532b76c0dc"
+    }
+  ]
+}

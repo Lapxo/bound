@@ -1,0 +1,29 @@
+{
+  "profile": "quartet-process@1",
+  "scope": "contract/published",
+  "surface": [
+    "contract/published/attest-evidence-view",
+    "contract/published/cli/fold",
+    "contract/published/cli/land",
+    "contract/published/cli/sign",
+    "contract/published/pipeline/archive",
+    "contract/published/typed-object-sample",
+    "contract/published/view/card",
+    "contract/published/view/citation-file",
+    "contract/published/view/explanation",
+    "contract/published/view/guide",
+    "contract/published/view/help",
+    "contract/published/view/lines",
+    "contract/published/view/manifest-render",
+    "contract/published/view/programs",
+    "contract/published/view/readme-historical",
+    "contract/published/view/receipts",
+    "contract/published/view/reference",
+    "contract/published/view/release-workflow-render",
+    "contract/published/view/tsconfig",
+    "contract/published/view/usage-profile",
+    "contract/published/view/walk",
+    "contract/published/view/why"
+  ],
+  "note": "Explicit public-surface inventory. A selected coordinate without a descriptor is unpaid. Outstanding capability demands are not advertised implementations."
+}

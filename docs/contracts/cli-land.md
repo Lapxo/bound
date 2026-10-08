@@ -1,0 +1,3 @@
+# land
+
+`bound land <lot>` admits authenticated lines through the same boundary used by signing and previews. Authority, coverage, historical wire and typed context remain distinct checks. Unknown wire and tampered signatures refuse. Exact redelivery returns ONCE; it does not append another origin or grant new authority. Withdrawals remain exact under their declared contract. A refusal does not append a partial act. The published evidence vector lands fresh places, refuses unauthorized writes and tampering, redelivers signed bytes and exercises exact withdrawals. The signing-port vector additionally checks interrupted or invalid command responses do not land a partial lot.

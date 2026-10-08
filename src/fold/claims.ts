@@ -46,7 +46,10 @@ function regionsOf(line: string): readonly Region[] {
 
 function contracted(line: string, sides: readonly string[], receipts: readonly { readonly scope: string; readonly moved: readonly string[] }[]): boolean {
   const scope = fieldsOf(line)['scope'] ?? '';
-  const mine = exclusive(regionsOf(line), sides.filter((other) => other !== line).map(regionsOf));
+  const named = regionsOf(line);
+  // File receipts can discharge only declared file regions. No region is not an empty proof.
+  if (named.length === 0) return false;
+  const mine = exclusive(named, sides.filter((other) => other !== line).map(regionsOf));
   const touched = receipts.filter((r) => r.scope === scope).flatMap((r) => r.moved.map((coordinate) => point(coordinate)));
   return contracts(mine, touched);
 }

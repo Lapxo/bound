@@ -1,0 +1,8 @@
+{
+  "keyClasses": [
+    "authorize",
+    "read",
+    "access",
+    "attest"
+  ]
+}

@@ -51,3 +51,9 @@ The accepted TARGET is independent of a contributor's scan. Commit native receip
 A contribution is a proposed lot with the leaf changes rendered from it. Send that lot for admission by the team's coverage. Do not submit hand-edited lock output as already accepted. Check secrets, extra bound files, foreign vendoring and uncaptured page claims before review.
 
 A review includes the product fold, meaningful suites and verification of the rendered bytes. Preserve their actual output and exit status.
+
+## Declaring a demand
+
+A new demand records what remains to be proved. Admission does not create conformance evidence or pay it. An OWED line after land says the declaration was admitted and remains unpaid. Signing authority and conformance evidence are separate inputs.
+
+The selected program projection reads declared requirements and handed evidence. Missing evidence stays unread; a missing elapsed-time reading is not zero. A dependency cannot close before its requirements and predecessors. Declaring a plan never certifies a release.

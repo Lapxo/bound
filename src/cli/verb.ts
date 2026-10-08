@@ -45,6 +45,9 @@ import { claimLinesIn, entryOf, namedPlaces, positionalsOf, valueOf } from './ar
 import { EXIT, FLAGS, NAMED_VIEWS, helpLines } from './names.ts';
 import type { VerbName } from './names.ts';
 import { accept, signedBatch } from './accept.ts';
+import {renderWalk,landWalk,foreignWalkLines} from '../host/walk.ts';
+import {isWalkHeader} from '@lapxo/topos/walk';
+import {ingressBundles,ingressReceipts} from '../host/ports/ingress.ts';
 
 /** The first land of a lock: TARGET.bound into an empty owner ledger, then the sources that lock names. */
 async function firstLand(root: string, args: readonly string[]): Promise<number> {
@@ -175,6 +178,15 @@ async function view(root: string, under: string | undefined, asked: string, told
   if (!lockLines(storeOf(root)).length) {
     process.stderr.write(`${selfName()}: the owner ledger is empty; land it before rendering a view\n`);
     return EXIT.refuse;
+  }
+  if(name==='evidence'&&!under&&!told.length&&ingressBundles(storeOf(root)).length){
+    const declared=viewsOf(lockStanding(storeOf(root))).get(name);
+    if(!declared||declared.shape||!declared.regions.some(region=>region.name==='evidence'))throw Error('REFUSE·view foreign evidence requires a declared evidence view');
+    const received=await foreignWalkLines(root),authority=authorityFor(lockLines(storeOf(root)),rootSigner(root),signaturesOf(storeOf(root)).admitted);
+    const local=[...new Set(authority.admitted.flatMap(key=>ledgerLines(storeOf(root),key.id)))].filter(line=>authority.of(line).kind==='admitted');
+    for(const line of [...new Set([...local,...ingressReceipts(storeOf(root)),...received])])process.stdout.write(line+'\n');
+    process.stdout.write('FACT authenticated histories · readings · no encounters computed\n');
+    return EXIT.closed;
   }
   const at = Date.now();
   const place = under?.replace(/\/$/, '');
@@ -341,6 +353,11 @@ async function landVerb(root: string, rest: readonly string[]): Promise<number> 
   process.once('uncaughtException', (error) => die(error instanceof Error ? error.message : String(error)));
   process.once('unhandledRejection', (error) => die(error instanceof Error ? error.message : String(error)));
   try {
+    const proposed=batch.flatMap(claimLinesIn);
+    if(proposed.some(isWalkHeader)){
+      for(const line of await landWalk(root,proposed,valueOf(rest,FLAGS.key),valueOf(rest,FLAGS.keyFile),valueOf(rest,FLAGS.signer)))process.stdout.write(line+'\n');
+      return EXIT.closed;
+    }
     return await accept(root, rest);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -365,7 +382,7 @@ function foldFile(at: string): number {
   }
   for (const line of folded.standing) process.stdout.write(`${line}\n`);
   for (const fork of folded.forks) process.stdout.write(`FORK     ${fork.key}${fork.state ? ` · ${fork.state}` : ''}\n`);
-  process.stdout.write(`FACT     ${folded.standing.length} standing · ${folded.forks.length} forks · ${basename(at)}\n`);
+  process.stdout.write(`FACT     ${folded.standing.length} standing · ${folded.forks.length} forks · ${basename(at)} · readings · no encounters computed\n`);
   return EXIT.closed;
 }
 
@@ -401,6 +418,15 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
   // Public content is authenticated by its digest, independently of owner history.
   // A named view does not request mounting every release of the instrument.
   const receiptCheck = as === undefined && argv.includes(FLAGS.check);
+
+  if(as?.split('@')[0]==='walk'){
+    if(argv.includes(FLAGS.check))throw Error('REFUSE·walk check does not initiate or sign an exchange');
+    if(under||inputs.length>1)throw Error('REFUSE·walk one place and one authenticated peer inventory per fold');
+    const depth=as.split('@')[1];if(depth!==undefined&&(!/^(0|[1-9][0-9]*)$/.test(depth)||!Number.isSafeInteger(Number(depth))))throw Error('REFUSE·walk invalid resolution');
+    const peer=inputs.length?claimLinesIn(inputs[0]!):[];
+    for(const line of await renderWalk(root,depth===undefined?undefined:Number(depth),peer,valueOf(argv,FLAGS.key),valueOf(argv,FLAGS.keyFile),valueOf(argv,FLAGS.signer)))process.stdout.write(line+'\n');
+    return EXIT.closed;
+  }
 
   if(as===OBJECT_VIEW){const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));const cells=objectFold(held.records,held.context);for(const c of cells)process.stdout.write('CELL '+JSON.stringify(c)+'\n');process.stdout.write(`FACT     object fold ${cells.length} cells\n`);return EXIT.closed;}
   const key = valueOf(argv, FLAGS.key);

@@ -1,0 +1,16 @@
+{
+  "keyClasses": [
+    "authorize",
+    "read",
+    "access",
+    "attest"
+  ],
+  "lines": [
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=class role=writes scope=keys/views-fold value=fold",
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/help value=help",
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/lines value=lines",
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=writes scope=wire/receipt-fields value=scope|role|form|measure|value|by|at",
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/receipts value=receipts@8|receipts@0|receipts@1",
+    "bound-lock/1 at=policy:evidence by=target form=alphabet measure=id role=demands scope=view/not-provided-by-this-place value=never-offered"
+  ]
+}

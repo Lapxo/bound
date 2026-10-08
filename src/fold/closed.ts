@@ -1,6 +1,8 @@
+import {actCosts} from '../host/act-cost.ts';
+import {verifiedReadingReceipts} from '../host/reading-closures.ts';
 import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writeFileSync } from '../host/io.ts';
-import { canonical, LOCK, parse, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
-import { RECEIPTS, fieldOf, isWire } from './claims.ts';
+import { byBytes, canonical, LOCK, parse, publicationOf, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
+import { RECEIPTS, fieldOf, foldClaims, isConfig, isWire } from './claims.ts';
 import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest.ts';
 import { worldAt } from './places.ts';
 import { ownLockOf } from './signed.ts';
@@ -10,9 +12,8 @@ import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts'
 import { carriedFrom } from './resolved.ts';
 import { takenFor } from '../fold/place-inputs.ts';
 
-/** A region is closed when the digest of its bytes is the one its receipt names. Folding a closed region is idle: idleCount is how many were already closed, actSeconds how long this act has run, receiptsSeen how many receipts were read and how long that took. */
+/** A region is closed when the digest of its bytes is the one its receipt names. Folding a closed region is idle: idleCount is how many were already closed, actSeconds the largest measured act or unpartitioned host work, receiptsSeen how many receipts were read and how long that took. */
 let idle = 0;
-const began = Date.now();
 let seen = { count: 0, ms: 0 };
 
 export const idleCount = (): number => idle;
@@ -21,7 +22,7 @@ export const noteIdle = (): void => {
   idle += 1;
 };
 
-export const actSeconds = (): number => Math.max(0, Math.round((Date.now() - began) / 1000));
+export const actSeconds = (): number => actCosts.seconds();
 
 export const receiptsSeen = (): { readonly count: number; readonly ms: number } => seen;
 
@@ -62,13 +63,20 @@ function filesOf(root: string, place: string, region: string, inputs: readonly s
 
 const rooted = new Map<string, readonly string[]>();
 
+function publicConfiguration(lines: readonly string[]): readonly string[] {
+  if (!lines.length || !lines.every(isConfig)) return lines;
+  const folded = foldClaims(lines);
+  if (folded.forks.length) throw Error('REFUSE·receipt disputed configuration standing');
+  return publicationOf(folded.standing.filter(line => fieldOf(line, 'value') !== 'withdraw'));
+}
+
 function rootLines(root: string, place: string): readonly string[] {
   const name = place.replace(/\/$/, '');
   if (!name) return [];
   const key = `${root}\0${name}\0${lockStamp(root, '')}`;
   const held = rooted.get(key);
   if (held !== undefined) return held;
-  const standing = (observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire);
+  const standing = publicConfiguration((observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire));
   // Authority validates admission separately; it is not a rendered file input.
   const lines = standing.filter((line) => fieldOf(line, 'value') !== 'withdraw' && !fieldOf(line, 'scope').startsWith('keys/'));
   const take = takenFor(lines, `${name}/`, worldAt(root, name) ? { own: ownLockOf(root, name), tree: viewsOf(standing) } : undefined);
@@ -79,8 +87,18 @@ function rootLines(root: string, place: string): readonly string[] {
 
 /** File-fold identity uses public inputs; admission history stays in its separate ledger guard. */
 export function fileRegionDigest(root: string, place: string, region: string, algorithm: string, inputs: readonly string[] = []): string {
-  const files = filesOf(root, place, region, inputs);
-  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(observeFile(join(root, rel)) ?? new Uint8Array(), algorithm)}`), ...rootLines(root, place)], algorithm);
+  const files = [...filesOf(root, place, region, inputs)].sort(byBytes);
+  const own = join(root, place, LOCK);
+  const bytesOf = (rel: string): Uint8Array => {
+    const at = join(root, rel), bytes = observeFile(at) ?? new Uint8Array();
+    if (resolve(at) !== resolve(own)) return bytes;
+    const lines = new TextDecoder().decode(bytes).split('\n').filter(isWire);
+    // Object history keeps its own contract. Configuration's public identity is
+    // the existing Topos publication projection, not its admission envelopes.
+    if (!lines.length || !lines.every(isConfig)) return bytes;
+    return new TextEncoder().encode(publicConfiguration(lines).join('\n') + '\n');
+  };
+  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...rootLines(root, place)], algorithm);
 }
 
 function namedReceipts(root: string, store: string): ReadonlyMap<string, string> {
@@ -95,14 +113,17 @@ function namedReceipts(root: string, store: string): ReadonlyMap<string, string>
   return out;
 }
 
+// Only the instrument's file seals describe file-region bytes. Reader receipts keep their own semantic identity.
+const fileSeal = (line:string):boolean => isWire(line) && fieldOf(line,'measure') === 'bytes' && fieldOf(line,'by') === 'bound';
+
 function ownBytes(root: string): readonly string[] {
-  return (observeText(join(root, RECEIPTS)) ?? '').split('\n').filter(line => isWire(line) && fieldOf(line, 'measure') === 'bytes');
+  return (observeText(join(root, RECEIPTS)) ?? '').split('\n').filter(fileSeal);
 }
 
 function bytesMeet(root: string, place: string): boolean {
   const shipped = (observeText(join(root, place, RECEIPTS)) ?? '').split('\n').filter(isWire);
   const inputs = carriedFrom(storeOf(root), shipped) ?? [];
-  const lines = shipped.filter(line => fieldOf(line, 'measure') === 'bytes');
+  const lines = shipped.filter(fileSeal);
   const algorithm = algorithmIn(lines.join('\n'));
   return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === lines.map((line) => fileRegionDigest(root, place, fieldOf(line, 'scope'), algorithm, inputs)).join('\n');
 }
@@ -126,8 +147,8 @@ function rewritePlace(root: string, place: string): void {
   const text = observeText(at) ?? '';
   const algorithm = algorithmIn(text);
   if (algorithm === '') return;
-  const kept = text.split('\n').filter((line) => line === '' || !isWire(line) || fieldOf(line, 'measure') !== 'bytes');
-  const regions = kept.filter((line) => isWire(line) && fieldOf(line, 'measure') === 'count' && fieldOf(line, 'scope').startsWith('receipts/'));
+  const kept = text.split('\n').filter((line) => line === '' || !fileSeal(line));
+  const regions = kept.filter((line) => isWire(line) && fieldOf(line, 'measure') === 'count' && fieldOf(line,'by') === 'bound' && fieldOf(line, 'scope').startsWith('receipts/'));
   const bytes = regions.map((line) => {
     const scope = fieldOf(line, 'scope');
     const inputs = carriedFrom(storeOf(root), kept.filter(isWire)) ?? [];
@@ -159,11 +180,12 @@ export function meets(root: string, store: string, place: string): boolean {
     const own = ownBytes(root);
     const carried = own.length ? carriedFrom(store, (observeText(join(root, RECEIPTS)) ?? '').split('\n').filter(isWire)) : undefined;
     const ownClosed = own.length > 0 && carried !== undefined && carried.length > 0 && bytesMeet(root, '');
-    const closed = (own.length > 0 ? ownClosed : named.size > 0) && [...named].every(([one, expected]) => {
+    let closed = (own.length > 0 ? ownClosed : named.size > 0) && [...named].every(([one, expected]) => {
       const bytes = observeFile(join(root, one, RECEIPTS));
       const algorithm = expected.split(':')[0];
       return bytes !== undefined && hashBytes(bytes, algorithm) === expected && meets(root, store, `${one}/`);
     });
+    if(closed && carried){const algorithm=algorithmIn(own.join('\n'));const readings=verifiedReadingReceipts(store,carried,text=>hashFull(text,algorithm));if(readings===undefined)closed=false;else if(readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);}
     seen = { count: named.size + (own.length > 0 ? 1 : 0), ms: Date.now() - at };
     return closed;
   }

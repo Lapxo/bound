@@ -32,5 +32,6 @@
         "test/bootstrap.test.ts"
       ]
     }
-  ]
+  ],
+  "execution": "independent"
 }

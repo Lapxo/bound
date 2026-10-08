@@ -1,0 +1,88 @@
+{
+  "providerSource": "/** Verbatim prose explicitly assigned to the requested output. The host chooses no format or project vocabulary. */\nexport const render = (asked) => {\n    const bodies = [...new Set(asked.lines.filter(line => line.scope?.startsWith('prose/') && line.measure === 'text' && line.shape === asked.shape && line.value !== 'withdraw').map(line => line.about).filter((body) => body !== undefined))];\n    if (bodies.length > 1)\n        throw Error(`REFUSE\u00b7view conflicting prose names ${asked.shape}`);\n    return bodies;\n};\n",
+  "providerDigest": "sha256:8e322a6ed813609ed6233c5c82812e63eec0480be1eaa46fef62b59cd4c01531",
+  "wire": [
+    [
+      "fields",
+      "scope|role|form|measure|value|by|at|epoch|sig|needs|shape|about|kind|restsOn"
+    ],
+    [
+      "required",
+      "scope|role|form|measure|value|by|at"
+    ],
+    [
+      "forms",
+      "alphabet|interval"
+    ],
+    [
+      "families",
+      "keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|prose|uses|dep"
+    ],
+    [
+      "roles",
+      "reads|writes|demands"
+    ],
+    [
+      "at-classes",
+      "policy|place|origin|witness|receipt"
+    ],
+    [
+      "era",
+      "sample"
+    ],
+    [
+      "signature-algorithms",
+      "ed25519:sample"
+    ],
+    [
+      "digest-algorithms",
+      "sha256"
+    ],
+    [
+      "region-measures",
+      "coordinates|leaves|reads|receipts"
+    ]
+  ],
+  "places": [
+    {
+      "name": "field-notes",
+      "outputs": [
+        {
+          "view": "usage-profile",
+          "path": "notes.md",
+          "body": "# Observations\n\nA field note belongs to its place.\n"
+        },
+        {
+          "view": "manifest-render",
+          "path": "manifest.json",
+          "body": "{\"name\":\"field-notes\"}\n"
+        },
+        {
+          "view": "release-workflow-render",
+          "path": "process.yml",
+          "body": "name: field-work\non: push\n"
+        }
+      ]
+    },
+    {
+      "name": "collection",
+      "outputs": [
+        {
+          "view": "usage-profile",
+          "path": "catalogue.md",
+          "body": "# Collection\n\nAn item keeps its provenance.\n"
+        },
+        {
+          "view": "manifest-render",
+          "path": "catalogue.json",
+          "body": "{\"name\":\"collection\"}\n"
+        },
+        {
+          "view": "release-workflow-render",
+          "path": "catalogue.yml",
+          "body": "name: catalogue\non: push\n"
+        }
+      ]
+    }
+  ]
+}

@@ -29,6 +29,10 @@ test('host capture retains readings without interpreting their domain', () => {
   const forked=capture(bytes('5..6'),'water.bound');
   assert.match(agreed,/FACT\s+2 standing · 0 forks · water\.bound/);
   assert.match(forked,/FACT\s+2 standing · 0 forks · water\.bound/);
+  for (const output of [agreed, forked]) {
+    assert.match(output, /readings · no encounters computed/);
+    assert.doesNotMatch(output, /^CELL /m);
+  }
   assert.ok(!agreed.includes('meeting'));
 });
 
@@ -40,5 +44,19 @@ test('scenario tooling retains the same-signer malformed-history negative contro
     writeFileSync(join(root,'malformed.bound'),lines.join('\n'));
     const run=spawnSync(process.execPath,[new URL('../src/cli/verb.ts',import.meta.url).pathname,'fold','malformed.bound'],{cwd:root,encoding:'utf8'});
     assert.equal(run.status,1);assert.match(run.stderr,/REFUSE·document/);assert.ok(!run.stdout.includes('CONFLICT'));
+  } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+// A host summary cannot imply object freedom from a missing configuration reading.
+test('file field labels its computation without object states', async () => {
+  const {field}=await import('../src/render/field.ts');
+  const root=mkdtempSync(join(tmpdir(),'bound-field-output-'));
+  try {
+    const missing=canonical({scope:'requirement/input',role:'demands',form:'alphabet',measure:'status',value:'present',by:'target',at:'policy:sample'});
+    const output=field({root,regions:{named:[],bounds:[],summaries:[]},own:{},ceilings:{unread:[],vacuous:[]},missing:[missing],forks:[]} as unknown as import('../src/cli/place.ts').PlaceFold,3).join('\n');
+    assert.match(output,/readings · no encounters computed/);
+    assert.match(output,/requirement\/input · unanswered/);
+    assert.doesNotMatch(output,/\b(?:REQUIRED|FREE|CONFLICT|FORBIDDEN)\b/);
+    assert.doesNotMatch(output,/\d+ cells/);
   } finally {rmSync(root,{recursive:true,force:true});}
 });

@@ -1,0 +1,3 @@
+# Reference — historical profile
+
+The declared view combines term, set and ref from the pinned historical document provider. The profile projects the place term and meaning, its selected world names and links to its declared Markdown shapes. The executable sample runs two unrelated places, checks their own term and meaning, the actual selected world and relative guide link, and captures two identical CLI readings. A view asking an unoffered region refuses by name. Missing terms or links can yield empty component answers; these are not measurements or a claim that obligations were paid. These historical regions and selectors belong to the selected Topos; Bound supplies verified inputs and dispatch only. The general document contract remains unpaid.

@@ -44,9 +44,9 @@ function unpacked(digest: string, bytes: Uint8Array): string {
 
 /**
  * A capsule is the bytes a digest names in the instrument's own store, and only when they hash to it: its own lock is
- * read from them, and the coordinate a lock names runs as a process of its own, like a reader. Each answer is kept in one
- * slot of the capsule, the place and the region; the body of the request is the hit, so a file that moved misses and
- * overwrites the slot, and a request asked again for the same bytes is read back and never run twice. Operational failures never enter the cache; refusals and abstentions are asked again.
+ * read from them, and the coordinate a lock names runs as a process of its own, like a reader. Each answer is kept by the
+ * digest of its complete declared request and implementation; distinct views retain distinct answers, and the same
+ * request reads its verified answer without running again. Operational failures never enter the cache; refusals and abstentions are asked again.
  */
 const capsules = new Map<string, Capsule>();
 
@@ -101,10 +101,9 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
     return requests.map(() => undefined);
   }
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
-  const slotOf = (request: Request): string => sha(`${digest}\n${loader}${request.verb}\n${request.rootScope}\n${request.region ?? ''}`);
   const hitOf = (request: Request): string => sha(`${digest}\n${loader}${JSON.stringify(request)}`);
-  const kept = requests.map((request) => storeAt(cacheStore, 'cas', 'answers', slotOf(request)));
   const hits = requests.map(hitOf);
+  const kept = hits.map(hit => storeAt(cacheStore, 'cas', 'answers', hit));
   const held = kept.map((at, i) => {
     const text = observeText(at);
     if (text === undefined) return undefined;
@@ -126,7 +125,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
     if (said?.kind === 'fact') {
       const text = JSON.stringify({ format: 'capsule-answer/2', hit: hits[i], said });
       replaceWhole(kept[i]!, text);
-      holdStore(cacheStore, 'answers', slotOf(request), Buffer.byteLength(text));
+      holdStore(cacheStore, 'answers', hits[i]!, Buffer.byteLength(text));
     }
     return said;
   });

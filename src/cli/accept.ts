@@ -11,7 +11,7 @@ import { fieldOf, isConfig, foldClaims, sayingOf, selfName } from '../fold/claim
 import { isReaderLock } from '../fold/observed.ts';
 import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signers.ts';
 import { lockLines, lockStanding } from '../fold/keys.ts';
-import { keepVerdict, keptVerdict, land, landBlob, storeOf } from '../land/ledger.ts';
+import { keepVerdict, keptVerdict, land, landBlob, ledgerLines, storeOf } from '../land/ledger.ts';
 import { signConsentLot, verifiesOwnerLine } from '../land/sign.ts';
 import { signerFor } from '../host/signing.ts';
 import { appliedIn, ownLockOf } from '../fold/signed.ts';
@@ -19,7 +19,7 @@ import { wordOf } from '../fold/wire.ts';
 import { hasVouchedTree, landCoordinates, locationsOf, vouchedCoordinates } from '../land/vouched.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
 import { coneOf, standingOf } from './place.ts';
-import { ownLock, ownRoot, ownStore } from '../observe/runner.ts';
+import { ownLock, ownRoot } from '../observe/runner.ts';
 import { widenedWithoutWitness } from '../judge/widening.ts';
 import { retractedTogether, withdrawal } from '../land/withdraw.ts';
 import { isCeiling } from '../fold/configures.ts';
@@ -37,7 +37,7 @@ import { lateFacts } from '../judge/late.ts';
 import { paidOf } from '../fold/paid.ts';
 import { aliasPinned } from '../land/alias.ts';
 import { coordinatesWithdrawn } from '../land/leaving.ts';
-import { ownerOf, epochOf, forksItself, forksJoinedBy, renderInto, sideOf, signedDemands, signedOwnerLines } from './owner.ts';
+import { ownerOf, epochOf, localActLines, forksItself, forksJoinedBy, renderInto, sideOf, signedDemands, signedOwnerLines } from './owner.ts';
 import { claimLinesIn, entryOf, namedPlaces, placesOfFile, positionalsOf, valueOf } from './args.ts';
 import { FLAGS } from './names.ts';
 import { judgeDemand, landTake } from './takes.ts';
@@ -56,7 +56,15 @@ function admissionEvidence(root: string, signed: readonly string[], standing: re
     const coordinates = coordinatesWithdrawn(root, store, signed, [...signed, ...standing]);
     if (coordinates.refused.length) throw Error(`REFUSE·withdraw a file is still read: ${coordinates.refused.map(one => `${one.path} by ${one.by}`).join(' · ')}`);
     const view = `${wordOf(standing, 'families', 'view')}/`;
-    const judged = signed.filter(one => isConfig(one) && fieldOf(one, 'role') === 'demands' && fieldOf(one, 'value') !== 'withdraw' && !fieldOf(one, 'scope').startsWith(view)).map(one => judgeDemand(root, one));
+    const judged: Judged[] = signed.filter(one => isConfig(one) && fieldOf(one, 'role') === 'demands' && fieldOf(one, 'value') !== 'withdraw' && !fieldOf(one, 'scope').startsWith(view)).map(one => {
+      const scope = fieldOf(one, 'scope');
+      const alreadyDemanded = standing.some(held => isConfig(held) && fieldOf(held, 'role') === 'demands'
+        && fieldOf(held, 'value') !== 'withdraw' && fieldOf(held, 'scope') === scope
+        && fieldOf(held, 'form') === fieldOf(one, 'form') && fieldOf(held, 'measure') === fieldOf(one, 'measure'));
+      // Declaring an obligation is not a claim to have discharged it.
+      return alreadyDemanded ? judgeDemand(root, one)
+        : {kind: 'owed', scope, why: 'new demand declared; no conformance reading is claimed'};
+    });
     const refused = judged.filter(one => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
     if (refused.length) throw Error(`REFUSE·takes ${refused.map(one => `${one.scope}: ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}`).join(' · ')}`);
     return { coordinates, judged, fold };
@@ -125,7 +133,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     process.stderr.write(`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
     return {kind:'exit',code:2};
   }
-  const epoch = epochOf([...lockLines(store), ...destinations.flatMap((place) => appliedIn(root, place))]) + 1;
+  const epoch = epochOf(localActLines(root,destinations)) + 1;
   const stale = proposed.filter((line) => fieldOf(line, 'sig')).flatMap((line) => ((by, key) => (key === undefined || !verifiesOwnerLine(line, key, signaturesOf(store).admitted)
     ? [`${fieldOf(line, 'scope')} · the signature does not hold for ${by || '∅'}`]
     : []))(fieldOf(line, 'by'), publicKeyOf(root, fieldOf(line, 'by'))));
@@ -137,9 +145,13 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   const [named, places] = [namedPlaces(args), placesIn(root)];
   const inLock = new Set(lockLines(store).map(sayingOf));
   const inPlace = new Map(places.map((place) => [place, new Set(appliedIn(root, place).map(sayingOf))] as const));
+  const deliveryAuthority = authorityFor(lockLines(store), rootSigner(root), signaturesOf(store).admitted);
+  const delivered = (line: string): boolean => Boolean(fieldOf(line, 'sig'))
+    && deliveryAuthority.of(line).kind === 'admitted'
+    && ledgerLines(store, fieldOf(line, 'by')).includes(line);
   const held = (line: string, at = named.length ? named : byFile.flatMap(([heads, lines]) => (lines.includes(line) ? heads : []))): boolean => at.length
     ? at.every((place) => inPlace.get(place)?.has(sayingOf(line)))
-    : inLock.has(sayingOf(line)) || places.some((place) => inPlace.get(place)?.has(sayingOf(line)));
+    : delivered(line) || inLock.has(sayingOf(line)) || places.some((place) => inPlace.get(place)?.has(sayingOf(line)));
   if (proposed.every((line) => held(line))) {
     if(proposed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...proposed]);}catch(e){process.stderr.write(`${selfName()}: ${String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
     return { kind: 'once', proposed };
@@ -293,7 +305,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   }
   const told = took('told', () => standingOf(root, undefined, signed));
   for (const name of openedBy(descent, told.standing, signed)) process.stderr.write(`OPEN     ${name}\n`);
-  if (owned.own.size) layReleases(store, ownRoot(), ownLock(), ownStore());
+  if (owned.own.size) layReleases(store, root, told.standing, store);
   const landed = took('land', () => [...new Set(signed.map((line) => fieldOf(line, 'by')))].map((by) => land(store, by, signed.filter((line) => fieldOf(line, 'by') === by))));
   for (const [place, lines] of owned.own) landOwned(root, place, lines);
   landSaid(store, writerFor(told.standing, 'fold'), []);
@@ -340,7 +352,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   if (folder !== undefined) land(store, folder, [beat(perLine, 'line'), beat(1, fold.kept ? 'kept' : 'folded'), beat(Date.now() - started, 'total')]);
   process.stdout.write(
     `FACT     signed ${signed.length + own} · landed ${landed.length ? landed.map((one) => `${one.appended} in ${one.at}`).join(' · ') : '0'}${[...owned.own].map(([place, lines]) => ` · ${lines.length} in ${place}/${LOCK}`).join('')} · epoch ${epoch}\n`
-    + `TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · ${Date.now() - started} ms\n`
+    + `TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · readings · no encounters computed · ${Date.now() - started} ms\n`
     + `SPENT    ${spent.join(' ms · ')} ms · ${signed.length} lines\n`,
   );
   if (withdrawn) {
@@ -388,7 +400,7 @@ function repaid(root: string, proposed: readonly string[], started: number): num
   }
   const rendered = renderInto(root, store);
   process.stdout.write(`RENDER 0\n`);
-  process.stdout.write(`TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · ${Date.now() - started} ms\n`);
+  process.stdout.write(`TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · readings · no encounters computed · ${Date.now() - started} ms\n`);
   return 0;
 }
 

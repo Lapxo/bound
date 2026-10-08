@@ -7,6 +7,7 @@ import { EXTENSION, fieldOf, foldClaims, selfName } from './claims.ts';
 import { wireLine } from './wire.ts';
 import { publicLock, LOCK } from '@lapxo/topos/wire';
 import {builtinModules,createRequire} from 'node:module';
+import {moduleImports} from '../host/adapters/modules/javascript.ts';
 
 const held = new Map<string, string>();
 let algorithmMs = 0;
@@ -106,6 +107,7 @@ const memoOf = (store: string): Map<string, string> => stamped.get(store) ?? sta
 export function coordinateDigest(store: string, at: string): string | undefined {
   const stamp = stampOf(at);
   if (stamp?.kind !== 'file') return stamp === undefined ? undefined : bytesDigest(store, observeFile(at) ?? new Uint8Array());
+  if (readOnly()) return bytesDigest(store, observeFile(at) ?? new Uint8Array());
   const key = `${at} ${stamp.stamp}`;
   const memo = memoOf(store);
   const held = memo.get(key);
@@ -134,9 +136,9 @@ const imported = new Map<string, readonly string[]>();
 const importsOf = (store: string, at: string, digest: string): readonly string[] => {
   const key = `imports ${fullDigest(store,importsOf.toString())} ${digest}`;
   const memo = memoOf(store);
-  const held = imported.get(digest) ?? memo.get(key)?.split('|').filter(Boolean);
+  const held = imported.get(digest) ?? (readOnly() ? undefined : memo.get(key)?.split('|').filter(Boolean));
   if (held !== undefined) return held;
-  const found = [...new TextDecoder().decode(observeFile(at) ?? new Uint8Array()).matchAll(/(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s*)['"]([^'"]*)['"]/g)].map((m) => m[1] ?? '');
+  const found = moduleImports(new TextDecoder().decode(observeFile(at) ?? new Uint8Array()),at);
   imported.set(digest, found);
   memo.set(key, found.join('|'));
   if (!readOnly()) appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import { strict as assert } from 'node:assert';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { gzipSync } from 'node:zlib';
@@ -37,4 +37,15 @@ test('a declared capsule entry runs exactly that member and cannot reuse another
     assert.deepEqual(other.ask([request]),[{protocol:'bound-lock/1',kind:'fact',lines:['other']}]);
     assert.deepEqual(chosen.ask([request]),[{protocol:'bound-lock/1',kind:'fact',lines:['chosen']}]);
   } finally {process.argv[1]=prior;rmSync(store,{recursive:true,force:true});}
+});
+
+
+test('render requests retain independent receipts by digest, across another view',()=>{
+ const store=mkdtempSync(join(tmpdir(),'capsule-render-reuse-')),prior=process.argv[1];process.argv[1]=new URL('../src/cli/verb.ts',import.meta.url).pathname;
+ try{
+  const calls=join(store,'calls'),module="import{appendFileSync}from'node:fs';export const render=asked=>{appendFileSync("+JSON.stringify(calls)+",'1');return [asked.shape];};";
+  const bytes=tar(record('capsule.bound',canonical({scope:'region/prose',role:'render',form:'alphabet',measure:'reads',value:'**',by:'fixture',at:'policy:test'})+'\n'),record('entry.js',module)),digest=sha(bytes);save(store,digest,bytes);const capsule=capsuleAt(digest,'entry.js',store)!;
+  const ask=(shape:string)=>capsule.ask([{protocol:'bound-lock/1',verb:'render',rootScope:'fixture',region:'prose',files:[],shape}]);
+  const first=ask('first'),second=ask('second');assert.deepEqual(ask('first'),first);assert.deepEqual(ask('second'),second);assert.equal(readFileSync(calls,'utf8'),'11','an intervening view cannot evict a closed render');
+ }finally{process.argv[1]=prior;rmSync(store,{recursive:true,force:true});}
 });

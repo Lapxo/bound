@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/pipeline/archive",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/015-stage-10.md",
+      "digest": "sha256:eedbd0ca544377080763c035053e532bfc46ddd496c3794e0cac2e0d6286e3a9"
+    },
+    {
+      "role": "yes",
+      "path": "samples/yes/015-stage-10.json",
+      "digest": "sha256:1e2a1ce055edb12da86e1ddbbf78e1f9cb910ad6fe14f57fc3e360751e604a4c"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/015-stage-10.json",
+      "digest": "sha256:a39cb8d552ccb7122b7d30d823238922f4f5ea5f68ea1a78f0c2fa6a3117a696"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/015-stage-10.json",
+      "digest": "sha256:e14e5007e6b097be39964a749a09fb7143f652129869a8902743eee3ec9b89ea"
+    }
+  ]
+}

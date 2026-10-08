@@ -8,31 +8,35 @@ import { declaredBy } from '../observe/regions.ts';
 import type { RegionName } from './names.ts';
 import { readersBehind } from '../fold/observed.ts';
 import { LOCK, canonical, matches } from '@lapxo/topos/wire';
-import { STATES } from '@lapxo/obligations';
 import type { PlaceFold } from '../cli/place.ts';
 import type { View } from '../fold/views.ts';
 import { fieldOf, foldClaims, selfName } from '../fold/claims.ts';
 import { keepRender, keptRender } from '../fold/kept.ts';
-import { bytesDigest } from '../fold/digests.ts';
-import { writerFor } from '../fold/signers.ts';
+import { bytesDigest, signaturesOf } from '../fold/digests.ts';
+import { authorityFor, rootSigner, writerFor } from '../fold/signers.ts';
 import { lockLines } from '../fold/keys.ts';
+import { appliedIn } from '../fold/signed.ts';
+import { ledgerLines } from '../land/ledger.ts';
 import { horizonOf, moved, shapeLines } from './shape.ts';
 import { rankLines } from '../fold/rank.ts';
 import { differing, regionsOf } from '../fold/region.ts';
-import { verdictsFor } from '../fold/paid.ts';
 import { field } from './field.ts';
 import { helpLines } from '../cli/names.ts';
 
 type Region = (fold: PlaceFold) => readonly string[];
 
+/** Authenticated delivery history is evidence, not the place's normative standing. */
+const evidence: Region = (fold) => {
+  const authority = authorityFor(lockLines(fold.store), rootSigner(fold.root), signaturesOf(fold.store).admitted);
+  const place = (fold.under ?? '').replace(/\/$/, '');
+  const deliveries = place ? appliedIn(fold.root, place)
+    : [...new Set(authority.admitted.flatMap(key => ledgerLines(fold.store, key.id)))];
+  return deliveries
+    .filter(line => authority.of(line).kind === 'admitted');
+};
+
 const block = (name: string, lines: readonly string[]): readonly string[] => (lines.length ? [`## ${name}`, '', '```', ...lines, '```'] : []);
 const seconds = (ms: number): string => `${(ms / 1000).toFixed(1)} s`;
-
-const statesOf = (fold: PlaceFold): readonly string[] => {
-  const held = new Map<string, number>();
-  for (const one of Object.values(verdictsFor(fold))) held.set(one, (held.get(one) ?? 0) + 1);
-  return STATES.flatMap((one) => (held.get(one) ? [`${one} ${held.get(one)}`] : []));
-};
 
 const programs: Region = (fold) => {
   const median = fold.costs.length ? [...fold.costs].sort((a, b) => a - b)[Math.floor(fold.costs.length / 2)] ?? 0 : 0;
@@ -41,12 +45,13 @@ const programs: Region = (fold) => {
   const refusedByReader = fold.observed.filter((line) => fieldOf(line, 'scope') === 'refuse/reader').length;
   const c = fold.ceilings;
   return block('programs', [
-    `PROGRAMS${fold.under ? ` ${fold.under}` : ''} ${[`${fold.claims} claims`, ...statesOf(fold), `${fold.history.length} history`].join(' · ')}`
+    `PROGRAMS${fold.under ? ` ${fold.under}` : ''} ${[`${fold.claims} claims`, `${fold.history.length} history`].join(' · ')}`
     + ` · ${fold.forks.length + (fold.second.verdict === 'forks' ? 1 : 0)} forks · ${fold.grey.length} grey · ${fold.refused.length} refused · ${fold.vacuous} vacuous`
     + ` · ${secondName()} ${fold.second.verdict}${fold.second.verdict === 'agrees' && !fold.second.external ? ', never disagreed' : ''}`
     + ` · store ${fold.observed.length} observed${refusedByReader ? ` · ${refusedByReader} refuse·reader` : ''}`
     + (fold.under ? ` · ceilings ${c.read} met here · ${c.short.length} short · ${c.over.length} over`
       : ` · ceilings ${c.read}/${c.total} read · ${c.short.length} short · ${c.over.length} over · ${c.unread.length} unread${c.vacuous.length ? ` · ${c.vacuous.length} vacuous unread` : ''}`)
+    + ' · readings · no encounters computed'
     + ` · ${fold.effects} · take ${fold.costs.length ? seconds(fold.costs[fold.costs.length - 1] ?? 0) : 'none'} last`
     + (fold.costs.length > 1 ? ` · ${seconds(median)} median of ${fold.costs.length}` : '')
     ,
@@ -149,6 +154,7 @@ const REGIONS: Readonly<Record<string, Region>> = {
   receipts: (fold) => receiptRegion(fold, 1),
   help: () => helpLines(),
   lines: (fold) => fold.standing,
+  evidence,
   red, forks, programs, why, sign, take, history,
   field: (fold) => field(fold, 3),
 } satisfies Record<RegionName, Region>;
