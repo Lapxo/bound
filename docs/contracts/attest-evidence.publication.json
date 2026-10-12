@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/evidence-view.md",
-      "digest": "sha256:522740051150e3b35dcca31bcc398b18b8cc8b5f9b18417ec4c676f5ea59e61d"
+      "digest": "sha256:6dda469344b02a79d9ee8cd960f11fea30bd4fae14df2e7fc808c4b692f4b3b3"
     },
     {
       "role": "yes",
@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/native-views.json",
-      "digest": "sha256:1f17bde653377103acf8888717b0ad5c2b83b79860a4833be93270532b76c0dc"
+      "digest": "sha256:d827c6590b310ce5bc02eac532b23f40d3ef82800dc5ca3ddf1aad69da1dfdef"
     }
   ]
 }

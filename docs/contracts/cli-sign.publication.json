@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/cli.md",
-      "digest": "sha256:4d1782d30d6d695b0cdad7db1bc2453b98adfcb3f7f8574326ddc794bfa9cf12"
+      "digest": "sha256:dcab312079efcb1b9c8f1357ebb87763aa286f478187358bbd1cbcdf2a064a4d"
     },
     {
       "role": "yes",
@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/signing-port.json",
-      "digest": "sha256:53cc8abaccbcb37385fdc1acd1d251c4d3d77ca44df4f8436ee498acf40d4fde"
+      "digest": "sha256:2e65d1f9f146f2581af5ea677dd023be84d830a705017789d5b80a2bf42491c5"
     }
   ]
 }

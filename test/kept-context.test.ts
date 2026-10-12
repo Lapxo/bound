@@ -9,6 +9,21 @@ import {land,landShard} from '../src/land/ledger.ts';
 import {keepFold,keptPlace} from '../src/fold/kept.ts';
 import type {PlaceFold} from '../src/cli/place.ts';
 
+test('retained history cannot answer as a different current instrument',()=>{
+ const root=mkdtempSync(join(tmpdir(),'fold-instrument-')),store=join(root,'.bound');
+ try {
+  mkdirSync(store);
+  const fields={scope:'wire/digest-algorithms',measure:'id',value:'sha256',form:'alphabet',role:'writes',at:'policy:fixture',by:'device',epoch:'1'};
+  const pair=generateKeyPairSync('ed25519');
+  land(store,'device',[canonical({...fields,sig:'ed25519:fixture:'+sign(null,Buffer.from(canonical(fields)),pair.privateKey).toString('base64')})]);
+  const fold={instrument:'previous',standing:[],observed:[],grey:[],refused:[],demands:[],paid:[],missing:[],history:[],orphans:[],signed:new Map(),claims:1} as unknown as PlaceFold;
+  keepFold(store,'previous-fold',fold,['place .']);
+  assert.equal(keptPlace(store,undefined,'previous')?.claims,1);
+  assert.equal(keptPlace(store,undefined,'current'),undefined);
+  assert.equal(keptPlace(store)?.instrument,'previous','history remains retained');
+ } finally {rmSync(root,{recursive:true,force:true});}
+});
+
 test('a completed reader invalidates the cached verdict without changing project leaves',()=>{
  const root=mkdtempSync(join(tmpdir(),'fold-journal-')),store=join(root,'.bound');
  try {
@@ -32,5 +47,28 @@ test('a completed reader invalidates the cached verdict without changing project
   assert.equal(keptPlace(store)?.claims,1);
   landShard(store,'observer','sector', [reading]);
   assert.equal(keptPlace(store)?.claims,1,'redelivery leaves the journal and cache unchanged');
+ } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+for(const scope of ['calibration','inventory']) test(`a new ${scope} judgment invalidates only a verdict that depends on it`,()=>{
+ const root=mkdtempSync(join(tmpdir(),'fold-judgment-')),store=join(root,'.bound');
+ try {
+  mkdirSync(store);
+  const pair=generateKeyPairSync('ed25519');
+  const fields={scope:'wire/digest-algorithms',measure:'id',value:'sha256',form:'alphabet',role:'writes',at:'policy:fixture',by:'device',epoch:'1'};
+  land(store,'device',[canonical({...fields,sig:'ed25519:fixture:'+sign(null,Buffer.from(canonical(fields)),pair.privateKey).toString('base64')})]);
+  const demand=canonical({scope,status:'present',role:'demands',at:'policy:fixture',by:'device'});
+  // Private cache fixture: the test does not manufacture a payment certificate.
+  const fold={standing:[demand],observed:[],grey:[],refused:[],demands:[demand],paid:[],missing:[demand],history:[],orphans:[],signed:new Map(),claims:1} as unknown as PlaceFold;
+  const judgment=(named:string)=>canonical({scope:named,status:'present',role:'writes',by:'judge',at:'receipt:fixture'});
+  keepFold(store,'before',fold,['place .']);
+  assert.equal(keptPlace(store)?.missing.length,1);
+  land(store,'judge',[judgment('unrelated')]);
+  assert.equal(keptPlace(store)?.missing.length,1,'unrelated evidence preserves the cached verdict');
+  land(store,'judge',[judgment(scope)]);
+  assert.equal(keptPlace(store),undefined,'relevant evidence must trigger a new verdict');
+  keepFold(store,'after',{...fold,paid:[demand],missing:[]},['place .']);
+  land(store,'judge',[judgment(scope)]);
+  assert.equal(keptPlace(store)?.missing.length,0,'idempotent delivery preserves the refreshed verdict');
  } finally {rmSync(root,{recursive:true,force:true});}
 });

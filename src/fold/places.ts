@@ -1,5 +1,8 @@
 import { join } from '../host/io.ts';
-import { CAPSULE, canonical, LOCK, matches, parse } from '@lapxo/topos/wire';
+import { CAPSULE, canonical, EXTENSION, LOCK, matches, parse } from '@lapxo/topos/wire';
+import {lockLines} from './keys.ts';
+import {releasesOf} from '../host/release.ts';
+import {archiveCoordinate} from '../host/archive.ts';
 import { fieldOf } from './claims.ts';
 import { isCeiling } from './configures.ts';
 import { entriesIn, observeText } from '../observe/files.ts';
@@ -9,8 +12,23 @@ import { ownLockOf } from './signed.ts';
 
 type Spoken = { readonly place: string; readonly line: string };
 
-export const placesIn = (root: string): readonly string[] => entriesIn(root)
-  .filter((entry) => entry.dir && observeText(join(root, entry.name, LOCK)) !== undefined).map((entry) => entry.name).sort();
+/** A dependency's lock describes the dependency, never a child of its host.
+ * Retiring a mount does not turn its retained bytes into local declarations. */
+export function mountedCoordinatesIn(root:string,history:readonly string[]=lockLines(join(root,EXTENSION))):readonly string[]{
+  return releasesOf(history).flatMap(line=>{
+    const needs=fieldOf(line,'needs');
+    return needs?[archiveCoordinate(needs)]:[];
+  });
+}
+
+export function localDirectoriesIn(root:string,history:readonly string[]=lockLines(join(root,EXTENSION))):readonly string[]{
+  const mounts=new Set(mountedCoordinatesIn(root,history));
+  return entriesIn(root).filter(entry=>entry.dir&&!mounts.has(entry.name)).map(entry=>entry.name).sort();
+}
+
+export function placesIn(root:string,history:readonly string[]=lockLines(join(root,EXTENSION))):readonly string[]{
+  return localDirectoriesIn(root,history).filter(name=>observeText(join(root,name,LOCK))!==undefined);
+}
 
 /** A directory with no own lock is founded by the root: a line of its region family names the directory's coordinates, and a covered batch that names the place lands its first own lock. */
 export const foundableIn = (root: string, standing: readonly string[], family: string, name: string): boolean => !placesIn(root).includes(name)

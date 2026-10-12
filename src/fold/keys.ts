@@ -2,6 +2,7 @@ import { dirname, existsSync, join } from '../host/io.ts';
 import { ledgerLines, ledgerWriters, signedLines } from '../land/ledger.ts';
 import { EXTENSION, fieldOf, foldClaims, isWire, LOCK, selfName } from './claims.ts';
 import { entriesIn, observeText } from '../observe/files.ts';
+import {publicLock} from '@lapxo/topos/wire';
 
 type Keys = { readonly classes: ReadonlyMap<string, readonly string[]>; readonly signers: readonly string[] };
 
@@ -76,14 +77,17 @@ export function releaseOf(store: string): readonly string[] | undefined {
   if (releases.has(store)) return releases.get(store);
   const at = join(dirname(store), LOCK);
   const lines = ledgerKeyLines(store).length || !existsSync(at) ? [] : (observeText(at) ?? '').split('\n').filter(isWire);
-  const got = lines.some((line) => fieldOf(line, 'scope') === 'publish/bootstrap' && fieldOf(line, 'value') !== 'withdraw') ? lines : undefined;
+  const published = lines.some(line => fieldOf(line, 'scope').startsWith('keys/') && fieldOf(line, 'measure') === 'public-key' && fieldOf(line, 'sig'))
+    && publicLock(lines) !== undefined;
+  const got = published || lines.some((line) => fieldOf(line, 'scope') === 'publish/bootstrap' && fieldOf(line, 'value') !== 'withdraw') ? lines : undefined;
   releases.set(store, got);
   return got;
 }
 
 function read(store: string, told: readonly string[] = []): Keys {
-  const said = [...ledgerKeyLines(store), ...releaseOf(store) ?? [], ...told]
-    .filter((line) => /\bsig=/.test(line) && /(?:^|\s)scope=keys\/[^/\s]+\s/.test(line));
+  const release = releaseOf(store) ?? [], published = publicLock(release) === undefined ? [] : release;
+  const said = [...ledgerKeyLines(store), ...release, ...told]
+    .filter((line) => (/\bsig=/.test(line) || published.includes(line)) && /(?:^|\s)scope=keys\/[^/\s]+\s/.test(line));
   const standing = foldClaims(said).standing.filter((line) => fieldOf(line, 'value') !== 'withdraw')
     .sort((a, b) => (Number(fieldOf(a, 'epoch')) || 0) - (Number(fieldOf(b, 'epoch')) || 0));
   const idOf = (line: string): string => fieldOf(line, 'scope').slice('keys/'.length);

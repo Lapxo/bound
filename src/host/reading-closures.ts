@@ -25,7 +25,8 @@ export function readingClosures(options:{root:string;store:string;reader:string;
  for(const line of projected.lines){const f=fields(line),scope=f.scope??'',resolution=/^receipt:(\d+)$/.exec(f.at??'');
   if(!scope||plans.has(scope)||f.form!=='alphabet'||f.measure!=='reads'||f.role!=='reads'||!resolution)throw Error('REFUSE·input projection ambiguous reading '+scope);
   const inputs=(f.value??'').split('|').filter(Boolean),needs=(f.needs??'').split('|').filter(Boolean);
-  if(!inputs.length||new Set(inputs).size!==inputs.length||inputs.some(input=>!handed.has(input))||new Set(needs).size!==needs.length)throw Error('REFUSE·input projection has unhanded or duplicate dependencies '+scope);
+  // An aggregate reads its declared receipts; it need not reread a leaf file.
+  if((!inputs.length&&!needs.length)||new Set(inputs).size!==inputs.length||inputs.some(input=>!handed.has(input))||new Set(needs).size!==needs.length)throw Error('REFUSE·input projection has unhanded or duplicate dependencies '+scope);
   const n=Number(resolution[1]);if(!Number.isSafeInteger(n))throw Error('REFUSE·input projection invalid resolution '+scope);
   plans.set(scope,{scope,inputs,needs,resolution:n,line:canonical({scope,form:f.form,measure:f.measure,role:f.role,value:inputs.join('|'),needs:needs.join('|'),at:f.at})});
  }

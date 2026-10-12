@@ -23,5 +23,5 @@ test('none blocks a selected declared gate even when the old paid list claims pa
 test('a declared gate is visible without inventing release categories or READY',()=>{
  const gate=canonical({scope:'pipeline/release',role:'demands',form:'alphabet',measure:'verdict',value:'agrees',needs:'verify',by:'fixture',at:'policy:forge'});
  const got=releasePolicy({standing:[gate],demands:[gate],paid:[],ceilings:[],readings:{read:[],unread:[],vacuous:[],over:[]},snapshot:{fold:'f',instrument:'i'},verdicts:[{coordinate:'verify',value:'none'}]});
- assert.equal(got.status,'absent');assert.equal(got.gates?.[0]?.status,'blocked');assert.ok(releasePolicyLines(got).every(l=>!l.startsWith('RELEASE')));
+ assert.equal(got.status,'absent');assert.equal(got.gates?.[0]?.status,'blocked');assert.ok(releasePolicyLines(got).some(l=>l.startsWith('RELEASE  policy absent')));assert.ok(releasePolicyLines(got).every(l=>!l.includes('policy ready')&&!l.startsWith('UNRESOLVED')&&!l.startsWith('BLOCK')));
 });

@@ -113,7 +113,6 @@ export function releasePolicy(input: ReleasePolicyInput): ReleasePolicyResult {
 export function releasePolicyLines(result: ReleasePolicyResult | undefined): readonly string[] {
   if (result === undefined) return [];
   const gates=(result.gates??[]).map(g=>`GATE     ${g.scope} ${g.status} · requires=${g.required.join('|')} · ${g.evidence.map(e=>`${e.coordinate}=${e.value}`).join(' | ')||g.reason||'no evidence'}`);
-  if(result.status==='absent')return gates;
   return [
     ...gates,
     `RELEASE  policy ${result.status} · fold ${result.snapshot.fold} · instrument ${result.snapshot.instrument}`,

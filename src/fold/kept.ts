@@ -139,14 +139,23 @@ function readingContext(store: string): string {
     .map(file => bytesDigest(store, observeFile(file) ?? new Uint8Array())),...segments].join('\n')));
 }
 
-export function keptPlace(store: string, under?: string): PlaceFold | undefined {
+/** A new judgment changes the result even when the files and reader history do not. */
+function judgmentContext(store: string, demands: readonly string[]): string {
+  const scopes = new Set(demands.map(line => fieldOf(line, 'scope')));
+  return bytesDigest(store, text(ledgerLines(store, 'judge')
+    .filter(line => scopes.has(fieldOf(line, 'scope'))).join('\n')));
+}
+
+export function keptPlace(store: string, under?: string, currentInstrument?: string): PlaceFold | undefined {
   const key = observeText(memoAt(store, lastOf([`place ${under ?? '.'}`])))?.trim();
   if (key === undefined || key === '') return undefined;
   const held = observeText(memoAt(store, `fold/${key}`));
   if (held === undefined) return undefined;
-  const blob = JSON.parse(held) as { readonly fold: Packed & { readonly standing?: string | readonly string[] }; readonly readingContext?: string };
+  const blob = JSON.parse(held) as { readonly fold: Packed & { readonly standing?: string | readonly string[] }; readonly readingContext?: string; readonly judgmentContext?: string };
   if (blob.readingContext !== readingContext(store)) return undefined;
   const fold = blob.fold;
+  if (currentInstrument !== undefined && fold.instrument !== currentInstrument) return undefined;
+  if (blob.judgmentContext !== judgmentContext(store, linesOf(fold.demands))) return undefined;
   return {
     ...fold,
     standing: linesOf(fold.standing),
@@ -183,7 +192,7 @@ export function keepFold(store: string, key: string, fold: PlaceFold, points: re
     signed: [...fold.signed],
     kept: false,
   };
-  landMemo(store, `fold/${key}`, text(JSON.stringify({ fold: packed, points, instrument, readingContext: readingContext(store) })));
+  landMemo(store, `fold/${key}`, text(JSON.stringify({ fold: packed, points, instrument, readingContext: readingContext(store), judgmentContext: judgmentContext(store, fold.demands) })));
   const at = memoAt(store, lastOf(points));
   mkdirSync(dirname(at), { recursive: true });
   writeFileSync(`${at}.${process.pid}.part`, `${key}\n`);

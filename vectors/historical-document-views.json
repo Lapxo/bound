@@ -23,23 +23,23 @@
         },
         {
           "stream": "stdout",
-          "pattern": "RENDERED CITATION.cff \u00b7 view/citation-file"
+          "pattern": "RENDERED CITATION.cff · view/citation-file"
         },
         {
           "stream": "stdout",
-          "pattern": "RENDERED docs/guide.md \u00b7 view/guide"
+          "pattern": "RENDERED docs/guide.md · view/guide"
         },
         {
           "stream": "stdout",
-          "pattern": "RENDERED docs/reference.md \u00b7 view/reference"
+          "pattern": "RENDERED docs/reference.md · view/reference"
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE\u00b7view view/unoffered"
+          "pattern": "REFUSE·view view/unoffered"
         },
         {
           "stream": "stdout",
-          "pattern": "RENDERED tsconfig.json \u00b7 view/tsconfig"
+          "pattern": "RENDERED tsconfig.json · view/tsconfig"
         },
         {
           "stream": "stdout",
@@ -51,16 +51,17 @@
         },
         {
           "stream": "stdout",
-          "pattern": "9 renders \u00b7 9 same"
+          "pattern": "9 renders · 9 same"
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE\u00b7view conflicting prose"
+          "pattern": "REFUSE·view conflicting prose"
         }
       ],
       "inputs": [
-        "package.json",
+        "TARGET.bound",
         "dist/cli/accept.js",
+        "dist/cli/act-result.js",
         "dist/cli/args.js",
         "dist/cli/host.js",
         "dist/cli/names.js",
@@ -68,8 +69,11 @@
         "dist/cli/owner.js",
         "dist/cli/pass.js",
         "dist/cli/place.js",
+        "dist/cli/release-result.js",
+        "dist/cli/standing-result.js",
         "dist/cli/takes.js",
         "dist/cli/verb.js",
+        "dist/fold/admission-history.js",
         "dist/fold/ceilings.js",
         "dist/fold/claims.js",
         "dist/fold/closed.js",
@@ -105,6 +109,7 @@
         "dist/fold/views.js",
         "dist/fold/wire.js",
         "dist/fold/zoom.js",
+        "dist/host/act-cost.js",
         "dist/host/adapters/keys/ed25519.js",
         "dist/host/adapters/modules/javascript.js",
         "dist/host/adapters/transport/http.js",
@@ -121,12 +126,15 @@
         "dist/host/located.js",
         "dist/host/objects.js",
         "dist/host/ports/ingress.js",
+        "dist/host/ports/local-act.js",
+        "dist/host/ports/publication.js",
         "dist/host/ports/signing.js",
         "dist/host/ports/store.js",
         "dist/host/ports/transport.js",
         "dist/host/process-lifetime.js",
         "dist/host/provide.js",
         "dist/host/read-only.js",
+        "dist/host/reading-closures.js",
         "dist/host/release.js",
         "dist/host/selected-capsules.js",
         "dist/host/selected-topos.js",
@@ -145,6 +153,7 @@
         "dist/land/ledger.js",
         "dist/land/owned.js",
         "dist/land/sign.js",
+        "dist/land/standing-pin.js",
         "dist/land/vouched.js",
         "dist/land/withdraw.js",
         "dist/observe/files.js",
@@ -162,12 +171,16 @@
         "dist/render/shape.js",
         "dist/render/target.js",
         "dist/render/view.js",
+        "package.json",
+        "samples/no/historical-document-views.json",
+        "samples/yes/historical-document-views.json",
         "tools/samples/check-publication.mjs",
         "tools/samples/evidence-worker.mjs",
         "tools/samples/historical-document-worker.mjs",
         "tools/samples/module-closure.mjs",
         "tools/samples/program-worker.mjs",
         "tools/samples/prose-worker.mjs",
+        "tools/samples/public-instrument.mjs",
         "tools/samples/run-evidence.mjs",
         "tools/samples/run-historical-document-views.mjs",
         "tools/samples/run-program-views.mjs",
@@ -178,12 +191,7 @@
         "tools/samples/run-typed.mjs",
         "tools/samples/run-walk-refinement.mjs",
         "tools/samples/run-walk.mjs",
-        "tools/samples/typed-provider.mjs",
-        "samples/yes/historical-document-views.json",
-        "samples/no/historical-document-views.json",
-        "tools/samples/public-instrument.mjs",
-        "TARGET.bound",
-        "dist/host/act-cost.js"
+        "tools/samples/typed-provider.mjs"
       ]
     }
   ]

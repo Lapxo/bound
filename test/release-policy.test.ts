@@ -81,8 +81,10 @@ test('refused, grey, orphan and conflicting second head do not vanish behind pai
 test('fault with explicit obligation identity blocks its declared category', () => {
   assert.equal(releasePolicy({ ...input, faults: [{ kind: 'conflict', obligation: demand, evidence: [demand] }] }).status, 'blocked');
 });
-test('no policy keeps existing output untouched; snapshot is provenance only', () => {
+test('an absent policy is visible and makes no readiness assertion', () => {
   assert.deepEqual(releasePolicyLines(undefined), []);
-  assert.deepEqual(releasePolicyLines(releasePolicy({ ...input, standing: [] })), []);
+  const absent=releasePolicyLines(releasePolicy({ ...input, standing: [] }));
+  assert.deepEqual(absent,[`RELEASE  policy absent · fold ${snapshot.fold} · instrument ${snapshot.instrument}`]);
+  assert.ok(!absent.some(line=>/ready|UNRESOLVED|BLOCK/.test(line)));
   assert.deepEqual(releasePolicy(input).snapshot, snapshot);
 });

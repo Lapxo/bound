@@ -38,12 +38,13 @@
         },
         {
           "stream": "stdout",
-          "pattern": "REFUSE\u00b7walk"
+          "pattern": "REFUSE·walk"
         }
       ],
       "inputs": [
         "TARGET.bound",
         "dist/cli/accept.js",
+        "dist/cli/act-result.js",
         "dist/cli/args.js",
         "dist/cli/host.js",
         "dist/cli/names.js",
@@ -51,8 +52,11 @@
         "dist/cli/owner.js",
         "dist/cli/pass.js",
         "dist/cli/place.js",
+        "dist/cli/release-result.js",
+        "dist/cli/standing-result.js",
         "dist/cli/takes.js",
         "dist/cli/verb.js",
+        "dist/fold/admission-history.js",
         "dist/fold/ceilings.js",
         "dist/fold/claims.js",
         "dist/fold/closed.js",
@@ -88,6 +92,7 @@
         "dist/fold/views.js",
         "dist/fold/wire.js",
         "dist/fold/zoom.js",
+        "dist/host/act-cost.js",
         "dist/host/adapters/keys/ed25519.js",
         "dist/host/adapters/modules/javascript.js",
         "dist/host/adapters/transport/http.js",
@@ -104,12 +109,15 @@
         "dist/host/located.js",
         "dist/host/objects.js",
         "dist/host/ports/ingress.js",
+        "dist/host/ports/local-act.js",
+        "dist/host/ports/publication.js",
         "dist/host/ports/signing.js",
         "dist/host/ports/store.js",
         "dist/host/ports/transport.js",
         "dist/host/process-lifetime.js",
         "dist/host/provide.js",
         "dist/host/read-only.js",
+        "dist/host/reading-closures.js",
         "dist/host/release.js",
         "dist/host/selected-capsules.js",
         "dist/host/selected-topos.js",
@@ -128,6 +136,7 @@
         "dist/land/ledger.js",
         "dist/land/owned.js",
         "dist/land/sign.js",
+        "dist/land/standing-pin.js",
         "dist/land/vouched.js",
         "dist/land/withdraw.js",
         "dist/observe/files.js",
@@ -146,8 +155,10 @@
         "dist/render/target.js",
         "dist/render/view.js",
         "package.json",
+        "samples/no/walk.json",
         "samples/walk/no.json",
         "samples/walk/yes.json",
+        "samples/yes/walk.json",
         "tools/samples/check-publication.mjs",
         "tools/samples/check-walk-publication.mjs",
         "tools/samples/evidence-worker.mjs",
@@ -171,10 +182,7 @@
         "tools/samples/run-walk-refinement.mjs",
         "tools/samples/run-walk.mjs",
         "tools/samples/typed-provider.mjs",
-        "samples/yes/walk.json",
-        "samples/no/walk.json",
-        "tools/samples/walk-sample-worker.mjs",
-        "dist/host/act-cost.js"
+        "tools/samples/walk-sample-worker.mjs"
       ]
     }
   ]

@@ -53,8 +53,17 @@ for(const [label,region,entry,scheme] of [['summary','summary','run.mjs','alpha'
   writeFileSync(adapter,`import{readFileSync,appendFileSync}from'node:fs';const req=JSON.parse(readFileSync(0,'utf8'));if(req.protocol!=='content-request/1')process.exit(9);appendFileSync(${JSON.stringify(calls)},req.location+'\\n');process.stdout.write(readFileSync(req.location.endsWith('standing')?${JSON.stringify(join(temp,'standing'))}:${JSON.stringify(archive)}));`);
   writeFileSync(registry,JSON.stringify({fixture:{kind:'command',executable:process.execPath,args:[adapter]}}));
   const proposal=join(temp,'selection.proposal');writeFileSync(proposal,[row('uses/world','digest',pin),row('sources/world','id',`${scheme}:standing`),row('dep/provider','digest',blob,{shape:entry}),row('sources/provider','id',`${scheme}:artifact`),row('view/report','id',`${region}@1`,{role:'demands'}),row('configuration/limit','id','place')].join('\n')+'\n');
+  const missing=run('unverified standing refuses selection',['land',proposal,'--key','device','--key-file',key],1);
+  assert.match(missing.stderr,/REFUSE·pin uses\/world.*not laid.*nothing landed/);
+  assert.equal(existsSync(calls),false,'admission cannot fetch missing standing to authenticate a selection');
+  assert.deepEqual(readFileSync(join(root,'TARGET.bound')),beforeUnauthorized,'missing content admits none of the lot');
+  const laid=join(root,'.bound','cas','blobs',pin.slice(7));
+  mkdirSync(join(root,'.bound','cas','blobs'),{recursive:true});writeFileSync(laid,standing);
   run('selection',['land',proposal,'--key','device','--key-file',key]);
   assert.equal(existsSync(calls),false,'admission does not execute transport');
+  // A consumer with the admitted lock but without retained bytes requests them
+  // only when its view needs them. Missing bytes do not change standing identity.
+  unlinkSync(laid);
   run('help before materialization',['fold','--as','help']);assert.equal(existsSync(calls),false,'help does not materialize the world');
   run('check before materialization',['fold','--check'],1);assert.equal(existsSync(calls),false,'check verifies existing evidence without fetching');
   const cold=run('local named view',['fold','--as','report']);assert.match(cold.stdout,new RegExp(`^${label}$`,'m'));assert.match(cold.stdout,/FETCHED/);assert.equal(readFileSync(calls,'utf8').trim().split('\n').length,2);

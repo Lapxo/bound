@@ -245,13 +245,13 @@ export function coneOf(root: string, entry: string, ceilings: readonly string[],
 export const ownCeilings = (under?: string): readonly string[] => ((home) => (under === undefined || under === `${home}/`
   ? ownLock().filter(isCeiling).map((line) => canonical({ ...fieldsOf(line), scope: `${home}/${fieldOf(line, 'scope')}` })) : []))(basename(ownRoot()));
 
-export function foldPlace(root: string, entry: string, under?: string, look = true, given?: { readonly standing: ReturnType<typeof standingOf>; readonly observed: readonly string[]; readonly free?: boolean }): PlaceFold {
+export function foldPlace(root: string, entry: string, under?: string, look = true, given?: { readonly standing: ReturnType<typeof standingOf>; readonly observed?: readonly string[]; readonly free?: boolean }): PlaceFold {
   const store = storeOf(root);
   const digestAt = Date.now();
   const closed = meets(root, store, under ?? '');
   const digestMs = Date.now() - digestAt;
   if (closed && given?.free !== true) {
-    const prior = keptPlace(store, under);
+    const prior = keptPlace(store, under, instrumentOf(store, entry, standingOf(root).standing, root, ownLock()));
     if (prior !== undefined) {
       process.stderr.write(`CLOSED   ${under || '.'} · digest ${digestMs} ms\n`);
       return { ...prior, kept: true };
