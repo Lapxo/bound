@@ -57,6 +57,8 @@ export function judgeTake(input: {
   readonly template: string;
   readonly shape?: string;
   readonly restsOn?: string;
+  /** An unchanged cone may receive its first missing judgment; vouching bytes is not judgment. */
+  readonly unpaid?: boolean;
   readonly witnessOf?: (coordinate: string) => string | undefined;
 }): Verdict & { readonly notOwned: readonly string[] } {
   const { root, scope, value, locations, before, after } = input;
@@ -80,7 +82,7 @@ export function judgeTake(input: {
   const digest = fullDigest(storeOf(root), JSON.stringify({ ...envelope, effects: effects.map((e) => ({ kind: e.kind, status: e.status, at: e.at })) }));
   const refuse = (why: string): Verdict & { readonly notOwned: readonly string[] } => ({ kind: 'refuse', why, envelope, digest, changed, notOwned });
   const met = (why: string): Verdict & { readonly notOwned: readonly string[] } => ({ kind: 'fact', why, envelope, digest, changed, notOwned });
-  if (!changed.length) return refuse('nothing in the cone moved against what was vouched');
+  if (!changed.length && !input.unpaid) return refuse('nothing in the cone moved against what was vouched');
   const cone = locations.map((l) => region(l));
   const outside = changed.filter((coordinate) => !answers([point(coordinate)], cone));
   if (outside.length) return refuse(`outside the cone: ${outside.join(', ')}`);

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { fullDigest } from '../fold/digests.ts';
 import { canonical } from '@lapxo/topos/wire';
 import { fieldOf, foldClaims } from '../fold/claims.ts';
+import { paidOf } from '../fold/paid.ts';
 import { rolesOf } from '../fold/roles.ts';
 import { writerFor } from '../fold/signers.ts';
 import { judgeTake, sealed } from '../judge/take.ts';
@@ -51,8 +52,10 @@ export function judgeDemand(root: string, demand: string): Judged {
   const after = new Map<string, string>();
   for (const location of locations) for (const [coordinate, digest] of coordinatesOf(root, location, walked)) after.set(coordinate, digest);
   const law = [scope.split('/').pop() ?? scope, fieldOf(demand, 'at').replace(/^witness:/, '')].filter(Boolean);
+  const standing = foldClaims(signedOwnerLines(store)).standing;
+  const unpaid = paidOf(store, [demand], [], `${wordOf(standing, 'families', 'view')}/`).missing.length === 1;
   const verdict = judgeTake({
-    root, scope, value: fieldOf(demand, 'value'), locations, before, after, law,
+    root, scope, value: fieldOf(demand, 'value'), locations, before, after, law, unpaid,
     shape: fieldOf(demand, 'shape'), restsOn: fieldOf(demand, 'restsOn'), witnessOf: (coordinate) => witnessOf(root, coordinate),
     template: wordOf(foldClaims(signedOwnerLines(store)).standing, 'templates', '{roots}'),
   });
@@ -95,7 +98,7 @@ export function landTake(root: string, one: Judged, gates: readonly Gate[]): voi
       canonical({
         scope, role: 'writes', form: 'alphabet', measure: fieldOf(demand, 'measure') || 'status', value: fieldOf(demand, 'value') || 'present', by: 'judge', at: receipt,
       }),
-      canonical({ scope, role: 'writes', form: 'alphabet', measure: 'cone', value: verdict.changed.join('|'), by: 'judge', at: receipt }),
+      canonical({ scope, role: 'writes', form: 'alphabet', measure: 'cone', value: (verdict.changed.length ? verdict.changed : [...after.keys()].sort()).join('|'), by: 'judge', at: receipt }),
     ]);
   }
   const ms = Date.now() - started;
