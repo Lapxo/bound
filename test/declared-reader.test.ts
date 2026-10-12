@@ -15,6 +15,20 @@ function fixture(run:(root:string,store:string)=>void){
  try{mkdirSync(store);mkdirSync(join(root,'place'));writeFileSync(join(root,'place','TARGET.bound'),canonical({scope:'region/surface',form:'alphabet',measure:'coordinates',value:'*.input',role:'reads',at:'policy:region',by:'target'})+'\n');run(root,store);}finally{rmSync(root,{recursive:true,force:true});}
 }
 
+test('receipt selectors cannot replace input coordinates in either declaration order',()=>fixture((root,store)=>{
+ const input=canonical({scope:'region/surface',measure:'coordinates',value:'*.input'});
+ const receipts=canonical({scope:'region/surface',measure:'receipts',value:'reading/**'});
+ const vocabulary=[canonical({scope:'wire/region-measures',value:'coordinates|receipts'}),canonical({scope:'wire/region-coordinate',value:'coordinates'})];
+ for(const declarations of [[input,receipts],[receipts,input]]){
+  writeFileSync(join(root,'place','TARGET.bound'),declarations.join('\n')+'\n');
+  const got=capsuleReadersOf(root,store,vocabulary,[],selected);
+  assert.equal(got.length,1);
+  assert.deepEqual([...got[0]!.capsule!.globs],[['place/',['*.input']]]);
+ }
+ writeFileSync(join(root,'place','TARGET.bound'),receipts+'\n');
+ assert.deepEqual(capsuleReadersOf(root,store,vocabulary,[],selected),[]);
+}));
+
 test('a declared region gets its provider without retired readers or a private ledger',()=>fixture((root,store)=>{
  const got=capsuleReadersOf(root,store,wire,[],selected);
  assert.equal(got.length,1);assert.equal(got[0]!.capsule!.digest,'sha256:provider');

@@ -14,13 +14,13 @@ import { algorithmCost, instrumentOf, instrumentDigest } from '../fold/digests.t
 import { writerFor } from '../fold/signers.ts';
 import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
 import { ownLockOf } from '../fold/signed.ts';
-import { worldAt, worldsIn } from '../fold/places.ts';
+import { localDirectoriesIn, worldAt, worldsIn } from '../fold/places.ts';
 import { wordsOf } from '../fold/wire.ts';
 import type { View } from '../fold/views.ts';
 import { land, ledgerLines, replaceWhole, storeOf } from '../land/ledger.ts';
 import { holdRoot, holds, underTheLock } from '../land/act.ts';
 import { emptyLedger, sayStranger } from '../fold/stranger.ts';
-import { entriesIn, observeFile, observeText } from '../observe/files.ts';
+import { observeFile, observeText } from '../observe/files.ts';
 import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
 import { releasePolicyLines } from '../fold/release-policy.ts';
 import { carriedFrom } from '../fold/resolved.ts';
@@ -90,7 +90,9 @@ export async function pass(root: string, entry: string, under: string | undefine
     // Byte seals describe the completed render pass, not its intermediate outputs.
     if (!swept.written.length) await closeReceipts(root, storeOf(root));
     const closed = meets(root, storeOf(root), under ?? '') && !swept.written.length;
-    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), observed: swept.settled ? [] : swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }), free: !swept.settled });
+    // Sealed files do not imply an empty reading. If a retained fold is stale,
+    // foldPlace must reload its evidence; a valid retained fold still costs no read.
+    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), ...(swept.settled ? {} : { observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }) }), free: !swept.settled });
     for (const line of releasePolicyLines(fold.release)) process.stdout.write(`${line}\n`);
     if (closed) {
       instrumentKeep(storeOf(root), instrumentOf(storeOf(root), entry, standingOf(root).standing, root, ownLock()));
@@ -172,7 +174,7 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     return picked.length ? picked : [...worldPlaces];
   };
   const placeless = views.filter((view) => !worldList.includes(view.name) && !placesOf(lock.standing, view).length);
-  const holding = entriesIn(root).filter((entry) => entry.dir && placeless.some((view) => observeText(join(root, entry.name, view.shape)) !== undefined)).map((entry) => `${entry.name}/`);
+  const holding = localDirectoriesIn(root).filter((name) => placeless.some((view) => observeText(join(root, name, view.shape)) !== undefined)).map((name) => `${name}/`);
   const descended = (place: string): boolean => !limited || descent.some((one) => one === '' || place === `${one}/` || place.startsWith(`${one}/`));
   const reached = limited ? descent.filter((one) => one !== '').map((one) => (one.endsWith('/') ? one : `${one}/`)) : [];
   const places = [...new Set([...views.flatMap(resolved), ...holding, ...reached])]

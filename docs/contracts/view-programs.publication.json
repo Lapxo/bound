@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/program-views.json",
-      "digest": "sha256:a10f688f48b2a9686cfe9ebc3908fa06d04cb0d3e86602a51d47511076f81f71"
+      "digest": "sha256:89cdae6e34ea68d61e886783b45e26d50250e15a5668514c7ec26881acd3c65f"
     }
   ]
 }

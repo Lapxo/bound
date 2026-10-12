@@ -62,6 +62,7 @@ const reachOfLine = (module: string, where: readonly string[]): readonly string[
  */
 export function capsuleReadersOf(root: string, store: string, standing: readonly string[], lines: readonly ReaderClaim[], resolve: typeof capsulesFor = capsulesFor): readonly ReaderClaim[] {
   const reaching = new Set(lines.flatMap((reader) => reachOfLine(reader.module, reader.where)));
+  const coordinateMeasure = wordOn(standing, 'region-coordinate', ownLock());
   const localMeasures = wordsOf(standing, 'region-measures');
   const pins = standing.filter(line => fieldOf(line, 'scope').startsWith('uses/') && fieldOf(line, 'value') !== 'withdraw');
   const measures = localMeasures.length || !pins.length ? localMeasures
@@ -70,7 +71,7 @@ export function capsuleReadersOf(root: string, store: string, standing: readonly
   const groups = new Map<string, { module: string; digest: string; entry: string; selected:Capsule; region: string; reads: readonly string[]; globs: Map<string, readonly string[]> }>();
   for (const place of ['', ...placesIn(root)]) {
     const where = place ? `${place}/` : '';
-    const own = ownLockOf(root, place).filter((line) => fieldOf(line, 'scope').startsWith('region/') && measures.includes(fieldOf(line, 'measure')) && fieldOf(line, 'value') !== 'withdraw');
+    const own = ownLockOf(root, place).filter((line) => fieldOf(line, 'scope').startsWith('region/') && measures.includes(fieldOf(line, 'measure')) && fieldOf(line, 'measure') === coordinateMeasure && fieldOf(line, 'value') !== 'withdraw');
     const offered = [...own, ...(capsuleAt(root, place) ? world.filter((line) => !own.some((one) => fieldOf(one, 'scope') === fieldOf(line, 'scope'))) : [])];
     if (!offered.length) continue;
     const capsules = resolve(standing, place, root);

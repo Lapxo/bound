@@ -4,7 +4,7 @@ import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writ
 import { byBytes, canonical, LOCK, parse, publicationOf, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, foldClaims, isConfig, isWire } from './claims.ts';
 import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest.ts';
-import { worldAt } from './places.ts';
+import { mountedCoordinatesIn, worldAt } from './places.ts';
 import { ownLockOf } from './signed.ts';
 import { viewsOf } from './views.ts';
 import { storeAt, storeOf } from '../land/ledger.ts';
@@ -38,6 +38,9 @@ const lockStamp = (root: string, place: string): string => {
   }
 };
 
+const publishedMounts = (root: string): readonly string[] => mountedCoordinatesIn(root,
+  (observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire));
+
 function filesOf(root: string, place: string, region: string, inputs: readonly string[]): readonly string[] {
   const step = region.replace(/^receipts\//, '').replace(/\/$/, '');
   const here = join(root, place);
@@ -48,7 +51,10 @@ function filesOf(root: string, place: string, region: string, inputs: readonly s
     const record = parse(line);
     return record.kind === 'fact' ? [record.value.fields] : [];
   }));
-  const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relative(here, join(root, rel)), claims) !== 'foreign');
+  const localMounts = [...mountedCoordinatesIn(here), ...publishedMounts(here)];
+  const mounts = [...new Set([...mountedCoordinatesIn(root), ...publishedMounts(root), ...localMounts.map(coordinate => relative(root, join(here, coordinate)))])];
+  const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relative(here, join(root, rel)), claims) !== 'foreign'
+    && !mounts.some(mount => rel === mount || rel.startsWith(`${mount}/`)));
   // Foreign worlds are not the place's tree. Retain the external files actually handed to its readers.
   const observed = inputs.filter(line => fieldOf(line, 'measure') === 'observed').flatMap(line => {
     const coordinate = fieldOf(line, 'scope');
@@ -105,10 +111,12 @@ function namedReceipts(root: string, store: string): ReadonlyMap<string, string>
   const text = observeText(join(root, RECEIPTS));
   const carried = carriedFrom(store, (text ?? '').split('\n').filter(isWire));
   const out = new Map<string, string>();
+  const mounted = new Set(mountedCoordinatesIn(root));
   for (const line of carried ?? []) {
     if (!isWire(line) || fieldOf(line, 'measure') !== 'digest') continue;
     const place = /^write\/([^/]+)\/receipts\.bound$/.exec(fieldOf(line, 'scope'))?.[1];
-    if (place) out.set(place, fieldOf(line, 'value'));
+    // A retained dependency receipt is input evidence, not a child-place closure.
+    if (place && !mounted.has(place)) out.set(place, fieldOf(line, 'value'));
   }
   return out;
 }

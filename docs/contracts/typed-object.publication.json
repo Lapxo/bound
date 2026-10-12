@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/typed-object.json",
-      "digest": "sha256:32f8b095f4a240c6a3c640797a9f0fbc05506fa623e7cb61f0d9fd8c8bd9124a"
+      "digest": "sha256:85aae5aeb44cd2e7121c917fcaa5241d0f9eecaede8f680b58ea71e94e84aeea"
     },
     {
       "role": "no",

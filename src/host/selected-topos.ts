@@ -1,11 +1,26 @@
 import {verifiedContent} from './content-store.ts';
 import {readStanding} from '@lapxo/topos/standing';
 import type {StandingTopos} from '@lapxo/topos/standing';
-import {parse,wireAt} from '@lapxo/topos/wire';
+import {parse,wireAt,fromLine} from '@lapxo/topos/wire';
 import {fieldOf} from '../fold/claims.ts';
 
 export interface SelectedTopos {readonly digest:string; readonly topos:StandingTopos}
 export type ToposResolver=(digest:string)=>StandingTopos;
+
+/** Local grammar is sufficient for locally declared records. Resolve selected
+ * contracts only when a reader is missing; a local refusal remains a refusal. */
+export function admittedLine(line:string,local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=toposAt):ReturnType<typeof fromLine> {
+  const own=wireAt(local,epoch);
+  // A signature era alone is not a configuration grammar. An absent list
+  // must be supplied by the selected contract; an explicit local list remains
+  // authoritative and may refuse a field without opening unrelated content.
+  if(own && ['fields','required','roles','forms','at-classes'].every(name=>own.lists.has(name))){
+    const got=fromLine(line,own);
+    const needsObject=fieldOf(line,'type')!==''&&!own.object;
+    if(got.kind==='fact'||(got.kind==='refuse'&&!needsObject))return got;
+  }
+  return fromLine(line,selectedWireAt(local,epoch,pins,resolve));
+}
 
 /** Resolve content using the instrument wire's admitted digest algorithms. No transport interpretation. */
 export function toposAt(digest:string,store?:string):StandingTopos {

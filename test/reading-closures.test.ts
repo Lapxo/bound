@@ -12,7 +12,7 @@ for(const name of ['specification','conversion'])test('native input closure: '+n
  try{
   writeFileSync(join(root,'left.txt'),'left');writeFileSync(join(root,'right.txt'),'right');let run=0;
   const plan=(scope:string,file:string,needs='',at='receipt:1')=>canonical({scope,role:'reads',form:'alphabet',measure:'reads',value:file,...(needs?{needs}:{}),at,by:'world'});
-  let projected=[plan('left','left.txt'),plan('right','right.txt'),plan('summary','left.txt','left|right','receipt:0')];
+  let projected=[plan('left','left.txt'),plan('right','right.txt'),plan('summary','','left|right','receipt:0')];
   const capsule={digest:'sha256:'+'1'.repeat(64),declaration:{regions:{}},lines:[],ask:(requests:any[])=>requests.map(req=>{if(req.verb==='render')return {protocol:PROTOCOL,kind:'fact',lines:projected};run++;return {protocol:PROTOCOL,kind:'fact',claims:[{scope:'seen/'+req.rootScope,role:'reads',measure:'status',bound:{kind:'enumerated',values:['met']}}]};})} as Capsule;
   let lifetime={timeoutMs:2000,responseBytes:65536};
   const read=()=>readingClosures({root,store,reader:name,speaker:'reader',digest:text=>fullDigest(text,'sha256'),capsule,region:'reading',projection:'inputs',readerReference:{id:name,module:'world/reading'},lifetime,files:['left.txt','right.txt'].map(place=>({place,text:readFileSync(join(root,place),'utf8')}))});
@@ -22,6 +22,8 @@ for(const name of ['specification','conversion'])test('native input closure: '+n
   const carried=join(store,'cas','carried');for(const name of readdirSync(carried))writeFileSync(join(carried,name),'corrupt');assert.equal(read().opened,2);assert.equal(run,11,'corrupt authentic carriers recompute');
   const before=run;projected=[plan('left','left.txt','right'),plan('right','right.txt','left')];assert.throws(read,/dependency cycle/);assert.equal(run,before,'cyclic projection refuses before any reading');
   projected=[plan('outside','not-handed')];assert.throws(read,/unhanded/);assert.equal(run,before);
+  projected=[plan('unfounded','')];assert.throws(read,/unhanded/);assert.equal(run,before,'an aggregate without files or receipts still refuses');
+  projected=[plan('missing','','absent','receipt:0')];assert.throws(read,/missing reading/);assert.equal(run,before,'an undeclared receipt is not an input');
  }finally{rmSync(root,{recursive:true,force:true});}
 });
 

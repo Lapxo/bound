@@ -6,9 +6,23 @@ import { selectedCapsules } from '../src/host/selected-capsules.ts';
 import { ownLock } from '../src/observe/runner.ts';
 import { fieldOf } from '../src/fold/claims.ts';
 import type { Capsule } from '../src/host/capsule.ts';
-import {selectedWireList,selectedWireAt} from '../src/host/selected-topos.ts';
+import {selectedWireList,selectedWireAt,admittedLine} from '../src/host/selected-topos.ts';
 const pin = (name: string, value: string) => canonical({scope:`consumer/uses/${name}`,value,by:'fixture'});
 const standing = (fields: Record<string,string>) => readStanding(standingBytes([canonical(fields)]));
+
+test('complete local admission does not open unrelated standing; local refusals remain closed',()=>{
+  const local=[['fields','scope|role|form|measure|value|by|at|epoch'],['required','scope|role|form|measure|value|by|at'],['roles','reads|writes'],['forms','alphabet'],['at-classes','policy']].map(([name,value])=>({scope:`wire/${name}`,value:value!,epoch:'2'}));
+  let opened=0;
+  const unavailable=()=>{opened++;throw Error('REFUSE·pin unrelated not laid');};
+  const fields={scope:'version',role:'writes',form:'alphabet',measure:'id',value:'0.1.3',by:'fixture',at:'policy:version',epoch:'3'};
+  for(const value of ['0.1.3','withdraw'])assert.equal(admittedLine(canonical({...fields,value}),local,3,[pin('unrelated','sha256:missing')],unavailable).kind,'fact');
+  assert.equal(admittedLine(canonical({...fields,unknown:'extra'}),local,3,[pin('unrelated','sha256:missing')],unavailable).kind,'refuse');
+  assert.equal(opened,0);
+  assert.throws(()=>admittedLine(canonical(fields),[],3,[pin('required','sha256:missing')],unavailable),/REFUSE·pin unrelated not laid/);
+  assert.equal(opened,1);
+  assert.throws(()=>admittedLine(canonical({type:'cell',id:'cell',topos:'sha256:missing'}),local,3,[pin('required','sha256:missing')],unavailable),/REFUSE·pin unrelated not laid/);
+  assert.equal(opened,2,'typed records still require their declared object grammar');
+});
 
 test('selected wire contracts resolve without executable offers or copied foreign claims', () => {
   const local:readonly string[]=[];
@@ -87,11 +101,14 @@ test('admission reads selected wire fields alongside the place cryptographic era
  assert.equal(fromLine(line,snapshot).kind,'fact');
  assert.deepEqual(local,[{scope:'wire/era',epoch:'2',value:'fixture'}],'reading must not copy selected claims into the place');
  assert.equal(fromLine(canonical({scope:'name',role:'writes',form:'alphabet',measure:'id',value:'project',by:'target',at:'policy:fixture',unknown:'extra'}),snapshot).kind,'refuse');
+ assert.equal(admittedLine(line,local,3,[pin('wire','sha256:held')],()=>world).kind,'fact','an era without a field alphabet does not silently install an empty alphabet');
+ assert.equal(admittedLine(canonical({scope:'name',role:'writes',form:'alphabet',measure:'id',value:'project',by:'target',at:'policy:fixture',unknown:'extra'}),local,3,[pin('wire','sha256:held')],()=>world).kind,'refuse');
 });
 test('selected admission cannot choose a foreign alphabet by order or a future local declaration',()=>{
  const resolve=(digest:string)=>standing({scope:'wire/fields',value:digest==='sha256:one'?'scope|value':'scope|value|extra'});
  const pins=[pin('one','sha256:one'),pin('two','sha256:two')];
  assert.throws(()=>selectedWireAt([],4,pins,resolve),/conflicting selected contracts/);
+ assert.throws(()=>admittedLine(canonical({scope:'name',value:'fixture'}),[],4,pins,resolve),/conflicting selected contracts/);
  assert.throws(()=>selectedWireAt([],4,[...pins].reverse(),resolve),/conflicting selected contracts/);
  const future=[{scope:'wire/fields',value:'scope|value|future',epoch:'5'}];
  assert.deepEqual([...selectedWireAt(future,4,[pins[0]!],resolve)!.fields],['scope','value']);

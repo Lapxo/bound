@@ -1,7 +1,10 @@
 #!/usr/bin/env node
+import {printReleaseApproval} from './release-result.ts';
 import {printActResult} from './act-result.ts';
+import {printStandingResult} from './standing-result.ts';
 import {withContentStore} from '../host/content-store.ts';
-import {withoutEffects} from '../host/read-only.ts';
+import {readOnly, withoutEffects} from '../host/read-only.ts';
+import {layReleases} from '../host/release.ts';
 import {resolveSources,resolveRequested} from '../host/source-content.ts';
 import {cellsWithReceipts} from '../host/cell-receipts.ts';
 import {renderCells} from '@lapxo/topos/cells-view';
@@ -181,6 +184,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     return EXIT.refuse;
   }
   if(name==='act'){if(under||told.length)throw Error('REFUSE·act committed identity query only');printActResult(root,coord);return EXIT.closed;}
+  if(name==='standing'){if(under||told.length||coord||depth!==undefined)throw Error('REFUSE·standing local committed projection only');printStandingResult(root);return EXIT.closed;}
   if(name==='evidence'&&!under&&!told.length&&ingressBundles(storeOf(root)).length){
     const declared=viewsOf(lockStanding(storeOf(root))).get(name);
     if(!declared||declared.shape||!declared.regions.some(region=>region.name==='evidence'))throw Error('REFUSE·view foreign evidence requires a declared evidence view');
@@ -213,6 +217,9 @@ async function view(root: string, under: string | undefined, asked: string, told
     }
   }
   const own = place ? rest.filter((line) => admittedIn(root, place, line)) : [];
+  // Executed views use the place's declared mounts before observation, as pass
+  // does. Prospective folds and public standing queries do not lay releases.
+  if (!told.length && !readOnly()) layReleases(storeOf(root), root, standingOf(root, under).standing, storeOf(root));
   const fold = told.length
     ? foldPlace(root, entryOf(root), under, false, { standing: standingOf(root, under, ledger), observed: observedClaims(root, storeOf(root), { wait: false }), free: true })
     : foldPlace(root, entryOf(root), under, true);
@@ -410,12 +417,17 @@ async function foldAt(root: string, under: string | undefined, argv: readonly st
 async function foldRequested(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
   const prospective = as !== undefined && positionalsOf(argv).some(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
-  if(as?.split('@')[0]==='act'||as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
+  if(as==='release'||as?.split('@')[0]==='act'||as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
   return resolveRequested(digest=>resolveSources(standingOf(root,under).standing,[digest]),()=>foldResolved(root,under,argv));
 }
 
 async function foldResolved(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
+  if(as==='release'){
+    const approvals=positionalsOf(argv).filter(one=>!(existsSync(resolve(one))&&lstatSync(resolve(one)).isDirectory()));
+    if(approvals.length!==1||argv.includes(FLAGS.check))throw Error('REFUSE·release name one approval file; check does not authorize delivery');
+    return withoutEffects(()=>{printReleaseApproval(under?resolve(root,under):root,resolve(approvals[0]!));return EXIT.closed;});
+  }
   const inputs = positionalsOf(argv).filter(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
   // Public content is authenticated by its digest, independently of owner history.
   // A named view does not request mounting every release of the instrument.

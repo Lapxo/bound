@@ -1,13 +1,13 @@
 import {commitLocalAct,intactLocalAct,committedLocalActs} from '../host/ports/local-act.ts';
 import {withoutEffects} from '../host/read-only.ts';
-import {selectedWireAt} from '../host/selected-topos.ts';
+import {admittedLine} from '../host/selected-topos.ts';
 import { timing } from '../host/timing.ts';
 import {admittedObjects} from '../host/objects.ts';
 import { existsSync, rmdirSync, rmSync } from 'node:fs';
 import { dirname, join, basename } from 'node:path';
 import { closeReceipts, instrumentKeep, instrumentKept } from '../fold/closed.ts';
 import { bytesDigest, fullDigest, instrumentOf, signaturesOf } from '../fold/digests.ts';
-import { canonical, fromLine, LOCK, parse, actIdentity, actResultProfile } from '@lapxo/topos/wire';
+import { canonical, LOCK, parse, actIdentity, actResultProfile } from '@lapxo/topos/wire';
 import { fieldOf, isConfig, foldClaims, sayingOf, selfName } from '../fold/claims.ts';
 import { isReaderLock } from '../fold/observed.ts';
 import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signers.ts';
@@ -37,6 +37,7 @@ import { outsideTheirCapsule } from '../fold/own.ts';
 import { lateFacts } from '../judge/late.ts';
 import { paidOf } from '../fold/paid.ts';
 import { aliasPinned } from '../land/alias.ts';
+import { admitStandingPins } from '../land/standing-pin.ts';
 import { coordinatesWithdrawn } from '../land/leaving.ts';
 import { ownerOf, epochOf, localActLines, forksItself, forksJoinedBy, renderInto, sideOf, signedDemands, signedOwnerLines } from './owner.ts';
 import { claimLinesIn, entryOf, namedPlaces, placesOfFile, positionalsOf, valueOf } from './args.ts';
@@ -109,6 +110,11 @@ function refusesAdmission(root: string, signed: readonly string[], standing: rea
     return true;
   }
   return false;
+}
+
+function refusesStandingPins(root:string, lines:readonly string[]):boolean {
+  try {admitStandingPins(root,lines);return false;}
+  catch(error){process.stderr.write(`${selfName()}: ${error instanceof Error?error.message:String(error)}\n`);return true;}
 }
 
 /** A batch signed as accept signs it: at the next epoch, by the key it names, each line read by the wire it would land under. */
@@ -195,12 +201,13 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     return got.kind === 'fact' ? [got.value.fields] : [];
   });
   for (const line of signed) {
-    const got = fromLine(line, selectedWireAt(wireLines,Number(fieldOf(line, 'epoch')), foldClaims(signedOwnerLines(store)).standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw')));
+    const got = admittedLine(line, wireLines,Number(fieldOf(line, 'epoch')), foldClaims(signedOwnerLines(store)).standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw'));
     if (got.kind !== 'fact') {
       process.stderr.write(`${selfName()}: REFUSE·wire ${fieldOf(line, 'scope')} · ${got.why} · nothing landed\n`);
       return { kind: 'exit', code: 1 };
     }
   }
+  if(refusesStandingPins(root,signed))return {kind:'exit',code:1};
   const taken = retractedTogether(signed);
   if (taken.length) {
     for (const pair of taken) {
@@ -270,6 +277,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const spent: string[] = [`sign ${asked - started}`, `wait ${waited}`];
   const took = timing(spent);
   const { signed, epoch } = batch;
+  if(refusesStandingPins(root,batch.records??signed))return 1;
   const store = storeOf(root);
   const currentBase = fullDigest(store, localActLines(root, batch.base.places));
   if (currentBase !== batch.base.digest) {

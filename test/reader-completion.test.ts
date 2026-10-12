@@ -3,14 +3,14 @@ import {strict as assert} from 'node:assert';
 import {gzipSync} from 'node:zlib';
 import {standingBytes} from '@lapxo/topos/standing';
 import {createHash,generateKeyPairSync} from 'node:crypto';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,existsSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical} from '@lapxo/topos/wire';
 
-for(const profile of ['historical','bounded-process@1','bounded-process@2','disjoint@2','capsule@2','projection@2'])test(`a requested native view consumes ${profile} without changing its compatibility contract`,()=>{
- const bounded=profile!=='historical',capsuleMode=['capsule@2','projection@2'].includes(profile);
+for(const profile of ['historical','mounted','bounded-process@1','bounded-process@2','disjoint@2','capsule@2','projection@2'])test(`a requested native view consumes ${profile} without changing its compatibility contract`,()=>{
+ const bounded=!['historical','mounted'].includes(profile),capsuleMode=['capsule@2','projection@2'].includes(profile);
  const reader=process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js',import.meta.url).pathname;
  const temp=mkdtempSync(join(tmpdir(),'bound-completion-')),root=join(temp,'place'),pair=generateKeyPairSync('ed25519');
  const key=join(temp,'key.pem');writeFileSync(key,pair.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});
@@ -42,13 +42,52 @@ for(const profile of ['historical','bounded-process@1','bounded-process@2','disj
    const shapes=seed.findIndex(line=>line.includes('scope=wire/shapes '));seed[shapes]=seed[shapes].replace('value=', 'value=entry.js|');
    seed.push(row('reader/timeout','milliseconds','0..3000','interval'),row('reader/provider/extent/timeout','milliseconds','0..2500','interval'),row('uses/provider','id',pin),canonical({scope:'dep/provider',role:'writes',form:'alphabet',measure:'id',value:blob,shape:'entry.js',at:'policy:sample',by:'target'}),row('region/extent','coordinates','src/**'));
   }
+  if(profile==='mounted'){
+   const hash=(bytes:Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
+   const member=(name:string,text:string)=>{const bytes=Buffer.from(text),h=Buffer.alloc(512);h.write(name);h.write('0000644\0',100);h.write('0000000\0',108);h.write('0000000\0',116);h.write(bytes.length.toString(8).padStart(11,'0')+'\0',124);h.write('00000000000\0',136);h.fill(32,148,156);h.write('0',156);h.write('ustar\0',257);h.write(h.reduce((a,b)=>a+b,0).toString(8).padStart(6,'0')+'\0 ',148);return Buffer.concat([h,bytes,Buffer.alloc(Math.ceil(bytes.length/512)*512-bytes.length)]);};
+   const foreign=row('uses/unavailable','id','sha256:'+'f'.repeat(64));
+   const archive=gzipSync(Buffer.concat([member('extent.mjs',readFileSync(join(root,'extent.mjs'),'utf8')),member('TARGET.bound',foreign+'\n'),member('readings.txt','dependency-owned file\n'),member('receipts.bound',''),Buffer.alloc(1024)])),digest=hash(archive);
+   const cas=join(root,'.bound/cas/blobs');mkdirSync(cas,{recursive:true});writeFileSync(join(cas,digest.slice(7)),archive);
+   rmSync(join(root,'extent.mjs'));
+   const families=seed.findIndex(line=>line.includes('scope=wire/families '));seed[families]=seed[families].replace('value=','value=dep|');
+   const readerAt=seed.findIndex(line=>line.includes('scope=reader/extent '));seed[readerAt]=seed[readerAt].replace('value=extent.mjs','value=library/extent.mjs');
+   seed.push(canonical({scope:'dep/extent',role:'reads',form:'alphabet',measure:'digest',value:digest,needs:'library',at:'policy:sample',by:'target'}));
+   const shapes=seed.findIndex(line=>line.includes('scope=wire/shapes '));seed[shapes]=seed[shapes].replace('value=','value=receipts.bound|readings.txt|');
+   seed.push(canonical({scope:'view/receipt-page',role:'demands',form:'alphabet',measure:'id',value:'receipts@8',shape:'readings.txt',at:'policy:sample',by:'target'}));
+   seed.push(canonical({scope:'view/sealed',role:'demands',form:'alphabet',measure:'id',value:'receipts@8|receipts@0|receipts@1',shape:'receipts.bound',at:'policy:sample',by:'target'}));
+  }
   writeFileSync(join(root,'TARGET.bound'),seed.join('\n')+'\n');
   const bootstrap=run(['land','--key','device','--key-file',key]);assert.equal(bootstrap.status,0,bootstrap.stderr);
+  if(profile==='mounted'){
+   const check=run(['fold','--check']);assert.equal(check.status,1,check.stderr);
+   assert.match(check.stderr,/REFUSE·check/);
+   assert.equal(existsSync(join(root,'library')),false,'check must not materialize dependencies');
+   assert.equal(existsSync(join(root,'calls')),false,'check must not invoke a reader');
+   const proposal=join(temp,'prospective.proposal');writeFileSync(proposal,row('sample/name','id','prospective')+'\n');
+   for(const args of [['fold','--as','help'],['fold','--as','lines'],['sign',proposal,'--key','device','--key-file',key],['fold',proposal,'--as','lines','--key','device','--key-file',key]]){
+    const query=run(args);assert.equal(query.status,0,query.stderr);
+    assert.equal(existsSync(join(root,'library')),false,'queries, signing and previews must not materialize dependencies');
+    assert.equal(existsSync(join(root,'calls')),false,'queries, signing and previews must not invoke a reader');
+   }
+  }
   const first=run(['fold','--as','evidence']);
   if(profile==='disjoint@2'){assert.equal(first.status,1,first.stderr);assert.match(first.stderr,/REFUSE·reader extent conflicting timeout/);assert.equal(first.stdout.includes('scope=extent'),false);assert.throws(()=>readFileSync(join(root,'calls')));console.log(first.stderr.trim());return;}
   assert.equal(first.status,0,first.stderr);assert.match(first.stdout,/scope=extent .*value=5\.\.5/,first.stderr);assert.equal(first.stderr.includes('GREY     reading:'),false,first.stderr);
   let calls=readFileSync(join(root,'calls'),'utf8');
   const second=run(['fold','--as','evidence']);assert.equal(second.status,0,second.stderr);assert.match(second.stdout,/scope=extent .*value=5\.\.5/);assert.equal(readFileSync(join(root,'calls'),'utf8'),calls);assert.match(second.stderr,/OBSERVE\s+0 run/);
+  if(profile==='mounted'){
+   assert.ok(existsSync(join(root,'library/extent.mjs')));
+   const page=run(['fold','--as','receipt-page']);assert.equal(page.status,0,page.stderr);
+   const sealed=run(['fold','--as','sealed']);assert.equal(sealed.status,0,sealed.stderr);
+   const pass=run(['fold']);assert.equal(pass.status,0,pass.stdout+'\n'+pass.stderr);
+   assert.doesNotMatch(pass.stdout+pass.stderr,/OPEN\s+library\/|REFUSE·pin/);
+   assert.equal(readFileSync(join(root,'library/readings.txt'),'utf8'),'dependency-owned file\n','a mounted dependency is not an implicit render destination');
+   assert.equal(readFileSync(join(root,'calls'),'utf8'),calls,'default folding must reuse the completed reading');
+   const check=run(['fold','--check']);assert.equal(check.status,0,check.stdout+'\n'+check.stderr);
+   assert.match(check.stdout,/PASS\s+closed/);
+   assert.equal(readFileSync(join(root,'library/receipts.bound'),'utf8'),'','an empty dependency-owned receipt cannot make the host inspect or rewrite the dependency as a child place');
+   return;
+  }
   if(capsuleMode){
    const policy=join(temp,'capsule-limits.proposal');writeFileSync(policy,row('reader/provider/extent/timeout','milliseconds','0..2000','interval')+'\n');
    const admitted=run(['land',policy,'--key','device','--key-file',key]);assert.equal(admitted.status,0,admitted.stderr);

@@ -3,7 +3,7 @@ import {join,dirname} from 'node:path';
 import {performance} from 'node:perf_hooks';
 import {fileURLToPath} from 'node:url';
 import {canonical,objectHistory,parse,byBytes,wireAt,RECEIPTS} from '@lapxo/topos/wire';
-import {cellInputs,cellReceiptContract} from '@lapxo/topos/cell-inputs';
+import {cellInputs,cellReceiptContract,cellInputProfile} from '@lapxo/topos/cell-inputs';
 import {renderCells} from '@lapxo/topos/cells-view';
 import {admittedObjects} from './objects.ts';
 import {objectFold} from '../fold/object.ts';
@@ -30,16 +30,20 @@ export async function cellsWithReceipts(root:string,history:readonly string[],em
  for(const record of parsed.value.objects)if(authority.of(canonical(record.fields)).kind!=='admitted')throw Error(`REFUSE·authority receipt input ${record.fields.id}`);
  const config=parsed.value.configuration.filter(f=>authority.of(canonical(f)).kind==='admitted');
  cellReceiptContract(config);
+ const profile=cellInputProfile(config);
  const instrument=ownLock().map(fields);
  const wire=wireAt(instrument,Number.MAX_SAFE_INTEGER);if(!wire)throw Error('REFUSE·receipt no admitted digest algorithm');
  const algorithm=[...wire.digests][0];if(!algorithm)throw Error('REFUSE·receipt no digest algorithm');
  const code=implementation(algorithm);
- const inputs=cellInputs(parsed.value.objects),semantic=new Map<string,string>(),inputBytes=new Map<string,string>();
+ const inputs=cellInputs(parsed.value.objects,profile),semantic=new Map<string,string>(),inputBytes=new Map<string,string>();
  const pins=new Map<string,readonly string[]>();
  for(const record of parsed.value.objects.filter(r=>r.record==='cell')){
   const pin=record.fields.topos!;if(!pins.has(pin)){const top=toposAt(pin,store);pins.set(pin,[pin,...top.dependencies]);}
   const scope=`receipts/cells/${record.fields.scope!}`;
-  const bytes=[...inputs.get(record.fields.scope!)!,...pins.get(pin)!,...code,'resolution=1'].sort(byBytes).join('\n');
+  const ownInputs=inputs.get(record.fields.scope!)!;
+  const metadata=[...pins.get(pin)!,...code,'resolution=1'];
+  const bytes=profile==='semantic-live@1'?[...ownInputs,...metadata].sort(byBytes).join('\n'):
+   [...ownInputs,...metadata.sort(byBytes),`receipt-inputs=${profile}`].join('\n');
   inputBytes.set(scope,bytes);semantic.set(scope,fullDigest(bytes,algorithm));
  }
  // The context stamp is a cache validity guard, not any cell's semantic receipt identity.

@@ -1,7 +1,8 @@
 import { join } from '../host/io.ts';
 import { canonical, LOCK, parse, RECEIPTS } from '@lapxo/topos/wire';
 import { fieldOf, foldClaims, isWire } from './claims.ts';
-import { entriesIn, observeText } from '../observe/files.ts';
+import { observeText } from '../observe/files.ts';
+import { placesIn } from './places.ts';
 
 /**
  * A line of the tree seen from inside a place: every path it names under the place is read from the place's root, and
@@ -39,10 +40,10 @@ export function zoomed(line: string, place: string): string {
 
 /** The lines of each place's own lock that still name the place: seen from inside a place, no scope carries its name. */
 export function namingTheirPlace(root: string): number {
-  return entriesIn(root).filter((entry) => entry.dir && !entry.name.startsWith('.')).flatMap((entry) => {
-    const own = (observeText(join(root, entry.name, LOCK)) ?? '').split('\n').filter(isWire);
+  return placesIn(root).filter(name => !name.startsWith('.')).flatMap((name) => {
+    const own = (observeText(join(root, name, LOCK)) ?? '').split('\n').filter(isWire);
     return foldClaims(own).standing.filter((line) => fieldOf(line, 'value') !== 'withdraw')
-      .map((line) => fieldOf(line, 'scope')).filter((scope) => scope.startsWith(`${entry.name}/`) || scope.includes(`/${entry.name}/`));
+      .map((line) => fieldOf(line, 'scope')).filter((scope) => scope.startsWith(`${name}/`) || scope.includes(`/${name}/`));
   }).length;
 }
 

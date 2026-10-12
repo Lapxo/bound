@@ -17,3 +17,11 @@ The opt-in `local-act@1` contract is selected by `wire/act-result`, `wire/act-re
 Admission publishes the original signed records, their logical placements and one native result receipt atomically. A failure before commit writes no partial act. The result names the committed digest and local epoch; replay returns the original result without another epoch or origin. A post-commit error is not a rollback. Read the committed result before deciding whether to retry.
 
 The query verifies the record signatures and coverage against the authority snapshot at admission, and the native receipt against its retained provenance. Later key retirement or profile replacement cannot authorize a new act but does not erase a verifiable historical result. Admission is not conformance: the output says `admitted · conformance not asserted`. Missing or corrupt results refuse by name. Host paths and delivery counts are not identity inputs.
+
+## Release approval
+
+`fold --as release <approval-file>` verifies the external approval against the place authorizer, its admitted public key, coverage and signature era. Exactly one signed release/<tag> digest, release/artifact name and sources/archive URL are required. It prints `READY sha256:<digest> <name> <source>` or refuses with the coordinate and cause. This is an approval judgment, distinct from the place release-policy verdict. It never fetches, executes, signs or lands.
+
+## Standing admission
+
+A uses/ selection admits canonical standing bytes, never an archive. The bytes must already be held under their verified digest or in the single local coordinate explicitly named by needs. Admission checks identity and canonical form without fetching, executing or writing the content store. Missing or corrupt bytes refuse the whole lot. A corrupt held copy cannot be hidden by another source. Archives remain separate dependency declarations.

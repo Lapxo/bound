@@ -11,6 +11,29 @@ import { layReleases, laidAt, resolvedOf, runtimeTreeAt } from '../src/host/rele
 import { capsuleAt } from '../src/host/capsule.ts';
 import { blobAt } from '../src/land/ledger.ts';
 import {isCeiling} from '../src/fold/configures.ts';
+import {localDirectoriesIn,placesIn} from '../src/fold/places.ts';
+import {fileRegionDigest} from '../src/fold/closed.ts';
+
+test('file seals exclude declared mounts but retain explicitly handed dependency inputs',()=>{
+ const root=mkdtempSync(join(tmpdir(),'file-seal-mount-boundary-'));
+ try{
+  writeFileSync(join(root,'TARGET.bound'),canonical({scope:'dep/library',role:'reads',form:'alphabet',measure:'digest',value:'sha256:'+'a'.repeat(64),needs:'library'})+'\n');
+  writeFileSync(join(root,'owned.txt'),'the place owns this');
+  const clean=fileRegionDigest(root,'','receipts/.','sha256');
+  mkdirSync(join(root,'library'));
+  writeFileSync(join(root,'library','entry.js'),'dependency implementation');
+  assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),clean);
+  const input=canonical({scope:'library/entry.js',role:'writes',form:'alphabet',measure:'observed',value:'retained input'});
+  const handed=fileRegionDigest(root,'','receipts/.','sha256',[input]);
+  assert.notEqual(handed,clean);
+  writeFileSync(join(root,'library','entry.js'),'a changed dependency implementation');
+  assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),clean);
+  assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256',[input]),handed);
+  mkdirSync(join(root,'local'));
+  writeFileSync(join(root,'local','.laid'),'a marker cannot exclude a local directory');
+  assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256'),clean);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
 
 const record = (name: string, text: string, type = '0'): Buffer => {
   const body = Buffer.from(text);
@@ -25,6 +48,44 @@ const tar = (...rows: Buffer[]): Buffer => gzipSync(Buffer.concat([...rows, Buff
 const sha = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
 const save = (store: string, digest: string, bytes: Uint8Array): void => { const at = blobAt(store, digest); mkdirSync(join(store, 'cas', 'blobs'), { recursive: true }); writeFileSync(at, bytes); };
 const scope = (digest: string): string => canonical({ scope: 'dep/example', role: 'reads', form: 'alphabet', measure: 'digest', value: digest, needs: 'layout', by: 'fixture', at: 'policy:fixture' });
+
+test('dependency locks stay foreign while local siblings and nested host places remain discoverable',()=>{
+ const root=mkdtempSync(join(tmpdir(),'place-mount-boundary-'));
+ try{
+  for(const name of ['library','compiler','local','parent','marked']){
+   mkdirSync(join(root,name));
+   writeFileSync(join(root,name,'TARGET.bound'),canonical({scope:'keys/foreign',role:'writes',form:'alphabet',measure:'coverage',value:'*'})+'\n');
+  }
+  writeFileSync(join(root,'marked','.laid'),'a marker is not authority');
+  const binding=(name:string,needs:string)=>canonical({scope:'dep/'+name,role:'reads',form:'alphabet',measure:'digest',value:'sha256:'+'a'.repeat(64),needs});
+  const history=[binding('one','library'),binding('two','compiler'),binding('nested','parent/node_modules/dependency')];
+  assert.deepEqual(placesIn(root,history),['local','marked','parent']);
+  assert.deepEqual(localDirectoriesIn(root,history),['local','marked','parent']);
+  mkdirSync(join(root,'unformed'));
+  assert.deepEqual(localDirectoriesIn(root,history),['local','marked','parent','unformed']);
+  assert.deepEqual(placesIn(root,history),['local','marked','parent']);
+  // Retained dependency bytes do not gain local authority upon withdrawal.
+  const withdraw=canonical({scope:'dep/one',role:'reads',form:'alphabet',measure:'digest',value:'withdraw',needs:'library'});
+  assert.deepEqual(placesIn(root,[...history,withdraw]),['local','marked','parent']);
+  assert.deepEqual(placesIn(root,[]),['compiler','library','local','marked','parent']);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
+
+test('a dependency LICENSE never creates a child-place view; local documents remain discoverable',()=>{
+ for(const mount of ['reader-library','layout-engine']){
+  const root=mkdtempSync(join(tmpdir(),'license-mount-boundary-'));
+  try{
+   for(const name of [mount,'local']){mkdirSync(join(root,name));writeFileSync(join(root,name,'LICENSE'),'MIT License\n');}
+   const binding=canonical({scope:'dep/library',role:'reads',form:'alphabet',measure:'digest',value:'sha256:'+'a'.repeat(64),needs:mount});
+   const holding=localDirectoriesIn(root,[binding]).filter(name=>existsSync(join(root,name,'LICENSE')));
+   assert.deepEqual(holding,['local']);
+   assert.equal(readFileSync(join(root,mount,'LICENSE'),'utf8'),'MIT License\n');
+   writeFileSync(join(root,mount,'TARGET.bound'),canonical({scope:'view/license',shape:'LICENSE',value:'foreign-view'})+'\n');
+   assert.deepEqual(placesIn(root,[binding]),[]);
+   assert.deepEqual(localDirectoriesIn(root,[binding]),['local']);
+  }finally{rmSync(root,{recursive:true,force:true});}
+ }
+});
 
 test('host artifact bindings do not become inert measured ceilings; dependency constraints still do',()=>{
  assert.equal(isCeiling(scope('sha256:'+'a'.repeat(64))),false);
