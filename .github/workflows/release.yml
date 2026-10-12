@@ -1,28 +1,46 @@
 name: release
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: [tag]
+    types: [completed]
+  workflow_dispatch:
 jobs:
   stage:
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    concurrency: release-delivery
     environment: release
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: 24
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm install --global npm@'12.1.0' --ignore-scripts
+      - name: Prepare release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="v$(node -p "require('./package.json').version")"
+          printf 'TAG=%s\n' "$TAG" >> "$GITHUB_ENV"
+          git fetch origin "refs/tags/$TAG:refs/tags/$TAG"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/releases" --jq '.[].tag_name' > "$RUNNER_TEMP/release-tags"
+          if grep -Fxq "$TAG" "$RUNNER_TEMP/release-tags"; then
+            printf 'RELEASE %s · exists\n' "$TAG"
+          else
+            gh release create "$TAG" --verify-tag --draft --title "$TAG" --generate-notes
+            printf 'RELEASE %s · draft created · awaiting signed assets\n' "$TAG"
+          fi
       - name: Read owner approval
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
           mkdir .release
@@ -32,7 +50,6 @@ jobs:
       - name: Stage the approved release archive
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
           read -r status digest archive source extra < .release/verdict
@@ -44,5 +61,7 @@ jobs:
           actual="$(tar -xOf ".release/$archive" package/package.json | node -p "const p=JSON.parse(require('fs').readFileSync(0,'utf8'));p.name+'@'+p.version")"
           test "$actual" = "$expected"
           printf 'SOURCE release/%s/%s · %s · declared %s\n' "$TAG" "$archive" "$digest" "$source"
+          gh release edit "$TAG" --draft=false
+          printf 'RELEASE %s · published · %s\n' "$TAG" "$digest"
           npm stage publish ".release/$archive" --access public --ignore-scripts
           printf 'STAGED %s · %s · owner approval pending\n' "$actual" "$digest"
