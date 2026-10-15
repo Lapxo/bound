@@ -4,7 +4,28 @@ on:
     branches: [main]
   pull_request:
 jobs:
+  inputs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download unpublished inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bound-inputs"
+          gh release download "v$(jq -r .version package.json)" --pattern 'sha256-*' --dir "$RUNNER_TEMP/bound-inputs"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: declared-reader-inputs
+          path: ${{ runner.temp }}/bound-inputs/sha256-*
+          if-no-files-found: error
   test:
+    needs: inputs
     strategy:
       fail-fast: false
       matrix:
@@ -23,18 +44,20 @@ jobs:
         run: |
           set -euo pipefail
           npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - uses: actions/download-artifact@v4
+        with:
+          name: declared-reader-inputs
+          path: ${{ runner.temp }}/bound-inputs
       - name: Lay declared reader inputs
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/bound-inputs" .bound/cas/blobs
-          gh release download "v$(jq -r .version package.json)" --pattern 'sha256-*' --dir "$RUNNER_TEMP/bound-inputs"
+          mkdir -p .bound/cas/blobs
           for input in "$RUNNER_TEMP/bound-inputs"/sha256-*; do
             asset="$(basename "$input")"
             digest=${asset#sha256-}
             digest=${digest%%.*}
             [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
+            printf '%s  %s\n' "$digest" "$input" | sha256sum -c -
             cp "$input" ".bound/cas/blobs/$digest"
             printf 'INPUT %s · sha256:%s\n' "$asset" "$digest"
           done
