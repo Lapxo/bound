@@ -9,7 +9,7 @@ async function fixture(mode?: string) {
  const data = await new Promise<any>((resolve, reject) => { worker.once('message', resolve); worker.once('error', reject); });
  const endpoint = mode ? data : data.endpoint, cap = endpoint.responseBytes;
  const binding: FixedControlBinding = { endpoint, workerBytes, worker: { coordinate: 'executor/control-worker', digest: sha(workerBytes), bytes: workerBytes.length }, runtime: { path: process.execPath, digest: sha(runtimeBytes), bytes: runtimeBytes.length }, resources: { inputBytes: cap, outputBytes: cap, sharedBytes: 32 + 2 * cap }, deadlineMs: endpoint.deadlineMs };
- return { data, binding, async close() { worker.postMessage('close'); await new Promise(resolve => worker.once('exit', resolve)); } };
+ return { data, binding, usage: () => new Promise<any>(resolve => { worker.once('message', reply => resolve(reply.usage)); worker.postMessage('usage'); }), async close() { worker.postMessage('close'); await new Promise(resolve => worker.once('exit', resolve)); } };
 }
 const frame = (f: any, request: unknown) => JSON.stringify({ protocol: 'command-lot/1', coordinate: f.endpoint.coordinate, implementation: f.endpoint.implementation, identity: f.endpoint.identity, requests: [JSON.stringify(request)] });
 test('fixed host transport uses the actual custodian on every call and keeps its charges', async () => {
@@ -71,7 +71,9 @@ test('two actual Worker realms retain the existing fixed client and the same agg
   const workers=[0,1].map(()=>new Worker(new URL('./control-bridge-realm-child.ts',import.meta.url),{execArgv:[],workerData:{binding:f.binding,workerBytes:workerBytes.toString('base64'),frame:frame(f.data,f.data.request)}}));
   const replies=await Promise.all(workers.map(w=>new Promise<any>((resolve,reject)=>{w.once('message',resolve);w.once('error',reject)})));
   for(const reply of replies){assert.equal(reply.isMainThread,false);assert.match(reply.refusal,/requires main-thread realm/);assert.equal(reply.status,0,reply.stderr);assert.equal(JSON.parse(reply.reply).responses[0].kind,'entry-context');}
-  assert.deepEqual(replies.map(r=>JSON.parse(r.reply).responses[0].usage.work).sort(),[2,3]);
+  // Connections are charged on acceptance: concurrent replies may both see 3.
+  for(const reply of replies)assert.ok([2,3].includes(JSON.parse(reply.reply).responses[0].usage.work));
+  assert.equal((await f.usage()).work,3,'one initial request plus two concurrent realms share exactly three charges');
   await Promise.all(workers.map(w=>w.terminate()));
  }finally{await bridge?.close();await f.close();}
 });
