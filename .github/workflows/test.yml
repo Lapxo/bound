@@ -40,10 +40,6 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run build
-      - name: Run tests
-        run: |
-          set -euo pipefail
-          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
       - uses: actions/download-artifact@v4
         with:
           name: declared-reader-inputs
@@ -66,10 +62,14 @@ jobs:
           set -euo pipefail
           bootstraps=("$RUNNER_TEMP/bound-inputs"/*.bootstrap.bound)
           test "${#bootstraps[@]}" -eq 1
+          mkdir -p "$RUNNER_TEMP/bound-bootstrap-instrument"
+          cp -R dist "$RUNNER_TEMP/bound-bootstrap-instrument/dist"
+          cp TARGET.bound package.json "$RUNNER_TEMP/bound-bootstrap-instrument/"
+          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/bound-bootstrap-instrument/node_modules"
           cp TARGET.bound "$RUNNER_TEMP/bound-public-target"
           trap 'cp "$RUNNER_TEMP/bound-public-target" TARGET.bound' EXIT
           cp "${bootstraps[0]}" TARGET.bound
-          node dist/cli/verb.js land 2>&1 | tee "$RUNNER_TEMP/bound-admission.log"
+          node "$RUNNER_TEMP/bound-bootstrap-instrument/dist/cli/verb.js" land 2>&1 | tee "$RUNNER_TEMP/bound-admission.log"
           cp "$RUNNER_TEMP/bound-public-target" TARGET.bound
           trap - EXIT
       - name: Verify native closure and receipt reuse
@@ -80,6 +80,10 @@ jobs:
           node dist/cli/verb.js fold --check 2>&1 | tee "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
       - run: npm pack --silent
       - name: Preserve test and fold logs
         if: always()
