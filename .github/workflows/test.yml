@@ -61,6 +61,17 @@ jobs:
             cp "$input" ".bound/cas/blobs/$digest"
             printf 'INPUT %s · sha256:%s\n' "$asset" "$digest"
           done
+      - name: Admit signed configuration
+        run: |
+          set -euo pipefail
+          bootstraps=("$RUNNER_TEMP/bound-inputs"/*.bootstrap.bound)
+          test "${#bootstraps[@]}" -eq 1
+          cp TARGET.bound "$RUNNER_TEMP/bound-public-target"
+          trap 'cp "$RUNNER_TEMP/bound-public-target" TARGET.bound' EXIT
+          cp "${bootstraps[0]}" TARGET.bound
+          node dist/cli/verb.js land 2>&1 | tee "$RUNNER_TEMP/bound-admission.log"
+          cp "$RUNNER_TEMP/bound-public-target" TARGET.bound
+          trap - EXIT
       - name: Verify native closure and receipt reuse
         run: |
           set -euo pipefail
