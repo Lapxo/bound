@@ -6,6 +6,7 @@ import { fieldOf } from '../fold/claims.ts';
 import { observeText } from '../observe/files.ts';
 import { ownLock, ownStore, ownRoot } from '../observe/runner.ts';
 import { runtimeTreeAt } from './release.ts';
+import {ContentNeeded} from './content-needed.ts';
 import { theWord } from '../fold/wire.ts';
 
 interface ResolveContext { parentURL?: string }
@@ -110,26 +111,46 @@ export function provide(): void {
   if (hooked) return;
   const dependencies=ownLock().filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads');
   const file=manifestOf(),selected=selectNativeDependencies(ownRoot(),dependencies,file);
-  // An ordinary host library is selected by its declared mount. Unmounted
-  // catalog entries stay lazy; explicit pinPlace requests still verify their bytes.
-  const pins = (selected??dependencies.filter(line=>fieldOf(line,'needs')!=='').map(line=>({line,library:undefined})))
-    .flatMap(({line,library}) => {
-      const name = fieldOf(line, 'scope').slice('dep/'.length);
-      const pin=readProvidedPin(name,pinPlace(name),file,library?.name);
-      if(!pin)throw Error('REFUSE·pin declared library unavailable '+name);
-      return [pin];
-    });
-  if(reuseNativeResolution(pins)){
-    hooked = true;
+  const load=(line:string,requiredName?:string)=>{
+    const name=fieldOf(line,'scope').slice('dep/'.length),at=pinPlace(name);
+    if(!at)throw new ContentNeeded(fieldOf(line,'value'),'REFUSE·pin declared library unavailable '+name);
+    const pin=readProvidedPin(name,at,file,requiredName);
+    if(!pin)throw Error('REFUSE·pin declared library unavailable '+name);
+    return pin;
+  };
+  if(selected!==undefined){
+    reuseNativeResolution(selected.map(({line,library})=>load(line,library.name)));
+    hooked=true;
     return;
   }
+  // A mount selects a library, but its manifest is only a routing hint until
+  // an import requests it. The selected archive alone supplies executable bytes.
+  const mounts=dependencies.filter(line=>fieldOf(line,'needs')!=='').map(line=>{
+    const mount=join(ownRoot(),fieldOf(line,'needs'));
+    const manifest=JSON.parse(observeText(join(mount,file))??'{}') as {name?:unknown};
+    return {line,mount,pkg:typeof manifest.name==='string'?manifest.name:''};
+  });
+  const verified=new Map<string,ReturnType<typeof load>>();
   registerHooks({
     resolve(specifier, context, nextResolve) {
       if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.includes(':')) return nextResolve(specifier, context);
-      const parent = context.parentURL ?? '';
-      const pin = pins.find((one) => specifier === one.pkg || specifier.startsWith(`${one.pkg}/`));
-      if (pin === undefined || parent.startsWith(pin.href)) return nextResolve(specifier, context);
-      return resolvePinned(specifier, context, nextResolve, pin);
+      let selected=mounts.find(one=>one.pkg&&(specifier===one.pkg||specifier.startsWith(one.pkg+'/')));
+      if(!selected){
+        // Node's actual instrument resolution also identifies a selected mount
+        // when a mutable manifest's name changed. Resolution never executes it.
+        let resolved:ResolveResult|undefined;
+        try{resolved=nextResolve(specifier,{...context,parentURL:pathToFileURL(join(ownRoot(),file)).href})}catch{}
+        if(resolved?.url.startsWith('file:'))selected=mounts.find(one=>{
+          try{const part=relative(realpathSync(one.mount),realpathSync(new URL(resolved!.url)));
+            return !isAbsolute(part)&&part!=='..'&&!part.startsWith('..'+sep);
+          }catch{return false}
+        });
+      }
+      if(!selected)return nextResolve(specifier,context);
+      let pin=verified.get(selected.line);
+      if(!pin){pin=load(selected.line);verified.set(selected.line,pin);}
+      if(specifier!==pin.pkg&&!specifier.startsWith(pin.pkg+'/'))throw Error('REFUSE·pin selected library name differs');
+      return resolvePinned(specifier,context,nextResolve,pin);
     },
   });
   hooked = true;

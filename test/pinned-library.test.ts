@@ -50,29 +50,32 @@ test('a package main cannot substitute a file outside its digest-laid tree',()=>
 
 // Exercise the real instrument entry: catalog blobs must stay unopened, while a
 // selected mount still requires its exact archive instead of Node's local copy.
-for(const missing of [false,true])test(`provide opens only mounted libraries; missing selected archive=${missing}`,()=>{
+for(const [missing,renamed] of [[false,false],[true,false],[false,true]])test(`provide opens only mounted libraries; missing=${missing}, renamed metadata=${renamed}`,()=>{
  const temp=mkdtempSync(join(tmpdir(),'bound-provide-'));
  try{
   const instrument=join(temp,'instrument'),library=join(temp,'library');mkdirSync(instrument);mkdirSync(library);
   cpSync(new URL('../src/',import.meta.url),join(instrument,'src'),{recursive:true});
-  symlinkSync(new URL('../node_modules/',import.meta.url).pathname,join(instrument,'node_modules'),'dir');
+  mkdirSync(join(instrument,'node_modules/@lapxo'),{recursive:true});
+  for(const pkg of ['@lapxo/topos','@lapxo/obligations','acorn'])symlinkSync(new URL('../node_modules/'+pkg,import.meta.url).pathname,join(instrument,'node_modules',pkg),'dir');
   writeFileSync(join(instrument,'package.json'),'{"type":"module"}');
   writeFileSync(join(library,'package.json'),JSON.stringify({name:'fixture-selected-library',type:'module',exports:{'.':'./index.js'}}));
   writeFileSync(join(library,'index.js'),'export const value=31;');writeFileSync(join(library,'private.js'),'export const hidden=99;');
+  cpSync(library,join(instrument,'node_modules/fixture-selected-library'),{recursive:true});
+  if(renamed)writeFileSync(join(instrument,'node_modules/fixture-selected-library/package.json'),JSON.stringify({name:'forged-routing-name',type:'module',exports:{'.':'./index.js'}}));
   const archive=join(temp,'library.tgz'),packed=spawnSync('tar',['-czf',archive,'-C',library,'.']);assert.equal(packed.status,0,String(packed.stderr));
   const bytes=readFileSync(archive),digest='sha256:'+createHash('sha256').update(bytes).digest('hex'),catalog='sha256:'+'a'.repeat(64);
   const row=(scope:string,value:string,extra:Record<string,string>={})=>canonical({scope,value,role:'writes',form:'alphabet',measure:'id',at:'policy:fixture',by:'target',...extra});
   writeFileSync(join(instrument,'TARGET.bound'),[
    row('audit/wire/pin-shape','package'),
    row('dep/inactive-catalog',catalog,{role:'reads'}),
-   row('dep/selected',digest,{role:'reads',needs:'library-mount'}),
+   row('dep/selected',digest,{role:'reads',needs:'node_modules/fixture-selected-library'}),
   ].join('\n')+'\n');
   const cas=join(instrument,'.bound/cas/blobs');mkdirSync(cas,{recursive:true});
   writeFileSync(join(cas,catalog.slice(7)),'corrupt catalog bytes that must not be opened');
   if(!missing)writeFileSync(join(cas,digest.slice(7)),bytes);
   const entry=join(instrument,'src/cli/provide-fixture.ts');
   writeFileSync(entry,`import assert from 'node:assert/strict';import {provide,pinPlace} from '../host/provide.ts';
-   ${missing?`assert.throws(()=>provide(),/REFUSE·pin declared library unavailable selected/);`:`provide();assert.equal((await import('fixture-selected-library')).value,31);await assert.rejects(import('fixture-selected-library/private.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});assert.throws(()=>pinPlace('inactive-catalog'),/does not name its available bytes/);`}
+   ${missing?`provide();console.log('UNUSED MISSING LIBRARY DID NOT OPEN');await assert.rejects(import('fixture-selected-library'),/REFUSE·pin declared library unavailable selected/);`:`provide();assert.equal((await import('fixture-selected-library')).value,31);${renamed?"await assert.rejects(import('forged-routing-name'),/selected library name differs/);":''}await assert.rejects(import('fixture-selected-library/private.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});assert.throws(()=>pinPlace('inactive-catalog'),/does not name its available bytes/);`}
    console.log('PROVIDE VERIFIED');`);
   const got=spawnSync(process.execPath,[entry],{encoding:'utf8'});assert.equal(got.status,0,got.stdout+got.stderr);assert.match(got.stdout,/PROVIDE VERIFIED/);
  }finally{rmSync(temp,{recursive:true,force:true})}
