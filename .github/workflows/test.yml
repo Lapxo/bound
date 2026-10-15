@@ -19,11 +19,37 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run build
-      - run: npm test
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - name: Lay declared reader inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/bound-inputs" .bound/cas/blobs
+          gh release download "v$(jq -r .version package.json)" --pattern 'sha256-*' --dir "$RUNNER_TEMP/bound-inputs"
+          for input in "$RUNNER_TEMP/bound-inputs"/sha256-*; do
+            asset="$(basename "$input")"
+            digest=${asset#sha256-}
+            digest=${digest%%.*}
+            [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
+            cp "$input" ".bound/cas/blobs/$digest"
+            printf 'INPUT %s · sha256:%s\n' "$asset" "$digest"
+          done
       - name: Verify native closure and receipt reuse
         run: |
-          node dist/cli/verb.js fold --check > "$RUNNER_TEMP/bound-check.log" 2>&1 || { cat "$RUNNER_TEMP/bound-check.log"; exit 1; }
-          cat "$RUNNER_TEMP/bound-check.log"
+          set -euo pipefail
+          node dist/cli/verb.js fold 2>&1 | tee "$RUNNER_TEMP/bound-fold.log"
+          node dist/cli/verb.js fold --check 2>&1 | tee "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
       - run: npm pack --silent
+      - name: Preserve test and fold logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bound-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/bound-*.log
+          if-no-files-found: ignore

@@ -63,20 +63,63 @@ export function resolvePinned(specifier: string, context: ResolveContext, nextRe
  * blob's folder.
  */
 let hooked = false;
+type NativeResolution={readonly libraryNames:readonly string[];readonly libraries:readonly {readonly name:string;readonly manifest:string;readonly coordinate?:string}[];assertPins(pins:readonly {name:string;at:string}[]):void};
+function nativeResolution():NativeResolution|undefined{
+  const installed=Object.getOwnPropertyDescriptor(globalThis,Symbol.for('bound.native.resolution@1'));
+  if(!installed)return undefined;
+  const capability=installed.value as {profile?:unknown;libraryNames?:unknown;libraries?:unknown;assertPins?:unknown}|undefined;
+  if(installed.configurable!==false||installed.writable!==false||!capability||!Object.isFrozen(capability)||capability.profile!=='fixed-native-resolution@1'||!Array.isArray(capability.libraryNames)||!Object.isFrozen(capability.libraryNames)||capability.libraryNames.some(name=>typeof name!=='string')||!Array.isArray(capability.libraries)||!Object.isFrozen(capability.libraries)||capability.libraries.some(lib=>!lib||!Object.isFrozen(lib)||typeof lib.name!=='string'||typeof lib.manifest!=='string')||typeof capability.assertPins!=='function')throw Error('REFUSE·pin fixed resolution capability invalid');
+  return capability as NativeResolution;
+}
+
+/** Fixed execution selects libraries by the instrument's explicit local mount,
+ * before opening any artifact. An alias or package-name guess grants nothing. */
+export function selectNativeDependencies(root:string,dependencies:readonly string[],manifest:string):readonly {line:string;library:{readonly name:string;readonly manifest:string;readonly coordinate?:string}}[]|undefined{
+  const capability=nativeResolution();if(!capability)return undefined;
+  if(dependencies.length&&capability.libraries.some(library=>typeof library.coordinate!=='string'||!library.coordinate))throw Error('REFUSE·pin fixed resolution logical library coordinate missing');
+  const selected=new Map(capability.libraries.map(library=>[library.coordinate,library]));
+  return dependencies.flatMap(line=>{const mount=fieldOf(line,'needs');if(!mount)return [];
+    const library=selected.get(mount.replace(/\/+$/,'')+'/'+manifest);if(!library)return [];
+    let actual:string;try{actual=realpathSync(join(root,mount,manifest))}catch{throw Error('REFUSE·pin selected library mount absent '+library.name)}
+    if(actual!==library.manifest)throw Error('REFUSE·pin selected library mount differs '+library.name);
+    return[{line,library}];
+  });
+}
+
+/** A declared artifact is not automatically an active Node library. This fixed
+ * assertion reuses only the packages selected by the actual host boundary. */
+export function reuseNativeResolution(pins:readonly {pkg:string;at:string}[]):boolean{
+  const capability=nativeResolution();if(!capability)return false;
+  const selected=new Set(capability.libraryNames);
+  // The fixed preload owns this closed assertion. Package names select which
+  // declared pins participate; exact manifests and member bytes still decide.
+  capability.assertPins(pins.filter(pin=>selected.has(pin.pkg)).map(pin=>({name:pin.pkg,at:pin.at})));
+  return true;
+}
+
+/** Read one resolved archive's manifest; a selected fixed library cannot vanish
+ * into the optional historical provider path when its archive is absent. */
+export function readProvidedPin(name:string,at:string,file:string,requiredName?:string):{at:string;pkg:string;exports:boolean;href:string;json:string}|undefined{
+  if(!at){if(requiredName!==undefined)throw Error('REFUSE·pin fixed resolution requires declared library '+name);return undefined}
+  const manifest=JSON.parse(observeText(join(at,file))??'{}') as Record<string,unknown>,pkg=typeof manifest.name==='string'?manifest.name:'';
+  if(requiredName!==undefined&&pkg!==requiredName)throw Error('REFUSE·pin fixed resolution library name differs '+name);
+  return pkg?{at,pkg,exports:Object.prototype.hasOwnProperty.call(manifest,'exports'),href:pathToFileURL(at).href,json:pathToFileURL(join(at,file)).href}:undefined;
+}
 
 export function provide(): void {
   if (hooked) return;
-  hooked = true;
-  const pins = ownLock()
-    .filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads')
-    .flatMap((line) => {
+  const dependencies=ownLock().filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads');
+  const file=manifestOf(),selected=selectNativeDependencies(ownRoot(),dependencies,file);
+  const pins = (selected??dependencies.map(line=>({line,library:undefined})))
+    .flatMap(({line,library}) => {
       const name = fieldOf(line, 'scope').slice('dep/'.length);
-      const at = pinPlace(name);
-      const pkg = pinName(name);
-      const file = manifestOf();
-      const manifest = JSON.parse(observeText(join(at, file)) ?? '{}') as Record<string, unknown>;
-      return at && pkg ? [{ at, pkg, exports: Object.prototype.hasOwnProperty.call(manifest, 'exports'), href: pathToFileURL(at).href, json: pathToFileURL(join(at, file)).href }] : [];
+      const pin=readProvidedPin(name,pinPlace(name),file,library?.name);
+      return pin?[pin]:[];
     });
+  if(reuseNativeResolution(pins)){
+    hooked = true;
+    return;
+  }
   registerHooks({
     resolve(specifier, context, nextResolve) {
       if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.includes(':')) return nextResolve(specifier, context);
@@ -86,4 +129,5 @@ export function provide(): void {
       return resolvePinned(specifier, context, nextResolve, pin);
     },
   });
+  hooked = true;
 }

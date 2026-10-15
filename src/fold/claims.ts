@@ -6,12 +6,23 @@ import { ownRoot } from '../observe/runner.ts';
 import type { Region } from '@lapxo/obligations/field';
 
 const decoded = new Map<string, Readonly<Record<string, string>>>();
+const parsed = new Map<string, ReturnType<typeof parse>>();
+const kinds = new Map<string, boolean>();
+
+/** Pure syntax is retained by the exact record bytes, never by a path, epoch or
+ * claimed digest. This does not retain admission, coverage or current grants. */
+export function parsedLine(line:string):ReturnType<typeof parse>{
+  const held=parsed.get(line);if(held!==undefined)return held;
+  const got=parse(line);
+  if(got.kind==='fact'){Object.freeze(got.value.fields);if(got.value.keys)Object.freeze(got.value.keys);Object.freeze(got.value);}
+  Object.freeze(got);parsed.set(line,got);return got;
+}
 
 /** Field access uses the Topos wire parser; decoding is shared for this CLI process. */
 function wireFields(line: string): Readonly<Record<string, string>> {
   const held = decoded.get(line);
   if (held !== undefined) return held;
-  const got = parse(line);
+  const got = parsedLine(line);
   const fields = got.kind === 'fact' ? got.value.fields : {};
   decoded.set(line, fields);
   return fields;
@@ -23,8 +34,8 @@ export const fieldsOf = (line: string): Record<string, string> => ({ ...wireFiel
 export function selfName(): string { return basename(ownRoot()); }
 export function isWire(line: string): boolean { return line.startsWith(PROTOCOL); }
 export const wireLinesOf = (text: string | undefined): readonly string[] => (text ?? '').split('\n').filter(isWire);
-export const isConfig = (line:string):boolean => {const k=recordKind(line);return k.kind==='fact'&&k.value==='config';};
-export const sayingOf = (line: string): string => !isConfig(line) ? ((p)=>p.kind==='fact'?signedBytes(p.value.fields):line)(parse(line)) : Object.entries(fieldsOf(line)).filter(([k]) => !ENVELOPE.has(k)).sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, v]) => `${k}=${v}`).join(' ');
+export const isConfig = (line:string):boolean => {const held=kinds.get(line);if(held!==undefined)return held;const k=recordKind(line),value=k.kind==='fact'&&k.value==='config';kinds.set(line,value);return value;};
+export const sayingOf = (line: string): string => !isConfig(line) ? ((p)=>p.kind==='fact'?signedBytes(p.value.fields):line)(parsedLine(line)) : Object.entries(fieldsOf(line)).filter(([k]) => !ENVELOPE.has(k)).sort(([a], [b]) => (a < b ? -1 : 1)).map(([k, v]) => `${k}=${v}`).join(' ');
 
 /** One key per claim: scope, role and measure; what a line says, its envelope set aside, is one however often it landed. */
 export function claimKey(line: string): string {

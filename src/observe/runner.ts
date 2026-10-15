@@ -23,8 +23,15 @@ const moduleAt = fromBlob() ? undefined : fileURLToPath(import.meta.url);
 const runtimeAt = moduleAt === undefined ? '' : resolve(dirname(moduleAt), '..');
 const runtimeExtension = moduleAt === undefined ? '' : extname(moduleAt);
 export const ownRoot = (): string => (fromBlob() ? join(resolve(dirname(self()), '..', '..', '..'), 'bound') : resolve(runtimeAt, '..'));
-export const ownStore = (): string => existsSync(join(ownRoot(), EXTENSION, 'ledger'))
-  ? join(ownRoot(), EXTENSION) : join(ownRoot(), '..', EXTENSION);
+/** A published instrument carries its own content store even before any ledger
+ * exists. Public-lock recognition grants no authority; legacy signed delivery
+ * trees retain their historical colocated-ledger or sibling-store layout. */
+export function instrumentStoreAt(root:string):string{
+  const lines=(observeText(join(root,LOCK))??'').split('\n').filter(isWire);
+  const published=lines.length>0&&publicLock(lines)!==undefined;
+  return published||existsSync(join(root,EXTENSION,'ledger'))?join(root,EXTENSION):join(root,'..',EXTENSION);
+}
+export const ownStore = (): string => instrumentStoreAt(ownRoot());
 /** The colocated public artifact is read without an unrelated parent's authority store. */
 // An act is judged by the instrument it started with, even when that act changes its colocated lock.
 let instrumentLock: readonly string[] | undefined;

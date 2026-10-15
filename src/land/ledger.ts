@@ -45,11 +45,30 @@ function journalLines(store:string,writer:string,place:string,legacy:readonly st
   if(last?.length===lines.length&&last.every((line,i)=>line===lines[i]))return last;
   journalMemo.set(key,lines);return lines;
 }
-export function ledgerWriters(store:string):readonly string[]{
+function legacyWriters(store:string):readonly string[]{
   const at=join(store,'ledger');
-  const legacy=existsSync(at)?readdirSync(at).filter(name=>name.endsWith(EXTENSION)).map(name=>name.slice(0,-EXTENSION.length)):[];
+  return existsSync(at)?readdirSync(at).filter(name=>name.endsWith(EXTENSION)).map(name=>name.slice(0,-EXTENSION.length)):[];
+}
+export function ledgerWriters(store:string):readonly string[]{
+  const legacy=legacyWriters(store);
   const committed=committedLocalActs(store).flatMap(act=>act.bundle.placements?.filter(p=>p.place==='.').flatMap(p=>actLines(p.records).map(line=>fieldOf(line,'by')))??[]);
   return [...new Set([...legacy,...committed])];
+}
+
+/** One synchronous root-history read, not a retained authority snapshot.
+ * Preserve writer order and each writer's legacy-before-committed ordering.
+ * Every call rereads the complete committed inventory exactly once. */
+export function rootLedgerLines(store:string):readonly string[]{
+  const legacy=legacyWriters(store),acts=committedLocalActs(store);
+  const fresh=acts.flatMap(act=>act.bundle.placements?.filter(p=>p.place==='.').flatMap(p=>actLines(p.records))??[]);
+  const writers=[...new Set([...legacy,...fresh.map(line=>fieldOf(line,'by'))])];
+  return writers.flatMap(writer=>{
+    // Authority-history identity needs actual bytes. A writer's size and mtime
+    // cannot distinguish a same-size edit or stand in for an admission proof.
+    const at=writerFile(store,writer),prior=existsSync(at)?readFileSync(at,'utf8').split('\n').filter(line=>line.startsWith(PROTOCOL)):[];
+    const committed=fresh.filter(line=>fieldOf(line,'by')===writer);
+    return committed.length?[...new Set([...prior,...committed])]:prior;
+  });
 }
 
 export function landShard(store: string, writer: string, region: string, lines: readonly string[]): number {

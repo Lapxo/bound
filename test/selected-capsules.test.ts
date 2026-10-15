@@ -84,7 +84,10 @@ test('a consumer projects a new artifact without changing the instrument, with n
   const calls:string[][]=[];
   const capsule={} as Capsule;
   const got=selectedCapsules([pin('world','sha256:held')],(name,entry)=>{calls.push([name,entry]);return capsule;},()=>top,[binding('package/run.js')]);
-  assert.equal(got[0]!.capsule,capsule);assert.deepEqual(calls,[[digest,'package/run.js']]);
+  assert.deepEqual(got[0]!.capsule,{...capsule,selection:'sha256:held offers/provider',selectedWorld:{standing:top,offer:'offers/provider'}});
+  assert.equal(got[0]!.capsule.selectedWorld!.standing,top,'selector metadata remains the verified selected world');
+  assert.deepEqual(capsule,{},'binding a selected origin does not mutate the loaded capsule');
+  assert.deepEqual(calls,[[digest,'package/run.js']]);
   calls.length=0;
   assert.throws(()=>selectedCapsules([pin('world','sha256:held')],()=>{calls.push(['unexpected']);return capsule;},()=>top,[binding('package/run.js'),binding('another.js')]),/conflicting host projections/);
   assert.deepEqual(calls,[]);

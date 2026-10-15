@@ -27,6 +27,7 @@ import { carriedFrom } from '../fold/resolved.ts';
 import { wireLine } from '../fold/wire.ts';
 import { isWire, RECEIPTS } from '../fold/claims.ts';
 import {withoutEffects} from '../host/read-only.ts';
+import {assertNativeReaderGrantsCurrent} from '../host/native/route.ts';
 
 /**
  * The pass of a place, in one process: the releases its instrument names are laid out first, its readers observe
@@ -46,7 +47,7 @@ import {withoutEffects} from '../host/read-only.ts';
 async function checked(root: string, entry: string, under: string | undefined): Promise<number> {
   const started = Date.now();
   const store = storeOf(root);
-  if (!meets(root, store, under ?? '')) {
+  if (!meets(root, store, under ?? '',false)) {
     process.stderr.write(`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
     return 1;
   }
@@ -140,7 +141,11 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     });
   };
   const settled = met && sameInstrument && !missingView();
-    if (settled) {
+  if (settled) {
+    // File and receipt seals authenticate retained evidence. A normal quiet
+    // fold also needs today's acting Root grant; --check uses checked() above
+    // and intentionally performs historical inspection without fresh effects.
+    assertNativeReaderGrantsCurrent(store);
     const ms = Date.now() - digestAt;
     const read = receiptsSeen();
     const lock = algorithmCost();

@@ -1,0 +1,5 @@
+import{parentPort,workerData}from'node:worker_threads';import{createServer}from'node:net';import{mkdtempSync,rmSync}from'node:fs';import{tmpdir}from'node:os';import{join}from'node:path';
+const dir=mkdtempSync(join(tmpdir(),'ipc-red-')),socket=join(dir,'p'),mode=workerData.mode,connections=new Set();
+const server=createServer(s=>{connections.add(s);s.once('close',()=>connections.delete(s));s.on('data',()=>{if(mode==='malformed')s.end('{bad');else if(mode==='oversize')s.end('x'.repeat(4097));else if(mode==='interrupted')s.end();else if(mode==='identity')s.end(JSON.stringify({protocol:'command-lot/1',coordinate:'wrong',implementation:'fixture',identity:'fixture',responses:[{kind:'entry-context'}]}));});});
+await new Promise(r=>server.listen(socket,r));parentPort.postMessage({socket,token:'fixture',coordinate:'fixture',implementation:'fixture',identity:'fixture',timeoutMs:1000,deadlineMs:Date.now()+5000,responseBytes:4096});
+parentPort.on('message',async()=>{for(const s of connections)s.destroy();await new Promise(r=>server.close(r));rmSync(dir,{recursive:true,force:true});parentPort.close();});

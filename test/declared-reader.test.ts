@@ -9,7 +9,7 @@ import {selectionLines, type capsulesFor} from '../src/fold/reach.ts';
 
 const wire=[canonical({scope:'wire/region-measures',value:'coordinates'}),canonical({scope:'wire/region-coordinate',value:'coordinates'})];
 const offer=canonical({scope:'dep/reader-world',value:'sha256:provider',shape:'run.mjs'});
-const selected=(() => [{offer,capsule:{digest:'sha256:provider',lines:[canonical({scope:'region/surface',measure:'writes',value:'readings/**'})],declaration:{regions:{surface:['*.input']}}}}]) as unknown as typeof capsulesFor;
+const selected=(() => [{offer,capsule:{digest:'sha256:provider',selection:'sha256:world offers/reader',lines:[canonical({scope:'region/surface',measure:'writes',value:'readings/**'})],declaration:{regions:{surface:['*.input']}}}}]) as unknown as typeof capsulesFor;
 function fixture(run:(root:string,store:string)=>void){
  const root=mkdtempSync(join(tmpdir(),'bound-declared-region-')),store=join(root,'.bound');
  try{mkdirSync(store);mkdirSync(join(root,'place'));writeFileSync(join(root,'place','TARGET.bound'),canonical({scope:'region/surface',form:'alphabet',measure:'coordinates',value:'*.input',role:'reads',at:'policy:region',by:'target'})+'\n');run(root,store);}finally{rmSync(root,{recursive:true,force:true});}
@@ -37,12 +37,17 @@ test('a declared region gets its provider without retired readers or a private l
  assert.deepEqual(readdirSync(store),[]);
 }));
 test('an active reader retains ownership; no second reader is scheduled',()=>fixture((root,store)=>{
- const existing={id:'declared',module:'reader-world/surface',where:['place/'],shape:['run'],kind:'process' as const};
+ const actual=capsuleReadersOf(root,store,wire,[],selected)[0]!;
+ const existing={...actual,id:'declared'};
  assert.deepEqual(capsuleReadersOf(root,store,wire,[existing],selected),[]);
+}));
+test('an existing reader without authenticated selected origin refuses instead of claiming ownership',()=>fixture((root,store)=>{
+ const existing={id:'legacy',module:'reader-world/surface',where:['place/'],shape:['run'],kind:'process' as const};
+ assert.throws(()=>capsuleReadersOf(root,store,wire,[existing],selected),/REFUSE·reader reader-world\/surface existing provider origin unmeasured/);
 }));
 test('a declared region without a matching provider stays unobserved',()=>fixture((root,store)=>{
  assert.deepEqual(capsuleReadersOf(root,store,wire,[],()=>[]),[]);
- const unrelated=(() => [{offer,capsule:{digest:'sha256:provider',lines:[canonical({scope:'region/other',measure:'writes',value:'readings/**'})],declaration:{regions:{other:['*.input']}}}}]) as unknown as typeof capsulesFor;
+ const unrelated=(() => [{offer,capsule:{digest:'sha256:provider',selection:'sha256:world offers/reader',lines:[canonical({scope:'region/other',measure:'writes',value:'readings/**'})],declaration:{regions:{other:['*.input']}}}}]) as unknown as typeof capsulesFor;
  assert.deepEqual(capsuleReadersOf(root,store,wire,[],unrelated),[]);
 }));
 
@@ -52,7 +57,7 @@ test('a repository root is a place; declared input globs are not limited to sibl
  const got=capsuleReadersOf(root,store,wire,[],selected);assert.equal(got.length,1);
  assert.deepEqual(got[0]!.where,['','place/']);
  assert.deepEqual([...got[0]!.capsule!.globs],[['',['src/*.input']],['place/',['*.input']]]);
- const existing={id:'root-reader',module:'reader-world/surface',where:[''],shape:['run'],kind:'process' as const};
+ const existing={...got[0]!,id:'root-reader',where:['']};
  const childOnly=capsuleReadersOf(root,store,wire,[existing],selected);assert.deepEqual(childOnly[0]!.where,['place/']);
 }));
 

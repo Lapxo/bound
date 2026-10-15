@@ -2,6 +2,9 @@ import type {ReaderReference} from '@lapxo/topos/wire';
 import {readerLifetime,parse} from '@lapxo/topos/wire';
 import {contentStore,verifiedContent,contentPolicy} from './content-store.ts';
 import {readOnly} from './read-only.ts';
+import {readingBoundary} from './reading-context.ts';
+import {nativeReaderRoute} from './native-reader-context.ts';
+import {assertNativeRouteCurrent,invokeNativeRoute,materializeNativeRoute} from './native/route.ts';
 import { sha } from './hash.ts';
 import { wireLinesOf as linesOf } from '../fold/claims.ts';
 import { createHash } from 'node:crypto';
@@ -21,6 +24,7 @@ import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { said } from '../fold/wire.ts';
 
 export interface Capsule {
+  readonly selectedWorld?: {readonly standing: import("@lapxo/topos/standing").StandingTopos; readonly offer:string};
   readonly selection?: string;
   readonly digest: string;
   readonly declaration: Declaration;
@@ -96,6 +100,12 @@ export const childFlags = (argv: readonly string[] = process.execArgv): readonly
   argv.filter((flag, i) => !/^(-e|-p|--eval|--print)$/.test(argv[i - 1] ?? '') && !/^(-e|-p|--eval|--print|--input-type)(=|$)/.test(flag));
 
 function answered(digest: string, bytes: Uint8Array, requests: readonly Request[], names: readonly string[], tree?: string, cacheStore: string = ownStore(), entry?: string, reader?: ReaderReference): readonly (Response | undefined)[] {
+  const boundary=readingBoundary();
+  const native=nativeReaderRoute();
+  if(native){
+    if(!boundary?.execution||digest!==native.profile.selection.archive)throw Error('REFUSE·native reader lacks its complete implementation identity');
+    assertNativeRouteCurrent(native);
+  }
   const child = entry === undefined ? spawnOf(tree ?? unpacked(digest, bytes), names) : [entry];
   if (!child.length) {
     process.stderr.write(`LOAD     regions · none of ${names.length} under the directories release/layout names\n`);
@@ -104,7 +114,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
   const lifetime = readerLifetime(contentPolicy().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];}), reader ?? digest);
   const policy = lifetime === undefined ? '' : JSON.stringify(lifetime)+'\n';
-  const hitOf = (request: Request): string => sha(`${digest}\n${loader}${policy}${JSON.stringify(request)}`);
+  const hitOf = (request: Request): string => sha(`${digest}\n${loader}${policy}${boundary===undefined?'':boundary.identity+'\n'}${JSON.stringify(request)}`);
   const hits = requests.map(hitOf);
   const kept = hits.map(hit => storeAt(cacheStore, 'cas', 'answers', hit));
   const held = kept.map((at, i) => {
@@ -121,7 +131,10 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   if (missing.length && readOnly()) throw Error(`REFUSE·preview capsule ${digest} has no verified answer for the proposed inputs; fold the declared inputs first`);
   if (missing.length) process.stderr.write(`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
-  const ran = !missing.length ? [] : executeCapsule(process.execPath, [...childFlags(), hostOf(), ...child], missing, {}, lifetime);
+  if(native&&!lifetime)throw Error('REFUSE·native reader missing declared lifetime');
+  const ran = !missing.length ? [] : native
+    ? invokeNativeRoute(native,{...materializeNativeRoute(native),requests:missing,execution:boundary!.execution!,limits:lifetime!})
+    : executeCapsule(process.execPath, [...childFlags(boundary?.execution?.flags), hostOf(), ...child], missing, boundary?.execution?{env:boundary.execution.env,cwd:boundary.execution.cwd}:{}, lifetime);
   return requests.map((request, i) => {
     if (held[i] !== undefined) return held[i];
     const said = ran[missing.indexOf(request)];

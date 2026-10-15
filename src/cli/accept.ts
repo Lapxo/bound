@@ -1,3 +1,5 @@
+import {assertProspectiveRootClockSelection} from '../host/root-clock-source.ts';
+import {hasContextualPlace,landContextualPlace} from '../host/contextual-place.ts';
 import {commitLocalAct,intactLocalAct,committedLocalActs} from '../host/ports/local-act.ts';
 import {withoutEffects} from '../host/read-only.ts';
 import {admittedLine} from '../host/selected-topos.ts';
@@ -26,7 +28,7 @@ import { retractedTogether, withdrawal } from '../land/withdraw.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { inertIn } from '../land/inert.ts';
 import { landSaid } from './pass.ts';
-import { underTheLock, underTheRegions } from '../land/act.ts';
+import { underTheLock, underTheRegions, underAuthorityRegions, underRootProjection } from '../land/act.ts';
 import { openedBy } from '../fold/opened.ts';
 import { touchedBy } from '../fold/reach.ts';
 import { landOwned, ownedOf } from '../land/owned.ts';
@@ -51,6 +53,7 @@ export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[
 function admissionEvidence(root: string, signed: readonly string[], standing: readonly string[]) {
   return withoutEffects(() => {
     const store = storeOf(root);
+    assertProspectiveRootClockSelection(root,signed);
     const reads = !signed.some(isReaderLock) && signed.some(isCeiling);
     const fold = reads ? coneOf(root, entryOf(root), signed.filter(isCeiling)) : { standing, observed: [], own: {}, kept: true };
     const inert = inertIn(signed, { standing: fold.standing, ceiling: isCeiling, signsReader: !reads, observed: fold.observed, own: fold.own, epoch: epochOf([...lockLines(store), ...signed]) });
@@ -247,6 +250,11 @@ export async function signedBatch(root: string, args: readonly string[], files: 
  */
 export async function accept(root: string, args: readonly string[]): Promise<number> {
   const started = Date.now();
+  const contextFiles=positionalsOf(args);
+  if(contextFiles.length===1&&hasContextualPlace(root)&&!claimLinesIn(contextFiles[0]!).length){
+    if(namedPlaces(args).length||valueOf(args,FLAGS.key)||valueOf(args,FLAGS.keyFile)||valueOf(args,FLAGS.signer))throw Error('REFUSE·contextual place accepts one already signed context envelope');
+    const result=await landContextualPlace(root,contextFiles[0]!);process.stdout.write(JSON.stringify({profile:'place-act-context@1',identity:result.identity,status:result.kind,context:result.context,receipts:result.receipts})+'\n');return 0;
+  }
   const named = namedPlaces(args);
   const placed = positionalsOf(args).reduce((all, file) => ((places) => (places.length ? claimLinesIn(file).reduce((got, line) => got.set(sayingOf(line), [...new Set([...(got.get(sayingOf(line)) ?? []), ...places])]), all) : all))(placesOfFile(file)), new Map<string, readonly string[]>());
   const batch = await signedBatch(root, args, positionalsOf(args));
@@ -268,7 +276,11 @@ export async function accept(root: string, args: readonly string[]): Promise<num
   const where = every ? 'every place · then the root, where the places join' : regions.length ? regions.map((one) => `${one}/`).join(' · ') : 'the root alone, where the places join';
   process.stdout.write(`ACTS     ${where} · ${owned.ledger.length} lines to the ledger${[...owned.own].map(([place, lines]) => ` · ${lines.length} to ${place}'s own lock`).join('')} · before the lock\n`);
   const asked = Date.now();
-  return underTheRegions(store, every ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger, records:batch.signed }, started, owned, asked, regions));
+  // Root-ledger writes may change grants or inherited policies. Child-only
+  // lots read that authority through publication, without excluding siblings.
+  const rootWrite = owned.ledger.length > 0 || every || regions.length === 0;
+  const enter = rootWrite ? underTheRegions : underAuthorityRegions;
+  return enter(store, rootWrite ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger, records:batch.signed }, started, owned, asked, regions));
 }
 
 async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 'signed' }>, started: number, owned: Owned, asked = started, descent: readonly string[] = []): Promise<number> {
@@ -284,6 +296,8 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     process.stderr.write(`${selfName()}: REFUSE·base moved ${batch.base.digest} → ${currentBase} · nothing landed\n`);
     return 1;
   }
+  try {assertProspectiveRootClockSelection(root,signed);}
+  catch(error){process.stderr.write(`${selfName()}: ${error instanceof Error?error.message:String(error)} · nothing landed\n`);return 1;}
   if(signed.some(line=>!isConfig(line))) {
     try {await admittedObjects(root,[...signedOwnerLines(store),...signed]);}
     catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return 1;}
@@ -342,6 +356,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     landed=[{at:'committed act '+identity,appended:records.length}];
   }else landed=took('land',()=>[...new Set(signed.map(line=>fieldOf(line,'by')))].map(by=>land(store,by,signed.filter(line=>fieldOf(line,'by')===by))));
   for (const [place, lines] of owned.own) landOwned(root, place, lines,resultProfile!==undefined);
+  return underRootProjection(store, 'projection', async () => {
   landSaid(store, writerFor(told.standing, 'fold'), []);
   for (const line of signed) {
     const value = fieldOf(line, 'value');
@@ -394,6 +409,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     for (const line of withdrawn.inexact) process.stdout.write(`INEXACT  ${fieldOf(line, 'scope')} · its scale is not distributive: what the others hold is not what they held without it\n`);
   }
   return 0;
+  });
 }
 
 /**

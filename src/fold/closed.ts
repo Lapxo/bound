@@ -1,5 +1,8 @@
 import {actCosts} from '../host/act-cost.ts';
 import {verifiedReadingReceipts} from '../host/reading-closures.ts';
+import {readingProfile} from '../host/reading-context.ts';
+import {currentReadingEnvironment} from '../host/native/receipt-environment.ts';
+import {childFlags} from '../host/capsule.ts';
 import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writeFileSync } from '../host/io.ts';
 import { byBytes, canonical, LOCK, parse, publicationOf, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, foldClaims, isConfig, isWire } from './claims.ts';
@@ -68,12 +71,19 @@ function filesOf(root: string, place: string, region: string, inputs: readonly s
 }
 
 const rooted = new Map<string, readonly string[]>();
+let lastConfiguration: {readonly input: string; readonly output: readonly string[]} | undefined;
 
 function publicConfiguration(lines: readonly string[]): readonly string[] {
+  const input = lines.join('\n');
+  // Retain only this pure projection. Callers still read and hash the actual
+  // files; neither a timestamp nor a previous seal proves their current bytes.
+  if (lastConfiguration?.input === input) return lastConfiguration.output;
   if (!lines.length || !lines.every(isConfig)) return lines;
   const folded = foldClaims(lines);
   if (folded.forks.length) throw Error('REFUSE·receipt disputed configuration standing');
-  return publicationOf(folded.standing.filter(line => fieldOf(line, 'value') !== 'withdraw'));
+  const output = publicationOf(folded.standing.filter(line => fieldOf(line, 'value') !== 'withdraw'));
+  lastConfiguration = {input, output};
+  return output;
 }
 
 function rootLines(root: string, place: string): readonly string[] {
@@ -180,7 +190,7 @@ export async function closeReceipts(root: string, store: string, semantic?: Read
 }
 
 /** One comparison. A place meets its receipt; the root meets when every receipt it names meets. */
-export function meets(root: string, store: string, place: string): boolean {
+export function meets(root: string, store: string, place: string, current=true): boolean {
   const name = place.replace(/\/$/, '');
   if (name === '') {
     const at = Date.now();
@@ -191,9 +201,9 @@ export function meets(root: string, store: string, place: string): boolean {
     let closed = (own.length > 0 ? ownClosed : named.size > 0) && [...named].every(([one, expected]) => {
       const bytes = observeFile(join(root, one, RECEIPTS));
       const algorithm = expected.split(':')[0];
-      return bytes !== undefined && hashBytes(bytes, algorithm) === expected && meets(root, store, `${one}/`);
+      return bytes !== undefined && hashBytes(bytes, algorithm) === expected && meets(root, store, `${one}/`,current);
     });
-    if(closed && carried){const algorithm=algorithmIn(own.join('\n'));const readings=verifiedReadingReceipts(store,carried,text=>hashFull(text,algorithm));if(readings===undefined)closed=false;else if(readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);}
+    if(closed && carried){const algorithm=algorithmIn(own.join('\n'));const profile=readingProfile((observeText(join(root,LOCK))??'').split('\n').filter(isWire),fieldOf);const readings=verifiedReadingReceipts(store,carried,text=>hashFull(text,algorithm),current&&profile?currentReadingEnvironment(store,root,text=>hashFull(text,algorithm),childFlags()):undefined,profile);if(readings===undefined)closed=false;else if(readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);}
     seen = { count: named.size + (own.length > 0 ? 1 : 0), ms: Date.now() - at };
     return closed;
   }

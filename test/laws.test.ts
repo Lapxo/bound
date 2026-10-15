@@ -63,13 +63,21 @@ test('foldClaims is a function of its lines: a second fold of the same lines is 
   compare(foldClaims(lines).standing.length, foldClaims([...lines, ...lines]).standing.length, 'duplicates do not grow standing');
 });
 
-test('the kernel names no world', () => {
+test('the kernel names no world; the native Node host may name its package metadata', () => {
   const walk = (dir: string): readonly string[] => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const at = join(dir, entry.name);
     return entry.isDirectory() ? walk(at) : entry.name.endsWith('.ts') ? [at] : [];
   });
-  const banned = /npm|node_modules|package\.json|github|tsconfig|eslint/;
-  const hits = walk(join(import.meta.dirname, '..', 'src')).filter((at) => banned.test(readFileSync(at, 'utf8')));
+  const source = join(import.meta.dirname, '..', 'src');
+  const native = join(source, 'host', 'native') + '/';
+  // The Node loader's controlling package metadata is part of its execution
+  // platform, like its import syntax. It grants no source-measurement or
+  // registry/release vocabulary to the host, and none to the kernel.
+  const domain = /npm|node_modules|github|tsconfig|eslint/;
+  const hits = walk(source).filter((at) => {
+    const text = readFileSync(at, 'utf8');
+    return domain.test(text) || (!at.startsWith(native) && /package\.json/.test(text));
+  });
   compare(hits, [], hits.join('\n'));
 });
 

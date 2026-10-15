@@ -1,6 +1,6 @@
 import type {Capsule} from '../host/capsule.ts';
 import { resolve } from '../host/io.ts';
-import { canonical, fields, matches } from '@lapxo/topos/wire';
+import { canonical, fields, matches, byBytes } from '@lapxo/topos/wire';
 import { namesAt, wordOn, wordsOf, wireLine } from './wire.ts';
 import { fits } from '../observe/match.ts';
 import type { CoordinateRole } from './wire.ts';
@@ -55,13 +55,14 @@ const reachOfLine = (module: string, where: readonly string[]): readonly string[
 
 /**
  * The reader regions of the capsules a place can run, where the place's own lock offers them or, at a world, the wire's offers/world list does for a
- * region its own lock does not name: `region/<name>` under a measure the wire's region-measures list names gives the region and its coordinates, and the first capsule, pinned before carried, that writes the region
- * reads them, handed the coordinates it declares it reads among those the place offers. A capsule region takes over what a
- * place's declared region. A standing reader for that same provider and region keeps ownership, so nothing is read twice.
+ * region its own lock does not name: each selected capsule that writes a declared region reads the coordinates
+ * it declares among the place's offered coordinates. Selection identifies attribution, never independence.
+ * An existing reader suppresses only that same selected provider, region and place; an ambiguous legacy
+ * owner refuses instead of hiding another provider or invoking the same provider twice.
  * A newly declared region does not need a retired reader in private history to be observed.
  */
 export function capsuleReadersOf(root: string, store: string, standing: readonly string[], lines: readonly ReaderClaim[], resolve: typeof capsulesFor = capsulesFor): readonly ReaderClaim[] {
-  const reaching = new Set(lines.flatMap((reader) => reachOfLine(reader.module, reader.where)));
+  const origin = (capsule: ReaderClaim["capsule"]): string | undefined => capsule?.selected?.selection;
   const coordinateMeasure = wordOn(standing, 'region-coordinate', ownLock());
   const localMeasures = wordsOf(standing, 'region-measures');
   const pins = standing.filter(line => fieldOf(line, 'scope').startsWith('uses/') && fieldOf(line, 'value') !== 'withdraw');
@@ -77,15 +78,19 @@ export function capsuleReadersOf(root: string, store: string, standing: readonly
     const capsules = resolve(standing, place, root);
     for (const line of offered) {
       const region = fieldOf(line, 'scope').slice('region/'.length);
-      const by = capsules.find(({ capsule }) => capsule.lines.some((one) => fieldOf(one, 'scope') === `region/${region}` && fieldOf(one, 'measure') === 'writes'));
-      const pkg = fieldOf(by?.offer ?? '', 'scope').split('/')[1] ?? '';
-      if (by === undefined || reaching.has(`${pkg} ${region} ${where || '/'}`)) continue;
-      const key = `${by.capsule.selection??by.capsule.digest} ${region}`;
-      const group = groups.get(key) ?? groups.set(key, { module: `${pkg}/${region}`, digest: by.capsule.digest, entry: fieldOf(by.offer, 'shape'), selected:by.capsule, region, reads: by.capsule.declaration.regions[region] ?? [], globs: new Map() }).get(key)!;
-      group.globs.set(where, fieldOf(line, 'value').split('|').filter(Boolean));
+      for (const by of capsules.filter(({ capsule }) => capsule.lines.some((one) => fieldOf(one, 'scope') === `region/${region}` && fieldOf(one, 'measure') === 'writes'))) {
+        const pkg = fieldOf(by.offer, 'scope').split('/')[1] ?? '';
+        const reaches = lines.filter(reader => reachOfLine(reader.module, reader.where).includes(`${pkg} ${region} ${where || '/'}`));
+        if (reaches.some(reader => origin(reader.capsule) === undefined))
+          throw Error(`REFUSE·reader ${pkg}/${region} existing provider origin unmeasured at ${where || '/'}`);
+        if (by.capsule.selection !== undefined && lines.some(reader => origin(reader.capsule) === by.capsule.selection && reader.capsule?.region === region && reader.where.some(place => place.replace(/\/?$/, '/') === (where || '/')))) continue;
+        const key = `${by.capsule.selection??by.capsule.digest} ${region}`;
+        const group = groups.get(key) ?? groups.set(key, { module: `${pkg}/${region}`, digest: by.capsule.digest, entry: fieldOf(by.offer, 'shape'), selected:by.capsule, region, reads: by.capsule.declaration.regions[region] ?? [], globs: new Map() }).get(key)!;
+        group.globs.set(where, fieldOf(line, 'value').split('|').filter(Boolean));
+      }
     }
   }
-  return [...groups.values()].map((group) => ({ id: group.module, shape: ['run'], where: [...group.globs.keys()], module: group.module, kind: 'process' as const,
+  return [...groups.entries()].sort(([a],[b]) => byBytes(a,b)).map(([,group]) => ({ id: group.module, shape: ['run'], where: [...group.globs.keys()], module: group.module, kind: 'process' as const,
     capsule: { selected:group.selected,digest: group.digest, entry: group.entry, region: group.region, reads: group.reads, globs: group.globs } }));
 }
 

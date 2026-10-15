@@ -52,7 +52,7 @@ for (const place of ['observations', 'inventory']) for (const mode of ['journal'
     assert.match(first,/by=device.*scope=sample\/reading/);
     const source=join(temp,'source.bound');
     writeFileSync(source,row('sample/next','observed','old')+'\n');
-    assert.equal(run(['land',source,'--key','owner','--key-file',key]).status,0);
+    const nextLand=run(['land',source,'--key','owner','--key-file',key]);assert.equal(nextLand.status,0,nextLand.stdout+nextLand.stderr);
     writeFileSync(source,row('sample/next','observed','new')+'\n');
     const revised=run(['land',source,'--key','owner','--key-file',key]);assert.equal(revised.status,0,revised.stderr);
     const next=publicRead();assert.match(next,/scope=sample\/next.*value=new/);assert.doesNotMatch(next,/scope=sample\/next.*value=old/);

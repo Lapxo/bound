@@ -1,0 +1,35 @@
+/** Host-only native binary selection. No PATH lookup, Node impersonation,
+ * transitive OS-library seal or arbitrary-process sandbox is claimed. */
+import{createHash}from'node:crypto';import{isAbsolute}from'node:path';import{realpathSync}from'node:fs';import{fileURLToPath}from'node:url';import{authorityAtEpoch}from'@lapxo/topos/wire';import{parsedLine as parse}from'../../fold/claims.ts';import{authorityFor}from'../../fold/signers.ts';
+import{authenticateSignedPort,nativeParentInputBytes,canonicalJson,type RootStanding}from'./reading.ts';
+import{readBounded,type ParentExecution}from'./generated.ts';
+const sha=(b:Uint8Array)=>'sha256:'+createHash('sha256').update(b).digest('hex'),keys=(x:object)=>Object.keys(x).sort().join(','),validDigest=(x:unknown)=>typeof x==='string'&&/^sha256:[0-9a-f]{64}$/.test(x),fail=(why:string):never=>{throw Error('REFUSE·native binary '+why)};
+interface NativeBinaryFields{coordinate:string;alias:string;selector:{port:string;binding:string;implementation:string};entry:{path:string;digest:string;bytes:number};limits:{bytes:number};condition:string}
+export type NativeBinaryProfile=NativeBinaryFields&({profile:'host-native-binary@1'}|{profile:'host-native-binary-origin@1';origin:string});
+export interface NativeBinaryOrigin{readonly coordinate:string;readonly line:string;readonly path:string}
+/** A Root-selected local origin is a location constraint, not a World hint. */
+export function hostOriginPath(root:RootStanding,coordinate:string):NativeBinaryOrigin{
+ if(!/^region\/[^\s]+$/.test(coordinate))fail('origin is not a declared region');const rows=root.live.filter(line=>{const row=parse(line);return row.kind==='fact'&&row.value.fields.scope===coordinate&&row.value.fields.measure==='origin'&&row.value.fields.value!=='withdraw'});if(rows.length!==1)fail('missing/conflicting origin '+coordinate);const line=rows[0]!;if(!root.history.includes(line))fail('origin absent from authenticated history');const row=parse(line);if(row.kind!=='fact')return fail('origin not a wire record');const f=row.value.fields;if(f.role!=='writes'||f.form!=='alphabet')fail('origin declaration meaning');const auth=authorityFor(root.history,root.signer,root.eras),signed=auth.of(line);if(signed.kind!=='admitted'||signed.signer!==root.signer.id)fail('origin must be Root signed');const current=authorityAtEpoch(f,root.signer,root.epoch,coordinate,'authority');if(current.kind!=='admitted')fail('current origin authority '+current.why);let url:URL,path:string;try{url=new URL(f.value)}catch{return fail('origin URL invalid')}if(url.protocol!=='file:'||url.username||url.password||url.search||url.hash||(url.hostname&&url.hostname!=='localhost'))fail('unsupported origin transport');try{path=fileURLToPath(url);if(!isAbsolute(path)||path.includes('\0'))return fail('origin path invalid');path=realpathSync(path)}catch{return fail('local origin absent/invalid')}return Object.freeze({coordinate,line,path});
+}
+export function nativeBinaryOrigin(root:RootStanding,p:NativeBinaryProfile,portLine:string):NativeBinaryOrigin|undefined{
+ if(p.profile!=='host-native-binary-origin@1')return;const signed=authorityFor(root.history,root.signer,root.eras).of(portLine);if(signed.kind!=='admitted'||signed.signer!==root.signer.id)fail('origin selection must be Root signed');const origin=hostOriginPath(root,p.origin);const bytes=readBounded(origin.path,p.entry.bytes);if(bytes.byteLength!==p.entry.bytes||sha(bytes)!==p.entry.digest)fail('origin bytes differ');return origin;
+}
+export interface VerifiedNativeBinary{readonly identity:string}
+export interface NativeBinaryProjection{kind:'native-binary';alias:string;entry:string;entryDigest:string;entryBytes:number;condition:string}
+const verified=new WeakMap<VerifiedNativeBinary,NativeBinaryProjection>();
+/** Call under the existing Root guard; privateBinding is from the already
+ * prepared host image, never the candidate profile's own expected digest. */
+export function verifyNativeBinary(root:RootStanding,coordinate:string,parent:ParentExecution,privateBinding:{coordinate:string;path:string;digest:string}):VerifiedNativeBinary{
+ const auth=authenticateSignedPort(root,coordinate),p=auth.profile as NativeBinaryProfile;
+ if(!p||keys(p)!==(p.profile==='host-native-binary-origin@1'?'alias,condition,coordinate,entry,limits,origin,profile,selector':'alias,condition,coordinate,entry,limits,profile,selector')||!['host-native-binary@1','host-native-binary-origin@1'].includes(p.profile)||p.coordinate!==coordinate||typeof p.alias!=='string'||!p.alias.length||p.alias.includes('\0')||typeof p.condition!=='string'||!p.condition.length)fail('selection absent/unknown');
+ if(keys(p.selector??{})!=='binding,implementation,port'||canonicalJson(p.selector)!==canonicalJson({port:parent.port,binding:parent.binding,implementation:parent.implementation}))fail('selection differs from parent');
+ if(!validDigest(parent.identity)||!validDigest(parent.instrument)||!validDigest(parent.policy)||!validDigest(parent.authority)||!validDigest(parent.implementation)||!Array.isArray(parent.inputs))fail('parent identity absent');
+ if(keys(p.entry??{})!=='bytes,digest,path'||typeof p.entry.path!=='string'||isAbsolute(p.entry.path)||p.entry.path.split('/').some(s=>!s||s==='.'||s==='..')||!validDigest(p.entry.digest)||!Number.isSafeInteger(p.entry.bytes)||p.entry.bytes<1||keys(p.limits??{})!=='bytes'||!Number.isSafeInteger(p.limits.bytes)||p.limits.bytes<1||p.entry.bytes>p.limits.bytes||p.limits.bytes>nativeParentInputBytes(root,parent))fail('entry byte resource absent/outside Root');
+ if(!privateBinding||typeof privateBinding.path!=='string'||!isAbsolute(privateBinding.path)||!validDigest(privateBinding.digest)||p.entry.path!==privateBinding.coordinate||p.entry.digest!==privateBinding.digest||!parent.inputs.some(([_,digest])=>digest===privateBinding.digest))fail('private image binding absent/differs');
+ const origin=nativeBinaryOrigin(root,p,auth.line);let expected:string,actual:string;try{expected=realpathSync(privateBinding.path);actual=realpathSync(privateBinding.path)}catch{return fail('entry absent')}
+ if(expected!==actual)fail('entry path differs from private image');let runtimePath:string;try{runtimePath=realpathSync(parent.runtime)}catch{return fail('runtime binding absent')}if(actual===runtimePath)fail('binary aliases actual runtime');if(origin&&actual!==origin.path)fail('entry differs from declared origin');
+ const bytes=readBounded(actual,p.entry.bytes);if(bytes.byteLength!==p.entry.bytes||sha(bytes)!==privateBinding.digest)fail('entry bytes differ');
+ const handle=Object.freeze({identity:'sha256:'+createHash('sha256').update(canonicalJson([auth.line,parent.identity,...(origin?[origin.line]:[])])).digest('hex')});
+ verified.set(handle,{kind:'native-binary',alias:p.alias,entry:actual,entryDigest:privateBinding.digest,entryBytes:bytes.byteLength,condition:p.condition});return handle;
+}
+export function nativeBinaryProjection(handle:VerifiedNativeBinary):NativeBinaryProjection{const p=verified.get(handle);if(!p)return fail('unknown verified selection');return JSON.parse(canonicalJson(p))}

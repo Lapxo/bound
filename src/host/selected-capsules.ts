@@ -24,13 +24,14 @@ export function selectedCapsules(pins: readonly string[], resolve: typeof capsul
     };
     const descriptor=capsuleDescriptor(topos,offer.scope??'');
     const loaded=descriptor===undefined?load():undefined;
-    const capsule:Capsule=loaded?.capsule??{
+    const supplied:Capsule=loaded===undefined?{
       digest:offer.value!,selection:`${digest} ${offer.scope}`, ...descriptor!,ask:(requests,reader)=>{
         if(!requests.length)return [];
         const actual=load();assertCapsuleDescriptor(descriptor!.lines,actual.capsule.lines);
         return actual.capsule.ask(requests,reader);
       },
-    };
+    }:{...loaded.capsule,selection:`${digest} ${offer.scope}`};
+    const capsule:Capsule={...supplied,selectedWorld:{standing:topos,offer:offer.scope??''}};
     const projected=loaded?.offer??canonical(offer);
     if(!providerInputRegions(topos,offer.scope??'').length)return {capsule,offer:projected};
     const fields=ownLock().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];});

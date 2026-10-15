@@ -54,7 +54,7 @@ const lockFiles = (locks: string): readonly string[] => coordinatesUnder(locks, 
 });
 const overlaps = (a: string, b: string): boolean => !a || !b || a === b || a.startsWith(`${b}/`) || b.startsWith(`${a}/`);
 const treeAt = (store: string): string => join(store, 'lock');
-const named = (at: string): string => (basename(at) === 'lock' ? 'the store' : `region ${basename(at) === ROOT ? '.' : basename(at)}`);
+const named = (at: string): string => (basename(at) === 'lock' ? 'the store' : basename(at).startsWith('@authority-') ? 'root authority' : basename(at) === '@projection' ? 'root projection' : `region ${basename(at) === ROOT ? '.' : basename(at)}`);
 const owns = (at: string): boolean => {
   for (let frame = context.getStore(); frame !== undefined; frame = frame.parent) {
     const token = frame.locks.get(at);
@@ -64,6 +64,8 @@ const owns = (at: string): boolean => {
 };
 
 const ownsRegion = (store: string): boolean => [...held.keys()].some((at) => at.startsWith(`${join(store, 'locks')}/`) && owns(at));
+const ownsAuthority = (store: string): boolean => [...held.keys()].some((at) => dirname(at) === join(store, 'locks') && basename(at).startsWith('@authority-') && owns(at));
+const projectionAt = (store: string): string => join(store, 'locks', '@projection');
 
 /** Reentry belongs to an awaited act's context. Another process or async act has no inherited authority. */
 async function hold(at: string, what: string): Promise<void> {
@@ -131,10 +133,11 @@ async function framed<T>(takes: () => Promise<void>, act: () => T | Promise<T>):
   });
 }
 
-export function underTheRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>): Promise<T> {
+function guardedRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>, rootAuthority: boolean): Promise<T> {
   return framed(async () => {
     const tree = treeAt(store);
     const asked = [...new Set((regions.length ? regions : ['']).map((one) => one.replace(/\/+$/, '')))];
+    if (rootAuthority && (asked.includes('') || (ownsRegion(store) && !owns(tree) && !ownsAuthority(store)))) throw new Error(`${selfName()}: REFUSE·lock authority dependencies and child regions must be declared together`);
     if (owns(tree) || asked.every((region) => owns(regionAt(store, region)))) {
       for (const region of asked) await hold(regionAt(store, region), what);
       return;
@@ -146,16 +149,28 @@ export function underTheRegions<T>(store: string, regions: readonly string[], wh
     try {
       const locks = join(store, 'locks');
       for (;;) {
-        const conflict = lockFiles(locks).find((file) => asked.some((region) => overlaps(region, file) || overlaps(region, coordinateOf(file))) && !owns(join(locks, file)));
+        const conflict = lockFiles(locks).find((file) => !owns(join(locks, file))
+          && (file.startsWith('@authority-') || file === '@projection' ? asked.includes('')
+            : asked.some((region) => overlaps(region, file) || overlaps(region, coordinateOf(file)))));
         if (conflict === undefined) break;
         const at = join(locks, conflict);
         const began = Date.now();
+        let told = false;
         for (let holder = holderOf(at); holder !== undefined; holder = holderOf(at)) {
           if (!alive(holder.pid)) throw new Error(`${selfName()}: REFUSE·stale ${named(at)} belongs to exited process ${holder.pid}; host recovery required`);
           overAMinute(at, began, holder);
+          if (!told) {
+            process.stderr.write(`WAIT     ${named(at)} is held by ${holder.pid} · ${holder.what} since ${holder.since}\n`);
+            told = true;
+          }
           await pauseFor(250);
         }
+        if (told) process.stderr.write(`HELD     ${named(at)} after ${Date.now() - began} ms waiting\n`);
       }
+      // Registered under the same acquisition gate as every legacy writer.
+      // Root writes overlap all locks; siblings keep distinct region locks.
+      // '@' is encoded for real region coordinates, so this is host bookkeeping.
+      if (rootAuthority) await hold(join(store, 'locks', `@authority-${randomUUID()}`), what);
       for (const region of asked.filter(Boolean).sort()) await hold(regionAt(store, region), what);
       if (asked.includes('')) await hold(regionAt(store, ''), what);
     } finally {
@@ -168,6 +183,84 @@ export function underTheRegions<T>(store: string, regions: readonly string[], wh
         }
       }
     }
+  }, act);
+}
+
+export function underTheRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>): Promise<T> {
+  return guardedRegions(store, regions, what, act, false);
+}
+
+/** Protect the root authority/policy read through child publication. This is
+ * exclusion only: callers must authenticate contexts and compare prepared heads
+ * while held. It creates no grant, clock advance, lease or automatic recovery. */
+export function underAuthorityRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>): Promise<T> {
+  return guardedRegions(store, regions, what, act, true);
+}
+
+/** Protect an authority snapshot without taking a child region. The acquisition
+ * gate and temporary root marker exclude a root mutation while registering the
+ * shared read; existing child acts continue independently. This is exclusion,
+ * never authorization or a clock advance. */
+export function underRootAuthority<T>(store: string, what: string, act: () => T | Promise<T>): Promise<T> {
+  return framed(async () => {
+    const tree = treeAt(store), root = regionAt(store, '');
+    if (owns(tree) || owns(root) || ownsAuthority(store)) return;
+    if (ownsRegion(store)) throw new Error(`${selfName()}: REFUSE·lock authority dependencies must be declared before entering a region act`);
+    await hold(tree, what);
+    try {
+      await hold(root, what);
+      await hold(join(store, 'locks', `@authority-${randomUUID()}`), what);
+    } finally {
+      const frame = context.getStore()!;
+      for (const at of [root, tree]) {
+        const token = frame.locks.get(at);
+        if (token !== undefined) { release(at, token); frame.locks.delete(at); }
+      }
+    }
+  }, act);
+}
+
+export interface RootAuthorityProtection {
+  readonly store: string;
+  readonly lock: string;
+  readonly pid: number;
+  readonly token: string;
+}
+
+/** The fixed host may hand its child evidence of an actual held exclusion.
+ * It is an operational envelope, not a grant, signer or receipt identity. */
+export function rootAuthorityProtection(store: string): RootAuthorityProtection {
+  const locks=[treeAt(store),regionAt(store,''),...held.keys()].filter(at=>
+    at===treeAt(store)||at===regionAt(store,'')||dirname(at)===join(store,'locks')&&basename(at).startsWith('@authority-'));
+  const lock=locks.find(owns);
+  if(lock===undefined)throw Error(`${selfName()}: REFUSE·lock root authority is not protected`);
+  const holder=holderOf(lock);
+  if(holder?.pid!==process.pid||holder.token!==held.get(lock))throw Error(`${selfName()}: REFUSE·lock authority protection changed`);
+  return Object.freeze({store,lock,pid:holder.pid,token:holder.token});
+}
+
+/** expectedStore and expectedParent come from the fixed host's inheritance
+ * channel, never from world data. Matching a live lock proves exclusion only;
+ * signature, coverage and current context still require verification. */
+export function assertRootAuthorityProtection(proof: RootAuthorityProtection, expectedStore: string, expectedParent: number): void {
+  if(!proof||proof.store!==expectedStore||!Number.isSafeInteger(expectedParent)||expectedParent<=0||proof.pid!==expectedParent
+    ||typeof proof.lock!=='string'||typeof proof.token!=='string'||!proof.token
+    ||!(proof.lock===treeAt(expectedStore)||proof.lock===regionAt(expectedStore,'')
+      ||dirname(proof.lock)===join(expectedStore,'locks')&&basename(proof.lock).startsWith('@authority-'))) {
+    throw Error(`${selfName()}: REFUSE·lock invalid inherited authority protection`);
+  }
+  const holder=holderOf(proof.lock);
+  if(!alive(expectedParent)||holder?.pid!==proof.pid||holder.token!==proof.token)throw Error(`${selfName()}: REFUSE·lock inherited authority protection ended`);
+}
+
+/** A child can publish independently, but the joined root projection and its
+ * derived ledger appends have one writer. Authority protection already excludes
+ * root mutations, so this lock needs no acquisition-gate upgrade. */
+export function underRootProjection<T>(store: string, what: string, act: () => T | Promise<T>): Promise<T> {
+  return framed(async () => {
+    if (owns(treeAt(store)) || owns(regionAt(store, ''))) return;
+    if (!ownsAuthority(store)) throw new Error(`${selfName()}: REFUSE·lock root projection requires authority protection`);
+    await hold(projectionAt(store), what);
   }, act);
 }
 
