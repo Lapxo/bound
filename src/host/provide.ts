@@ -110,11 +110,14 @@ export function provide(): void {
   if (hooked) return;
   const dependencies=ownLock().filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads');
   const file=manifestOf(),selected=selectNativeDependencies(ownRoot(),dependencies,file);
-  const pins = (selected??dependencies.map(line=>({line,library:undefined})))
+  // An ordinary host library is selected by its declared mount. Unmounted
+  // catalog entries stay lazy; explicit pinPlace requests still verify their bytes.
+  const pins = (selected??dependencies.filter(line=>fieldOf(line,'needs')!=='').map(line=>({line,library:undefined})))
     .flatMap(({line,library}) => {
       const name = fieldOf(line, 'scope').slice('dep/'.length);
       const pin=readProvidedPin(name,pinPlace(name),file,library?.name);
-      return pin?[pin]:[];
+      if(!pin)throw Error('REFUSE·pin declared library unavailable '+name);
+      return [pin];
     });
   if(reuseNativeResolution(pins)){
     hooked = true;

@@ -1,6 +1,9 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
+import {mkdtempSync, mkdirSync, writeFileSync, rmSync,cpSync,symlinkSync,readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
+import {canonical} from '@lapxo/topos/wire';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {pathToFileURL} from 'node:url';
@@ -43,4 +46,34 @@ test('a package main cannot substitute a file outside its digest-laid tree',()=>
   const pin={at,pkg:'fixture-escape',json:pathToFileURL(join(at,'package.json')).href,exports:false};
   assert.throws(()=>resolvePinned('fixture-escape',{},()=>({url:''}),pin),/REFUSE·pin library entry leaves its laid tree/);
  } finally {rmSync(root,{recursive:true,force:true});}
+});
+
+// Exercise the real instrument entry: catalog blobs must stay unopened, while a
+// selected mount still requires its exact archive instead of Node's local copy.
+for(const missing of [false,true])test(`provide opens only mounted libraries; missing selected archive=${missing}`,()=>{
+ const temp=mkdtempSync(join(tmpdir(),'bound-provide-'));
+ try{
+  const instrument=join(temp,'instrument'),library=join(temp,'library');mkdirSync(instrument);mkdirSync(library);
+  cpSync(new URL('../src/',import.meta.url),join(instrument,'src'),{recursive:true});
+  symlinkSync(new URL('../node_modules/',import.meta.url).pathname,join(instrument,'node_modules'),'dir');
+  writeFileSync(join(instrument,'package.json'),'{"type":"module"}');
+  writeFileSync(join(library,'package.json'),JSON.stringify({name:'fixture-selected-library',type:'module',exports:{'.':'./index.js'}}));
+  writeFileSync(join(library,'index.js'),'export const value=31;');writeFileSync(join(library,'private.js'),'export const hidden=99;');
+  const archive=join(temp,'library.tgz'),packed=spawnSync('tar',['-czf',archive,'-C',library,'.']);assert.equal(packed.status,0,String(packed.stderr));
+  const bytes=readFileSync(archive),digest='sha256:'+createHash('sha256').update(bytes).digest('hex'),catalog='sha256:'+'a'.repeat(64);
+  const row=(scope:string,value:string,extra:Record<string,string>={})=>canonical({scope,value,role:'writes',form:'alphabet',measure:'id',at:'policy:fixture',by:'target',...extra});
+  writeFileSync(join(instrument,'TARGET.bound'),[
+   row('audit/wire/pin-shape','package'),
+   row('dep/inactive-catalog',catalog,{role:'reads'}),
+   row('dep/selected',digest,{role:'reads',needs:'library-mount'}),
+  ].join('\n')+'\n');
+  const cas=join(instrument,'.bound/cas/blobs');mkdirSync(cas,{recursive:true});
+  writeFileSync(join(cas,catalog.slice(7)),'corrupt catalog bytes that must not be opened');
+  if(!missing)writeFileSync(join(cas,digest.slice(7)),bytes);
+  const entry=join(instrument,'src/cli/provide-fixture.ts');
+  writeFileSync(entry,`import assert from 'node:assert/strict';import {provide,pinPlace} from '../host/provide.ts';
+   ${missing?`assert.throws(()=>provide(),/REFUSE·pin declared library unavailable selected/);`:`provide();assert.equal((await import('fixture-selected-library')).value,31);await assert.rejects(import('fixture-selected-library/private.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});assert.throws(()=>pinPlace('inactive-catalog'),/does not name its available bytes/);`}
+   console.log('PROVIDE VERIFIED');`);
+  const got=spawnSync(process.execPath,[entry],{encoding:'utf8'});assert.equal(got.status,0,got.stdout+got.stderr);assert.match(got.stdout,/PROVIDE VERIFIED/);
+ }finally{rmSync(temp,{recursive:true,force:true})}
 });
