@@ -1,23 +1,25 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {generateKeyPairSync,createHash} from 'node:crypto';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,cpSync,symlinkSync,existsSync} from 'node:fs';
-import {join} from 'node:path';
+import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync,cpSync,symlinkSync,existsSync,statSync} from 'node:fs';
+import {join,dirname,relative} from 'node:path';
 import {tmpdir} from 'node:os';
 import {spawnSync} from 'node:child_process';
 import {gzipSync} from 'node:zlib';
 import {canonical,parse} from '@lapxo/topos/wire';
-import {nodePlatformIdentity} from '../src/host/native/image.ts';
+import {nodePlatformIdentity,mountNativeImage} from '../src/host/native/image.ts';
 import {verifiedReadingReceipts} from '../src/host/reading-closures.ts';
 import {readingEnvironment} from '../src/host/reading-context.ts';
 import {fileRegionDigest} from '../src/fold/closed.ts';
 import {carriedFrom} from '../src/fold/resolved.ts';
 import {fieldOf,isWire} from '../src/fold/claims.ts';
 import {canonicalJson} from '../src/host/native/reading.ts';
+import {instrumentCoordinates} from '../src/fold/digests.ts';
+import {withoutEffects} from '../src/host/read-only.ts';
 const sha=(b:string|Uint8Array)=>'sha256:'+createHash('sha256').update(b).digest('hex');
 const row=(scope:string,measure:string,value:string,extra:Record<string,string>={})=>canonical({scope,measure,value,form:'alphabet',role:'writes',by:'target',at:'policy:native-quiet',...extra});
 function member(name:string,text:string){const body=Buffer.from(text),h=Buffer.alloc(512);h.write(name,0,100);h.write('0000644\0',100);h.write('0000000\0',108);h.write('0000000\0',116);h.write(body.length.toString(8).padStart(11,'0')+'\0',124);h.write('00000000000\0',136);h.fill(32,148,156);h.write('0',156);h.write('ustar\0',257);h.write(h.reduce((a,b)=>a+b,0).toString(8).padStart(6,'0')+'\0 ',148);return Buffer.concat([h,body,Buffer.alloc(Math.ceil(body.length/512)*512-body.length)])}
-test('native quiet reuse survives unrelated Root acts and requires current grant; historical check inspects receipts',{timeout:90000},()=>{
+test('native quiet reuse survives unrelated Root acts and requires current grant; historical check inspects receipts',{timeout:90000},t=>{
  const temp=mkdtempSync(join(tmpdir(),'native-quiet-')),root=join(temp,'counts');mkdirSync(root);let cli=new URL('../src/cli/verb.ts',import.meta.url).pathname;const captures:unknown[]=[];
  const run=(args:string[])=>{const p=spawnSync(process.execPath,[cli,...args],{cwd:root,encoding:'utf8',env:{...process.env,NODE_OPTIONS:'',NODE_PATH:''},timeout:30000,maxBuffer:67108864});captures.push({args:args.map(a=>a.replaceAll(temp,'[fixture]')),status:p.status,stdout:p.stdout,stderr:p.stderr});return p};const ok=(a:string[])=>{const p=run(a);assert.equal(p.status,0,p.stderr+p.stdout);return p};
  try{
@@ -26,7 +28,16 @@ test('native quiet reuse survives unrelated Root acts and requires current grant
  const capsule=[row('region/extent','reads','**@0'),row('region/extent','writes','extent-results'),row('region/extent','input-projection','extent-inputs'),row('region/extent-inputs','reads','**@0',{role:'render'})].join('\n')+'\n',manifest='{"type":"module"}\n';
  const imageRows=[{coordinate:'dist/index.js',bytes:Buffer.from(module)},{coordinate:'package.json',bytes:Buffer.from(manifest)},{coordinate:'capsule.bound',bytes:Buffer.from(capsule)}];const archive=gzipSync(Buffer.concat([...imageRows.map(m=>member(m.coordinate,m.bytes.toString())),Buffer.alloc(1024)])),archiveDigest=sha(archive),runtime=readFileSync(process.execPath),platform=nodePlatformIdentity();
  const imageMembers=imageRows.map(m=>({coordinate:m.coordinate,digest:sha(m.bytes),bytes:m.bytes.length}));const loaderBytes=Buffer.from(canonicalJson({members:imageMembers.filter(m=>m.coordinate!=='capsule.bound'),libraries:[],builtins:[],entries:['dist/index.js'],platform})+'\n'),config={coordinate:'host/loader-config.json',digest:sha(loaderBytes),bytes:loaderBytes.length},runtimeMember={coordinate:'host/runtime',digest:sha(runtime),bytes:runtime.length},members=[...imageMembers,runtimeMember,config];
- const profile={profile:'host-native-reading@1',port:{coordinate:'port/extent',implementation:imageMembers[0]!.digest,closure:[...new Set(members.map(m=>m.digest))],timeoutMs:30000,responseBytes:67108864,environment:[],stderr:'reject'},selection:{archive:archiveDigest,entry:'dist/index.js',reader:'dist/index.js',loaderConfig:config.coordinate,runtime:runtimeMember.coordinate,preload:null,nativePreloadMembers:[config.coordinate],condition:platform,budget:{jobs:1,members:members.length,edges:1,bytes:67108864,payloadBytes:67108864,env:1},members:members.map(({coordinate,digest})=>({coordinate,digest})),bindings:[],loads:[]}};
+ // Image preparation is a named input, separate from reader response resources.
+ const imageBytes=archive.length+members.reduce((total,member)=>total+member.bytes,0),prepared=join(temp,'prepared-image');
+ const preparedRows=[...imageRows,{coordinate:config.coordinate,bytes:loaderBytes}];for(const member of preparedRows){const path=join(prepared,member.coordinate);mkdirSync(dirname(path),{recursive:true});writeFileSync(path,member.bytes);}
+ const mounts=members.map(member=>({coordinate:member.coordinate,path:member.coordinate===runtimeMember.coordinate?process.execPath:join(prepared,member.coordinate)}));
+ assert.throws(()=>mountNativeImage({members,libraries:[],builtins:[],entries:['dist/index.js'],platform},mounts,'dist/index.js',{members:members.length,bytes:imageBytes-archive.length-1}),/missing\/duplicate\/oversized member/,'one byte below the prepared image refuses before any execution');
+ // The same selected resource also bounds the fixed executor's input descriptor.
+ writeFileSync(join(prepared,'TARGET.bound'),row('wire/digest-algorithms','id','sha256')+'\n');
+ const sourceRoot=new URL('../src/',import.meta.url).pathname,executorBytes=withoutEffects(()=>{const files=new Set<string>();for(const name of ['cli/native.ts','host/lifetime.ts','cli/custodian.ts','cli/native-descendant.ts','host/native/preload.ts'])for(const path of instrumentCoordinates(join(prepared,'.bound'),join(sourceRoot,name),[],sourceRoot,[],true).keys())files.add(path);let bytes=0;for(const path of files){bytes+=statSync(path).size;if(relative(sourceRoot,path).startsWith('..')){let at=dirname(path);for(;;){const manifest=join(at,'package.json');if(existsSync(manifest)){bytes+=statSync(manifest).size;break;}const parent=dirname(at);assert.notEqual(parent,at,'executor dependency has a named package');at=parent;}}}return bytes;});
+ const preparedBytes=Math.max(imageBytes,executorBytes);assert.ok(Number.isSafeInteger(preparedBytes));t.diagnostic(`prepared image ${imageBytes} bytes; fixed executor ${executorBytes} bytes; selected resource ${preparedBytes} bytes`);
+ const profile={profile:'host-native-reading@1',port:{coordinate:'port/extent',implementation:imageMembers[0]!.digest,closure:[...new Set(members.map(m=>m.digest))],timeoutMs:30000,responseBytes:67108864,environment:[],stderr:'reject'},selection:{archive:archiveDigest,entry:'dist/index.js',reader:'dist/index.js',loaderConfig:config.coordinate,runtime:runtimeMember.coordinate,preload:null,nativePreloadMembers:[config.coordinate],condition:platform,budget:{jobs:1,members:members.length,edges:1,bytes:preparedBytes,payloadBytes:67108864,env:1},members:members.map(({coordinate,digest})=>({coordinate,digest})),bindings:[],loads:[]}};
  const world=join(temp,'extent.world.bound');writeFileSync(world,[row('offers/capsule/extent','digest',archiveDigest,{kind:'capsule',restsOn:archiveDigest}),row('region/extent','reads','region/**|offers/**'),row('region/extent','writes','extent-results')].join('\n')+'\n');const named=ok(['fold',world]),pin=/PIN (sha256:[a-f0-9]{64})/.exec(named.stdout)?.[1];assert.ok(pin);const lines=named.stdout.split('\n').filter(l=>l.startsWith('TOPOS ')).map(l=>l.slice(6)).join('\n'),standing=[lines,lines+'\n'].find(t=>sha(t)===pin);assert.ok(standing);
  const clockBudget={bytes:65536,records:64,placements:1,policies:128,proofs:8,signers:8},storageBudget={acts:16,bytes:131072},selection={profile:'place-act-context@1',namespace:'.',regionFamily:'region',receiptSigner:'owner',receiptScope:'receipts',digestAlgorithm:'sha256',budget:clockBudget,storageBudget,initial:[{place:'.',receiver:{identity:sha('empty-receiver'),epoch:'0'},origin:{prefix:sha(''),epoch:'1'}}]},source={profile:'place-act-context@1',selector:'wire/place-act-context-selection',profileSelector:'wire/place-act-context',bootstrapCheckpoint:{scope:'wire/place-act-context',measure:'id'},resources:{bytes:262144,lines:512,places:1,acts:16},inherited:{clock:clockBudget,storage:storageBudget}};
  const seed=[row('keys/owner','class','authorize'),row('keys/owner','coverage','*'),row('keys/owner','public-key',owner.publicKey.export({format:'der',type:'spki'}).toString('base64')),row('keys/owner','signer','file'),row('keys/reader','class','read'),row('keys/folder','class','fold'),row('signer/timeout','milliseconds','5000..5000',{form:'interval'}),row('signer/response-bytes','bytes','65536..65536',{form:'interval'}),row('wire/era','id','sample'),row('wire/signature-algorithms','id','ed25519:sample'),row('wire/digest-algorithms','id','sha256')];
