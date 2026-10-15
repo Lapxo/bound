@@ -4,8 +4,9 @@ import {generateKeyPairSync} from 'node:crypto';
 import {mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {spawnSync} from 'node:child_process';
+import {spawn,spawnSync} from 'node:child_process';
 import {canonical, parse} from '@lapxo/topos/wire';
+import {underAuthorityRegions,underRootProjection} from '../src/land/act.ts';
 
 const reader = process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js', import.meta.url).pathname;
 const row = (scope: string, measure: string, value: string) => canonical({scope, measure, value, form:'alphabet', role:'writes', by:'target', at:'policy:race'});
@@ -59,9 +60,71 @@ for (const place of ['observations', 'inventory']) test(`committed CLI results s
     const ownIdentity=/^ACT (\S+)/m.exec(ownLand.stdout)?.[1];assert.ok(ownIdentity,ownLand.stdout);
     const ownQuery=run(['fold','--as','act',ownIdentity]);assert.equal(ownQuery.status,0,ownQuery.stdout+ownQuery.stderr);assert.match(ownQuery.stdout,/value=child-act/);
     const ownReplay=run(['land',own,'--place','child']);assert.equal(ownReplay.status,0,ownReplay.stderr);assert.match(ownReplay.stdout,/ONCE/);assert.ok(ownReplay.stdout.includes(ownIdentity));
+    // Pause the shared projection after publication, then prepare a second
+    // genuine sibling act on its current legacy base. Both may commit while
+    // projection delivery waits; the joined root still has one writer.
+    for(const child of ['sibling','projection']){mkdirSync(join(root,child));writeFileSync(join(root,child,'TARGET.bound'),row('sample/title','id',child)+'\n')}
+    const inFlight:ReturnType<typeof spawn>[]=[];
+    const deliveries:Promise<number|null>[]=[];
+    const siblingActs:{out:string;err:string;identity?:string}[]=[];
+    const beginOwn=(placeName:string,index:number)=>{
+      const file=join(temp,`sibling-${index}.bound`);writeFileSync(file,row(`sample/concurrent-${index}`,'id',placeName)+'\n');
+      const signed=run(['sign',file,'--place',placeName,'--key','owner','--key-file',key]);assert.equal(signed.status,0,signed.stderr);
+      writeFileSync(file,signed.stdout.split('\n').filter(line=>parse(line).kind==='fact').join('\n')+'\n');
+      const child=spawn(process.execPath,[reader,'land',file,'--place',placeName],{cwd:root,stdio:['ignore','pipe','pipe']});inFlight.push(child);
+      const result={out:'',err:'',identity:undefined as string|undefined};siblingActs.push(result);
+      deliveries.push(new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',resolve)}));
+      child.stderr!.on('data',bytes=>result.err+=bytes);
+      return new Promise<void>((resolve,reject)=>{
+        child.stdout!.on('data',bytes=>{result.out+=bytes;const identity=/^ACT (\S+)/m.exec(result.out)?.[1];if(identity){result.identity=identity;resolve()}});
+        child.once('error',reject);child.once('close',()=>{if(!result.identity)reject(Error('sibling publication failed: '+result.out+result.err))});
+      });
+    };
+    const projectionBefore=readFileSync(join(root,'TARGET.bound'),'utf8');
+    try{
+      await underAuthorityRegions(join(root,'.bound'),['projection'],'projection fixture',()=>underRootProjection(join(root,'.bound'),'projection fixture',async()=>{
+        await beginOwn('child',0);await beginOwn('sibling',1);
+        assert.ok(inFlight.every(child=>child.exitCode===null));
+        assert.equal(readFileSync(join(root,'TARGET.bound'),'utf8'),projectionBefore);
+      }));
+      assert.deepEqual(await Promise.all(deliveries),[0,0],JSON.stringify(siblingActs));
+      for(const result of siblingActs){const inspected=run(['fold','--as','act',result.identity!]);assert.equal(inspected.status,0,inspected.stderr);assert.ok(inspected.stdout.includes(result.identity!));}
+      const projectionLines=readFileSync(join(root,'TARGET.bound'),'utf8').trimEnd().split('\n');
+      const claims=projectionLines.filter(line=>!line.startsWith('# '));
+      assert.ok(claims.length>=lines.length,'joined projection retains root claims');
+      for(const line of claims)assert.equal(parse(line).kind,'fact',line);
+      captures.push({args:['land','[sibling publication]'],status:0,siblingActs});
+    }finally{
+      for(const child of inFlight)if(child.exitCode===null&&child.signalCode===null)child.kill('SIGTERM');
+      await Promise.allSettled(deliveries);
+    }
     const retire=join(temp,'retire.bound');
     writeFileSync(retire,[row('keys/device','class','withdraw'),row('keys/folder','class','withdraw'),row('keys/replacement','class','fold'),row('wire/act-result-context','id','receipt:changed')].join('\n')+'\n');
-    const retired=run(['land',retire,'--key','owner','--key-file',key]);assert.equal(retired.status,0,retired.stdout+retired.stderr);
+    // The real root-admission process participates in the same protocol as
+    // child publication; grant retirement cannot pass an authority read guard.
+    let retiring:ReturnType<typeof spawn>|undefined;
+    let retirement:Promise<number|null>|undefined;
+    let retirementOut='',retirementErr='';
+    const ownerBefore=readFileSync(join(root,'.bound','ledger','owner.bound'),'utf8');
+    try{
+      await underAuthorityRegions(join(root,'.bound'),['child'],'child-publication',async()=>{
+        retiring=spawn(process.execPath,[reader,'land',retire,'--key','owner','--key-file',key],{cwd:root,stdio:['ignore','pipe','pipe']});
+        retirement=new Promise((resolve,reject)=>{retiring!.once('error',reject);retiring!.once('close',resolve)});
+        retiring.stdout!.on('data',bytes=>retirementOut+=bytes);
+        await new Promise<void>((resolve,reject)=>{
+          const ready=(bytes:Buffer)=>{retirementErr+=bytes;if(retirementErr.includes('WAIT ')){cleanup();resolve()}};
+          const exited=()=>{cleanup();reject(Error('root admission exited before authority guard: '+retirementErr))};
+          const cleanup=()=>{retiring!.stderr!.off('data',ready);retiring!.off('close',exited)};
+          retiring!.stderr!.on('data',ready);retiring!.once('close',exited);retiring!.once('error',reject);
+        });
+        assert.equal(readFileSync(join(root,'.bound','ledger','owner.bound'),'utf8'),ownerBefore);
+        assert.equal(retiring.exitCode,null,'root retirement waits through child publication');
+      });
+      assert.equal(await retirement,0,retirementOut+retirementErr);
+      captures.push({args:['land','[retirement]'],status:0,stdout:retirementOut,stderr:retirementErr});
+    }finally{
+      if(retiring?.exitCode===null&&retiring.signalCode===null){retiring.kill('SIGTERM');await retirement}
+    }
     const historical=run(['fold','--as','act',identity]);assert.equal(historical.status,0,historical.stdout+historical.stderr);assert.equal(historical.stdout,query.stdout,'historical result survives retirement and changed profile');
     const refused=run(['sign',next,'--key','device','--key-file',deviceKey]);assert.notEqual(refused.status,0,'retired evidence never authorizes a new act');assert.match(refused.stderr,/device/);
     console.log('HISTORY '+place+' · original result retained · retired key cannot sign new delivery');

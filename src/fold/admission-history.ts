@@ -1,14 +1,14 @@
 import {join} from 'node:path';
 import {readFileSync} from 'node:fs';
 import type {Signer} from '@lapxo/topos/wire';
-import {ledgerLines,ledgerWriters,storeOf} from '../land/ledger.ts';
+import {rootLedgerLines,storeOf} from '../land/ledger.ts';
 import {fieldOf,isConfig,selfName} from './claims.ts';
 
 /** Local admission history only. Foreign ingress is evidence, never coverage.
  * The clock cutoff is meaningful for configuration; object clocks stay intact. */
 export function admissionHistoryAt(root:string,epoch:number):readonly string[]{
   const store=storeOf(root);
-  return [...new Set(ledgerWriters(store).flatMap(writer=>ledgerLines(store,writer)))]
+  return [...new Set(rootLedgerLines(store))]
     .filter(line=>fieldOf(line,'sig')!==''&&(!isConfig(line)||Number(fieldOf(line,'epoch'))<=epoch));
 }
 

@@ -1,11 +1,17 @@
+import {authenticatedStanding} from '../host/admitted-place.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {readingClosures} from '../host/reading-closures.ts';
+import {readingExecution,readingProfile} from '../host/reading-context.ts';
+import {withNativeReaderRoute} from '../host/native-reader-context.ts';
+import {prepareNativeReaderRoute,assertNativeRouteCurrent,materializeNativeRoute} from '../host/native/route.ts';
+import {verifiedContent} from '../host/content-store.ts';
+import {ownLock,ownRoot,ownStore} from '../observe/runner.ts';
 import {readerLifetime,readerAllowsEmpty,assertReaderInputs,parse as parseLifetime} from '@lapxo/topos/wire';
 import {readOnly} from '../host/read-only.ts';
-import { basename, dirname, existsSync, mkdirSync, resolve, rmSync, spawn, statSync, writeFileSync } from '../host/io.ts';
+import { basename, dirname, relative, existsSync, mkdirSync, resolve, rmSync, spawn, statSync, writeFileSync } from '../host/io.ts';
 import { bundleOf, processOf } from '../observe/runner.ts';
 import { canonical, parse, PROTOCOL } from '@lapxo/topos/wire';
-import { bytesDigest, memoized } from './digests.ts';
+import { bytesDigest, memoized, instrumentCoordinates } from './digests.ts';
 import { land, landMemo, landShard, memoAt, shardLines, storeAt } from '../land/ledger.ts';
 import { fieldOf, isWire } from './claims.ts';
 import { rolesOf } from './roles.ts';
@@ -159,9 +165,13 @@ function carried(store: string): readonly string[] {
     .filter((line) => isWire(line) && speaker !== undefined && fieldOf(line, 'by').split(':')[0] === speaker);
 }
 
+const readerSelection = (reader: ReaderClaim): string | undefined => reader.capsule?.selected?.selection === undefined ? undefined : 'sha256:'+sha(JSON.stringify([reader.capsule.selected.selection,reader.capsule.region,reader.module,reader.where,[...reader.capsule.globs]]));
+
+const readerScope = (reader: ReaderClaim): string => reader.capsule?.selected?.selection === undefined ? `reader/${reader.module}` : `reader/${reader.module}/${sha(`${reader.capsule.selected.selection}\n${reader.capsule.region}`)}`;
+
 const lineagesOf = (store: string, speaker: string, readers: readonly ReaderClaim[], regions: readonly string[]): ReadonlySet<string> =>
   new Set(readers.flatMap((reader) => shardLines(store, speaker, regionIn(regions, reader.module))
-    .filter((line) => fieldOf(line, 'scope') === `reader/${reader.module}` && /(?:^|\s)measure=(?:identity|extension)\s/.test(line)).map((line) => fieldOf(line, 'value'))));
+    .filter((line) => fieldOf(line, 'scope') === readerScope(reader) && /(?:^|\s)measure=(?:identity|extension)\s/.test(line)).map((line) => fieldOf(line, 'value'))));
 
 export function readerLines(store: string): readonly string[] {
   const readers = readersOf(store);
@@ -184,7 +194,7 @@ export function readerReaches(reach: readonly string[] | undefined, where: reado
   return where.some((one) => reached(trimmed(one)));
 }
 
-export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string> } = {}): readonly string[] {
+export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string>; readonly selected?: string } = {}): readonly string[] {
   refused.length = 0;
   if (readOnly()) {
     const carried = (observeText(resolve(root, 'receipts.bound')) ?? '').split('\n').filter(isWire);
@@ -196,7 +206,17 @@ export function observedClaims(root: string, store: string, options: { readonly 
   const standing = lockStanding(store);
   const lines = readersOf(store);
   const readers = [...lines, ...capsuleReadersOf(root, store, standing, lines)];
+  if (options.selected !== undefined) {
+    if (!/^sha256:[a-f0-9]{64}$/.test(options.selected) || options.only === undefined) throw Error('REFUSE·reader invalid internal background selector');
+    if (readers.filter(reader => reader.module === options.only && readerSelection(reader) === options.selected).length !== 1) throw Error('REFUSE·reader internal background selector is not uniquely adopted');
+  }
   if (!readers.length) return carried(store);
+  const modern=readingProfile(standing,fieldOf);
+  const implementation=modern?instrumentCoordinates(store,processOf('verb'),[],ownRoot(),ownLock(),true):undefined;
+  if(implementation)for(const module of [processOf('host'),processOf('lifetime','host')])for(const [coordinate,digest] of instrumentCoordinates(store,module,[],ownRoot(),ownLock(),true)) (implementation as Map<string,string>).set(coordinate,digest);
+  const code=implementation?bytesDigest(store,new TextEncoder().encode([...implementation.values()].sort().join('\n'))):undefined;
+  const transitive=implementation?[...implementation].map(([coordinate,digest])=>[relative(ownRoot(),coordinate),digest] as const):[];
+  if(modern)for(const line of ownLock().filter(line=>fieldOf(line,'scope').startsWith('dep/')&&fieldOf(line,'role')==='reads'&&fieldOf(line,'value')!=='withdraw')){const digest=fieldOf(line,'value');verifiedContent(digest,store,ownStore());transitive.push([fieldOf(line,'scope'),digest]);}
   const speaker = keyFor(store, 'read');
   const regions = [...new Set(readers.flatMap((reader) => reader.where.map(trimmed)))];
   const whole = options.only === undefined && options.reach === undefined;
@@ -254,6 +274,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
   const spent: string[] = [];
   for (const reader of readers) {
     if (options.only !== undefined && reader.module !== options.only) continue;
+    if (options.selected !== undefined && readerSelection(reader) !== options.selected) continue;
     if (!readerReaches(options.reach, reader.where)) continue;
     const started = Date.now();
     const mark = out.length;
@@ -267,19 +288,29 @@ export function observedClaims(root: string, store: string, options: { readonly 
     if(projection.length){
       if(projection.length!==1||!asked)throw Error('REFUSE·input projection is ambiguous '+reader.module);
       const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>({place,text:observeText(resolve(root,place))??''}));
-      const result=readingClosures({root,store,reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty:readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module),files,emit:line=>process.stderr.write(line+'\n')});
+      const hash=(text:string)=>bytesDigest(store,Buffer.from(text));
+      const allowsEmpty=readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module);
+      const native=prepareNativeReaderRoute(store,{id:reader.id,module:reader.module});
+      if(native&&!modern)throw Error('REFUSE·native reader requires complete reading identity '+reader.module);
+      if(native&&asked.digest!==native.profile.selection.archive)throw Error('REFUSE·native reader implementation differs '+reader.module);
+      const image=native?materializeNativeRoute(native):undefined;
+      const execution=modern?readingExecution({instrument:code!,implementation:asked.digest,policy:hash(JSON.stringify([reader.id,reader.module,reader.kind,reader.shape,reader.where,lifetime??null,allowsEmpty])),inputs:[...transitive,...(native?.inputs??[]),...(image?[['native/mount',image.mountIdentity] as const]:[])]},hash,{env:process.env,cwd:image?.cwd??root,flags:native?[]:childFlags()}):undefined;
+      const result=withNativeReaderRoute(native,()=>readingClosures({root,store,...(execution?{context:execution.context,execution}:{}),reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,...(native?{assertCurrent:()=>assertNativeRouteCurrent(native)}:{}),region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),livePlace:()=>authenticatedStanding(root),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty,files,emit:line=>process.stderr.write(line+'\n')}));
       out.push(...result.lines);ran+=result.executed;read+=result.read-result.opened;
       return false;
     }
+    if(modern)throw Error('REFUSE·reader '+reader.module+' complete reading identity requires a declared input projection');
     const endAct=actCosts.begin();try{
     const source = reader.capsule === undefined ? observeFile(module) : asked === undefined ? undefined : new Uint8Array();
     const bundle = source && reader.capsule === undefined ? bundleOf(module) ?? bytesDigest(store, source) : 'none';
     const offered = offersOf(root, store, reader, roleOf, look, (where) => reached(trimmed(where)));
     assertReaderInputs(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module,offered.length);
     const vectors = reader.capsule === undefined ? observeText(resolve(root, vectorsOf(reader.module, standing))) : undefined;
+    const selectedBy = reader.capsule?.selected?.selection === undefined ? undefined : sha(`${reader.capsule.selected.selection}\n${reader.capsule.region}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`);
     const kept = whole && legacy === undefined && answered === undefined && source ? sha([
       speaker, reader.module, JSON.stringify(lifetime), reader.kind, reader.shape.join('|'), reader.where.join('|'), bundle, vectors === undefined ? 'no vectors' : sha(vectors),
       reader.capsule === undefined ? '' : `${reader.capsule.selected?.selection??reader.capsule.digest} ${reader.capsule.region} ${reader.capsule.reads.join('|')} ${[...reader.capsule.globs].map(([place, globs]) => `${place}${globs.join('|')}`).join(' ')}`,
+      ...(selectedBy === undefined ? [] : [selectedBy]),
       ...offered.map((offer) => `${offer.place} ${offer.digest?.() ?? bytesDigest(store, offer.bytes())}`),
     ].join('\n')) : undefined;
     const stored = kept === undefined ? undefined : observeText(memoAt(store, `observed/${kept}`));
@@ -291,10 +322,12 @@ export function observedClaims(root: string, store: string, options: { readonly 
     }
     const mark = out.length;
     const home = regionIn(regions, reader.module);
-    const own = shardLines(store, speaker, home).filter((line) => fieldOf(line, 'scope') === `reader/${reader.module}`);
-    const lineage = own.filter((line) => fieldOf(line, 'measure') === 'identity').map((line) => fieldOf(line, 'value'));
+    const own = shardLines(store, speaker, home).filter((line) => fieldOf(line, 'scope') === readerScope(reader));
+    // Short selected-origin identities remain stored history; they cannot name
+    // an unambiguous current origin or supply its held observations.
+    const lineage = own.filter((line) => fieldOf(line, 'measure') === 'identity').map((line) => fieldOf(line, 'value')).filter(value => selectedBy === undefined || /^[a-f0-9]{64}$/.test(value));
     const sum = source && reader.capsule === undefined ? bytesDigest(store, new TextEncoder().encode(`${reader.module} ${bundle}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`)).replace(/^sha256:/, '').slice(0, 12) : 'none';
-    const measured = reader.capsule !== undefined ? { by: source ? sha(`${reader.capsule.selected?.selection??reader.capsule.digest}\n${reader.capsule.region}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
+    const measured = reader.capsule !== undefined ? { by: source ? selectedBy ?? sha(`${reader.capsule.digest}\n${reader.capsule.region}${lifetime === undefined ? "" : "\n"+JSON.stringify(lifetime)}`).slice(0, 12) : 'none', lines: [] as readonly string[] }
       : source ? identityOf({ store, root, speaker, module: reader.module, kind: reader.kind, code: sum, lineage, lifetime, kept: own.filter((line) => /(?:^|\s)measure=(?:extension|emits)\s/.test(line)) })
       : { by: 'none', lines: [] };
     const by = measured.by;
@@ -383,7 +416,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
       const running = existsSync(marker) && Date.now() - statSync(marker).mtimeMs < 30 * 60 * 1000 && Number.isInteger(pid) && pid > 0 && alive(pid);
       if (!running) {
         mkdirSync(dirname(marker), { recursive: true });
-        const child = spawn(process.execPath, [...childFlags(), processOf('observe'), root, reader.module], { cwd: root, detached: true, stdio: 'ignore' });
+        const child = spawn(process.execPath, [...childFlags(), processOf('observe'), root, reader.module, ...(readerSelection(reader) === undefined ? [] : [readerSelection(reader)!])], { cwd: root, detached: true, stdio: 'ignore' });
         child.unref();
         writeFileSync(marker, `${reader.module}\n${child.pid ?? ''}\n`);
       }
@@ -433,7 +466,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
       const spent = Date.now() - at;
       const over = bytesDigest(store, new TextEncoder().encode(due.map((d) => d.digest).sort().join('\n'))).replace(/^sha256:/, '');
       level.push(canonical({ scope: `cost/reader/${reader.module}`, role: 'writes', form: 'interval', measure: 'ms', value: `${spent}..${spent}`, by: `${speaker}:${by}`, at: `place:${over}` }));
-      if (lineage.at(-1) !== by) level.push(canonical({ scope: `reader/${reader.module}`, role: 'writes', form: 'alphabet', measure: 'identity', value: by, by: `${speaker}:${by}`, at: `place:${by}` }));
+      if (lineage.at(-1) !== by) level.push(canonical({ scope: readerScope(reader), role: 'writes', form: 'alphabet', measure: 'identity', value: by, by: `${speaker}:${by}`, at: `place:${by}` }));
       rmSync(storeAt(store, 'pending', by), { force: true });
     }
     for (const plan of plans.filter((one) => one.said !== undefined)) {

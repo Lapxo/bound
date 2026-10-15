@@ -43,9 +43,9 @@ import { placesIn } from '../fold/places.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { readingsIn } from '../land/inert.ts';
 import { pass } from './pass.ts';
-import { underTheLock, underTheRegions } from '../land/act.ts';
+import { underTheLock, underTheRegions, underRootAuthority } from '../land/act.ts';
 import { ownerOf, renderInto, signedDemands, targetFile } from './owner.ts';
-import { claimLinesIn, entryOf, namedPlaces, positionalsOf, valueOf } from './args.ts';
+import { claimLinesIn, entryOf, namedPlaces, positionalIndexes, positionalsOf, valueOf } from './args.ts';
 import { EXIT, FLAGS, NAMED_VIEWS, helpLines } from './names.ts';
 import type { VerbName } from './names.ts';
 import { accept, signedBatch } from './accept.ts';
@@ -173,11 +173,18 @@ function beat(root: string, fold: PlaceFold, ms: number): void {
  * as if the batch had landed: the batch is signed and folded, never landed, and nothing is written — `--as rank <batch>`
  * is what a batch would move, read before land.
  */
-async function view(root: string, under: string | undefined, asked: string, told: readonly string[] = [], coord?: string, key?: string, includePolicy = true): Promise<number> {
+async function view(root: string, under: string | undefined, asked: string, told: readonly string[] = [], coord?: string, key?: string, includePolicy = true, authorityHeld = false): Promise<number> {
   const [name = asked, depth] = asked.split('@');
   if (name === NAMED_VIEWS.help) {
     process.stdout.write(`${helpLines().join('\n')}\n`);
     return EXIT.closed;
+  }
+  // A declared executable reader holds the acting Root's authority throughout
+  // observation and publication. This predicate acquires exclusion only; the
+  // native route authenticates the actual declaration before use.
+  if (!authorityHeld && !told.length && !readOnly() && lockStanding(storeOf(root)).some(line=>
+    /^reader\/.+\/port$/.test(fieldOf(line,'scope')) && fieldOf(line,'role')==='writes' && fieldOf(line,'value')!=='withdraw')) {
+    return underRootAuthority(storeOf(root),'view reader authority',()=>view(root,under,asked,told,coord,key,includePolicy,true));
   }
   if (!lockLines(storeOf(root)).length) {
     process.stderr.write(`${selfName()}: the owner ledger is empty; land it before rendering a view\n`);
@@ -496,8 +503,22 @@ function main(argv: readonly string[]): number | Promise<number> {
   const run = verb in VERBS ? VERBS[verb as VerbName] : undefined;
   const places = positionalsOf(run === undefined ? argv : argv.slice(1)).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
   if (run !== undefined) {
-    const root=resolve(places[0] ?? '.');
-    return withContentStore(storeOf(root),()=>run(root,argv.slice(1),argv));
+    const rest = argv.slice(1);
+    const roots = positionalIndexes(rest).filter(index => {
+      const path = resolve(rest[index]!);
+      return existsSync(path) && lstatSync(path).isDirectory();
+    });
+    if (roots.length > 1) {
+      process.stderr.write(`${selfName()}: REFUSE·root name one acting directory\n`);
+      return EXIT.usage;
+    }
+    const selected = roots[0];
+    const root = resolve(selected === undefined ? '.' : rest[selected]!);
+    const normalized = selected === undefined ? rest : rest.filter((_, index) => index !== selected);
+    return withContentStore(storeOf(root), () =>
+      verb === 'fold' && selected !== undefined
+        ? foldAt(root, undefined, normalized)
+        : run(root, normalized, [verb, ...normalized]));
   }
   const under = argv[0] ?? '';
   if (under && !under.startsWith('-') && places.includes(under)) {

@@ -162,11 +162,12 @@ export function instrumentDigest(store: string, entry: string, standing: readonl
   return bytesDigest(store, new TextEncoder().encode([...seen.values()].sort().join('\n')));
 }
 
-export function instrumentCoordinates(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): ReadonlyMap<string, string> {
+export function instrumentCoordinates(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = [], fresh=false): ReadonlyMap<string, string> {
   const seen = new Map<string, string>();
   const walk = (at: string): void => {
     if (seen.has(at)) return;
-    const digest = coordinateDigest(store, at);
+    const bytes=fresh?observeFile(at):undefined;
+    const digest = fresh?(bytes===undefined?undefined:bytesDigest(store,bytes)):coordinateDigest(store, at);
     if (digest === undefined) return;
     // The host loader resolves links before loading a module. Count that module
     // once, while retaining distinct modules even when their bytes are equal.

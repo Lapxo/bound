@@ -19,17 +19,21 @@ export function valueOf(args: readonly string[], flag: string): string | undefin
 export const valuesOf = (args: readonly string[], flag: string): readonly string[] => args.flatMap((arg, i) => (arg === flag && args[i + 1] !== undefined ? [args[i + 1]!] : []));
 export const namedPlaces = (args: readonly string[]): readonly string[] => valuesOf(args, FLAGS.place).map((one) => one.replace(/\/$/, ''));
 
-export function positionalsOf(args: readonly string[]): string[] {
-  const out: string[] = [];
+export function positionalIndexes(args: readonly string[]): number[] {
+  const out: number[] = [];
   for (let i = 0; i < args.length; i += 1) {
     const arg = args[i] ?? '';
     if (VALUED.includes(arg)) {
       i += 1;
       continue;
     }
-    if (!arg.startsWith('--')) out.push(arg);
+    if (!arg.startsWith('--')) out.push(i);
   }
   return out;
+}
+
+export function positionalsOf(args: readonly string[]): string[] {
+  return positionalIndexes(args).map(index => args[index]!);
 }
 
 export const placesOfFile = (file: string): readonly string[] => (observeText(file) ?? '').split('\n').map((line) => line.trim())

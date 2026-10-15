@@ -1,4 +1,5 @@
 import {actCosts} from './act-cost.ts';
+import {fileURLToPath} from 'node:url';
 import {boundedProcess} from './process-lifetime.ts';
 import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { spawnSync } from 'node:child_process';
@@ -39,9 +40,11 @@ export function validResponse(value: unknown, request: Request): value is Respon
 }
 
 /** Last-line JSON is the wire framing. No partial batch, failed exit or synthetic missing response is accepted. */
-export function executeCapsule(command: string, args: readonly string[], requests: readonly Request[], limits: Pick<SpawnSyncOptionsWithStringEncoding, 'timeout' | 'maxBuffer'> = {}, lifetime?:ReaderLifetime): readonly Response[] {
+export function executeCapsule(command: string, args: readonly string[], requests: readonly Request[], limits: Pick<SpawnSyncOptionsWithStringEncoding, 'timeout' | 'maxBuffer' | 'env' | 'cwd'> = {}, lifetime?:ReaderLifetime): readonly Response[] {
   return actCosts.measure(()=>{
-  const run = lifetime===undefined?spawnSync(command, args, { input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 26, ...limits }):boundedProcess(command,args,JSON.stringify(requests),lifetime);
+  const cwd=limits.cwd;
+  const directory=cwd===undefined?undefined:typeof cwd==='string'?cwd:fileURLToPath(cwd);
+  const run = lifetime===undefined?spawnSync(command, args, { input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 26, ...limits }):boundedProcess(command,args,JSON.stringify(requests),lifetime,directory,limits.env as Readonly<Record<string,string>>|undefined);
   if ('error' in run && run.error) throw new CapsuleProcessError(`failed: ${run.error.message}`, run);
   if (run.signal !== null || run.status !== 0) throw new CapsuleProcessError(`exited ${run.status ?? `with signal ${run.signal}`}`, run);
   const last = /(?:^|\n)([^\n]*)$/.exec(run.stdout.trimEnd())?.[1] ?? '';

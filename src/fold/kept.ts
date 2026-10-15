@@ -1,3 +1,4 @@
+import{encodeUTF8}from'../host/io.ts';
 import {actLines,committedLocalActs} from '../host/ports/local-act.ts';
 import {readOnly} from '../host/read-only.ts';
 import { createHash, dirname, existsSync, join, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
@@ -12,7 +13,7 @@ import { sourceOf, vouching } from '../land/vouched.ts';
 import { wordsOf } from './wire.ts';
 import { ownLock } from '../observe/runner.ts';
 
-const text = (s: string): Uint8Array => new TextEncoder().encode(s);
+const text = encodeUTF8;
 const atOf = (line: string): string => {
   if (line.includes(' about=')) return fieldOf(line, 'at');
   const from = line.indexOf(' at=') + ' at='.length;

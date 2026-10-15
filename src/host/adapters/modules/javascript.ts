@@ -13,11 +13,7 @@ export function moduleImports(source: string, coordinate: string): readonly stri
  try{tree=parse(code,{ecmaVersion:'latest',sourceType:'module',allowReturnOutsideFunction:true,allowHashBang:true})}
  catch{throw Error('REFUSE·source module syntax cannot be read: '+coordinate)}
  const found=new Set<string>();
- const literal=(node:unknown):string|undefined=>{
-  if(!node||typeof node!=='object')return;
-  const n=node as Record<string,unknown>;
-  return n['type']==='Literal'&&typeof n['value']==='string'?n['value']:undefined;
- };
+ const literal=stringLiteral;
  const visit=(node:unknown):void=>{
   if(!node||typeof node!=='object')return;
   if(Array.isArray(node)){for(const child of node)visit(child);return;}
@@ -34,3 +30,10 @@ export function moduleImports(source: string, coordinate: string): readonly stri
  visit(tree);
  return [...found];
 }
+
+/** A JavaScript literal value; syntax inventory never executes it. */
+export const stringLiteral=(node:unknown):string|undefined=>{
+ if(!node||typeof node!=='object')return;
+ const n=node as Record<string,unknown>;
+ return n['type']==='Literal'&&typeof n['value']==='string'?n['value']:undefined;
+};

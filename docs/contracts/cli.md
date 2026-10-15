@@ -25,3 +25,16 @@ The query verifies the record signatures and coverage against the authority snap
 ## Standing admission
 
 A uses/ selection admits canonical standing bytes, never an archive. The bytes must already be held under their verified digest or in the single local coordinate explicitly named by needs. Admission checks identity and canonical form without fetching, executing or writing the content store. Missing or corrupt bytes refuse the whole lot. A corrupt held copy cannot be hidden by another source. Archives remain separate dependency declarations.
+
+
+## Declared reading identity
+
+A place selects both `wire/reading-context value=reading-context@1` and `wire/reading-receipt value=reading-receipt@1`. Partial or conflicting selections refuse. Every reader under this profile declares an input projection; a legacy reader is refused by name instead of receiving a new identity without its closure.
+
+The host commits the full instrument reference, the verified capsule implementation, effective reader policy, declared transitive references, each input's actual bytes and dependent receipt identities. The process environment is captured explicitly: inherited variable values (hashed, never printed), the place working directory, child flags, runtime bytes and platform conditions. The same captured boundary is handed to execution and keys the capsule cache. These references grant neither authority nor independence and cannot prove undeclared inputs absent.
+
+An unchanged cross-process fold reads retained receipts with zero opened readings. Changed input reopens that reading and its dependents; changing shared implementation, policy or execution conditions invalidates the readings that depend on them. The semantic receipt names the reading and result together; elapsed time and signature envelopes remain separate. Old receipts are not promoted.
+
+Retained evidence may be inspected without asserting a current response. Reusing a current response also requires the existing snapshot-access contract: matching principal, authorization, request, implementation and snapshot, declared freshness, and both inspection and reuse permission. Unknown or expired freshness, withdrawn permission or changed context refuse before running a provider. A new observation needs its own admitted act.
+
+`fold --check` verifies the retained published evidence and instrument. It opens no reader and grants no permission to assert an old response today. A live fold additionally compares the current captured execution boundary.

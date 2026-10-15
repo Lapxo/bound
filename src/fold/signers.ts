@@ -1,8 +1,8 @@
 import { existsSync, join } from '../host/io.ts';
-import { authorityOf, isKeyClaim, parse, signersOf } from '@lapxo/topos/wire';
+import { authorityOf, isKeyClaim, signersOf } from '@lapxo/topos/wire';
 import type { Published, Signer, SignerVerdict } from '@lapxo/topos/wire';
 import { verifiesFields } from '../land/sign.ts';
-import { fieldOf, selfName } from './claims.ts';
+import { fieldOf, selfName, parsedLine as parse } from './claims.ts';
 import { keyFor, lockStanding } from './keys.ts';
 import { storeRoot } from '../host/ports/store.ts';
 import { storeOf } from '../land/ledger.ts';

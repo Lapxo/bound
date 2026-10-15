@@ -58,3 +58,16 @@ test('signed native receipt evidence is not mistaken for the public carrier head
   assert.deepEqual(carriedFrom(join(root,'empty'),[...body,header]),body);
  }finally{rmSync(root,{recursive:true,force:true});}
 });
+
+test('retained configuration projection never hides different bytes or a disputed standing',()=>{
+ const root=mkdtempSync(join(tmpdir(),'bound-projection-reuse-'));
+ try{
+  const lock=join(root,'TARGET.bound');
+  const row=(value:string)=>canonical({scope:'name',role:'writes',form:'alphabet',measure:'id',value,at:'policy:identity',by:'target'});
+  writeFileSync(lock,row('one')+'\n');const first=fileRegionDigest(root,'','receipts/.','sha256');
+  assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),first);
+  writeFileSync(lock,row('two')+'\n');assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256'),first);
+  writeFileSync(lock,row('one')+'\n'+row('two')+'\n');assert.throws(()=>fileRegionDigest(root,'','receipts/.','sha256'),/REFUSE·document name writes id · target has two live inscriptions without withdrawal/);
+  writeFileSync(lock,row('one')+'\n');assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),first);
+ }finally{rmSync(root,{recursive:true,force:true});}
+});

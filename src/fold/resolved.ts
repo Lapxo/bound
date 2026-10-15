@@ -42,7 +42,15 @@ export function receiptsOf(fold: PlaceFold): readonly string[] {
   const ran = [...new Set(fold.observed.filter((line) => fieldOf(line, 'measure') !== 'observed'
     && mine.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)))];
   const ranAt = new Set(ran.map((line) => `${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`));
-  const cones = new Set(fold.observed.filter((line) => fieldOf(line, 'measure') === 'observed' && own(fieldOf(line, 'scope')) && ranAt.has(`${fieldOf(line, 'by')} ${fieldOf(line, 'at')}`)).map(bytesOnly));
+  const cones = new Set(fold.observed.filter((line) => {
+    if (fieldOf(line, 'measure') !== 'observed') return false;
+    const at = fieldOf(line, 'at'), by = fieldOf(line, 'by');
+    // A physical input witnesses an owned reading's base, without becoming
+    // another location of its result. Even a foreign input belongs in that
+    // reading's portable carrier; its own child place is not the reader.
+    if (at.startsWith('witness:')) return ranAt.has(`${by} place:${at.slice('witness:'.length)}`);
+    return own(fieldOf(line, 'scope')) && ranAt.has(`${by} ${at}`);
+  }).map(bytesOnly));
   const paid = ledgerLines(fold.store, 'judge').filter((line) => fold.paid.some((demand) => fieldOf(demand, 'scope') === fieldOf(line, 'scope')
     && !(closed.length > 0 && fieldOf(demand, 'needs').split('|').filter(Boolean).length > 0
       && fieldOf(demand, 'needs').split('|').filter(Boolean).every((need) => closed.some((one) => need.startsWith(one))))));

@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: read
 jobs:
   test:
     strategy:
@@ -10,20 +12,24 @@ jobs:
       matrix:
         node: [22, 24]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run build
-      - run: npm test
-      - name: Verify native closure and receipt reuse
+      - name: Run tests
         run: |
-          node dist/cli/verb.js fold --check > "$RUNNER_TEMP/bound-check.log" 2>&1 || { cat "$RUNNER_TEMP/bound-check.log"; exit 1; }
-          cat "$RUNNER_TEMP/bound-check.log"
-          grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
-          grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
-      - run: npm pack --silent
+          set -euo pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - run: npm pack --pack-destination "$RUNNER_TEMP" --silent
+      - name: Preserve test logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bound-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/bound-tests.log
+          if-no-files-found: ignore

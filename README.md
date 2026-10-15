@@ -1,26 +1,13 @@
 # @lapxo/bound
 
-![license MIT](https://img.shields.io/badge/license-MIT-6b7280)
-
-Declare what must hold. Read what does. Keep the evidence
-
-```bash
-npx @lapxo/bound@0.1.8 fold --as help
-npx @lapxo/bound@0.1.8 fold
-```
-
-## How Bound reads a project
-
-Bound reads a project's admitted statements and observations through its selected Topos, then renders the declared views and records their inputs in receipts. The example below explains the object; a file-fold alone does not calculate its intervals.
-
 ## Use Bound in a project
 
 From a project with an admitted lock and selected views, inspect its standing, ask for its evidence, then verify the committed outputs:
 
 ```sh
-npx @lapxo/bound@0.1.8 fold --as lines
-npx @lapxo/bound@0.1.8 fold --as receipts@1
-npx @lapxo/bound@0.1.8 fold --check
+npx @lapxo/bound@0.1.9 fold --as lines
+npx @lapxo/bound@0.1.9 fold --as receipts@1
+npx @lapxo/bound@0.1.9 fold --check
 ```
 
 Use this flow to review a project change or check a dependency's declared contract. `--check` verifies existing evidence; it does not execute a missing reading. A file fold names readings and explicitly says that it computed no encounters.
@@ -29,6 +16,30 @@ Independent observations are judged through the declared typed cells view. The s
 
 A selected form can instead describe a set of artifacts, a delivery interval or another domain's values. The project declares the form, origin evidence and views; Bound does not infer them from filenames or units.
 
+
+Declare what must hold. Read what does. Keep the evidence.
+
+Bound reads a project's admitted statements, checks observations against its requirements, and produces the views its selected topos declares. It keeps conflicting evidence and its origins instead of choosing a convenient answer.
+
+`fold` reads. `sign` signs a proposed lot. `land` admits that lot under the place's authority. These acts work across domains: a selected topos supplies forms, units, readers and views.
+
+## Start in an admitted project
+
+```sh
+npx @lapxo/bound@0.1.9 fold --as help
+npx @lapxo/bound@0.1.9 fold
+```
+
+The help view prints:
+
+```text
+verbs fold land sign
+flags --as --check --key --key-file --signer --place
+```
+
+The default fold runs the project's declared views. Its authority and selected topos determine what can be admitted, read and shown.
+
+Start with the team's accepted TARGET, admitted authority and selected readers. [Full usage guide](https://github.com/Lapxo/bound/blob/2053bb6d6188f04538114eae6a0add5166944ed3/docs/usage.md).
 
 ## A meeting everyone can understand
 
@@ -66,18 +77,42 @@ lot_dir="$(mktemp -d)"
 Have the selected view produce a proposal at `$lot_dir/proposal.bound`, or prepare the project's permitted lines there for review. Unsigned proposals use `by=target`, without a preassigned epoch or `sig`. Lots stay outside the repository; the committed bound files are only `TARGET.bound` and `receipts.bound`.
 
 ```sh
-npx @lapxo/bound@0.1.8 sign "$lot_dir/proposal.bound" \
+npx @lapxo/bound@0.1.9 sign "$lot_dir/proposal.bound" \
   --key "$BOUND_KEY_ID" --key-file "$BOUND_KEY_FILE" \
   > "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.8 land "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.8 fold
+npx @lapxo/bound@0.1.9 land "$lot_dir/signed.bound" &&
+npx @lapxo/bound@0.1.9 fold
 ```
 
 `sign` assigns the admitted epoch and writes the signed lot to stdout. `land` validates the whole lot before admission. A refusal is evidence to inspect; it is not success. Do not proceed after a failed signature or admission. The key file is a PKCS8 private key matching the admitted public key; do not put it in the lot, source tree, package or CI artifacts.
 
 For typed object withdrawals, `takes` names the exact claim or mark id. Removing a local join leaves the travelling sign live. For untyped configuration, use the wire's exact withdrawal selectors; do not combine withdrawal and replacement with identical selectors in one lot. Wire alphabet updates supersede by epoch.
 
-[Authority, withdrawals, receipts and PR review](https://github.com/Lapxo/bound/blob/2053bb6d6188f04538114eae6a0add5166944ed3/docs/usage.md).
+[Authority, withdrawals, receipts and PR review](docs/usage.md).
+
+## Read a declared view and reuse its evidence
+
+When the project has admitted a cells view:
+
+```sh
+npx @lapxo/bound@0.1.9 fold --as cells
+```
+
+The installed interval scene printed this on an unchanged second reading:
+
+```text
+RECEIPTS 4 read · 0 opened · idle · provider 0
+```
+
+Native receipts identify the live semantic inputs, declared rest, selected topos, codecs and selected rendering implementation. They exclude delivery count, display paths and Bound's error wrapper. A local join changes its own cell's receipt. A travelling sign changes dependent cells. Missing or corrupt carried bytes cannot prove reuse.
+
+For judgement:
+
+```sh
+npx @lapxo/bound@0.1.9 fold --check
+```
+
+Keep stdout, stderr and the exit status. `--check` is not an install-and-build replacement. A source test passing does not pay an unread ceiling, prove a cold clone, or accept a release.
 
 ## Select a topos by what it declares
 
@@ -97,7 +132,7 @@ Cell `restsOn` is the object's relation. Directory prefixes and file summaries a
 
 ## Repository rules
 
-Commit `TARGET.bound`, `receipts.bound` and the outputs the forge reads. Ignore `.bound/` from the first line of `.gitignore`. Keep proposals, signed lots, keys, ledgers, caches and dependency blobs outside the published tree.
+Commit `TARGET.bound`, `receipts.bound` and the outputs the forge reads. Ignore `.bound/` from the first line of `.gitignore`. Keep proposals, signed lots, keys, ledgers, caches and dependency blobs outside the published tree. CI logs and test results are workflow artifacts; do not commit or package them. Cross-machine portability proof (L6) remains pending for 0.1.10.
 
 The lock is the project's own contract and pins. Read a dependency's declarations from its selected standing; do not copy its lines into your lock. README, package metadata and workflows must be renders of admitted declarations. A scan is an observation, not permission to lower a ceiling.
 
@@ -114,6 +149,7 @@ A pin names standing, not a download URL or runtime entry. Its declared artifact
 Use Bound where independently attributed observations must be judged against an accepted contract: compatibility between components, operational limits, or a team's project requirements. The selected topos must supply the actual measurements; a digest identifies the evidence without declaring it true.
 
 [Contribute a counterexample or a proposed lot](CONTRIBUTING.md).
+
 
 ## Foundations and related libraries
 

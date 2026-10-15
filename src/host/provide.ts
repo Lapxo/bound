@@ -6,11 +6,13 @@ import { fieldOf } from '../fold/claims.ts';
 import { observeText } from '../observe/files.ts';
 import { ownLock, ownStore, ownRoot } from '../observe/runner.ts';
 import { runtimeTreeAt } from './release.ts';
+import {ContentNeeded} from './content-needed.ts';
 import { theWord } from '../fold/wire.ts';
 
 interface ResolveContext { parentURL?: string }
 interface ResolveResult { url: string }
 type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult;
+const findPackageJSON=(nodeModule as unknown as {findPackageJSON(specifier:string,base:string):string|undefined}).findPackageJSON;
 const registerHooks = (nodeModule as unknown as {
   registerHooks: (hooks: { resolve: (specifier: string, context: ResolveContext, nextResolve: NextResolve) => ResolveResult }) => void;
 }).registerHooks;
@@ -63,27 +65,92 @@ export function resolvePinned(specifier: string, context: ResolveContext, nextRe
  * blob's folder.
  */
 let hooked = false;
+type NativeResolution={readonly libraryNames:readonly string[];readonly libraries:readonly {readonly name:string;readonly manifest:string;readonly coordinate?:string}[];assertPins(pins:readonly {name:string;at:string}[]):void};
+function nativeResolution():NativeResolution|undefined{
+  const installed=Object.getOwnPropertyDescriptor(globalThis,Symbol.for('bound.native.resolution@1'));
+  if(!installed)return undefined;
+  const capability=installed.value as {profile?:unknown;libraryNames?:unknown;libraries?:unknown;assertPins?:unknown}|undefined;
+  if(installed.configurable!==false||installed.writable!==false||!capability||!Object.isFrozen(capability)||capability.profile!=='fixed-native-resolution@1'||!Array.isArray(capability.libraryNames)||!Object.isFrozen(capability.libraryNames)||capability.libraryNames.some(name=>typeof name!=='string')||!Array.isArray(capability.libraries)||!Object.isFrozen(capability.libraries)||capability.libraries.some(lib=>!lib||!Object.isFrozen(lib)||typeof lib.name!=='string'||typeof lib.manifest!=='string')||typeof capability.assertPins!=='function')throw Error('REFUSE·pin fixed resolution capability invalid');
+  return capability as NativeResolution;
+}
+
+/** Fixed execution selects libraries by the instrument's explicit local mount,
+ * before opening any artifact. An alias or package-name guess grants nothing. */
+export function selectNativeDependencies(root:string,dependencies:readonly string[],manifest:string):readonly {line:string;library:{readonly name:string;readonly manifest:string;readonly coordinate?:string}}[]|undefined{
+  const capability=nativeResolution();if(!capability)return undefined;
+  if(dependencies.length&&capability.libraries.some(library=>typeof library.coordinate!=='string'||!library.coordinate))throw Error('REFUSE·pin fixed resolution logical library coordinate missing');
+  const selected=new Map(capability.libraries.map(library=>[library.coordinate,library]));
+  return dependencies.flatMap(line=>{const mount=fieldOf(line,'needs');if(!mount)return [];
+    const library=selected.get(mount.replace(/\/+$/,'')+'/'+manifest);if(!library)return [];
+    let actual:string;try{actual=realpathSync(join(root,mount,manifest))}catch{throw Error('REFUSE·pin selected library mount absent '+library.name)}
+    if(actual!==library.manifest)throw Error('REFUSE·pin selected library mount differs '+library.name);
+    return[{line,library}];
+  });
+}
+
+/** A declared artifact is not automatically an active Node library. This fixed
+ * assertion reuses only the packages selected by the actual host boundary. */
+export function reuseNativeResolution(pins:readonly {pkg:string;at:string}[]):boolean{
+  const capability=nativeResolution();if(!capability)return false;
+  const selected=new Set(capability.libraryNames);
+  // The fixed preload owns this closed assertion. Package names select which
+  // declared pins participate; exact manifests and member bytes still decide.
+  capability.assertPins(pins.filter(pin=>selected.has(pin.pkg)).map(pin=>({name:pin.pkg,at:pin.at})));
+  return true;
+}
+
+/** Read one resolved archive's manifest; a selected fixed library cannot vanish
+ * into the optional historical provider path when its archive is absent. */
+export function readProvidedPin(name:string,at:string,file:string,requiredName?:string):{at:string;pkg:string;exports:boolean;href:string;json:string}|undefined{
+  if(!at){if(requiredName!==undefined)throw Error('REFUSE·pin fixed resolution requires declared library '+name);return undefined}
+  const manifest=JSON.parse(observeText(join(at,file))??'{}') as Record<string,unknown>,pkg=typeof manifest.name==='string'?manifest.name:'';
+  if(requiredName!==undefined&&pkg!==requiredName)throw Error('REFUSE·pin fixed resolution library name differs '+name);
+  return pkg?{at,pkg,exports:Object.prototype.hasOwnProperty.call(manifest,'exports'),href:pathToFileURL(at).href,json:pathToFileURL(join(at,file)).href}:undefined;
+}
 
 export function provide(): void {
   if (hooked) return;
-  hooked = true;
-  const pins = ownLock()
-    .filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads')
-    .flatMap((line) => {
-      const name = fieldOf(line, 'scope').slice('dep/'.length);
-      const at = pinPlace(name);
-      const pkg = pinName(name);
-      const file = manifestOf();
-      const manifest = JSON.parse(observeText(join(at, file)) ?? '{}') as Record<string, unknown>;
-      return at && pkg ? [{ at, pkg, exports: Object.prototype.hasOwnProperty.call(manifest, 'exports'), href: pathToFileURL(at).href, json: pathToFileURL(join(at, file)).href }] : [];
-    });
+  const dependencies=ownLock().filter((line) => fieldOf(line, 'scope').startsWith('dep/') && fieldOf(line, 'role') === 'reads');
+  const file=manifestOf(),selected=selectNativeDependencies(ownRoot(),dependencies,file);
+  const load=(line:string,requiredName?:string)=>{
+    const name=fieldOf(line,'scope').slice('dep/'.length),at=pinPlace(name);
+    if(!at)throw new ContentNeeded(fieldOf(line,'value'),'REFUSE·pin declared library unavailable '+name);
+    const pin=readProvidedPin(name,at,file,requiredName);
+    if(!pin)throw Error('REFUSE·pin declared library unavailable '+name);
+    return pin;
+  };
+  if(selected!==undefined){
+    reuseNativeResolution(selected.map(({line,library})=>load(line,library.name)));
+    hooked=true;
+    return;
+  }
+  // A mount selects a library, but its manifest is only a routing hint until
+  // an import requests it. The selected archive alone supplies executable bytes.
+  const mounts=dependencies.filter(line=>fieldOf(line,'needs')!=='').map(line=>{
+    const mount=join(ownRoot(),fieldOf(line,'needs'));
+    const manifest=JSON.parse(observeText(join(mount,file))??'{}') as {name?:unknown};
+    return {line,mount,pkg:typeof manifest.name==='string'?manifest.name:''};
+  });
+  const verified=new Map<string,ReturnType<typeof load>>();
   registerHooks({
     resolve(specifier, context, nextResolve) {
       if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.includes(':')) return nextResolve(specifier, context);
-      const parent = context.parentURL ?? '';
-      const pin = pins.find((one) => specifier === one.pkg || specifier.startsWith(`${one.pkg}/`));
-      if (pin === undefined || parent.startsWith(pin.href)) return nextResolve(specifier, context);
-      return resolvePinned(specifier, context, nextResolve, pin);
+      let selected=mounts.find(one=>one.pkg&&(specifier===one.pkg||specifier.startsWith(one.pkg+'/')));
+      if(!selected){
+        // Identify the installed package before following its executable entry:
+        // a renamed manifest and an escaping entry cannot bypass the declared mount.
+        let manifest:string|undefined;
+        try{manifest=findPackageJSON(specifier,pathToFileURL(join(ownRoot(),file)).href)}catch{}
+        if(manifest)selected=mounts.find(one=>{
+          try{return realpathSync(join(one.mount,file))===realpathSync(manifest!)}catch{return false}
+        });
+      }
+      if(!selected)return nextResolve(specifier,context);
+      let pin=verified.get(selected.line);
+      if(!pin){pin=load(selected.line);verified.set(selected.line,pin);}
+      if(specifier!==pin.pkg&&!specifier.startsWith(pin.pkg+'/'))throw Error('REFUSE·pin selected library name differs');
+      return resolvePinned(specifier,context,nextResolve,pin);
     },
   });
+  hooked = true;
 }

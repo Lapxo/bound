@@ -1,5 +1,7 @@
+import{hashText}from'../hash.ts';
 import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
+import {createHash} from 'node:crypto';
 import {requireEffects} from '../read-only.ts';
 import {underTheRegions} from '../../land/act.ts';
 import {publishBundle,nativePublicationStorage} from './publication.ts';
@@ -47,14 +49,55 @@ export function intactLocalAct(identity:string,bundle:LocalActBundle):boolean{
   })===identity;
 }
 
+/** One last integrity result only. Every call rereads all exact current bytes;
+ * signatures, coverage and current authority are never retained here. */
+let lastIntactInventory:string|undefined;
+/** Internal integrity key only, not an act identity or a wire profile. */
+export function committedInventoryFingerprint(rows:readonly {identity:string;bundle:LocalActBundle}[]):string{
+  const hash=createHash('sha256');
+  const text=hashText.bind(undefined,hash);
+  text('committed-integrity-inventory');text(String(rows.length));
+  for(const {identity,bundle}of rows){
+    text(identity);text(bundle.records);text(bundle.receipt);
+    if(bundle.placements===undefined){text('absent');continue}
+    text('present');text(String(bundle.placements.length));
+    for(const placement of bundle.placements){text(placement.place);text(placement.records)}
+  }
+  return hash.digest('hex');
+}
+
 /** Committed segments are part of this ledger, not a second authority source. */
 export function committedLocalActs(store:string):readonly {identity:string;bundle:LocalActBundle}[]{
+  const observed=observationAt(store);if(observed)return observed.rows;
+  return readCommittedLocalActs(store);
+}
+type CommittedRows=ReturnType<typeof committedLocalActs>;
+interface CommittedObservation {readonly store:string;readonly rows:CommittedRows;readonly parent:CommittedObservation|undefined}
+let committedObservation:CommittedObservation|undefined;
+function observationAt(store:string):CommittedObservation|undefined{for(let one=committedObservation;one;one=one.parent)if(one.store===store)return one;return undefined}
+/** Fixed host observation only: one synchronous, coherent committed inventory.
+ * It supplies no authority, verifier or async lifetime. Each outer invocation
+ * rereads exact bodies before entering; current authorization still runs inside.
+ */
+export function withCommittedLocalActObservation<T>(store:string,body:()=>T):T{
+ const prior=committedObservation,existing=observationAt(store);
+ const rows=existing?.rows??Object.freeze(readCommittedLocalActs(store).map(row=>Object.freeze({identity:row.identity,bundle:Object.freeze({...row.bundle,...(row.bundle.placements?{placements:Object.freeze(row.bundle.placements.map(p=>Object.freeze({...p})))}:{})})})));
+ committedObservation={store,rows,parent:prior};
+ try{const result=body();if(result!==null&&(typeof result==='object'||typeof result==='function')&&typeof (result as {then?:unknown}).then==='function')throw Error('REFUSE·act committed observation must be synchronous');return result}finally{committedObservation=prior}
+}
+function readCommittedLocalActs(store:string):CommittedRows{
   const root=join(store,'ledger','acts');if(!existsSync(root))return [];
-  return readdirSync(root).filter(name=>name.startsWith('committed-')).map(name=>{
-    const identity=decodeURIComponent(name.slice(10)),bundle=read(join(root,name));
-    if(!intactLocalAct(identity,bundle))throw Error('REFUSE·act committed journal seal does not verify');
-    return {identity,bundle};
-  }).sort((a,b)=>{
+  const rows=readdirSync(root).filter(name=>name.startsWith('committed-')).map(name=>({
+    identity:decodeURIComponent(name.slice(10)),bundle:read(join(root,name)),
+  }));
+  // Ordered tuple framing commits every record, receipt and placement. No path,
+  // mtime, authority snapshot or caller-supplied seal substitutes for bytes.
+  const fingerprint=committedInventoryFingerprint(rows);
+  if(fingerprint!==lastIntactInventory){
+    for(const {identity,bundle}of rows)if(!intactLocalAct(identity,bundle))throw Error('REFUSE·act committed journal seal does not verify');
+    lastIntactInventory=fingerprint;
+  }
+  return rows.sort((a,b)=>{
     const epoch=(one:LocalActBundle)=>{const p=parse(one.receipt.trim());return p.kind==='fact'?Number(p.value.fields['epoch']):0};
     return epoch(a.bundle)-epoch(b.bundle);
   });
@@ -65,6 +108,8 @@ export function committedLocalActs(store:string):readonly {identity:string;bundl
  */
 export function localActResult(store: string,identity: string,verify: LocalActVerification): LocalActBundle | undefined {
   const at=atOf(store,identity);
+  const observed=observationAt(store);
+  if(observed){const bundle=observed.rows.find(row=>row.identity===identity)?.bundle;if(!bundle)return undefined;if(verify(identity,bundle)!==true)throw Error('REFUSE·act committed result does not verify');return bundle}
   if(!existsSync(at))return undefined;
   const bundle=read(at);
   if(verify(identity,bundle)!==true)throw Error('REFUSE·act committed result does not verify');
