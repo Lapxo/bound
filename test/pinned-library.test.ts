@@ -50,7 +50,7 @@ test('a package main cannot substitute a file outside its digest-laid tree',()=>
 
 // Exercise the real instrument entry: catalog blobs must stay unopened, while a
 // selected mount still requires its exact archive instead of Node's local copy.
-for(const [missing,renamed] of [[false,false],[true,false],[false,true]])test(`provide opens only mounted libraries; missing=${missing}, renamed metadata=${renamed}`,()=>{
+for(const [missing,renamed,escaped] of [[false,false,false],[true,false,false],[false,true,false],[false,true,true]])test(`provide opens only mounted libraries; missing=${missing}, renamed metadata=${renamed}, escaped entry=${escaped}`,()=>{
  const temp=mkdtempSync(join(tmpdir(),'bound-provide-'));
  try{
   const instrument=join(temp,'instrument'),library=join(temp,'library');mkdirSync(instrument);mkdirSync(library);
@@ -62,6 +62,7 @@ for(const [missing,renamed] of [[false,false],[true,false],[false,true]])test(`p
   writeFileSync(join(library,'index.js'),'export const value=31;');writeFileSync(join(library,'private.js'),'export const hidden=99;');
   cpSync(library,join(instrument,'node_modules/fixture-selected-library'),{recursive:true});
   if(renamed)writeFileSync(join(instrument,'node_modules/fixture-selected-library/package.json'),JSON.stringify({name:'forged-routing-name',type:'module',exports:{'.':'./index.js'}}));
+  if(escaped){const outside=join(temp,'outside.mjs');writeFileSync(outside,'console.log("UNVERIFIED OUTSIDE EXECUTED");export const value=99;');rmSync(join(instrument,'node_modules/fixture-selected-library/index.js'));symlinkSync(outside,join(instrument,'node_modules/fixture-selected-library/index.js'));}
   const archive=join(temp,'library.tgz'),packed=spawnSync('tar',['-czf',archive,'-C',library,'.']);assert.equal(packed.status,0,String(packed.stderr));
   const bytes=readFileSync(archive),digest='sha256:'+createHash('sha256').update(bytes).digest('hex'),catalog='sha256:'+'a'.repeat(64);
   const row=(scope:string,value:string,extra:Record<string,string>={})=>canonical({scope,value,role:'writes',form:'alphabet',measure:'id',at:'policy:fixture',by:'target',...extra});
@@ -76,7 +77,7 @@ for(const [missing,renamed] of [[false,false],[true,false],[false,true]])test(`p
   const entry=join(instrument,'src/cli/provide-fixture.ts');
   writeFileSync(entry,`import assert from 'node:assert/strict';import {provide,pinPlace} from '../host/provide.ts';
    ${missing?`provide();console.log('UNUSED MISSING LIBRARY DID NOT OPEN');await assert.rejects(import('fixture-selected-library'),/REFUSE·pin declared library unavailable selected/);`:`provide();assert.equal((await import('fixture-selected-library')).value,31);${renamed?"await assert.rejects(import('forged-routing-name'),/selected library name differs/);":''}await assert.rejects(import('fixture-selected-library/private.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});assert.throws(()=>pinPlace('inactive-catalog'),/does not name its available bytes/);`}
-   console.log('PROVIDE VERIFIED');`);
-  const got=spawnSync(process.execPath,[entry],{encoding:'utf8'});assert.equal(got.status,0,got.stdout+got.stderr);assert.match(got.stdout,/PROVIDE VERIFIED/);
+   assert.equal(typeof(await import('acorn')).parse,'function');console.log('PROVIDE VERIFIED');`);
+  const got=spawnSync(process.execPath,[entry],{encoding:'utf8'});assert.equal(got.status,0,got.stdout+got.stderr);assert.match(got.stdout,/PROVIDE VERIFIED/);assert.doesNotMatch(got.stdout,/UNVERIFIED OUTSIDE EXECUTED/);
  }finally{rmSync(temp,{recursive:true,force:true})}
 });

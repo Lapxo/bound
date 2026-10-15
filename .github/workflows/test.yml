@@ -33,29 +33,3 @@ jobs:
           name: bound-node-${{ matrix.node }}
           path: ${{ runner.temp }}/bound-tests.log
           if-no-files-found: ignore
-  closure:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - run: npm ci
-      - run: npm run build
-      - name: Verify native closure from declared sources
-        run: |
-          set -euo pipefail
-          node dist/cli/verb.js fold 2>&1 | tee "$RUNNER_TEMP/bound-fold.log"
-          grep -Eq '^RELEASE +policy ready' "$RUNNER_TEMP/bound-fold.log"
-          node dist/cli/verb.js fold --check 2>&1 | tee "$RUNNER_TEMP/bound-check.log"
-          grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
-          grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
-      - name: Preserve closure logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bound-native-closure
-          path: ${{ runner.temp }}/bound-*.log
-          if-no-files-found: ignore

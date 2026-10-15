@@ -12,6 +12,7 @@ import { theWord } from '../fold/wire.ts';
 interface ResolveContext { parentURL?: string }
 interface ResolveResult { url: string }
 type NextResolve = (specifier: string, context: ResolveContext) => ResolveResult;
+const findPackageJSON=(nodeModule as unknown as {findPackageJSON(specifier:string,base:string):string|undefined}).findPackageJSON;
 const registerHooks = (nodeModule as unknown as {
   registerHooks: (hooks: { resolve: (specifier: string, context: ResolveContext, nextResolve: NextResolve) => ResolveResult }) => void;
 }).registerHooks;
@@ -136,14 +137,12 @@ export function provide(): void {
       if (specifier.startsWith('.') || specifier.startsWith('/') || specifier.includes(':')) return nextResolve(specifier, context);
       let selected=mounts.find(one=>one.pkg&&(specifier===one.pkg||specifier.startsWith(one.pkg+'/')));
       if(!selected){
-        // Node's actual instrument resolution also identifies a selected mount
-        // when a mutable manifest's name changed. Resolution never executes it.
-        let resolved:ResolveResult|undefined;
-        try{resolved=nextResolve(specifier,{...context,parentURL:pathToFileURL(join(ownRoot(),file)).href})}catch{}
-        if(resolved?.url.startsWith('file:'))selected=mounts.find(one=>{
-          try{const part=relative(realpathSync(one.mount),realpathSync(new URL(resolved!.url)));
-            return !isAbsolute(part)&&part!=='..'&&!part.startsWith('..'+sep);
-          }catch{return false}
+        // Identify the installed package before following its executable entry:
+        // a renamed manifest and an escaping entry cannot bypass the declared mount.
+        let manifest:string|undefined;
+        try{manifest=findPackageJSON(specifier,pathToFileURL(join(ownRoot(),file)).href)}catch{}
+        if(manifest)selected=mounts.find(one=>{
+          try{return realpathSync(join(one.mount,file))===realpathSync(manifest!)}catch{return false}
         });
       }
       if(!selected)return nextResolve(specifier,context);
