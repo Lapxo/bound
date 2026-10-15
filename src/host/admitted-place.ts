@@ -1,3 +1,4 @@
+import{hashText}from'./hash.ts';
 import {admissionAnchor,admissionHistoryAt} from '../fold/admission-history.ts';
 import {authorityFor} from '../fold/signers.ts';
 import {eraOf} from '../fold/digests.ts';
@@ -9,7 +10,7 @@ import {createHash} from 'node:crypto';
 // Its complete inputs are reread before lookup, including original signatures.
 let historicalProjection:{readonly identity:string;readonly standing:readonly string[]}|undefined;
 function historicalIdentity(history:readonly string[],anchor:ReturnType<typeof admissionAnchor>):string{
- const hash=createHash('sha256'),text=(value:string)=>{hash.update(String(Buffer.byteLength(value,'utf8'))+':');hash.update(value,'utf8')};
+ const hash=createHash('sha256'),text=hashText.bind(undefined,hash);
  text('authenticated-root-history/1');text(String(history.length));for(const line of history)text(line);text(JSON.stringify(anchor));
  return hash.digest('hex');
 }

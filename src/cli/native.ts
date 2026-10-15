@@ -1,8 +1,8 @@
+import {sha256 as hash} from '../host/hash.ts';
 /** Fixed instrument child. Root authority and reading identity arrive through the
  * inherited supervisor argv; request JSON supplies neither verifier nor grant.
  */
 import {realpathSync} from 'node:fs';
-import {createHash} from 'node:crypto';
 import {readingIdentityBytes} from '@lapxo/topos/contract';
 import {readBoundedBatch} from '../host/native/bounded-file.ts';
 import {inheritedNativeGuard,inheritedNativeRoot,type NativeRootInheritance} from '../host/native/root.ts';
@@ -12,7 +12,6 @@ import {assertNativeRuntime} from '../host/native/runtime.ts';
 import {nativeReferenceInputs} from '../host/native/references.ts';
 import type {Handoff} from '../host/native/jobs.ts';
 const fail=(why:string):never=>{throw Error('REFUSE·native dispatcher '+why)};
-const hash=(text:string|Uint8Array)=>'sha256:'+createHash('sha256').update(text).digest('hex');
 const ordered=(value:readonly (readonly[string,string])[])=>[...value].sort(([a],[b])=>Buffer.compare(Buffer.from(a),Buffer.from(b)));
 async function run(){
  const inherited:NativeRootInheritance={store:process.argv[2]!,parent:Number(process.argv[8]),expected:JSON.parse(process.argv[4]!)},coordinate=process.argv[3]!,inputLimit=Number(process.argv[6]),phase=process.argv[7],execution:ReadingExecution=JSON.parse(process.argv[9]!);

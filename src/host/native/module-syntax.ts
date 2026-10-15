@@ -1,3 +1,4 @@
+import{stringLiteral}from'../adapters/modules/javascript.ts';
 import type {parse as Parser} from 'acorn';
 import * as nodeModule from 'node:module';
 import {extname} from 'node:path';
@@ -16,11 +17,7 @@ export function moduleImportSyntax(source: string, coordinate: string): ModuleIm
  try{tree=parse(code,{ecmaVersion:'latest',sourceType:'module',allowReturnOutsideFunction:true,allowHashBang:true})}
  catch{throw Error('REFUSE·source module syntax cannot be read: '+coordinate)}
  const found=new Set<string>(),unresolved=new Set<string>();
- const literal=(node:unknown):string|undefined=>{
-  if(!node||typeof node!=='object')return;
-  const n=node as Record<string,unknown>;
-  return n['type']==='Literal'&&typeof n['value']==='string'?n['value']:undefined;
- };
+ const literal=stringLiteral;
  const visit=(node:unknown,parent?:Record<string,unknown>,key?:string):void=>{
   if(!node||typeof node!=='object')return;
   if(Array.isArray(node)){for(const child of node)visit(child,parent,key);return;}

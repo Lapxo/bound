@@ -1,3 +1,4 @@
+import{hashText}from'../host/hash.ts';
 import {hasContextualPlace,contextualAct} from '../host/contextual-place.ts';
 import {createHash} from 'node:crypto';
 import {actResultOf,actResultProfile,type ActResult} from '@lapxo/topos/wire';
@@ -17,7 +18,7 @@ import {viewsOf} from '../fold/views.ts';
  * anchor are reread before lookup; this never retains a current command grant. */
 const historicalProofs=new WeakMap<object,{readonly fingerprint:string;readonly result:ActResult}>();
 function proofFingerprint(identity:string,bundle:LocalActBundle,history:readonly string[],anchor:ReturnType<typeof admissionAnchor>,algorithms:readonly string[]):string{
-  const hash=createHash('sha256'),text=(value:string)=>{hash.update(String(Buffer.byteLength(value,'utf8'))+':');hash.update(value,'utf8')};
+  const hash=createHash('sha256'),text=hashText.bind(undefined,hash);
   text('legacy-act-historical-proof/1');text(identity);text(bundle.records);text(bundle.receipt);
   text(bundle.placements===undefined?'absent':'present');text(String(bundle.placements?.length??0));
   for(const placement of bundle.placements??[]){text(placement.place);text(placement.records)}

@@ -1,12 +1,11 @@
+import {sha256 as digest} from '../hash.ts';
 /** Host-only controlled Node adapter; pure planning remains in planner.ts. */
-import{realpathSync}from'node:fs';import{isAbsolute}from'node:path';import{createHash}from'node:crypto';
-import{readBoundedFile}from'./bounded-file.ts';
+import{realpathSync}from'node:fs';import{isAbsolute}from'node:path';import{readBoundedFile}from'./bounded-file.ts';
 import type{CommandPort}from'@lapxo/topos/contract';
 import type{Declaration}from'./loader.ts';
 import{executeLot,type Invocation}from'./command.ts';
 import{moduleClosure,type ModuleClosureSnapshot}from'./module-closure.ts';
 import{planJobs,type Handoff,type Launch}from'./jobs.ts';
-const digest=(bytes:Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 const refuse=(why:string):never=>{throw Error('REFUSE·job adapter '+why)};
 const fileDigest=(path:string,limit:number):string=>{try{return digest(readBoundedFile(path,limit,path))}catch{return refuse('image member absent '+path)}};
 export interface Location {member:string;path:string;kind:'binary'|'module'|'data'}
@@ -72,7 +71,7 @@ export async function executeJobs(handle:PreparedNodeImage,request:Uint8Array,op
  const jobs=planJobs(ready.handoff,request,digest);
  // Complete batch and all locations are verified before invoking any program.
  for(const member of ready.handoff.members){const loc=ready.locations.get(member.coordinate)!;if(fileDigest(loc.path,ready.handoff.budget.bytes)!==member.digest)refuse('image bytes differ '+member.coordinate)}
- if(!jobs.length)return[];const slots=Math.min(...jobs.map(j=>j.limits.slots)),controller=new AbortController(),abort=()=>controller.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
+ if(!jobs.length)return[];const slots=Math.min(...jobs.map(j=>j.limits.slots)),controller=new AbortController(),abort=controller.abort.bind(controller,undefined);signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();
  const results=new Array<{id:string;identity:string;responses:readonly CapturedCommand[]}>(jobs.length);let next=0;let primary:unknown;
  const work=async()=>{while(!controller.signal.aborted){const index=next++;if(index>=jobs.length)return;const job=jobs[index]!,fixed=invocation(ready,job),implementation=job.program[1],port={...ready.image.commandPort!,timeoutMs:Math.min(ready.image.commandPort!.timeoutMs,job.limits.timeMs),responseBytes:Math.min(ready.image.commandPort!.responseBytes,job.limits.responseBytes)};
  const proofFor=()=>{for(const edge of job.edges){const loc=ready.locations.get(edge.target);if(!loc||fileDigest(loc.path,ready.handoff.budget.bytes)!==edge.digest)return'unmeasured' as const}const roots=[job.program[0],...(job.entry?[job.entry[0]]:[])].filter(c=>ready.locations.get(c)!.kind==='module');const actual=JSON.stringify(roots.flatMap(entry=>moduleClosure({...ready.snapshot,entry},()=>undefined)));return actual===ready.proofs.get(job.id)?'verified' as const:'unmeasured' as const};

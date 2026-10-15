@@ -1,3 +1,4 @@
+import{encodeUTF8}from'../io.ts';
 /** Pure prospective host handoff planner; no execution or authority discovery. */
 export interface Budget {jobs:number;members:number;edges:number;bytes:number;payloadBytes:number;env:number}
 export interface Member {coordinate:string;digest:string;bytes:Uint8Array}
@@ -9,7 +10,7 @@ export interface Handoff {place:string;instrument:string;policy:string;authority
 export interface Proposal {id:string;payload:string}
 export interface Launch {id:string;kind:Binding['kind'];identity:string;place:string;program:readonly [string,string];interpreter?:readonly [string,string];entry?:readonly [string,string];args:readonly string[];payload:Uint8Array;environment:readonly (readonly [string,string])[];limits:Binding['limits'];edges:readonly {from:string;kind:string;target:string;digest:string}[]}
 const fail=(why:string):never=>{throw Error('REFUSE·job '+why)};
-const utf8=(s:string)=>new TextEncoder().encode(s);
+const utf8=encodeUTF8;
 const by=(a:string,b:string)=>{const x=utf8(a),y=utf8(b);for(let i=0;i<Math.min(x.length,y.length);i++)if(x[i]!==y[i])return x[i]-y[i];return x.length-y.length};
 const text=(x:unknown):x is string=>typeof x==='string'&&x.length>0;
 const positive=(x:unknown)=>Number.isSafeInteger(x)&&Number(x)>0;

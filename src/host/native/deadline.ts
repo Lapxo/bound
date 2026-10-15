@@ -1,4 +1,8 @@
 const TIMER_MAX_MS=2_147_483_647;
+/** Remaining monotonic lease, rounded up for host APIs that accept milliseconds. */
+export function remainingDeadlineMs(deadline:bigint):number {
+ return Math.max(0,Number((deadline-process.hrtime.bigint()+999_999n)/1_000_000n));
+}
 interface Clock {
  readonly now:()=>bigint;
  readonly schedule:(callback:()=>void,delayMs:number)=>unknown;

@@ -1,3 +1,4 @@
+import{hashText}from'../hash.ts';
 import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -54,7 +55,7 @@ let lastIntactInventory:string|undefined;
 /** Internal integrity key only, not an act identity or a wire profile. */
 export function committedInventoryFingerprint(rows:readonly {identity:string;bundle:LocalActBundle}[]):string{
   const hash=createHash('sha256');
-  const text=(value:string)=>{hash.update(String(Buffer.byteLength(value,'utf8'))+':');hash.update(value,'utf8')};
+  const text=hashText.bind(undefined,hash);
   text('committed-integrity-inventory');text(String(rows.length));
   for(const {identity,bundle}of rows){
     text(identity);text(bundle.records);text(bundle.receipt);

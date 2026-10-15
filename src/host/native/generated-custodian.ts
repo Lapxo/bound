@@ -1,14 +1,14 @@
+import {sha256 as sha} from '../hash.ts';
 /** One asynchronous Root custodian owns aggregate counters for one actual job.
  * Endpoint is injected by instrument code, never selected by a world payload. */
 import{createServer,createConnection,type Socket}from'node:net';
-import{chmodSync,rmSync,realpathSync,writeFileSync,renameSync,existsSync}from'node:fs';import{join}from'node:path';import{randomBytes,createHash}from'node:crypto';
+import{chmodSync,rmSync,realpathSync,writeFileSync,renameSync,existsSync}from'node:fs';import{join}from'node:path';import{randomBytes}from'node:crypto';
 import{canonicalJson}from'./reading.ts';
 import{verifyNativeBinary,nativeBinaryProjection,type NativeBinaryProjection}from'./native-binary.ts';
 import{commandRequest,commandResponse}from'@lapxo/topos/contract';
 import{assertProducerInterpretation,chargeProducerRequest,createGeneratedProducer,readBounded,validateDescendantInvocation,sealGeneratedFile,sealNativeEval,sealInterpretation,recordProducerEmission,recordProducerEmissions,registerProducerCandidates,gateDerived,producerTransport,producerUsage,type GeneratedProducer,type LiteralSnapshot,type DescendantInvocation,type ProducerLimits,type ProducerCandidates}from'./generated.ts';
 import{retainedNativeEvalMatches,type NativeEvalActual}from'./node-launch.ts';
 import{verifyNativeProgram,nativeProgramProjection}from'./native-program.ts';
-const sha=(bytes:Uint8Array|string)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 export interface ProducerEndpoint {socket:string;token:string;coordinate:string;implementation:string;identity:string;timeoutMs:number;deadlineMs:number;responseBytes:number;interpretations:readonly string[];limits:Readonly<ProducerLimits>}
 /** Refusal transport is bounded too; an undersized channel closes without a
  * frame while the parent retains the named refusal. No truncation is success. */

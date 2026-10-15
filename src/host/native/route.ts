@@ -1,3 +1,5 @@
+import{fieldNames}from'./reading.ts';
+import {sha256 as hash} from '../hash.ts';
 /** Instrument-only native route. The caller holds the existing Root lease
  * across selection, cache authorization and this complete bounded child act.
  */
@@ -11,7 +13,6 @@ import {nativeExecutorInputs} from './materialize.ts';
 export {materializeNativeRoute} from './materialize.ts';
 import {assertNativeRuntime} from './runtime.ts';
 import {nativeReferenceInputs} from './references.ts';
-import {createHash} from 'node:crypto';
 import {rootAuthorityProtection} from '../../land/act.ts';
 import {currentNativeRoot,inheritedNativeRoot} from './root.ts';
 import {authenticateSignedPort,authenticateNativeProfile,canonicalJson,type PortProfile,type RootStanding} from './reading.ts';
@@ -22,7 +23,6 @@ import type {ReadingExecution,ReadingReference} from '../reading-context.ts';
 import type {Request,Response} from '@lapxo/topos/contract';
 import type {ReaderLifetime} from '@lapxo/topos/wire';
 import type {RootContext} from '@lapxo/topos/core';
-const hash=(text:string)=>'sha256:'+createHash('sha256').update(text).digest('hex');
 const fail=(why:string):never=>{throw Error('REFUSE·native route '+why)};
 export interface NativeBinaryBinding {readonly line:string;readonly coordinate:string;readonly profile:import('./native-binary.ts').NativeBinaryProfile;readonly origin?:NativeBinaryOrigin}
 export interface NativeRoute {readonly identity:string;readonly profile:PortProfile;readonly binaries:readonly NativeBinaryBinding[];readonly control?:HostControlSelection;readonly inputs:readonly ReadingReference[]}
@@ -80,9 +80,9 @@ export function invokeNativeRoute(route:NativeRoute,input:{archive:string;locati
 }
 
 /** This predicate only schedules an outer lease. It grants no command. */
-export function declaredNativeReaderPorts(lines:readonly string[]):boolean{return lines.some(line=>{const got=parse(line);return got.kind==='fact'&&got.value.fields.scope.startsWith('reader/')&&got.value.fields.scope.endsWith('/port')&&got.value.fields.value!=='withdraw'})}
+export function declaredNativeReaderPorts(lines:readonly string[]):boolean{return lines.some(line=>{const got=parse(line);return got.kind==='fact'&&got.value.fields.scope.startsWith('reader/')&&got.value.fields.scope.split('/').at(-1)==='port'&&got.value.fields.value!=='withdraw'})}
 export function prepareNativeReaderRoute(store:string,reader:{id:string;module:string}):NativeRoute|undefined{
- const expectedScope='reader/'+reader.module+'/port';
+ const expectedScope=['reader',reader.module,'port'].join('/');
  const declared=authenticatedRootStanding(dirname(store));if(!declared.some(line=>{const got=parse(line);return got.kind==='fact'&&got.value.fields.scope===expectedScope&&got.value.fields.value!=='withdraw'}))return undefined;
  const proof=rootAuthorityProtection(store),currentRoot=currentNativeRoot(store,process.pid,proof),root=currentRoot.root;
  const rows=root.live.filter(line=>{const got=parse(line);return got.kind==='fact'&&got.value.fields.scope===expectedScope});
@@ -104,7 +104,7 @@ export function assertNativeReaderGrantsCurrent(store:string):void{currentNative
 /** Executable kinds come only from current authenticated Root declarations. A
  * matching JSON hint identifies a candidate, but is never permission to execute. */
 export function authenticatedNativeBinaries(root:RootStanding,profile:PortProfile):readonly NativeBinaryBinding[]{
- const out:NativeBinaryBinding[]=[],names=new Set<string>();const keys=(x:object)=>Object.keys(x).sort().join(',');
+ const out:NativeBinaryBinding[]=[],names=new Set<string>();const keys=fieldNames;
  for(const line of root.live){const row=parse(line);if(row.kind!=='fact'||!row.value.fields.scope.startsWith('port/'))continue;let hint:any;try{hint=JSON.parse(row.value.fields.about??'')}catch{continue}
   if(!['host-native-binary@1','host-native-binary-origin@1'].includes(hint?.profile)||hint.selector?.port!==profile.port.coordinate)continue;
   const coordinate=row.value.fields.scope,auth=authenticateSignedPort(root,coordinate),p=auth.profile as import('./native-binary.ts').NativeBinaryProfile;
@@ -122,7 +122,7 @@ export interface CurrentNativeReaderSelection {readonly profile:PortProfile;read
 export function currentNativeReaderSelections(store:string):readonly CurrentNativeReaderSelection[]{
  const declared=authenticatedRootStanding(dirname(store));if(!declaredNativeReaderPorts(declared))return [];
  const proof=rootAuthorityProtection(store),currentRoot=currentNativeRoot(store,process.pid,proof),root=currentRoot.root;
- const mappings=root.live.flatMap(line=>{const row=parse(line);return row.kind==='fact'&&row.value.fields.scope.startsWith('reader/')&&row.value.fields.scope.endsWith('/port')?[{line,fields:row.value.fields}]:[]});
+ const mappings=root.live.flatMap(line=>{const row=parse(line);return row.kind==='fact'&&row.value.fields.scope.startsWith('reader/')&&row.value.fields.scope.split('/').at(-1)==='port'?[{line,fields:row.value.fields}]:[]});
  const seen=new Set<string>(),auth=authorityFor(root.history,root.signer,root.eras),out:CurrentNativeReaderSelection[]=[];
  for(const{line,fields:f}of mappings){if(seen.has(f.scope))fail('ambiguous reader port '+f.scope);seen.add(f.scope);
   if(f.role!=='writes'||f.form!=='alphabet'||f.measure!=='id'||typeof f.value!=='string'||!/^port\/[^\s]+$/.test(f.value))fail('malformed reader port '+f.scope);

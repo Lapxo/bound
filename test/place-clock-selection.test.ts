@@ -33,6 +33,9 @@ function fixture(){
 test('fixed host constructor authenticates root6/grant5 while unchanged local originals remain epoch2 in two places',async()=>{
  const f=fixture();try{const p=f.prepare();verifyPlaceActContext(p.encoded,p.chosen.trust.contract);assert.equal(p.chosen.trust.contract.root.epoch,'6');assert.match(p.original,/epoch=2 /);assert.equal((await commitPlaceAct(f.input.store,p.encoded,p.receipts,p.chosen.trust,f.selection.storageBudget)).kind,'landed')}finally{rmSync(f.root,{recursive:true,force:true})}
 });
+test('namespace segment boundaries refuse missing leaves, empty parents and traversal',()=>{
+ const f=fixture();try{const chosen=hostClockSelection(f.input),contract=chosen.trust.contract;assert.equal(contract.verifiesNamespaceAdmission('catalog/TARGET.bound',contract.root),true);for(const place of ['catalog/other','TARGET.bound','/TARGET.bound','catalog//TARGET.bound','catalog/../TARGET.bound','catalog/TARGET.bound/'])assert.equal(contract.verifiesNamespaceAdmission(place,contract.root),false,place);}finally{rmSync(f.root,{recursive:true,force:true})}
+});
 test('protected current reread observes retirement between preparation and commit',async()=>{
  const f=fixture();try{const p=f.prepare();f.setCurrent([...f.history,f.signed('keys/lane','class','withdraw','7',{role:'writes'})]);await assert.rejects(commitPlaceAct(f.input.store,p.encoded,p.receipts,p.chosen.trust,f.selection.storageBudget),/authority changed/)}finally{rmSync(f.root,{recursive:true,force:true})}
 });

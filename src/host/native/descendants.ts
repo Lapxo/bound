@@ -1,3 +1,4 @@
+import {sha256} from '../hash.ts';
 /** Fixed Root native preload. One parent custodian holds generated provenance
  * and counters. Original child APIs execute actual programs; nothing synthesizes
  * their results. This privileged native profile is not an adversarial sandbox. */
@@ -6,7 +7,6 @@ import fs from 'node:fs';
 import {traverseGeneratedClosure} from './generated.ts';
 import nativeWorkerThreads from 'node:worker_threads';
 import { readFileSync, realpathSync, existsSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as nativeModule from "node:module";
@@ -18,7 +18,7 @@ import {installNativeResolutionReuse} from './loader.ts';
 const childProcess:any = nativeChildProcess, workerThreads:any = nativeWorkerThreads;
 const registerHooks=(nativeModule as unknown as {registerHooks?:(hooks:any)=>unknown}).registerHooks;
 export function installDescendantBoundary(config: any) {
-    const sha = (b: any) => 'sha256:' + createHash('sha256').update(b).digest('hex'), originalSync = childProcess.spawnSync;
+    const sha = sha256, originalSync = childProcess.spawnSync;
     let red:any, transport:any, reporting = false;
     const fail:(why:string)=>never = (why: any) => { red ??= 'REFUSE·native descendant ' + why; if (transport && !reporting) {
         reporting = true;
@@ -89,7 +89,7 @@ export function installDescendantBoundary(config: any) {
     };
     transport = exchange;
     const verifiedEdges = new Map<string,string>();
-    let candidateHandoff=()=>[] as any[],candidateHanded=(_groups:readonly any[])=>{};
+    let candidateHandoff=()=>[] as any[],candidateHanded:(groups:readonly any[])=>void=ignoreEmission;
     const request = (entry: any, operation: any = 'entry') => { if (red)
         throw Error(red);const candidates=operation==='entry'?candidateHandoff():[];const one = exchange({ operation, token: endpoint.token, request: candidates.length?{...entry,candidates}:entry }); if (one.kind === 'refuse')
         fail(one.why); if (one.kind !== 'entry-context' || !one.context?.identity)
@@ -108,8 +108,8 @@ export function installDescendantBoundary(config: any) {
     let evalParent:NativeEvalParent|undefined;
     const actualEval=nativeWorkerThreads.isMainThread&&actualNodeEvalOptions(process.execArgv);
     if(actualEval){if(realpathSync(process.execPath)!==realpathSync(runtime))fail('actual eval runtime differs from Root selection');const actual={argv:[...process.execArgv,...process.argv.slice(1)],rootPrefix:['--import',preload],cwd:process.cwd(),environment:Object.entries(process.env).sort() as [string,string][],runtime};const retained=request(actual,'eval-context');evalParent=nativeEvalParent(retained,actual);}
-    let flushEmissions = (_paths:readonly string[] = []) => { };
-    let flushExecutable = (_path:string,_mode:'module'|'commonjs',_source?:Uint8Array) => { };
+    let flushEmissions:(paths?:readonly string[])=>void = ignoreEmission;
+    let flushExecutable:(path:string,mode:'module'|'commonjs',source?:Uint8Array)=>void = ignoreEmission;
     const interpretedMetadata = new Map<string,any>();
     const modeOf = (path: any, call: any) => { const ext = extname(path); if (ext === '.mjs' || ext === '.mts')
         return 'module'; if (ext === '.cjs' || ext === '.cts')
@@ -367,3 +367,6 @@ export function installDescendantBoundary(config: any) {
     process.once('beforeExit', () => { if (red)
         throw Error(red); });
 }
+
+/** An optional observer does nothing until fixed custody is installed. */
+const ignoreEmission=(..._args:unknown[]):void=>{};

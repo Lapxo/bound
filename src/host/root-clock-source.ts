@@ -1,5 +1,5 @@
 import {existsSync,opendirSync,statSync} from 'node:fs';
-import {join} from 'node:path';
+import {join,basename} from 'node:path';
 /** Actual stored Root cursor. Inputs are fixed host selections from admitted
  * lines, never packet epochs, receipt maxima, or caller-supplied verification. */
 import {committedLocalActs,actLines} from './ports/local-act.ts';
@@ -31,7 +31,7 @@ function sourceSelection(selected:RootClockSourceSelection){
 }
 function boundedInventory(root:string,selected:RootClockSourceSelection){
  const b=sourceSelection(selected),store=storeOf(root);let bytes=0,files=0,entries=0;const limit=b.acts*(b.places+2)+b.lines;if(!Number.isSafeInteger(limit))fail('source file bound');
- const visit=(path:string)=>{if(!existsSync(path))return;const s=statSync(path);if(s.isDirectory()){const directory=opendirSync(path);try{for(let entry=directory.readSync();entry;entry=directory.readSync()){if(++entries>limit)fail('source entry budget');if(path.endsWith('/ledger')&&entry.name==='place-acts')continue;visit(join(path,entry.name))}}finally{directory.closeSync()}}else{if(!s.isFile()||++files>limit||(bytes+=s.size)>b.bytes)fail('source file/byte budget')}};
+ const visit=(path:string)=>{if(!existsSync(path))return;const s=statSync(path);if(s.isDirectory()){const directory=opendirSync(path);try{for(let entry=directory.readSync();entry;entry=directory.readSync()){if(++entries>limit)fail('source entry budget');if(basename(path)==='ledger'&&entry.name==='place-acts')continue;visit(join(path,entry.name))}}finally{directory.closeSync()}}else{if(!s.isFile()||++files>limit||(bytes+=s.size)>b.bytes)fail('source file/byte budget')}};
  visit(join(store,'ledger'));visit(join(store,selfName()+'.keys'));
 }
 function current(root:string,selected:RootClockSourceSelection){

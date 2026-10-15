@@ -64,7 +64,7 @@ export function placeActHeads(store:string,initial:readonly PlaceActHead[],trust
 export async function commitPlaceAct(store:string,encoded:string,receipts:readonly PlaceReceipt[],trust:PlaceActTrust,limits:PlaceActBudget,storage:PublicationStorage=nativePublicationStorage):Promise<PlaceActBundle&{readonly kind:'landed'|'once';readonly identity:string}> {
  requireEffects('place act commitment');budget(limits);
  const decoded=readPlaceActContext(encoded,trust.contract.budget),id=trust.contract.digest(encoded);
- const regions=decoded.places.map(p=>p.place==='.'?'':p.place.slice(0,-'/TARGET.bound'.length));
+ const regions=decoded.places.map(p=>{if(p.place==='.')return '';const parts=p.place.split('/');if(parts.length<2||parts.pop()!=='TARGET.bound'||parts.some(s=>s===''||s==='.'||s==='..'))fail('unknown place namespace');return parts.join('/')});
  const enter=regions.includes('')?underTheRegions:underAuthorityRegions;
  return enter(store,regions,'place act',()=>underRootProjection(store,'place act publication',()=>{
   const prior=placeActResult(store,id,trust,limits);if(prior){if(prior.context!==encoded)fail('replay bytes differ');

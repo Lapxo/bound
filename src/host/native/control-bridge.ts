@@ -1,11 +1,11 @@
+import {sha256 as digest} from '../hash.ts';
 /** Root-fixed synchronous transport. It retains no grants or command results. */
 import { Worker, isMainThread } from 'node:worker_threads';
-import { createHash } from 'node:crypto';
 import { readBoundedFile } from './bounded-file.ts';
+import { remainingDeadlineMs } from './deadline.ts';
 const FixedWorker = Worker;
 const HEADER_BYTES = 32;
 let controlWorkerOccupied = false;
-const digest = (bytes: Uint8Array) => 'sha256:' + createHash('sha256').update(bytes).digest('hex');
 export interface ControlEndpoint {
  readonly socket: string; readonly timeoutMs: number; readonly deadlineMs: number; readonly responseBytes: number;
 }
@@ -47,7 +47,7 @@ export function createFixedControlBridge(inputBinding: FixedControlBinding) {
  const remainingMs = Math.min(endpoint.timeoutMs, binding.deadlineMs - Date.now());
  if (remainingMs <= 0) refuse('parent deadline');
  const deadline = process.hrtime.bigint() + BigInt(remainingMs) * 1_000_000n;
- const remaining = () => Math.max(0, Number((deadline - process.hrtime.bigint() + 999_999n) / 1_000_000n));
+ const remaining = remainingDeadlineMs.bind(undefined,deadline);
  if (controlWorkerOccupied) refuse('one live main-thread control worker resource exhausted');
  let shared: SharedArrayBuffer;
  try { shared = new SharedArrayBuffer(sharedBytes); } catch { return refuse('shared resource allocation'); }

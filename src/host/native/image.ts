@@ -1,4 +1,4 @@
-import {createHash} from 'node:crypto';
+import {sha256 as digest} from '../hash.ts';
 import {isAbsolute} from 'node:path';
 import {realpathSync} from 'node:fs';
 import {release} from 'node:os';
@@ -9,7 +9,6 @@ export interface LogicalLoader {readonly members:readonly LogicalMember[];readon
 export interface ImageMount {readonly coordinate:string;readonly path:string}
 export interface ImageBudget {readonly members:number;readonly bytes:number}
 const fail=(why:string):never=>{throw Error('REFUSE·native image '+why)};
-const digest=(bytes:string|Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 const coordinate=(name:string)=>typeof name==='string'&&name!==''&&!isAbsolute(name)&&!name.includes('\0')&&!name.includes('\\')&&!name.split('/').some(step=>!step||step==='.'||step==='..');
 /** Identifies the admitted Node/OS ABI condition, not a seal of backing libraries
  * or portability proof. The signed image must explicitly name this condition.

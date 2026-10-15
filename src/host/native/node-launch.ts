@@ -34,9 +34,10 @@ export function nodeLaunch(args:readonly string[]):NodeLaunch{
  * program handles under Root's guard, never accepted from a world proposal.
  * Selection names preserve argv; they confer no independent authority. */
 import {isAbsolute,resolve} from 'node:path';
+import {isSha256} from '../hash.ts';
 import type {NativeProgramProjection} from './native-program.ts';
 const programFail:(why:string)=>never=(why:string)=>{throw Error('REFUSE·native launch '+why)};
-const digest=(value:unknown):value is string=>typeof value==='string'&&/^sha256:[0-9a-f]{64}$/.test(value);
+const digest=isSha256;
 const exactPath=(value:unknown):value is string=>typeof value==='string'&&isAbsolute(value)&&resolve(value)===value;
 export interface SelectedInterpreter {readonly path:string;readonly digest:string}
 export interface NativeProgramLaunch {readonly interpreter:string;readonly interpreterDigest:string;readonly entry:string;readonly args:readonly string[]}

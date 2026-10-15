@@ -1,14 +1,15 @@
-/** Isolated host prototype: a program alias is a Root selection, never PATH.
+import{retainedProjection}from'./reading.ts';
+import{fieldNames}from'./reading.ts';
+import {sha256 as sha} from '../hash.ts';
+/** A program alias is a Root selection, never PATH.
  * This verifies a finite implementation before entry; it executes nothing.
  * The runtime hook must still verify each reached member before loading it. */
-import {createHash} from 'node:crypto';
 import {isAbsolute, resolve, relative} from 'node:path';
 import {realpathSync} from 'node:fs';
 import {authenticateSignedPort, nativeParentInputBytes, canonicalJson, type RootStanding} from './reading.ts';
 import {readBounded, type ParentExecution} from './generated.ts';
-const sha=(b:Uint8Array|string)=>'sha256:'+createHash('sha256').update(b).digest('hex');
 const fail=(why:string):never=>{throw Error('REFUSE·native program '+why)};
-const keys=(x:object)=>Object.keys(x).sort().join(',');
+const keys=fieldNames;
 export interface NativeProgramProfile {
  profile:'host-native-program@1'; coordinate:string; alias:string;
  selector:{port:string;binding:string;implementation:string};
@@ -42,4 +43,4 @@ export function verifyNativeProgram(root:RootStanding,coordinate:string,parent:P
 }
 /** Only the guarded instrument can obtain this from a verified opaque handle.
  * Put it in the signed native image; never accept it from a world proposal. */
-export function nativeProgramProjection(handle:VerifiedNativeProgram):NativeProgramProjection {const p=verified.get(handle);if(!p)return fail('unknown verified selection');return JSON.parse(canonicalJson(p));}
+export const nativeProgramProjection=retainedProjection(verified,fail);

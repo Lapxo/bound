@@ -1,9 +1,13 @@
+import{retainedProjection}from'./reading.ts';
+import{isSha256}from'../hash.ts';
+import{fieldNames}from'./reading.ts';
+import {sha256} from '../hash.ts';
 /** Host-only native binary selection. No PATH lookup, Node impersonation,
  * transitive OS-library seal or arbitrary-process sandbox is claimed. */
 import{createHash}from'node:crypto';import{isAbsolute}from'node:path';import{realpathSync}from'node:fs';import{fileURLToPath}from'node:url';import{authorityAtEpoch}from'@lapxo/topos/wire';import{parsedLine as parse}from'../../fold/claims.ts';import{authorityFor}from'../../fold/signers.ts';
 import{authenticateSignedPort,nativeParentInputBytes,canonicalJson,type RootStanding}from'./reading.ts';
 import{readBounded,type ParentExecution}from'./generated.ts';
-const sha=(b:Uint8Array)=>'sha256:'+createHash('sha256').update(b).digest('hex'),keys=(x:object)=>Object.keys(x).sort().join(','),validDigest=(x:unknown)=>typeof x==='string'&&/^sha256:[0-9a-f]{64}$/.test(x),fail=(why:string):never=>{throw Error('REFUSE·native binary '+why)};
+const sha = sha256,keys=fieldNames,validDigest=isSha256,fail=(why:string):never=>{throw Error('REFUSE·native binary '+why)};
 interface NativeBinaryFields{coordinate:string;alias:string;selector:{port:string;binding:string;implementation:string};entry:{path:string;digest:string;bytes:number};limits:{bytes:number};condition:string}
 export type NativeBinaryProfile=NativeBinaryFields&({profile:'host-native-binary@1'}|{profile:'host-native-binary-origin@1';origin:string});
 export interface NativeBinaryOrigin{readonly coordinate:string;readonly line:string;readonly path:string}
@@ -32,4 +36,4 @@ export function verifyNativeBinary(root:RootStanding,coordinate:string,parent:Pa
  const handle=Object.freeze({identity:'sha256:'+createHash('sha256').update(canonicalJson([auth.line,parent.identity,...(origin?[origin.line]:[])])).digest('hex')});
  verified.set(handle,{kind:'native-binary',alias:p.alias,entry:actual,entryDigest:privateBinding.digest,entryBytes:bytes.byteLength,condition:p.condition});return handle;
 }
-export function nativeBinaryProjection(handle:VerifiedNativeBinary):NativeBinaryProjection{const p=verified.get(handle);if(!p)return fail('unknown verified selection');return JSON.parse(canonicalJson(p))}
+export const nativeBinaryProjection=retainedProjection(verified,fail);

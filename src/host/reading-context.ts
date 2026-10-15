@@ -14,7 +14,7 @@ export interface ReadingExecution {
 }
 interface Boundary {readonly identity:string;readonly execution?:ReadingExecution}
 const active=new AsyncLocalStorage<Boundary>();
-export const readingBoundary=():Boundary|undefined=>active.getStore();
+export const readingBoundary=active.getStore.bind(active);
 export function withReadingBoundary<T>(identity:string,execution:ReadingExecution|undefined,run:()=>T):T{
  if(execution){const algorithm=identity.split(':')[0]!;const hash=(text:string)=>algorithm+':'+createHash(algorithm).update(text).digest('hex');
   const expected=readingEnvironment(hash,execution.env,execution.cwd,execution.flags);

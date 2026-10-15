@@ -1,7 +1,7 @@
+import {sha256 as digest} from '../hash.ts';
 import {realpathSync} from 'node:fs';
 import {dirname,join,relative,isAbsolute,sep} from 'node:path';
 import {readBoundedFile} from './bounded-file.ts';
-import {createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import * as nodeModule from 'node:module';
 const {builtinModules}=nodeModule;
@@ -75,7 +75,6 @@ export function installNativeResolutionReuse(declaration:Declaration):()=>void{
 }
 interface Context {parentURL?:string}
 interface Resolution {url:string}
-const digest=(bytes:Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 /** Resolution boundary for an instrument-selected native command. It checks
  * actual target bytes before Node executes that target. Native commands remain
  * privileged host implementations: this is not an arbitrary-JS sandbox and

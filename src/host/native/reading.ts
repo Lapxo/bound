@@ -1,4 +1,5 @@
-/** Isolated Bound HOST profile prototype. No owner, SDK wire growth or R activation. */
+import {sha256 as hash} from '../hash.ts';
+/** Host profile authentication and bounded executable input handoff. */
 import{extname}from'node:path';
 import{gunzipSync}from'node:zlib';
 import{readBoundedFile}from'./bounded-file.ts';
@@ -21,7 +22,6 @@ import{scheduleDeadline}from'./deadline.ts';
 import{prepareNodeImage,plannedJobs,executeJobs,type NodeImage,type CapturedCommand,type RootJobCustody}from'./node-jobs.ts';
 import type{Handoff,Proposal}from'./jobs.ts';
 const fail=(why:string):never=>{throw Error('REFUSE·native reading '+why)};
-const hash=(text:string)=>'sha256:'+createHash('sha256').update(text).digest('hex');
 export const canonicalJson=(value:unknown):string=>JSON.stringify(order(value));
 const order=(value:unknown):unknown=>Array.isArray(value)?value.map(order):value!==null&&typeof value==='object'?Object.fromEntries(Object.entries(value).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([k,v])=>[k,order(v)])):value;
 export interface RootStanding {readonly history:readonly string[];readonly live:readonly string[];readonly signer:Signer;readonly eras:readonly string[];readonly epoch:number;readonly budget:{readonly lines:number;readonly bytes:number}}
@@ -109,7 +109,7 @@ export async function loadSignedNativeReading(selection:AuthenticatedNativeSelec
 export async function answerNativeReading(handle:NativeReadingHandle,requests:readonly Request[],self:string,options:{phase:'act'|'selection'|'help'|'check'|'preview'|'sign';signal?:AbortSignal;guard:RootAuthorityGuard}):Promise<readonly Response[]>{
  const held=prepared.get(handle);if(!held)return fail('unknown instrument selection');if(options.phase!=='act')fail('effects forbidden during '+options.phase);
  if(options.signal?.aborted)fail('interrupted before wrapper');
- const deadline=process.hrtime.bigint()+BigInt(held.profile.port.timeoutMs)*1_000_000n,controller=new AbortController(),abort=()=>controller.abort(),cancel=scheduleDeadline(deadline,abort);options.signal?.addEventListener('abort',abort,{once:true});
+ const deadline=process.hrtime.bigint()+BigInt(held.profile.port.timeoutMs)*1_000_000n,controller=new AbortController(),abort=controller.abort.bind(controller,undefined),cancel=scheduleDeadline(deadline,abort);options.signal?.addEventListener('abort',abort,{once:true});
  try{return await options.guard.withCurrent(async current=>{
   const fresh=selected(current,held.coordinate);if(canonicalJson(fresh.profile)!==canonicalJson(held.profile)||current.epoch!==held.root.epoch||hash(canonicalJson(current.history))!==hash(canonicalJson(held.root.history)))fail('authority changed since preparation');
   if(!held.loader)return fail('reader not loaded by fixed host boundary');const boundary=installBoundary(held.loader);try{
@@ -129,4 +129,11 @@ export async function answerNativeReading(handle:NativeReadingHandle,requests:re
 export function nativeParentInputBytes(root:RootStanding,parent:{port:string}):number{
  const selected=authenticateSignedPort(root,parent.port).profile as PortProfile;
  const bytes=selected?.selection?.budget?.bytes;if(selected?.profile!=='host-native-reading@1'||!Number.isSafeInteger(bytes)||bytes<1)fail('parent executable input resource absent');return bytes;
+}
+
+/** Exact schema field names, shared by the host's selected native formats. */
+export function fieldNames(value:object):string{return Object.keys(value).sort().join(',');}
+/** Retain each verifier's private map and return a fresh canonical projection. */
+export function retainedProjection<H extends object,T>(verified:WeakMap<H,T>,fail:(why:string)=>never):(handle:H)=>T{
+ return handle=>{const p=verified.get(handle);if(!p)return fail('unknown verified selection');return JSON.parse(canonicalJson(p))};
 }

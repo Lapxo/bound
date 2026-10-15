@@ -1,14 +1,15 @@
+import{isSha256}from'../hash.ts';
+import {sha256 as sha} from '../hash.ts';
 import {nodeLaunch} from './node-launch.ts';
 /** Content producer for a separately Root-authorized finite native program.
  * Outputs are provenance, not grants. No arbitrary-JS confinement is claimed. */
 import{openSync,fstatSync,readSync,closeSync,realpathSync}from'node:fs';
 import{resolve,dirname,isAbsolute}from'node:path';import{fileURLToPath}from'node:url';
-import{createHash}from'node:crypto';import{builtinModules,createRequire}from'node:module';
+import{builtinModules,createRequire}from'node:module';
 import{moduleImportSyntax}from'./module-syntax.ts';
 import{authenticateSignedPort,canonicalJson,type RootStanding}from'./reading.ts';
 const fail:(why:string)=>never=(why:string)=>{throw Error('REFUSE·producer '+why)};
-const sha=(bytes:Uint8Array|string)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
-const digest=(x:unknown):x is string=>typeof x==='string'&&/^sha256:[0-9a-f]{64}$/.test(x);
+const digest=isSha256;
 export interface ProducerLimits {members:number;bytes:number;work:number;argvBytes:number;argvItems:number}
 export interface ProducerProfile {profile:'host-generated-executable@3';coordinate:string;implementation:string;interpretations:readonly string[];environmentNames:readonly string[];selector:{port:string;binding:string;implementation:string};limits:ProducerLimits}
 export interface ParentExecution {identity:string;port:string;binding:string;implementation:string;instrument:string;policy:string;authority:string;inputs:readonly (readonly[string,string])[];environment:readonly (readonly[string,string])[];argv:readonly string[];cwd:string;runtime:string;timeoutMs:number;responseBytes:number}

@@ -1,3 +1,4 @@
+import {sha256 as sha} from '../hash.ts';
 /** Fixed host materialization from admitted logical references. Physical locations
  * never arrive from a reader packet and never become semantic source identity.
  */
@@ -6,7 +7,6 @@ import {join,dirname,relative,sep,extname} from 'node:path';
 import {tmpdir} from 'node:os';
 import{fileURLToPath}from'node:url';
 import {gunzipSync} from 'node:zlib';
-import {createHash} from 'node:crypto';
 import {members as archiveMembers,archiveCoordinate} from '../archive.ts';
 import {blobAt,storeAt,holdStore} from '../../land/ledger.ts';
 import {ContentNeeded} from '../content-needed.ts';
@@ -16,7 +16,6 @@ import {readBoundedFile} from './bounded-file.ts';
 import {assertNativeRouteCurrent,nativeRouteStore,nativeMountIdentity,type NativeRoute} from './route.ts';
 import type {ReadingReference} from '../reading-context.ts';
 const fail=(why:string):never=>{throw Error('REFUSE·native materialize '+why)};
-const sha=(bytes:Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 export interface NativeMaterialization {readonly archive:string;readonly cwd:string;readonly mountIdentity:string;readonly locations:readonly {member:string;path:string;kind:'module'|'data'|'binary'}[]}
 const mounted=new Map<string,NativeMaterialization>();
 function laid(store:string,digest:string,remaining:number):{path:string;bytes:Buffer}{const path=blobAt(store,digest);if(!existsSync(path))throw new ContentNeeded(digest);const bytes=readBoundedFile(path,remaining,digest);if(sha(bytes)!==digest)fail('laid bytes differ '+digest);return{path,bytes}}
@@ -51,7 +50,7 @@ export function nativeExecutorInputs(route:NativeRoute):readonly ReadingReferenc
  const refs:ReadingReference[]=[];let bytes=0;
  for(const[path,digest]of all){const held=readBoundedFile(path,route.profile.selection.budget.bytes-bytes,path);bytes+=held.length;if(sha(held)!==digest)fail('fixed executor changed during descriptor');const local=relative(ownRoot(),path);let name:string;
   if(!local.startsWith('..'+sep)&&local!=='..')name=local.split(sep).join('/');
-  else{let cursor=dirname(path);for(;;){const manifest=join(cursor,'package.json');if(existsSync(manifest)){let pkg:any;try{const raw=readBoundedFile(manifest,route.profile.selection.budget.bytes-bytes,manifest);bytes+=raw.length;pkg=JSON.parse(raw.toString('utf8'));if(typeof pkg.name==='string')refs.push(['native/executor/library/'+pkg.name+'/package.json',sha(raw)])}catch{return fail('fixed dependency manifest invalid')}if(typeof pkg.name!=='string')return fail('fixed dependency has no declared name');name='library/'+pkg.name+'/'+relative(cursor,path).split(sep).join('/');break;}const parent=dirname(cursor);if(parent===cursor)return fail('fixed dependency logical coordinates absent');cursor=parent;}}
+  else{let cursor=dirname(path);for(;;){const manifest=join(cursor,'package.json');if(existsSync(manifest)){let pkg:any;try{const raw=readBoundedFile(manifest,route.profile.selection.budget.bytes-bytes,manifest);bytes+=raw.length;pkg=JSON.parse(raw.toString('utf8'));if(typeof pkg.name==='string')refs.push([['native/executor/library',pkg.name,'package.json'].join('/'),sha(raw)])}catch{return fail('fixed dependency manifest invalid')}if(typeof pkg.name!=='string')return fail('fixed dependency has no declared name');name='library/'+pkg.name+'/'+relative(cursor,path).split(sep).join('/');break;}const parent=dirname(cursor);if(parent===cursor)return fail('fixed dependency logical coordinates absent');cursor=parent;}}
   refs.push(['native/executor/'+name,digest]);
  }
  return [...new Map(refs).entries()];
