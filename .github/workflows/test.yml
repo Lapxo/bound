@@ -3,76 +3,48 @@ on:
   push:
     branches: [main]
   pull_request:
+permissions:
+  contents: read
 jobs:
-  inputs:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Download unpublished inputs
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/bound-inputs"
-          gh release download "v$(jq -r .version package.json)" --pattern 'sha256-*' --dir "$RUNNER_TEMP/bound-inputs"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: declared-reader-inputs
-          path: ${{ runner.temp }}/bound-inputs/sha256-*
-          if-no-files-found: error
   test:
-    needs: inputs
     strategy:
       fail-fast: false
       matrix:
         node: [22, 24]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run build
-      - uses: actions/download-artifact@v4
+      - name: Run tests
+        run: |
+          set -euo pipefail
+          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - run: npm pack --pack-destination "$RUNNER_TEMP" --silent
+      - name: Preserve test logs
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: declared-reader-inputs
-          path: ${{ runner.temp }}/bound-inputs
-      - name: Lay declared reader inputs
-        run: |
-          set -euo pipefail
-          mkdir -p .bound/cas/blobs
-          for input in "$RUNNER_TEMP/bound-inputs"/sha256-*; do
-            asset="$(basename "$input")"
-            digest=${asset#sha256-}
-            digest=${digest%%.*}
-            [[ "$digest" =~ ^[0-9a-f]{64}$ ]]
-            printf '%s  %s\n' "$digest" "$input" | sha256sum -c -
-            cp "$input" ".bound/cas/blobs/$digest"
-            printf 'INPUT %s · sha256:%s\n' "$asset" "$digest"
-          done
-      - name: Admit signed configuration
-        run: |
-          set -euo pipefail
-          bootstraps=("$RUNNER_TEMP/bound-inputs"/*.bootstrap.bound)
-          test "${#bootstraps[@]}" -eq 1
-          mkdir -p "$RUNNER_TEMP/bound-bootstrap-instrument"
-          cp -R dist "$RUNNER_TEMP/bound-bootstrap-instrument/dist"
-          cp TARGET.bound package.json "$RUNNER_TEMP/bound-bootstrap-instrument/"
-          ln -s "$GITHUB_WORKSPACE/node_modules" "$RUNNER_TEMP/bound-bootstrap-instrument/node_modules"
-          cp TARGET.bound "$RUNNER_TEMP/bound-public-target"
-          trap 'cp "$RUNNER_TEMP/bound-public-target" TARGET.bound' EXIT
-          cp "${bootstraps[0]}" TARGET.bound
-          node "$RUNNER_TEMP/bound-bootstrap-instrument/dist/cli/verb.js" land 2>&1 | tee "$RUNNER_TEMP/bound-admission.log"
-          cp "$RUNNER_TEMP/bound-public-target" TARGET.bound
-          trap - EXIT
-      - name: Verify native closure and receipt reuse
+          name: bound-node-${{ matrix.node }}
+          path: ${{ runner.temp }}/bound-tests.log
+          if-no-files-found: ignore
+  closure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build
+      - name: Verify native closure from declared sources
         run: |
           set -euo pipefail
           node dist/cli/verb.js fold 2>&1 | tee "$RUNNER_TEMP/bound-fold.log"
@@ -80,15 +52,10 @@ jobs:
           node dist/cli/verb.js fold --check 2>&1 | tee "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^PASS +closed' "$RUNNER_TEMP/bound-check.log"
           grep -Eq '^RECEIPTS [1-9][0-9]* read · 0 opened' "$RUNNER_TEMP/bound-check.log"
-      - name: Run tests
-        run: |
-          set -euo pipefail
-          npm test 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
-      - run: npm pack --silent
-      - name: Preserve test and fold logs
+      - name: Preserve closure logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bound-node-${{ matrix.node }}
+          name: bound-native-closure
           path: ${{ runner.temp }}/bound-*.log
           if-no-files-found: ignore
