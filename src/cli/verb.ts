@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import {printReleaseApproval} from './release-result.ts';
+import {inspectReference} from '../host/reference.ts';
+import {authenticatedReferenceSelected,openAuthenticatedReference} from '../host/reference-native.ts';
 import {printActResult} from './act-result.ts';
 import {printStandingResult} from './standing-result.ts';
 import {withContentStore} from '../host/content-store.ts';
@@ -10,7 +12,8 @@ import {cellsWithReceipts} from '../host/cell-receipts.ts';
 import {renderCells} from '@lapxo/topos/cells-view';
 import {releasePolicyLines} from '../fold/release-policy.ts';
 import {admittedObjects} from '../host/objects.ts';
-import {objectFold} from '../fold/object.ts';
+import {objectFold} from '../engine/index.ts';
+import {foldObjectsWithWasm,usesWasmObject} from '../wasm/object.ts';
 import {OBJECT_VIEW} from '@lapxo/topos/wire';
 import {toposStanding} from '@lapxo/topos/standing';
 import {wireAt,parse as parseWire} from '@lapxo/topos/wire';
@@ -403,6 +406,24 @@ function foldFile(at: string): number {
 }
 
 function foldVerb(root: string, rest: readonly string[]): number | Promise<number> {
+  const references = positionalsOf(rest).filter(one => /^#bound(?::|$)/.test(one));
+  if (references.length) {
+    if (references.length !== 1 || positionalsOf(rest).length !== 1 || rest.some(one => one.startsWith('--')))
+      throw Error('REFUSE·reference name one reference without view, check or signing options');
+    if(authenticatedReferenceSelected(standingOf(root).standing))return openAuthenticatedReference(root,references[0]!).then(result=>{
+      process.stdout.write(`SOURCE   ${result.reference.source}\n`);
+      for(const line of result.semanticStanding.split('\n').filter(Boolean))process.stdout.write(`TOPOS ${line}\n`);
+      for(const cell of result.readings)process.stdout.write('CELL '+JSON.stringify(cell)+'\n');
+      process.stdout.write(`AUTHENTICATED standing ${result.semanticIdentity} · authority ${result.authorityContextIdentity} · no effects committed\n`);
+      return EXIT.closed;
+    });
+    return inspectReference(references[0]!, standingOf(root).standing).then(result => {
+      process.stdout.write(`SOURCE   ${result.reference.source}\n`);
+      for (const line of result.lines) process.stdout.write(`TOPOS ${line}\n`);
+      process.stdout.write(`INSPECT  standing sha256:${result.reference.digest} · blob ${result.reference.blob} · no encounters computed · unauthenticated\n`);
+      return EXIT.closed;
+    });
+  }
   const files = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory() && one.endsWith(EXTENSION));
   const places = positionalsOf(rest).filter((one) => existsSync(resolve(one)) && lstatSync(resolve(one)).isDirectory());
   if (files.length === 1 && !places.length && valueOf(rest, FLAGS.as) === undefined) {
@@ -449,7 +470,22 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
     return EXIT.closed;
   }
 
-  if(as===OBJECT_VIEW){const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));const cells=objectFold(held.records,held.context);for(const c of cells)process.stdout.write('CELL '+JSON.stringify(c)+'\n');process.stdout.write(`FACT     object fold ${cells.length} cells\n`);return EXIT.closed;}
+  if(as===OBJECT_VIEW){
+    const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());
+    if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');
+    const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));
+    const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));
+    let cells:ReturnType<typeof objectFold>;
+    if(usesWasmObject(held.configuration)){
+      const cancellation=new AbortController(),interrupt=()=>cancellation.abort();
+      process.once('SIGINT',interrupt);
+      try{cells=await foldObjectsWithWasm(root,held.records,held.context,held.configuration,cancellation.signal);}
+      finally{process.removeListener('SIGINT',interrupt);}
+    }else cells=objectFold(held.records,held.context);
+    for(const cell of cells)process.stdout.write('CELL '+JSON.stringify(cell)+'\n');
+    process.stdout.write(`FACT     object fold ${cells.length} cells\n`);
+    return EXIT.closed;
+  }
   const key = valueOf(argv, FLAGS.key);
   if (as === undefined) {
     const exit=await pass(root, entryOf(root), under, argv.includes(FLAGS.check));
@@ -516,9 +552,9 @@ function main(argv: readonly string[]): number | Promise<number> {
     const root = resolve(selected === undefined ? '.' : rest[selected]!);
     const normalized = selected === undefined ? rest : rest.filter((_, index) => index !== selected);
     return withContentStore(storeOf(root), () =>
-      verb === 'fold' && selected !== undefined
+      verb === 'fold' && selected !== undefined && !positionalsOf(normalized).some(one => /^#bound(?::|$)/.test(one))
         ? foldAt(root, undefined, normalized)
-        : run(root, normalized, [verb, ...normalized]));
+        : run(root, normalized, [verb, ...normalized]), () => standingOf(root).standing);
   }
   const under = argv[0] ?? '';
   if (under && !under.startsWith('-') && places.includes(under)) {

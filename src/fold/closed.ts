@@ -10,9 +10,10 @@ import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest
 import { mountedCoordinatesIn, worldAt } from './places.ts';
 import { ownLockOf } from './signed.ts';
 import { viewsOf } from './views.ts';
+import {keptPlace} from './kept.ts';
 import { storeAt, storeOf } from '../land/ledger.ts';
 import { coordinatesUnder, observeFile, observeText } from '../observe/files.ts';
-import { carriedFrom } from './resolved.ts';
+import { bytesOnly, carriedFrom } from './resolved.ts';
 import { takenFor } from '../fold/place-inputs.ts';
 
 /** A region is closed when the digest of its bytes is the one its receipt names. Folding a closed region is idle: idleCount is how many were already closed, actSeconds the largest measured act or unpartitioned host work, receiptsSeen how many receipts were read and how long that took. */
@@ -190,7 +191,7 @@ export async function closeReceipts(root: string, store: string, semantic?: Read
 }
 
 /** One comparison. A place meets its receipt; the root meets when every receipt it names meets. */
-export function meets(root: string, store: string, place: string, current=true): boolean {
+export function meets(root: string, store: string, place: string, current=true, active?:readonly string[]): boolean {
   const name = place.replace(/\/$/, '');
   if (name === '') {
     const at = Date.now();
@@ -203,7 +204,27 @@ export function meets(root: string, store: string, place: string, current=true):
       const algorithm = expected.split(':')[0];
       return bytes !== undefined && hashBytes(bytes, algorithm) === expected && meets(root, store, `${one}/`,current);
     });
-    if(closed && carried){const algorithm=algorithmIn(own.join('\n'));const profile=readingProfile((observeText(join(root,LOCK))??'').split('\n').filter(isWire),fieldOf);const readings=verifiedReadingReceipts(store,carried,text=>hashFull(text,algorithm),current&&profile?currentReadingEnvironment(store,root,text=>hashFull(text,algorithm),childFlags()):undefined,profile);if(readings===undefined)closed=false;else if(readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);}
+    if(closed && carried){
+      const algorithm=algorithmIn(own.join('\n')),hash=(text:string)=>hashFull(text,algorithm);
+      const profile=readingProfile((observeText(join(root,LOCK))??'').split('\n').filter(isWire),fieldOf);
+      // History keeps its canonical identity and bytes. It does not become a
+      // current execution merely because it shares a public carrier with one.
+      const readings=verifiedReadingReceipts(store,carried,hash,undefined,profile);
+      if(readings===undefined)closed=false;
+      else if(current&&profile&&readings){
+        const stamp=instrumentKept(store);
+        const snapshot=active??(stamp?keptPlace(store,undefined,stamp)?.observed:undefined);
+        if(snapshot===undefined)closed=false;
+        else {
+          const units=snapshot.filter(line=>fieldOf(line,'scope').startsWith('receipts/readings/')&&fieldOf(line,'role')==='writes');
+          const supplied=new Set(carried);
+          const present=units.length>0&&units.every(line=>supplied.has(line)||(fieldOf(line,'measure')==='observed'&&supplied.has(bytesOnly(line))));
+          const fresh=present?verifiedReadingReceipts(store,snapshot,hash,currentReadingEnvironment(store,root,hash,childFlags()),profile):undefined;
+          if(!fresh)closed=false;
+        }
+      }
+      if(closed&&readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);
+    }
     seen = { count: named.size + (own.length > 0 ? 1 : 0), ms: Date.now() - at };
     return closed;
   }

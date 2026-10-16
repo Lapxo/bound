@@ -59,7 +59,7 @@ export function receiptsOf(fold: PlaceFold): readonly string[] {
     return canonical({ scope: `${sourced(fold.standing)}/${place}${shape}`, role: 'writes', form: 'alphabet', measure: 'digest', value: digest, by: writerFor(fold.standing, 'fold') ?? '', at: `place:${digest}` });
   });
   const place = under.replace(/\/$/, '');
-  const lines = [...named, ...[...cones].sort(), ...[...ran].sort(), ...paid]
+  const lines = [...new Set([...named, ...[...cones].sort(), ...[...ran].sort(), ...paid, ...(fold.receiptHistory??[])])]
     .map((line) => (place && !fieldOf(line, 'sig') ? zoomed(line, place) : line));
   if (!lines.length) {
     const shipped = (observeText(join(fold.root, under, RECEIPTS)) ?? '').split('\n').filter(isWire);

@@ -1,0 +1,1 @@
+{"fixture-bytes":{"kind":"command","executable":"/bin/cat","args":["inputs/coverage.json"],"environment":[]}}

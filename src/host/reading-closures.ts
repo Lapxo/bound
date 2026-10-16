@@ -18,6 +18,12 @@ type Plan={scope:string;inputs:readonly string[];needs:readonly string[];resolut
 const receiptScope=(scope:string):string=>[scope,'identity'].join('/');
 const fields=(line:string)=>{const got=parse(line);if(got.kind!=='fact')throw Error('REFUSE·input projection contains a non-wire line');return got.value.fields;};
 export const inputLines=(files:readonly File[]):readonly string[]=>files.map(file=>canonical({scope:file.place,form:'alphabet',measure:'text',role:'writes',value:'lock',shape:file.place,about:file.text,by:'host',at:'policy:handed-input'}));
+/** One portable native receipt carrier shared by file plans and native capsule batches. */
+export function portableReadingReceipt(scope:string,by:string,closure:string,output:string,hash:(text:string)=>string,modern=true,costs:readonly string[]=[]):readonly string[]{
+ const input=hash(closure),payload=hash(output),rows=output.split('\n').filter(Boolean);
+ return [...(modern?[canonical({scope:receiptScope(scope),role:'writes',form:'alphabet',measure:'digest',value:readingReceiptIdentity(input,payload,bytes=>hash(new TextDecoder().decode(bytes))),by,at:'place:'+input})]:[]),canonical({scope,role:'writes',form:'alphabet',measure:'observed',value:payload,by,at:'place:'+payload}),canonical({scope,role:'writes',form:'alphabet',measure:'bytes',value:input,by,at:'place:'+input,about:closure}),canonical({scope,role:'writes',form:'interval',measure:'count',value:`${rows.length}..${rows.length}`,by,at:'place:'+payload,about:output}),...costs];
+}
+
 /** The selected world owns input projection and reading. The host only verifies closures and keeps native count/bytes receipts. */
 export function readingClosures(options:{root:string;store:string;reader:string;speaker:string;digest:(text:string)=>string;capsule:Capsule;region:string;projection:string;readerReference?:ReaderReference;lifetime?:ReaderLifetime;allowsEmpty?:boolean;context?:ReadingIdentityContext;execution?:ReadingExecution;current?:CurrentReading;files:readonly File[];livePlace?:()=>readonly string[];assertCurrent?:()=>void;emit?:(line:string)=>void}):{lines:readonly string[];read:number;opened:number;executed:number}{
  const {root,store,reader,speaker,digest:hash,capsule,region,projection,files}=options,emit=options.emit??(()=>{});
@@ -98,7 +104,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
    if(plan.resolution===1)opened++;
   }
   const receipt=context?readingReceiptIdentity(input,payload,bytes=>hash(new TextDecoder().decode(bytes))):payload;
-  if(context)out.push(canonical({scope:receiptScope(scope),role:'writes',form:'alphabet',measure:'digest',value:receipt,by,at:'place:'+input}));
+  if(context&&plan.resolution!==1)out.push(canonical({scope:receiptScope(scope),role:'writes',form:'alphabet',measure:'digest',value:receipt,by,at:'place:'+input}));
   results.set(plan.scope,{digest:receipt,lines});out.push(canonical({scope:plan.scope,role:'writes',form:'alphabet',measure:'observed',value:input,by,at:'place:'+input}),
    // A logical reading name is not a physical input coordinate. Preserve the
    // host-verified handoff beside the result so portable file seals retain
@@ -106,14 +112,7 @@ export function readingClosures(options:{root:string;store:string;reader:string;
    // Input witnesses do not locate the result at each input. Result attribution
    // remains the logical reading's place; two inputs are not two new origins.
    ...plan.inputs.map(coordinate=>canonical({scope:coordinate,role:'writes',form:'alphabet',measure:'observed',value:hash(handed.get(coordinate)!),by,at:'witness:'+input})),...lines);
-  if(plan.resolution===1){read++;const native=shardLines(store,speaker,journal).filter(line=>fieldOf(line,'scope')===scope&&((fieldOf(line,'measure')==='bytes'&&fieldOf(line,'value')===input)||(fieldOf(line,'measure')==='count')||(fieldOf(line,'measure')==='s'&&fieldOf(line,'at')==='place:'+input))).map(line=>{
-   const f=fields(line),id=f.measure==='bytes'?f.value:f.measure==='count'?(f.at??'').replace(/^place:/,''):undefined;
-   if(id===undefined)return line;
-   const bytes=load(id);if(bytes===undefined)throw Error('REFUSE·receipt missing verified carrier '+id);
-   // The full-resolution native row carries the actual verified UTF-8 bytes.
-   // Its semantic count/digest is unchanged; a public copy needs no private CAS.
-   return canonical({...f,about:bytes});
-  });out.push(canonical({scope,role:'writes',form:'alphabet',measure:'observed',value:payload,by,at:'place:'+payload}),...native);}
+  if(plan.resolution===1){read++;const output=load(payload);if(output===undefined)throw Error('REFUSE·receipt missing verified carrier '+payload);const costs=shardLines(store,speaker,journal).filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='s'&&fieldOf(line,'at')==='place:'+input);out.push(...portableReadingReceipt(scope,by,closure,output,hash,!!context,costs));}
  });}
  verify();emit(`RECEIPTS ${read} read · ${opened} opened · reading closures`);
  return{lines:out,read,opened,executed};

@@ -32,7 +32,10 @@ export function authenticatedRootStanding(root:string):readonly string[]{
       const snapshot=history.filter(record=>!isConfig(record)||Number(fieldOf(record,'epoch'))<=epoch);
       // The signature vocabulary is configuration, not the as-yet
       // unauthenticated evidence whose values are about to be folded.
-      const wire=snapshot.filter(record=>fieldOf(record,'scope').startsWith('wire/'));
+      const wire=snapshot.filter(record=>{
+        const scope=fieldOf(record,'scope');
+        return scope.startsWith('wire/')||scope.startsWith('audit/wire/');
+      });
       authority=authorityFor(snapshot,anchor,eraOf(foldClaims(wire).standing).admitted);
       snapshots.set(epoch,authority);
     }

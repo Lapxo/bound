@@ -1,0 +1,8 @@
+{
+  "profile": "quartet-process@1",
+  "scope": "contract/published/native",
+  "surface": [
+    "contract/published/optional-wasm-adapter",
+    "contract/published/authenticated-reference"
+  ]
+}

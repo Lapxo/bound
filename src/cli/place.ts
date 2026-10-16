@@ -26,7 +26,7 @@ import { canonical, LOCK, parse } from '@lapxo/topos/wire';
 import { classDefaults, kindsOf, placesIn, spoken } from '../fold/places.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { observedClaims, placedReadings } from '../fold/observed.ts';
-import { capsuleReadingsOver } from '../observe/regions.ts';
+import { capsuleReadingsOver, currentReceiptObservations, retiredReceiptHistory } from '../observe/regions.ts';
 import { costReadings, ownReadings } from '../fold/own.ts';
 import { paidOf } from '../fold/paid.ts';
 import { rolesOf } from '../fold/roles.ts';
@@ -63,6 +63,7 @@ export interface PlaceFold {
   readonly missing: readonly string[];
   readonly history: readonly string[];
   readonly observed: readonly string[];
+  readonly receiptHistory?: readonly string[];
   readonly ceilings: {
     readonly read: number;
     readonly total: number;
@@ -218,7 +219,8 @@ function inheritedOf(root: string, standing: readonly string[]): readonly string
   return extra;
 }
 
-export function coneOf(root: string, entry: string, ceilings: readonly string[], descent?: readonly string[]): { readonly standing: readonly string[]; readonly observed: readonly string[]; readonly own: Readonly<Record<string, number>>; readonly kept: boolean } {
+export function coneOf(root: string, entry: string, ceilings: readonly string[], descent?: readonly string[]): { readonly standing: readonly string[]; readonly observed: readonly string[];
+  readonly receiptHistory?: readonly string[]; readonly own: Readonly<Record<string, number>>; readonly kept: boolean } {
   const store = storeOf(root);
   const { standing, rendered } = standingOf(root);
   // Admission consumes the verified completed fold; it does not ask providers again.
@@ -230,7 +232,8 @@ export function coneOf(root: string, entry: string, ceilings: readonly string[],
   const named = regionsNamed(standing);
   const reach = descent !== undefined && descent.length ? [...descent] : [...new Set(ceilings.map((line) => boundOf(named, line).region))];
   const read = observedClaims(root, store, { wait: false, ...(reach.includes('') ? {} : { reach }) });
-  const observed = [...read, ...capsuleReadingsOver({ root, store, standing, observed: read })];
+  const current = currentReceiptObservations({root,store,standing,observed:read});
+  const observed = [...current, ...capsuleReadingsOver({ root, store, standing, observed: read })];
   const own = {
     ...ownReadings({ root, store, entry, roleOf: rolesOf(store), standing, observed, unadmitted: rendered.grey.length + rendered.refused.length, orphans: 0 }),
     ...costReadings(store, standing),
@@ -269,7 +272,8 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
   const spent: string[] = [];
   const took = timing(spent);
   const read = given?.observed ?? (under ? took('observe', () => observedClaims(root, store, { wait: look })) : reached);
-  const everywhere = [...read, ...took('capsules', () => capsuleReadingsOver({ root, store, ...(under ? { under } : {}), standing, observed: read }))];
+  const current = currentReceiptObservations({root,store,...(under?{under}:{}),standing,observed:read});
+  const everywhere = [...current, ...took('capsules', () => capsuleReadingsOver({ root, store, ...(under ? { under } : {}), standing, observed: read }))];
   const points = foldPoints(store, standing, under, folder, self, reached, root, answered, reads);
   const taken = bytesDigest(store, new TextEncoder().encode(points.join('\n'))).replace(/^sha256:/, '');
   const observed = everywhere.filter((line) => !/ measure=observed /.test(line) || inside(fieldOf(line, 'scope')));
@@ -298,6 +302,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     demands, paid, missing,
     history: live.history.filter((line) => fieldOf(line, 'needs').split('|').filter(Boolean).some(inside)),
     observed,
+    receiptHistory: retiredReceiptHistory({root,store,...(under?{under}:{}),standing,observed:read}),
     ceilings: {
       read: folded.read.length,
       total: ceilings.length,
@@ -347,7 +352,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
       over: listed(again.over.filter((o) => o.side === 'over')),
     },
   };
-  if (folder !== undefined && closed) took('keep', () => keepFold(store, taken, whole, points, self));
+  if (folder !== undefined && meets(root,store,under??'',true,whole.observed)) took('keep', () => keepFold(store, taken, whole, points, self));
   process.stderr.write(`SPENT    fold ${spent.join(' ms · ')} ms\n`);
   return whole;
 }

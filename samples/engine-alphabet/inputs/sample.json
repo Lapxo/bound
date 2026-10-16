@@ -1,0 +1,323 @@
+{
+  "name": "alphabet",
+  "pin": "sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28",
+  "history": [
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=class role=writes scope=keys/device sig=\"ed25519:sample:Awlmj9Hxg1Evpc3fj/rsp5g0SGG1a/d9aKFid5iPd8xRyNemG4MlGXMzs/H41oGmgHVK/ZTb2fLun1LVH58jDA==\" value=authorize",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=coverage role=writes scope=keys/device sig=\"ed25519:sample:xY7HB4FPj9pwYz2EnGjLVLapxHypphYcN2PhJ0U4mEMHZprzkeGHDbYN1Fn+bZxk3qMpTTJRwIeNpx7seNAxDg==\" value=*",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=public-key role=writes scope=keys/device sig=\"ed25519:sample:eQJVnU+49tDvYziEXg51fE9cUSoSYHj/2CBvzA7GhY6kupba3R8pLGA/saedeyTgV4a9WQWNZpCux1hfQiwSCQ==\" value=\"MCowBQYDK2VwAyEAgvEztLpB288vOqHOUS1OFEsFIOX1Xk34EeixkF1QOCY=\"",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=signer role=writes scope=keys/device sig=\"ed25519:sample:Z4Zn8q+o38WffQ3aufCK9hoK7BbWRK2IlN7SafRYZLiIw4kW+1e/mROnKwEEdStB/DxpIciuZOzXCCSAWVUiDw==\" value=file",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=class role=writes scope=keys/reader sig=\"ed25519:sample:qVYrvZvxudkreHLRrNJVm8PPg+1xjSbpO/1hiPySPM5763PX5woQl+svOHLT0FCbBetL+UZyBzMCTplYHpORCw==\" value=read",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=class role=writes scope=keys/folder sig=\"ed25519:sample:+nUtPgIzMd+cqjhFfhhCsTJNHcl1GdaLCnltJ2cJ/0fHxGFzv7ixc+3tm9kRpmssopUBgfWIJL1cpDJUGgw3CQ==\" value=fold",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=interval measure=milliseconds role=writes scope=signer/timeout sig=\"ed25519:sample:hh5Rbe2RkOm+U4ykv1mnKPUmbd1uI+XRzbM3LEaklUkedtODvXip8DdNwmcmZnQm6LC0Ma6rQIPCJBc7Y+0vDw==\" value=5000..5000",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=interval measure=bytes role=writes scope=signer/response-bytes sig=\"ed25519:sample:wVTN44SxWS+LMZTdyCCSRiNqo4A6q+t6GwiZg54EcTizyGh/xPl79aWEP4xU6Q08LFvRsI9vspPx7AtlEIZ0CA==\" value=65536..65536",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/digest-algorithms sig=\"ed25519:sample:4dSuP38A8ijbmJFuWG5Bjg0efHJXNkvribriUxGRHiC12FxpNZJjhCtXPXivKLGdTkmL3bsrfVa/FJ6apSA4DA==\" value=sha256",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/signature-algorithms sig=\"ed25519:sample:aOrG372ZpUYYRT/zkN68JLjaflr/L/FxNRJgOl7znhBQzfGmL799jiGZJsTvFuy/THaBXX9UPQVAxYNbGaxRBQ==\" value=ed25519:sample",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/era sig=\"ed25519:sample:n+LlEPo1aoxsQ1T748OkvKqt9oUudaH3KcXFzCC+ZlsfK+p0jl8BwUDlZTPM8iAMWtnlChV9h+I/pI7Qe6XmBA==\" value=sample",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/families sig=\"ed25519:sample:H3nrSQQgt+ARnF+QaH4bkDCBqZc0OjVEwOjZ8a24c2bgIAn1gvz8ZaHxYcou+d2RqtHcWYbsVayM7r/ux0QxDw==\" value=B|C|D|G|keys|signer|wire|tree|write|leaf|reader|read|fold|receipts|rendered|resolved|beat|view|region|evidence|uses",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/forms sig=\"ed25519:sample:DAS/jN52u3X6R505ktUC8gP4GhDUm9D2WAkweAYrpZIc89WOuh7R7RqGDdOmG5cbQh6qYIbfViV3z7TMgp7HDg==\" value=alphabet|interval",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/roles sig=\"ed25519:sample:EsKliCDrnbiLg40cD5Z8NCD0hf+dCbJScdKkXKpGfB7WX+9o9X1r7FGnyvThHKw2gBqLZPXxqmEZd/D7R7+hCA==\" value=reads|writes|demands",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/at-classes sig=\"ed25519:sample:7y1FZuuli+k7dE7YHrfyIFzjMibDpJsncQR71DnQYEBjzkctNvs/IksYn0iZvsw0GP2HR+e4VeHF1sncb53vBg==\" value=origin|place|receipt|witness|policy",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/receipt-inputs sig=\"ed25519:sample:AozxH5GTqUYByPmnXVoH9dAdCO2bp0XryUZ73vlz49FCNA3bZpayB02Ep5cSqjE0M1PfiE4JqEGLNpBQWdY7Aw==\" value=semantic-live@1",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=writes scope=wire/region-measures sig=\"ed25519:sample:hIfZ0WuXLWohMBpGxedqDD+y+GZXty5qtIkuPf/j0WWXglBbGNv4nYHRID/Fg80gkSbV8PK1b+9FkQVgnKAtDg==\" value=coordinates|leaves",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=id role=demands scope=view/cells sig=\"ed25519:sample:POpC6KoAQxL4jBpzrbRuvUIiOfvBp26/EUFgTwxSMx6+jUAx5ka5pGO4SrB3Wv+otJISdr8paWCgE7fmHOopDw==\" value=cells@1",
+    "bound-lock/1 at=policy:sample by=device epoch=1 form=alphabet measure=digest role=writes scope=uses/sample sig=\"ed25519:sample:rKAShWfLYhr3vzcHYkoj0LFZt940MOZZGP5fF7gEAN9BJ8ZcYwDAOmw7OABIkQqnqQPeS4aNEGbiQvBJ/L+XAg==\" value=sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/fields sig=\"ed25519:sample:FmG/ydVvEDq57oeifc5j0/Ugjl3lPuKqJneomK2JnkNFIHytO3Ys3gfPSgsw3T2kiACvgf2z75lg+zd2KHgJBA==\" value=about|at|by|condition|epoch|form|id|kind|measure|needs|origin|params|pole|reach|restsOn|role|scope|shape|sig|sign|takes|topos|type|value|view|widens",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/required sig=\"ed25519:sample:iKPami4QlOoQt4Kwa3WPcWYmcq/RzsAHOnDnpMuOp+NFn/BGg/VzIoaGwRsDf9iWSHjw/CToXD9GWn2Z3ammCw==\" value=at|by|form|measure|role|scope|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/types sig=\"ed25519:sample:kIOP8nfnDdVed2iqrnI18TCQmLNnQzoeA5bx0OZ7pDrKBXcmNcbRsJYyICKOh38ny1zcyaSZh11gDYGiXL6YCw==\" value=cell|claim|mark",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/common sig=\"ed25519:sample:DYvaH7E4yNiuQQFFsySxN+hFFJJ7y4c3TtTEWbRh/Bru10YyEnBAGS3UezY9OjR5frIbeBYR/bXk3FVBQl8FDw==\" value=by|epoch|id|scope|sig|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/reserved sig=\"ed25519:sample:YaedQv7lVljDe+C4ebnAhJoOh5HbsaIve9wzd/MnAZF0VIfnmUPrwhGxHM3VQfY2n5s/FSRje4/eBZqFyR98Cw==\" value=id|origin|params|pole|reach|sign|takes|topos|type|widens",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/config sig=\"ed25519:sample:6VNSI9JqE836rDhoOAPMMhY3we8N2WF5Ya4a0NGDm23/mKKjccAa2K3vkWX3O3uA5CNVUZnR5VCNwXc8GSZSCg==\" value=about|at|by|condition|epoch|form|kind|measure|needs|restsOn|role|scope|shape|sig|value|view",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/cell sig=\"ed25519:sample:sJC4eJ/fPQdCKPpOTBcaX+TPWrZhiYAy1Z/Qa3IOoKzq61diWbIewYniPmGB/NexTomSOfKwmAnhYNDII+crAQ==\" value=by|epoch|form|id|measure|params|restsOn|scope|sig|topos|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/cell sig=\"ed25519:sample:9m9TbuduF2S0cyLHwcb41yeS40C5omfN3HLJMsi8IXFrmuUWq2CY0qHsjdgOtgvsQms/5ndDKaKc+L/qD5UNAQ==\" value=by|epoch|form|id|measure|params|restsOn|scope|sig|topos|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/claim/positive sig=\"ed25519:sample:D2AncAt2XvIUJEcw2r4h/mt+Lb6of7l/fG0jgzUhmY72i2V0kqrqg9imYAmdlMg02bJBCxNv5syllZv2uzb/Cw==\" value=by|epoch|id|origin|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/claim/positive sig=\"ed25519:sample:ip1Zg8LmCIRcaUsseKK8xFr8/R/+hfGRl3SkZToV6UksOJNe95944+BuI5HKAGMFQlty0nZoZZdwPjZF0ZBpAA==\" value=by|epoch|id|origin|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/claim/negative sig=\"ed25519:sample:HSf2m3PYqE0uhC3HOw25Bsp+JmkG+OAmAMwGSS05yNfk9uwYsNmSxmE/ovkWnsB7qoTN1G5mI2vUw/W99+TEAw==\" value=by|epoch|id|scope|sig|sign|takes|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/claim/negative sig=\"ed25519:sample:rws/YsDaKORlEMEplLPZPpGhiwqWCqcmh+W3HCUpVcpPkjvWRQILEDcngBojzL9T1H1rmi+ihAwez/+dhPzFBA==\" value=by|epoch|id|scope|sig|sign|takes|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/mark/travelling sig=\"ed25519:sample:Io1Rx7SuFH4SbhUloyhFIrdAz9k+4ouPCC98i3F0kXHrmAK2GMR4Dcz7SRKyR2totrHRaDYWPG5R/1/BJAZ5DQ==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/mark/travelling sig=\"ed25519:sample:OVmLGhuRAb1Fo2HDTV9fsoBNk1a7zT7n0VyVAtZTI9hlkXo9t+crXwpiAiq0F2q3a6N1PNt8HQh3PasAcjjHDQ==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/mark/local sig=\"ed25519:sample:9Dpv/qaHntZYmdC76LxZT4tkvbNc9gBvUf1RHb3k7fHjM2ftPHrxm0es45G80iUAfG7vRA7kE5wgq7ZTBBuACw==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value|widens",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/mark/local sig=\"ed25519:sample:AmLgK2dMWt0SpbtAoek+V0l4bdwXQOj2U2aiOgL2vFygmvDPL1Q8jeNYfmFPD3FIST8n0cizBoKmPrObQmw9DQ==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value|widens",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/mark/floor-travelling sig=\"ed25519:sample:x5QppqfGI4qF9CkkWYNLtynAPYMeeLHRWixTTz/8MFRM8/0rmj87GLeHdGpgkqrVU6gKV+RDVexeChYSQ+r5Aw==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/mark/floor-travelling sig=\"ed25519:sample:vMC1yMHSKcRt2sIOEvu1VE8w+SZGICPj1HtlPFPwG1qVfWbo8OmiT/uYf2dt7rKR5+J9z7Wa5gDtj6dlBulxAA==\" value=by|epoch|id|pole|reach|scope|sig|sign|type|value",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/required/mark/negative sig=\"ed25519:sample:QE9ABtb+G9y85jt2m7UUo8hCUdNdrNpBVLuspZWTeoB0Ej52r+cY/1yGqK14tJ4glSMNd2JsbfB8ZpaBIi5fAw==\" value=by|epoch|id|scope|sig|sign|takes|type",
+    "bound-lock/1 at=policy:topos/fold by=device epoch=1 form=alphabet measure=id role=reads scope=wire/object/allowed/mark/negative sig=\"ed25519:sample:Vu4dsbUszuwmm7UKe6b2Byg1MimvB3IuI72JVdrE025+vbSwNBDwFz/eGfp1x7SPrjmHfj8wOQzcH1YKv4M8Dw==\" value=by|epoch|id|scope|sig|sign|takes|type",
+    "bound-lock/1 at=policy:sample by=device condition=C epoch=1 form=alphabet measure=id role=writes scope=evidence/origin/ana sig=\"ed25519:sample:2rJw4jPD7AilzQzOdKkRpTVJspJZvyd1UwlXAhgv458r16W4NHijH/BdGB9cVn5d7Y+u07iw95adZsTDr5+uCg==\" value=ana",
+    "bound-lock/1 at=policy:sample by=device condition=C epoch=1 form=alphabet measure=id role=writes scope=evidence/origin/luis sig=\"ed25519:sample:kVOej25IS+5i69Qu71lgO0EsL/ZdlTro7tW/neC1WCw5tAf1hsT2E6+DnAN+hH6ZVYhQAYQ2OnaoUJIA0sR6DQ==\" value=luis",
+    "bound-lock/1 at=policy:sample by=device condition=B epoch=1 form=alphabet measure=id role=writes scope=evidence/witness/local-opening sig=\"ed25519:sample:OTVF5eiooQPRc7XH/9G6rGOOX7EVRAC2Y7YW8jhEGrHWsBvvSB5IpJqb7PtCPdakoPDOqewm3Ugxm/R7/Pf3Bg==\" value=local-opening",
+    "bound-lock/1 by=device epoch=2 form=alphabet id=def-B measure=artifact params=\"{\\\"tokens\\\":[\\\"lock\\\",\\\"readme\\\",\\\"source\\\"]}\" restsOn=none scope=B sig=\"ed25519:sample:1Sbiy6HrZGDaN/0anPUcGy6IqqVLdCBnToo6S5kxDcSPwJGz+Tx+Z6JBs9/8ls/3TjgYjiG8lo3+aMF9Ql0aAg==\" topos=sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28 type=cell",
+    "bound-lock/1 by=device epoch=2 form=alphabet id=def-C measure=artifact params=\"{\\\"tokens\\\":[\\\"lock\\\",\\\"readme\\\",\\\"source\\\"]}\" restsOn=B scope=C sig=\"ed25519:sample:gjI3EwxEcdUuBnDq02kQ4gn47pYJniy62gCNZz8rzn+8lOw5rOikT7wfkmRII4RntojTTzIlN2DEY/8ty/XEBw==\" topos=sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28 type=cell",
+    "bound-lock/1 by=device epoch=2 form=alphabet id=def-G measure=artifact params=\"{\\\"tokens\\\":[\\\"lock\\\",\\\"readme\\\",\\\"source\\\"]}\" restsOn=C scope=G sig=\"ed25519:sample:EbSKgsbqCgH2yXxZVk++sxBRZjIeU5Q+V8uwiDfdenQ1diq7nn3NNupZQowNwbbijsTbreb9hMVkLPBcXKaLDQ==\" topos=sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28 type=cell",
+    "bound-lock/1 by=device epoch=2 form=alphabet id=def-D measure=artifact params=\"{\\\"tokens\\\":[\\\"lock\\\",\\\"readme\\\",\\\"source\\\"]}\" restsOn=none scope=D sig=\"ed25519:sample:sk6645xwRNZM13ybqn13xojxFm86j+PzlwmNo5IIPX4b9oXoSjXl+wQMnwU5IXlY244HvT11jPVsHlCD/HwTAw==\" topos=sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28 type=cell",
+    "bound-lock/1 by=device epoch=3 id=s-B pole=ceiling reach=travels scope=B sig=\"ed25519:sample:eZI4pHaa87UYMJbvnhy+0KAHsukqN+NyyjwprOA8JsVEIzGyYw0/E0d4BcJbuqjs6ciJCA7XdAUrhsMs5r8OCA==\" sign=+1 type=mark value=lock|readme",
+    "bound-lock/1 by=device epoch=4 id=j-B pole=ceiling reach=local scope=B sig=\"ed25519:sample:NF7LXLljUZfy5maTVs4tzIQi88KRDeoPSUzgmUKBflvtaQedsvSGpUFPl7fCOAqGcN1JquZmLy8xCR0SaI6nCw==\" sign=+1 type=mark value=lock|readme|source widens=local-opening",
+    "bound-lock/1 by=device epoch=5 id=r-B pole=floor reach=travels scope=B sig=\"ed25519:sample:tyvpsBpbVNwcr9GDf8zSKT4NseVxOTVS9rI/1mm3yL0ApdgFBQpMJQcTuXKvOIwTEGNGzbyyQo152lYtGRPrCQ==\" sign=+1 type=mark value=lock",
+    "bound-lock/1 by=device epoch=6 id=c-C origin=ana scope=C sig=\"ed25519:sample:Pqk+dSjj+PM2t+PsMbup7jPLHYM3lM4sJwe9hWH8cYKU+0rpcCc+QRL1dCjYJD+yJjcspTFzsvif4hbKmwanCA==\" sign=+1 type=claim value=lock|readme",
+    "bound-lock/1 by=device epoch=7 id=c-L origin=luis scope=C sig=\"ed25519:sample:mldZsVhykAOWuPeoFJ0wXjKhU84LkPjt1UXcJxI3IKboG+WvahxmVasaGXHpo8310Be7gT/mbSB2qjbSu38UBg==\" sign=+1 type=claim value=lock",
+    "bound-lock/1 by=device epoch=8 id=disagreement origin=ana scope=C sig=\"ed25519:sample:1dup6T1QrnYskUP442+I3rPMqwBw/ZMq8sETMZHHln/AGLP9kt2j53mAgTBGq94uy1FBmo+/Zs5ArPWMYX6QCQ==\" sign=+1 type=claim value=readme",
+    "bound-lock/1 by=device epoch=9 id=withdraw-disagreement scope=C sig=\"ed25519:sample:QqbbaLtGei1L90papzdmQPODN0741ajFXc7zOFpGJbGllFqpIDOR+fHd7dJBhuOXm683GJCO0mqGWiCsNYvKBQ==\" sign=-1 takes=disagreement type=claim",
+    "bound-lock/1 by=device epoch=10 id=withdraw-c-C scope=C sig=\"ed25519:sample:QtRFXHw8+waSnnkQNgBWWmqfPMgxjeDD04pvZW89yfGYgsJBEd2YLNf5z6t3ks3AUeeWBbyjSvLLFTcr6VpMBQ==\" sign=-1 takes=c-C type=claim",
+    "bound-lock/1 by=device epoch=11 id=withdraw-c-L scope=C sig=\"ed25519:sample:TV5/s+RtGsdFC6AAtpNEXIN+aLfelSFRBboChykb5/yFrhMggMUMuHx1rpa0nDJcMVPndnLc+0CfVF99r6r6AA==\" sign=-1 takes=c-L type=claim",
+    "bound-lock/1 by=device epoch=12 id=outside-a origin=ana scope=C sig=\"ed25519:sample:6G7GtdlxnkHeppzrkyMGRe5vhQyG2FmdFUnGkmI60vdQWJxVV21QM0Zui5+ZCDn8HLvxrOnzGj4kxB6bQ+aXBg==\" sign=+1 type=claim value=source",
+    "bound-lock/1 by=device epoch=13 id=outside-b origin=luis scope=C sig=\"ed25519:sample:mUmGZCsCw9Vu+DdjVqtCgmTR+8m15ZbCVyfA4zHWG2CpRSHonCDK7wWlaSpIOBgkbNWUzV8lr61eNcJiiyxIBw==\" sign=+1 type=claim value=source",
+    "bound-lock/1 by=device epoch=14 id=incompatible-floor pole=floor reach=travels scope=G sig=\"ed25519:sample:fg1grFhXbGj7AxxkgDZbzd+6gPo3L6VQeYPBoXEV3Q3QY7lY3a2NGpeAz6BZZQSZF0EMRKaYlwP7YOD9Bwl3Bg==\" sign=+1 type=mark value=source",
+    "bound-lock/1 by=device epoch=15 id=withdraw-j scope=B sig=\"ed25519:sample:lbemLrA6hcjW5fZ5Nh2gn5Oy04NbzCjXAmAfDAuwKo2GWL/Jp6+g7Hmomcbh0SXnQYVeIAkMfoP8zkVfipmwAg==\" sign=-1 takes=j-B type=mark"
+  ],
+  "expected": [
+    {
+      "cell": "B",
+      "state": "REQUIRED",
+      "parts": {
+        "floor": {
+          "words": {
+            "0": 1
+          },
+          "width": 3
+        },
+        "ceiling": {
+          "words": {
+            "0": 3
+          },
+          "width": 3
+        },
+        "origins": [],
+        "rest": [],
+        "required": {
+          "words": {
+            "0": 1
+          },
+          "width": 3
+        },
+        "signed": {
+          "words": {
+            "0": 3
+          },
+          "width": 3
+        }
+      },
+      "rest": [],
+      "ownMarks": [
+        "s-B",
+        "r-B"
+      ],
+      "ownClaims": [],
+      "marks": [
+        {
+          "pole": "ceiling",
+          "reach": "travels",
+          "span": {
+            "words": {
+              "0": 3
+            },
+            "width": 3
+          },
+          "id": "s-B",
+          "at": 3
+        },
+        {
+          "pole": "floor",
+          "reach": "travels",
+          "span": {
+            "words": {
+              "0": 1
+            },
+            "width": 3
+          },
+          "id": "r-B",
+          "at": 5
+        }
+      ],
+      "claims": []
+    },
+    {
+      "cell": "C",
+      "state": "FORBIDDEN",
+      "parts": {
+        "floor": {
+          "words": {
+            "0": 0
+          },
+          "width": 3
+        },
+        "ceiling": {
+          "words": {
+            "0": 0
+          },
+          "width": 3
+        },
+        "origins": [
+          {
+            "id": "outside-a",
+            "at": 12,
+            "origin": "ana",
+            "span": {
+              "words": {
+                "0": 4
+              },
+              "width": 3
+            }
+          },
+          {
+            "id": "outside-b",
+            "at": 13,
+            "origin": "luis",
+            "span": {
+              "words": {
+                "0": 4
+              },
+              "width": 3
+            }
+          }
+        ],
+        "rest": [
+          "B"
+        ],
+        "required": {
+          "words": {
+            "0": 1
+          },
+          "width": 3
+        },
+        "signed": {
+          "words": {
+            "0": 3
+          },
+          "width": 3
+        }
+      },
+      "rest": [
+        "B"
+      ],
+      "ownMarks": [],
+      "ownClaims": [
+        {
+          "id": "outside-a",
+          "origin": "ana"
+        },
+        {
+          "id": "outside-b",
+          "origin": "luis"
+        }
+      ],
+      "marks": [],
+      "claims": [
+        {
+          "id": "outside-a",
+          "at": 12,
+          "origin": "ana",
+          "span": {
+            "words": {
+              "0": 4
+            },
+            "width": 3
+          }
+        },
+        {
+          "id": "outside-b",
+          "at": 13,
+          "origin": "luis",
+          "span": {
+            "words": {
+              "0": 4
+            },
+            "width": 3
+          }
+        }
+      ]
+    },
+    {
+      "cell": "G",
+      "state": "CONFLICT",
+      "parts": {
+        "floor": {
+          "words": {
+            "0": 0
+          },
+          "width": 3
+        },
+        "ceiling": {
+          "words": {
+            "0": 3
+          },
+          "width": 3
+        },
+        "origins": [],
+        "rest": [
+          "C",
+          "B"
+        ],
+        "required": {
+          "words": {
+            "0": 0
+          },
+          "width": 3
+        },
+        "signed": {
+          "words": {
+            "0": 3
+          },
+          "width": 3
+        }
+      },
+      "rest": [
+        "C",
+        "B"
+      ],
+      "ownMarks": [
+        "incompatible-floor"
+      ],
+      "ownClaims": [],
+      "marks": [
+        {
+          "pole": "floor",
+          "reach": "travels",
+          "span": {
+            "words": {
+              "0": 4
+            },
+            "width": 3
+          },
+          "id": "incompatible-floor",
+          "at": 14
+        }
+      ],
+      "claims": []
+    },
+    {
+      "cell": "D",
+      "state": "REQUIRED",
+      "parts": {
+        "floor": {
+          "words": {
+            "0": 7
+          },
+          "width": 3
+        },
+        "ceiling": {
+          "words": {
+            "0": 7
+          },
+          "width": 3
+        },
+        "origins": [],
+        "rest": [],
+        "required": {
+          "words": {
+            "0": 7
+          },
+          "width": 3
+        },
+        "signed": {
+          "words": {
+            "0": 7
+          },
+          "width": 3
+        }
+      },
+      "rest": [],
+      "ownMarks": [],
+      "ownClaims": [],
+      "marks": [],
+      "claims": []
+    }
+  ]
+}

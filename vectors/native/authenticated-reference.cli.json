@@ -1,0 +1,157 @@
+{
+  "profile": "native-cli-protocol-captures@1",
+  "projection": "SOURCE,CELL,AUTHENTICATED stdout records and named stderr refusal; duplicate TOPOS data excluded explicitly; full raw output digests retained",
+  "cases": [
+    {
+      "place": "weather-reading",
+      "case": "yes",
+      "status": 0,
+      "stdoutRecords": [
+        "SOURCE   fixture://carrier/yes",
+        "CELL {\"cell\":\"weather/temperature\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"lo\":2,\"hi\":3},\"ceiling\":{\"lo\":2,\"hi\":3},\"origins\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"lo\":2,\"hi\":3}}],\"rest\":[],\"required\":{\"lo\":0,\"hi\":10},\"signed\":{\"lo\":0,\"hi\":6}},\"rest\":[],\"ownMarks\":[\"parent-ceiling\"],\"ownClaims\":[{\"id\":\"claim-first\",\"origin\":\"origin-one\"}],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":{\"lo\":0,\"hi\":6},\"id\":\"parent-ceiling\",\"at\":3}],\"claims\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"lo\":2,\"hi\":3}}]}",
+        "CELL {\"cell\":\"weather/indoor\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"lo\":0,\"hi\":10},\"ceiling\":{\"lo\":0,\"hi\":9},\"origins\":[],\"rest\":[\"weather/temperature\"],\"required\":{\"lo\":0,\"hi\":10},\"signed\":{\"lo\":0,\"hi\":9}},\"rest\":[\"weather/temperature\"],\"ownMarks\":[\"child-join\"],\"ownClaims\":[],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":{\"lo\":0,\"hi\":9},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"}],\"claims\":[]}",
+        "AUTHENTICATED standing sha256:6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8 \u00b7 authority sha256:5798403c3964ef08ad14de4cb5c8dcba9680e3d52ac29740b995f7c7da3fb4e5 \u00b7 no effects committed"
+      ],
+      "stderrRefusal": "",
+      "rawOutputDigest": "sha256:c75cff416ff786a03d74d63ed2c53d0070d47eb29b3ff6ab3ae76ca2b501130c"
+    },
+    {
+      "place": "editorial-state",
+      "case": "yes",
+      "status": 0,
+      "stdoutRecords": [
+        "SOURCE   fixture://carrier/yes",
+        "CELL {\"cell\":\"editorial/state\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"words\":{\"0\":1},\"width\":3},\"ceiling\":{\"words\":{\"0\":1},\"width\":3},\"origins\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"words\":{\"0\":1},\"width\":3}}],\"rest\":[],\"required\":{\"words\":{\"0\":7},\"width\":3},\"signed\":{\"words\":{\"0\":3},\"width\":3}},\"rest\":[],\"ownMarks\":[\"parent-ceiling\"],\"ownClaims\":[{\"id\":\"claim-first\",\"origin\":\"origin-one\"}],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":{\"words\":{\"0\":3},\"width\":3},\"id\":\"parent-ceiling\",\"at\":3}],\"claims\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"words\":{\"0\":1},\"width\":3}}]}",
+        "CELL {\"cell\":\"editorial/review\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"words\":{\"0\":7},\"width\":3},\"ceiling\":{\"words\":{\"0\":7},\"width\":3},\"origins\":[],\"rest\":[\"editorial/state\"],\"required\":{\"words\":{\"0\":7},\"width\":3},\"signed\":{\"words\":{\"0\":7},\"width\":3}},\"rest\":[\"editorial/state\"],\"ownMarks\":[\"child-join\"],\"ownClaims\":[],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":{\"words\":{\"0\":7},\"width\":3},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"}],\"claims\":[]}",
+        "AUTHENTICATED standing sha256:48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c \u00b7 authority sha256:304d0960aa94aaeb51baf2f5d3afbfb70525595bd40ff6bb670d6d741f92742c \u00b7 no effects committed"
+      ],
+      "stderrRefusal": "",
+      "rawOutputDigest": "sha256:6a22b911a06532cab7e1ae12d44e93e068856e956f2cacc18a28651e8f955e1f"
+    },
+    {
+      "place": "weather-reading",
+      "case": "signature",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference original grey the signature does not hold for device",
+      "rawOutputDigest": "sha256:f043d89abb781deedff44dc4b9cafdbdd2cb831733eb1678ab87f2e29d703dcc"
+    },
+    {
+      "place": "weather-reading",
+      "case": "coverage",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference original refuse REFUSE\u00b7authority attester does not cover weather/temperature",
+      "rawOutputDigest": "sha256:c1b666a865ec09335abcc5c9c8e89635002c48fddafcd20edcd6a88438130d87"
+    },
+    {
+      "place": "weather-reading",
+      "case": "era",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference proof grey the signature does not hold for device",
+      "rawOutputDigest": "sha256:3b3639301ecb7bc26b322ac2e19c7f2d035b75b62fe2f9712303ca12f0c1c9ac"
+    },
+    {
+      "place": "weather-reading",
+      "case": "order",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7object context: cell not declared before claim-first",
+      "rawOutputDigest": "sha256:b30e83ea7041f2b1dbf430221cb44b7325d50e50077a6d8c4dac7b3be07b3a8c"
+    },
+    {
+      "place": "weather-reading",
+      "case": "arrival",
+      "status": 0,
+      "stdoutRecords": [
+        "SOURCE   fixture://carrier/arrival",
+        "CELL {\"cell\":\"weather/temperature\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"lo\":2,\"hi\":3},\"ceiling\":{\"lo\":2,\"hi\":3},\"origins\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"lo\":2,\"hi\":3}}],\"rest\":[],\"required\":{\"lo\":0,\"hi\":10},\"signed\":{\"lo\":0,\"hi\":6}},\"rest\":[],\"ownMarks\":[\"parent-ceiling\"],\"ownClaims\":[{\"id\":\"claim-first\",\"origin\":\"origin-one\"}],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":{\"lo\":0,\"hi\":6},\"id\":\"parent-ceiling\",\"at\":3}],\"claims\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"lo\":2,\"hi\":3}}]}",
+        "CELL {\"cell\":\"weather/indoor\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"lo\":0,\"hi\":10},\"ceiling\":{\"lo\":0,\"hi\":9},\"origins\":[],\"rest\":[\"weather/temperature\"],\"required\":{\"lo\":0,\"hi\":10},\"signed\":{\"lo\":0,\"hi\":9}},\"rest\":[\"weather/temperature\"],\"ownMarks\":[\"child-join\"],\"ownClaims\":[],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":{\"lo\":0,\"hi\":9},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"}],\"claims\":[]}",
+        "AUTHENTICATED standing sha256:6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8 \u00b7 authority sha256:5798403c3964ef08ad14de4cb5c8dcba9680e3d52ac29740b995f7c7da3fb4e5 \u00b7 no effects committed"
+      ],
+      "stderrRefusal": "",
+      "rawOutputDigest": "sha256:92be61b9a888bfe90c39995f11e59c80bac2adf1107c42bbacdeba03e8acdb51"
+    },
+    {
+      "place": "weather-reading",
+      "case": "blob",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference blob integrity",
+      "rawOutputDigest": "sha256:1239171cee7142f85e1175f205b38710b869636ab5d06a7459551b4afedf0f6d"
+    },
+    {
+      "place": "weather-reading",
+      "case": "standing",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference standing identity",
+      "rawOutputDigest": "sha256:c7c7d3ef55d1911d5cccfa78fb4f8ff59450c9a6a80b413fb101ed5361f3c7ed"
+    },
+    {
+      "place": "editorial-state",
+      "case": "signature",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference original grey the signature does not hold for device",
+      "rawOutputDigest": "sha256:f043d89abb781deedff44dc4b9cafdbdd2cb831733eb1678ab87f2e29d703dcc"
+    },
+    {
+      "place": "editorial-state",
+      "case": "coverage",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference original refuse REFUSE\u00b7authority attester does not cover editorial/state",
+      "rawOutputDigest": "sha256:02b7f1f972ab9d3569b3112a945c1adda93a7b7f4403e2a86f81b1469951c06f"
+    },
+    {
+      "place": "editorial-state",
+      "case": "era",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference proof grey the signature does not hold for device",
+      "rawOutputDigest": "sha256:3b3639301ecb7bc26b322ac2e19c7f2d035b75b62fe2f9712303ca12f0c1c9ac"
+    },
+    {
+      "place": "editorial-state",
+      "case": "order",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7object context: cell not declared before claim-first",
+      "rawOutputDigest": "sha256:b30e83ea7041f2b1dbf430221cb44b7325d50e50077a6d8c4dac7b3be07b3a8c"
+    },
+    {
+      "place": "editorial-state",
+      "case": "arrival",
+      "status": 0,
+      "stdoutRecords": [
+        "SOURCE   fixture://carrier/arrival",
+        "CELL {\"cell\":\"editorial/state\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"words\":{\"0\":1},\"width\":3},\"ceiling\":{\"words\":{\"0\":1},\"width\":3},\"origins\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"words\":{\"0\":1},\"width\":3}}],\"rest\":[],\"required\":{\"words\":{\"0\":7},\"width\":3},\"signed\":{\"words\":{\"0\":3},\"width\":3}},\"rest\":[],\"ownMarks\":[\"parent-ceiling\"],\"ownClaims\":[{\"id\":\"claim-first\",\"origin\":\"origin-one\"}],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":{\"words\":{\"0\":3},\"width\":3},\"id\":\"parent-ceiling\",\"at\":3}],\"claims\":[{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":{\"words\":{\"0\":1},\"width\":3}}]}",
+        "CELL {\"cell\":\"editorial/review\",\"state\":\"REQUIRED\",\"parts\":{\"floor\":{\"words\":{\"0\":7},\"width\":3},\"ceiling\":{\"words\":{\"0\":7},\"width\":3},\"origins\":[],\"rest\":[\"editorial/state\"],\"required\":{\"words\":{\"0\":7},\"width\":3},\"signed\":{\"words\":{\"0\":7},\"width\":3}},\"rest\":[\"editorial/state\"],\"ownMarks\":[\"child-join\"],\"ownClaims\":[],\"marks\":[{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":{\"words\":{\"0\":7},\"width\":3},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"}],\"claims\":[]}",
+        "AUTHENTICATED standing sha256:48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c \u00b7 authority sha256:304d0960aa94aaeb51baf2f5d3afbfb70525595bd40ff6bb670d6d741f92742c \u00b7 no effects committed"
+      ],
+      "stderrRefusal": "",
+      "rawOutputDigest": "sha256:fcdbdaf586d3642b9abf6ce109aa431246902e883e2aaf3305d8db33829d0ef3"
+    },
+    {
+      "place": "editorial-state",
+      "case": "blob",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference blob integrity",
+      "rawOutputDigest": "sha256:1239171cee7142f85e1175f205b38710b869636ab5d06a7459551b4afedf0f6d"
+    },
+    {
+      "place": "editorial-state",
+      "case": "standing",
+      "status": 1,
+      "stdoutRecords": [],
+      "stderrRefusal": "instrument: REFUSE\u00b7authenticated-reference standing identity",
+      "rawOutputDigest": "sha256:c7c7d3ef55d1911d5cccfa78fb4f8ff59450c9a6a80b413fb101ed5361f3c7ed"
+    }
+  ],
+  "instrument": "actual candidate public CLI; verified transitive context closure before execution",
+  "effects": "no signed state/authority changes or successful partial receipts; private CAS accounting is separate",
+  "platform": "two places, same Mac; not L6"
+}

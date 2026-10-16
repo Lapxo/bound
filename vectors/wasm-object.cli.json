@@ -1,0 +1,452 @@
+{
+  "scope": "optional-wasm-adapter/conformance",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "land"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+landed"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "TARGET.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"B\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"C\",\"state\":\"FORBIDDEN\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"G\",\"state\":\"CONFLICT\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"D\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+object fold 4 cells",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "esm.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/esm.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"B\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"C\",\"state\":\"FORBIDDEN\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"G\",\"state\":\"CONFLICT\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"D\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+object fold 4 cells",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-missing-limit.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/no-missing-limit.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm object missing or ambiguous stack limit",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-memory.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/no-memory.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm initialized memory [0-9]+ exceeds declared memory 1",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-deadline.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/no-deadline.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm worker lifetime",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "land"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+landed"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "TARGET.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"B\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"C\",\"state\":\"FORBIDDEN\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"G\",\"state\":\"CONFLICT\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"D\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+object fold 4 cells",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "esm.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/esm.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"B\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"C\",\"state\":\"FORBIDDEN\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"G\",\"state\":\"CONFLICT\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "^CELL \\{\"cell\":\"D\",\"state\":\"REQUIRED\"",
+          "flags": "m"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+object fold 4 cells",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-missing-limit.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/no-missing-limit.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm object missing or ambiguous stack limit",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-memory.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/no-memory.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm initialized memory [0-9]+ exceeds declared memory 1",
+          "flags": "m"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "fold",
+        "no-deadline.bound",
+        "--as",
+        "object"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/no-deadline.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 1,
+      "matches": [
+        {
+          "stream": "stderr",
+          "pattern": "^[^\\s:]+: REFUSE·wasm worker lifetime",
+          "flags": "m"
+        }
+      ]
+    }
+  ]
+}

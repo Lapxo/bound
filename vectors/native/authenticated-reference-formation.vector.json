@@ -1,0 +1,53 @@
+{
+  "scope": "fixture/authenticated-reference-formation",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "phase": "preparation before timed reference readings",
+  "cases": [
+    {
+      "program": "/usr/bin/env",
+      "args": [
+        "bound",
+        "land",
+        "--key",
+        "device"
+      ],
+      "cwd": "samples/authenticated-reference/yes/weather-reading",
+      "inputs": [
+        "samples/authenticated-reference/yes/weather-reading/TARGET.bound"
+      ],
+      "timeoutMs": 10000,
+      "maxBytes": 2097152,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT     landed 56 unique lines from 56 in TARGET \u00b7 0 of 56 signed lines fail admission by declared authority"
+        }
+      ]
+    },
+    {
+      "program": "/usr/bin/env",
+      "args": [
+        "bound",
+        "land",
+        "--key",
+        "device"
+      ],
+      "cwd": "samples/authenticated-reference/yes/editorial-state",
+      "inputs": [
+        "samples/authenticated-reference/yes/editorial-state/TARGET.bound"
+      ],
+      "timeoutMs": 10000,
+      "maxBytes": 2097152,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT     landed 56 unique lines from 56 in TARGET \u00b7 0 of 56 signed lines fail admission by declared authority"
+        }
+      ]
+    }
+  ]
+}

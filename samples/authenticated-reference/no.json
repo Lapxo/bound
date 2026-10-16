@@ -1,0 +1,31 @@
+{
+  "role": "no samples",
+  "places": [
+    {
+      "place": "yes/weather-reading",
+      "cases": [
+        "signature",
+        "coverage",
+        "era",
+        "order",
+        "blob",
+        "standing"
+      ],
+      "procedure": "same public CLI and existing declared fixture transport; see executable vector",
+      "expected": "named refusal before CELL or AUTHENTICATED output"
+    },
+    {
+      "place": "yes/editorial-state",
+      "cases": [
+        "signature",
+        "coverage",
+        "era",
+        "order",
+        "blob",
+        "standing"
+      ],
+      "procedure": "same public CLI and existing declared fixture transport; see executable vector",
+      "expected": "named refusal before CELL or AUTHENTICATED output"
+    }
+  ]
+}
