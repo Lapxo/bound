@@ -1,0 +1,306 @@
+{
+  "profile": "authenticated-standing-compatibility@1",
+  "carrierPolicy": "original bytes and signatures unchanged",
+  "publicInspection": "legacy trust supplied independently; no contracts@2 identity inferred",
+  "nativeReceiver": "explicit backend absent: reference/backend before transport; no fallback",
+  "places": [
+    {
+      "place": "weather-reading",
+      "cases": [
+        {
+          "name": "yes",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3Af285a014cc9e9453aebd4c4ed94354fba5cac55c05929f4ad7cdd1b3348a9717&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/yes.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.yes.json"
+          ],
+          "exit": 0,
+          "matches": [
+            {
+              "stream": "stdout",
+              "pattern": "AUTHENTICATED standing sha256:6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"weather/temperature\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"lo\":2,\"hi\":3\\},\"ceiling\":\\{\"lo\":2,\"hi\":3\\},\"origins\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"lo\":2,\"hi\":3\\}\\}\\],\"rest\":\\[\\],\"required\":\\{\"lo\":0,\"hi\":10\\},\"signed\":\\{\"lo\":0,\"hi\":6\\}\\},\"rest\":\\[\\],\"ownMarks\":\\[\"parent-ceiling\"\\],\"ownClaims\":\\[\\{\"id\":\"claim-first\",\"origin\":\"origin-one\"\\}\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":\\{\"lo\":0,\"hi\":6\\},\"id\":\"parent-ceiling\",\"at\":3\\}\\],\"claims\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"lo\":2,\"hi\":3\\}\\}\\]\\}"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"weather/indoor\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"lo\":0,\"hi\":10\\},\"ceiling\":\\{\"lo\":0,\"hi\":9\\},\"origins\":\\[\\],\"rest\":\\[\"weather/temperature\"\\],\"required\":\\{\"lo\":0,\"hi\":10\\},\"signed\":\\{\"lo\":0,\"hi\":9\\}\\},\"rest\":\\[\"weather/temperature\"\\],\"ownMarks\":\\[\"child-join\"\\],\"ownClaims\":\\[\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":\\{\"lo\":0,\"hi\":9\\},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"\\}\\],\"claims\":\\[\\]\\}"
+            }
+          ]
+        },
+        {
+          "name": "signature",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3A2049bbbf88077727911a0cfec3193ab6ce7bccb8d4e3bb22fc537c59f5addf58&source=fixture%3A%2F%2Fcarrier%2Fsignature",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/signature.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.signature.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "signature"
+            }
+          ]
+        },
+        {
+          "name": "coverage",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3Ae313d0de2c5676093f6c7fff023a923fd489c122f241b1e211dd1ff6bf10e335&source=fixture%3A%2F%2Fcarrier%2Fcoverage",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/coverage.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.coverage.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "cover"
+            }
+          ]
+        },
+        {
+          "name": "era",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3Ab51f57e7433bfce9e31496552ea5dd9445eaedab3fc3d6a2093e9bb1763b5442&source=fixture%3A%2F%2Fcarrier%2Fera",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/era.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.era.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "signature"
+            }
+          ]
+        },
+        {
+          "name": "order",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3Ac9ce0f452ac4b0465993c2c4997a30d2a95c0d1f71c5cc2485b95c06c1b995ef&source=fixture%3A%2F%2Fcarrier%2Forder",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/order.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.order.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "cell not declared before claim-first"
+            }
+          ]
+        },
+        {
+          "name": "arrival",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3A7543cb2f595484527ac15fb5787cc2ca1ac37e580b6a0b0de577466bb185fb90&source=fixture%3A%2F%2Fcarrier%2Farrival",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/arrival.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.arrival.json"
+          ],
+          "exit": 0,
+          "matches": [
+            {
+              "stream": "stdout",
+              "pattern": "AUTHENTICATED standing sha256:6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"weather/temperature\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"lo\":2,\"hi\":3\\},\"ceiling\":\\{\"lo\":2,\"hi\":3\\},\"origins\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"lo\":2,\"hi\":3\\}\\}\\],\"rest\":\\[\\],\"required\":\\{\"lo\":0,\"hi\":10\\},\"signed\":\\{\"lo\":0,\"hi\":6\\}\\},\"rest\":\\[\\],\"ownMarks\":\\[\"parent-ceiling\"\\],\"ownClaims\":\\[\\{\"id\":\"claim-first\",\"origin\":\"origin-one\"\\}\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":\\{\"lo\":0,\"hi\":6\\},\"id\":\"parent-ceiling\",\"at\":3\\}\\],\"claims\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"lo\":2,\"hi\":3\\}\\}\\]\\}"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"weather/indoor\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"lo\":0,\"hi\":10\\},\"ceiling\":\\{\"lo\":0,\"hi\":9\\},\"origins\":\\[\\],\"rest\":\\[\"weather/temperature\"\\],\"required\":\\{\"lo\":0,\"hi\":10\\},\"signed\":\\{\"lo\":0,\"hi\":9\\}\\},\"rest\":\\[\"weather/temperature\"\\],\"ownMarks\":\\[\"child-join\"\\],\"ownClaims\":\\[\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":\\{\"lo\":0,\"hi\":9\\},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"\\}\\],\"claims\":\\[\\]\\}"
+            }
+          ]
+        },
+        {
+          "name": "blob",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=6bb526807d02f1072556d3dea7cb05227e4cdeb1747219c93c3fc950b2617fd8&blob=sha256%3A0000000000000000000000000000000000000000000000000000000000000000&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/yes.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.yes.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "blob integrity"
+            }
+          ]
+        },
+        {
+          "name": "standing",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=0000000000000000000000000000000000000000000000000000000000000000&blob=sha256%3Af285a014cc9e9453aebd4c4ed94354fba5cac55c05929f4ad7cdd1b3348a9717&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/weather-reading/TARGET.bound",
+            "samples/authenticated-reference/yes/weather-reading/inputs/yes.json",
+            "samples/authenticated-reference/yes/weather-reading/inputs/transport.yes.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "standing identity"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "place": "editorial-state",
+      "cases": [
+        {
+          "name": "yes",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3Ad0c251889330c27f3eac8066c59556f1ea95fba907ce083bcca5f0fab4061931&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/yes.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.yes.json"
+          ],
+          "exit": 0,
+          "matches": [
+            {
+              "stream": "stdout",
+              "pattern": "AUTHENTICATED standing sha256:48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"editorial/state\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\},\"ceiling\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\},\"origins\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\}\\}\\],\"rest\":\\[\\],\"required\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"signed\":\\{\"words\":\\{\"0\":3\\},\"width\":3\\}\\},\"rest\":\\[\\],\"ownMarks\":\\[\"parent-ceiling\"\\],\"ownClaims\":\\[\\{\"id\":\"claim-first\",\"origin\":\"origin-one\"\\}\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":\\{\"words\":\\{\"0\":3\\},\"width\":3\\},\"id\":\"parent-ceiling\",\"at\":3\\}\\],\"claims\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\}\\}\\]\\}"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"editorial/review\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"ceiling\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"origins\":\\[\\],\"rest\":\\[\"editorial/state\"\\],\"required\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"signed\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\}\\},\"rest\":\\[\"editorial/state\"\\],\"ownMarks\":\\[\"child-join\"\\],\"ownClaims\":\\[\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"\\}\\],\"claims\":\\[\\]\\}"
+            }
+          ]
+        },
+        {
+          "name": "signature",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3A839091ff13acc4695b1f0d41afd7bccb808b8ade6e2f51cae8c698ed1f52ac3f&source=fixture%3A%2F%2Fcarrier%2Fsignature",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/signature.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.signature.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "signature"
+            }
+          ]
+        },
+        {
+          "name": "coverage",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3A5e134fbce70c50f5f777c5e8c52929187699dc6f7e2b7c054caba4d59e98137e&source=fixture%3A%2F%2Fcarrier%2Fcoverage",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/coverage.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.coverage.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "cover"
+            }
+          ]
+        },
+        {
+          "name": "era",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3Aa6802fb8be3d954a9551d22d94c58d974bffd432746443b08be7da63442f0169&source=fixture%3A%2F%2Fcarrier%2Fera",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/era.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.era.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "signature"
+            }
+          ]
+        },
+        {
+          "name": "order",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3A6e3dcacb310fd2a631c739b1f0fa198259c086f690a27cedd952c57bd20f49d2&source=fixture%3A%2F%2Fcarrier%2Forder",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/order.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.order.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "cell not declared before claim-first"
+            }
+          ]
+        },
+        {
+          "name": "arrival",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3A5602a5247fde99b2295faa26523ef3134bc18eef87ea31e1289db297d2278e7e&source=fixture%3A%2F%2Fcarrier%2Farrival",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/arrival.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.arrival.json"
+          ],
+          "exit": 0,
+          "matches": [
+            {
+              "stream": "stdout",
+              "pattern": "AUTHENTICATED standing sha256:48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"editorial/state\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\},\"ceiling\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\},\"origins\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\}\\}\\],\"rest\":\\[\\],\"required\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"signed\":\\{\"words\":\\{\"0\":3\\},\"width\":3\\}\\},\"rest\":\\[\\],\"ownMarks\":\\[\"parent-ceiling\"\\],\"ownClaims\":\\[\\{\"id\":\"claim-first\",\"origin\":\"origin-one\"\\}\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"travels\",\"span\":\\{\"words\":\\{\"0\":3\\},\"width\":3\\},\"id\":\"parent-ceiling\",\"at\":3\\}\\],\"claims\":\\[\\{\"id\":\"claim-first\",\"at\":3,\"origin\":\"origin-one\",\"span\":\\{\"words\":\\{\"0\":1\\},\"width\":3\\}\\}\\]\\}"
+            },
+            {
+              "stream": "stdout",
+              "pattern": "CELL \\{\"cell\":\"editorial/review\",\"state\":\"REQUIRED\",\"parts\":\\{\"floor\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"ceiling\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"origins\":\\[\\],\"rest\":\\[\"editorial/state\"\\],\"required\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"signed\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\}\\},\"rest\":\\[\"editorial/state\"\\],\"ownMarks\":\\[\"child-join\"\\],\"ownClaims\":\\[\\],\"marks\":\\[\\{\"pole\":\"ceiling\",\"reach\":\"local\",\"span\":\\{\"words\":\\{\"0\":7\\},\"width\":3\\},\"widens\":\"parent-ceiling\",\"at\":4,\"id\":\"child-join\"\\}\\],\"claims\":\\[\\]\\}"
+            }
+          ]
+        },
+        {
+          "name": "blob",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=48ed60f5bc98aaed5a0818087e2b5b1d0e63000bb3b8dbd1e97bd250b097106c&blob=sha256%3A0000000000000000000000000000000000000000000000000000000000000000&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/yes.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.yes.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "blob integrity"
+            }
+          ]
+        },
+        {
+          "name": "standing",
+          "reference": "#bound:1?class=standing&algorithm=sha256&digest=0000000000000000000000000000000000000000000000000000000000000000&blob=sha256%3Ad0c251889330c27f3eac8066c59556f1ea95fba907ce083bcca5f0fab4061931&source=fixture%3A%2F%2Fcarrier%2Fyes",
+          "inputs": [
+            "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
+            "samples/authenticated-reference/yes/editorial-state/inputs/yes.json",
+            "samples/authenticated-reference/yes/editorial-state/inputs/transport.yes.json"
+          ],
+          "exit": 1,
+          "matches": [
+            {
+              "stream": "stderr",
+              "pattern": "standing identity"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

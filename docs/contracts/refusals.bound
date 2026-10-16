@@ -1,0 +1,94 @@
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=id role=writes scope=refusal/catalog value=bound-refusals@1
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/source value=reference-export/source
+bound-lock/1 about="The source URL is not a canonical standing-reference location." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/source value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/source value=check-source
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/context value=reference-export/context
+bound-lock/1 about="Required admitted export policy or exact contract bytes are missing or conflicting." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/context value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/context value=inspect-standing
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/budget value=reference-export/budget
+bound-lock/1 about="The export exceeds or lacks its explicitly declared record or byte budget." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/budget value=resource
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/budget value=inspect-resource-lines
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/authority value=reference-export/authority
+bound-lock/1 about="The selected key is not authorized for the snapshot proof at this epoch." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/authority value=authority
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/authority value=inspect-authority
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/signer value=reference-export/signer
+bound-lock/1 about="The selected signer failed or returned a signature that does not verify." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/signer value=host
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/signer value=inspect-signer
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/history value=reference-export/history
+bound-lock/1 about="The current carrier profile cannot represent this historical authority; no original is silently removed." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/history value=authority
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/history value=inspect-standing-contract
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/catalog/invalid value=catalog/invalid
+bound-lock/1 about="The refusal catalog is malformed, duplicated or incomplete." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/catalog/invalid value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/catalog/invalid value=resolve-catalog
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference/format value=reference/format
+bound-lock/1 about="The reference has an unsupported or noncanonical shape." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference/format value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference/format value=check-reference
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/standing/view value=standing/view
+bound-lock/1 about="The place has not declared the public standing view." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/standing/view value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/standing/view value=declare-standing-view
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/standing/query value=standing/query
+bound-lock/1 about="Standing accepts only the local committed projection." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/standing/query value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/standing/query value=query-local-standing
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference-export/usage value=reference-export/usage
+bound-lock/1 about="Reference export requires exactly one source and explicit signing options." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference-export/usage value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference-export/usage value=check-export-arguments
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/context value=authenticated-reference/context
+bound-lock/1 about="The supplied interpretation context or snapshot binding is inconsistent." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/context value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/context value=resolve-public-context
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/budget value=authenticated-reference/budget
+bound-lock/1 about="The declared record or byte budget is invalid or exceeded." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/budget value=resource
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/budget value=inspect-resource-lines
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/transport value=authenticated-reference/transport
+bound-lock/1 about="The content port failed or returned shared mutable bytes." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/transport value=host
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/transport value=inspect-content-port
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/integrity value=authenticated-reference/integrity
+bound-lock/1 about="Carrier bytes or the snapshot commitment differ from their declared digest." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/integrity value=integrity
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/integrity value=resolve-exact-bytes
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/framing value=authenticated-reference/framing
+bound-lock/1 about="The carrier is not the canonical supported UTF-8 frame." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/framing value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/framing value=check-carrier
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/wire value=authenticated-reference/wire
+bound-lock/1 about="An original record is not canonical supported wire." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/wire value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/wire value=check-original-records
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/authority value=authenticated-reference/authority
+bound-lock/1 about="The proof or an original lacks admitted authority under the supplied context." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/authority value=authority
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/authority value=inspect-authority
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/history value=authenticated-reference/history
+bound-lock/1 about="This carrier profile cannot authenticate configuration withdrawal history." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/history value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/history value=request-admitted-standing
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/object-context value=authenticated-reference/object-context
+bound-lock/1 about="The existing object validator refused the declared form or context." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/object-context value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/object-context value=inspect-object-context
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/authenticated-reference/identity value=authenticated-reference/identity
+bound-lock/1 about="The semantic standing differs from the reference identity." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/authenticated-reference/identity value=integrity
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/authenticated-reference/identity value=resolve-standing
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/operation/failed value=operation/failed
+bound-lock/1 about="An operation failed without a more specific public code; details are diagnostic only." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/operation/failed value=host
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/operation/failed value=inspect-diagnostic
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/operation/usage value=operation/usage
+bound-lock/1 about="The command arguments do not describe a supported public operation." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/operation/usage value=input
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/operation/usage value=check-arguments
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference/backend value=reference/backend
+bound-lock/1 about="The host did not select a supported explicit reference backend." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference/backend value=interpretation
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference/backend value=select-reference-backend
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=code role=writes scope=refusal/reference/cancelled value=reference/cancelled
+bound-lock/1 about="The opening was interrupted before a complete result." at=policy:bound-reference-export by=target form=alphabet measure=class role=writes scope=refusal/reference/cancelled value=host
+bound-lock/1 at=policy:bound-reference-export by=target form=alphabet measure=next role=writes scope=refusal/reference/cancelled value=inspect-interruption
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/budget value=host-port/budget
+bound-lock/1 about="A host port lacks a valid finite budget or exceeds its byte bound." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/budget value=resource
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/budget value=inspect-resource-lines
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/cancelled value=host-port/cancelled
+bound-lock/1 about="A host operation was cancelled before a complete result." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/cancelled value=host
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/cancelled value=inspect-interruption
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/timeout value=host-port/timeout
+bound-lock/1 about="A host operation exceeded its declared lifetime." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/timeout value=host
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/timeout value=inspect-host-port
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/failed value=host-port/failed
+bound-lock/1 about="A declared host callback failed; no successful result is returned." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/failed value=host
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/failed value=inspect-host-port
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/integrity value=host-port/integrity
+bound-lock/1 about="Content bytes differ from the requested SHA-256 identity." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/integrity value=integrity
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/integrity value=resolve-exact-bytes
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/response value=host-port/response
+bound-lock/1 about="A host response has an unsupported shape or shared mutable bytes." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/response value=host
+bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/response value=inspect-host-port

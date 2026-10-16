@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/standing",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/standing.md",
+      "digest": "sha256:5ec4de0e1a47590361c74eb3c35256367bf11e4803d95a75ecfd38d76914b9bf"
+    },
+    {
+      "role": "yes",
+      "path": "samples/standing/yes.json",
+      "digest": "sha256:3fa321061f10b9d8fa25ddd8c57bf2471196e98a1719b41cd37352aee014ae9a"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/standing.vector.json",
+      "digest": "sha256:a70bacac5dcec8409388ef4f39394ed51180dabac65c27e9c4384de894bc05ba"
+    },
+    {
+      "role": "no",
+      "path": "samples/standing/no.json",
+      "digest": "sha256:147eba19b429b81cd2f7452c0a482796d2c4f95f842e3068b3cff40567db3ce7"
+    }
+  ]
+}

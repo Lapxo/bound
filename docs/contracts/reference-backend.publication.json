@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/reference-backend",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/reference-backend.md",
+      "digest": "sha256:c69fbaac11276efcd8a436f242e07d4fda18137c9987f8bba183fe6d6ea801c6"
+    },
+    {
+      "role": "yes",
+      "path": "samples/reference-backend/yes.json",
+      "digest": "sha256:67657bf32a0b85053bf3778f8e1dc13478aaf7386e39200d6967cc9ff2ef5e6f"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/reference-backend.vector.json",
+      "digest": "sha256:05257cf22466c859eb01e1abf660927afb5a9a160d3865053ebdf8649f0f5392"
+    },
+    {
+      "role": "no",
+      "path": "samples/reference-backend/no.json",
+      "digest": "sha256:a4e3dd23533925d117954666eb68c4f54165af3263317c330beed6d13a216626"
+    }
+  ]
+}

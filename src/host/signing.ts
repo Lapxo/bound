@@ -1,3 +1,4 @@
+import{invokeSigningPort,type SigningPort}from'../engine/ports.ts';
 import { readFileSync } from 'node:fs';
 import { parse, signerSelection, signerRequestBytes, signerResponseBytes, signerResponseOf } from '@lapxo/topos/wire';
 import { invokeSigner, SigningFailure } from './ports/signing.ts';
@@ -25,10 +26,14 @@ function binding(name: string, keyFile?: string): SigningMechanism {
 }
 
 /** Resolve data before acquisition; all mechanisms use one wire protocol and verification path. */
-export function signerFor(lines: readonly string[], keyId: string, selected?: string, keyFile?: string) {
+export function signerFor(lines: readonly string[], keyId: string, selected?: string, keyFile?: string, injected?:{readonly name:string;readonly sign:SigningPort}) {
   const fields = lines.flatMap(line => { const got = parse(line); return got.kind === 'fact' ? [got.value.fields] : []; });
   const declaration = signerSelection(fields, keyId);
   if (selected !== undefined && selected !== declaration.name) throw new SigningFailure(`REFUSE·signer ${keyId} CLI selection conflicts with declaration`);
+  if(injected){
+    if(injected.name!==declaration.name||keyFile)throw new SigningFailure('REFUSE·signer injected host binding conflicts with declaration or key file');
+    return(lot:SigningLot)=>invokeSigningPort(lot,injected.sign,{timeoutMs:declaration.timeoutMs,maxBytes:declaration.responseBytes});
+  }
   const mechanism = binding(declaration.name, keyFile);
   const protocol = { request: signerRequestBytes, response: signerResponseBytes, reply: signerResponseOf };
   return (lot: SigningLot) => invokeSigner(lot, mechanism, protocol, declaration);

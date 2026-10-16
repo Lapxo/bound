@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/wasm-object.cli.json",
-      "digest": "sha256:5f761fabd0592d7f8e9b95a9fc80583424a8e83fb7cb3c4b4905b62eca43db9e"
+      "digest": "sha256:f0b970ede31b99e00e94f249970aa8c714880dccb03ed7952a3cf01bf24a7c17"
     },
     {
       "role": "no",

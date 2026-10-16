@@ -15,8 +15,8 @@ function refuse(cause:string):never {throw Error('REFUSE·wasm object '+cause);}
 export function usesWasmObject(configuration:readonly Fields[]):boolean {
  const rows=configuration.filter(f=>f.scope==='engine/object'&&f.value!=='withdraw');
  if(!rows.length)return false;
- if(rows.length!==1||rows[0]!.role!=='writes'||rows[0]!.measure!=='id'||rows[0]!.form!=='alphabet'||rows[0]!.value!=='wasm@1')refuse('unique declared backend required');
- return true;
+ if(rows.length!==1||rows[0]!.role!=='writes'||rows[0]!.measure!=='id'||rows[0]!.form!=='alphabet'||!['esm@1','wasm@1'].includes(rows[0]!.value??''))refuse('unique declared backend required');
+ return rows[0]!.value==='wasm@1';
 }
 function limit(configuration:readonly Fields[],name:string,measure:string):number {
  const rows=configuration.filter(f=>f.scope==='engine/wasm/'+name&&f.value!=='withdraw');

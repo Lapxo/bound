@@ -3,6 +3,12 @@
   "scope": "contract/published/native",
   "surface": [
     "contract/published/optional-wasm-adapter",
-    "contract/published/authenticated-reference"
+    "contract/published/authenticated-reference",
+    "contract/published/reference-export",
+    "contract/published/reference-backend",
+    "contract/published/standing",
+    "contract/published/refusals",
+    "contract/published/host-ports",
+    "contract/published/readme"
   ]
 }

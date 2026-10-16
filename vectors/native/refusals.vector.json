@@ -1,0 +1,95 @@
+{
+  "scope": "conformance/refusals",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "refusals-native-quartet",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "test/refusal-catalog.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "samples/refusals/yes.json",
+        "samples/refusals/no.json",
+        "docs/contracts/refusals.bound",
+        "test/refusal-catalog.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "REFUSALS lines \u00b7 unique codes \u00b7 exact metadata \u00b7 duplicate refused"
+        }
+      ]
+    },
+    {
+      "name": "refusals-native-native-reference-export",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native reference export from a real admitted place native-reference-export",
+        "test/reference-export.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-export.test.ts",
+        "test/support/acting-root.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "assets/wasm/guest.js",
+        "test/support/reference-root.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "REFUSALS native-reference-export \u00b7 native usage budget context history query fallback \u00b7 named"
+        }
+      ]
+    },
+    {
+      "name": "refusals-native-editorial-delivery",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native reference export from a real admitted place editorial-delivery",
+        "test/reference-export.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-export.test.ts",
+        "test/support/acting-root.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "assets/wasm/guest.js",
+        "test/support/reference-root.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "REFUSALS editorial-delivery \u00b7 native usage budget context history query fallback \u00b7 named"
+        }
+      ]
+    }
+  ]
+}

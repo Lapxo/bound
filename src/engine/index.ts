@@ -9,3 +9,6 @@
 export {objectFold} from './object.ts';
 export type {ObjectReading} from './object.ts';
 export type {ObjectRecord,ObjectContext} from '@lapxo/topos/wire';
+// Optional host operations are explicit and injected; objectFold itself never invokes them.
+export{readContent,retainContent,invokeSigningPort}from'./ports.ts';
+export type{PortLimits,ContentReadPort,PersistencePort,DigestPort,SigningPort,SigningLot,SignatureRecord}from'./ports.ts';

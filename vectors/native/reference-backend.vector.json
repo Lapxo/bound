@@ -1,0 +1,84 @@
+{
+  "scope": "conformance/reference-backend",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "authenticated-wasm-water-level-reference",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "complete authenticated WASM opening water-level-reference",
+        "test/reference-backend.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-backend.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/reference-world.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "samples/reference-backend/world-fixture.json",
+        "samples/reference-backend/yes.json",
+        "samples/reference-backend/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/manifest.json",
+        "assets/wasm/guest.js",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "WASM water-level-reference · authenticated download · same standing · same records · byte-equal ESM projection · altered carrier refused · no commit"
+        }
+      ]
+    },
+    {
+      "name": "authenticated-wasm-editorial-reference",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "complete authenticated WASM opening editorial-reference",
+        "test/reference-backend.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-backend.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/reference-world.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "samples/reference-backend/world-fixture.json",
+        "samples/reference-backend/yes.json",
+        "samples/reference-backend/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/manifest.json",
+        "assets/wasm/guest.js",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "WASM editorial-reference · authenticated download · same standing · same records · byte-equal ESM projection · altered carrier refused · no commit"
+        }
+      ]
+    }
+  ]
+}

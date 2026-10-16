@@ -1,0 +1,4 @@
+{
+  "mutation": "replace-admitted-value-without-resigning",
+  "expect": "forged-line-excluded"
+}

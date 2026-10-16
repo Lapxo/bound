@@ -7,10 +7,12 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical, parse} from '@lapxo/topos/wire';
 
+const standingYes=JSON.parse(readFileSync(new URL('../samples/standing/yes.json',import.meta.url),'utf8')),standingNo=JSON.parse(readFileSync(new URL('../samples/standing/no.json',import.meta.url),'utf8'));
+assert.deepEqual(standingYes.classes,['authorize','attest','read','fold']);assert.equal(standingNo.expect,'forged-line-excluded');
 const reader = process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js', import.meta.url).pathname;
 const row = (scope: string, measure: string, value: string) => canonical({scope, measure, value, form:'alphabet', role:'writes', by:'target', at:'policy:race'});
 
-for (const place of ['observations', 'inventory']) for (const mode of ['journal','act']) test(`public standing includes attest evidence in ${place} via ${mode}`, {timeout:30_000}, async () => {
+for (const place of standingYes.places as string[]) for (const mode of standingYes.delivery as string[]) test(`public standing includes attest evidence in ${place} via ${mode}`, {timeout:30_000}, async () => {
   const temp = mkdtempSync(join(tmpdir(), 'bound-base-'));
   const root = join(temp, place), key = join(temp, 'ephemeral.pem');
   const captures:unknown[]=[];
@@ -27,6 +29,8 @@ for (const place of ['observations', 'inventory']) for (const mode of ['journal'
     lines.push(row('wire/act-result','id','local-act@1'),row('wire/act-result-scope','id','receipts'),row('wire/act-result-context','id','receipt:local-act'),row('keys/folder','class','fold'),canonical({scope:'view/act',measure:'id',value:'act',role:'demands',form:'alphabet',by:'target',at:'policy:race'}));
     lines.push(canonical({scope:'view/standing',measure:'id',value:'standing',role:'demands',form:'alphabet',by:'target',at:'policy:race'}));
     if(mode==='journal') { const i=lines.findIndex(line=>/scope=wire\/act-result /.test(line)); lines.splice(i,1); }
+    const auxiliary=['read','fold'].map((kind,index)=>{const id=index===0?'reader':'folder',pair=generateKeyPairSync('ed25519'),file=join(temp,id+'.pem');writeFileSync(file,pair.privateKey.export({format:'pem',type:'pkcs8'}),{mode:0o600});
+      lines.push(row('keys/'+id,'coverage','sample/'+kind),row('keys/'+id,'public-key',pair.publicKey.export({format:'der',type:'spki'}).toString('base64')),row('keys/'+id,'signer','file'),canonical({scope:'keys/'+id,measure:'resolution',value:'1..16',form:'interval',role:'writes',by:'target',at:'policy:race'}));return{id,kind,file};});
     writeFileSync(join(root,'TARGET.bound'),lines.join('\n')+'\n');
     const run = (args: string[]) => {
       const started=Date.now(),result=spawnSync(process.execPath,[reader,...args],{cwd:root,env:{...process.env,NODE_OPTIONS:'',NODE_PATH:''},encoding:'utf8',timeout:15_000});
@@ -44,7 +48,16 @@ for (const place of ['observations', 'inventory']) for (const mode of ['journal'
     const land=run(['land',lot]);
     assert.equal(land.status,0,land.stdout+land.stderr);
     const publicRead=()=> { const r=run(['fold','--as','standing']); assert.equal(r.status,0,r.stderr); return r.stdout; };
-    const first=publicRead();
+    for(const member of auxiliary){
+      const source=join(temp,member.id+'.bound');writeFileSync(source,row('sample/'+member.kind,'observed',member.kind)+'\n');
+      const signed=run(['sign',source,'--key',member.id,'--key-file',member.file]);assert.equal(signed.status,0,signed.stderr);writeFileSync(source,signed.stdout.split('\n').filter(line=>parse(line).kind==='fact').join('\n')+'\n');
+      const landed=run(['land',source]);assert.equal(landed.status,0,landed.stderr);
+      assert.match(publicRead(),new RegExp('by='+member.id+'.*scope=sample/'+member.kind));
+    }
+    // Same coordinate, incompatible admitted values, distinct writers: retain both.
+    const collision=join(temp,'collision.bound');writeFileSync(collision,row('sample/reading','observed','alternative')+'\n');
+    const collided=run(['land',collision,'--key','owner','--key-file',key]);assert.equal(collided.status,0,collided.stderr);
+    const first=publicRead();assert.match(first,/by=owner.*scope=sample\/reading.*value=alternative/);
     // Test-only corrupt delivery: a stored inscription is not proof of authority.
     appendFileSync(join(root,'.bound','ledger','device.bound'),signed.replace('value=retained','value=forged'));
     assert.doesNotMatch(publicRead(),/value=forged/);
@@ -58,16 +71,23 @@ for (const place of ['observations', 'inventory']) for (const mode of ['journal'
     const next=publicRead();assert.match(next,/scope=sample\/next.*value=new/);assert.doesNotMatch(next,/scope=sample\/next.*value=old/);
     writeFileSync(source,row('sample/next','observed','withdraw')+'\n');
     const withdrawal=run(['land',source,'--key','owner','--key-file',key]);assert.equal(withdrawal.status,0,withdrawal.stderr);
-    const withdrawn=publicRead();assert.doesNotMatch(withdrawn,/scope=sample\/next.*value=new/);assert.match(withdrawn,/scope=sample\/reading.*value=retained/);
+    const withdrawn=publicRead();assert.doesNotMatch(withdrawn,/value=withdraw/);assert.doesNotMatch(withdrawn,/scope=sample\/next.*value=new/);assert.match(withdrawn,/scope=sample\/reading.*value=retained/);
     const replay=run(['land',lot]);assert.equal(replay.status,0,replay.stderr);assert.match(replay.stdout,/ONCE/);assert.equal(publicRead(),withdrawn);
+    // Withdrawal at one exact inscription must not erase a different inscription.
+    const alternate=canonical({scope:'sample/exact',measure:'observed',value:'other',form:'alphabet',role:'writes',by:'target',at:'policy:other'});
+    writeFileSync(source,row('sample/exact','observed','original')+'\n'+alternate+'\n');
+    const exact=run(['land',source,'--key','owner','--key-file',key]);assert.equal(exact.status,0,exact.stderr);
+    writeFileSync(source,row('sample/exact','observed','withdraw')+'\n');
+    const exactWithdraw=run(['land',source,'--key','owner','--key-file',key]);assert.equal(exactWithdraw.status,0,exactWithdraw.stderr);
+    const exactRead=publicRead();assert.doesNotMatch(exactRead,/scope=sample\/exact.*value=original/);assert.match(exactRead,/at=policy:other.*scope=sample\/exact.*value=other/);
     writeFileSync(source,row('keys/device','class','withdraw')+'\n');
     const retire=run(['land',source,'--key','owner','--key-file',key]);assert.equal(retire.status,0,retire.stderr);
     assert.match(publicRead(),/scope=sample\/reading.*value=retained/);
     assert.notEqual(run(['sign',lot,'--key','device','--key-file',deviceKey]).status,0);
     writeFileSync(source,canonical({scope:'view/standing',measure:'id',value:'withdraw',role:'demands',form:'alphabet',by:'target',at:'policy:race'})+'\n');
     const removeView=run(['land',source,'--key','owner','--key-file',key]);assert.equal(removeView.status,0,removeView.stderr);
-    const undeclared=run(['fold','--as','standing']);assert.equal(undeclared.status,1);assert.match(undeclared.stderr,/REFUSE·view standing/);
-    console.log(`STANDING ${place} ${mode} · attest retained · revisions and withdrawals applied · replay identical`);
+    const undeclared=run(['fold','--as','standing']);assert.equal(undeclared.status,1);assert.match(undeclared.stderr,/REFUSE·view standing/);const refusal=JSON.parse(undeclared.stderr.trim().split('\n').at(-1)!);assert.equal(refusal.code,'standing/view');assert.equal(refusal.next,'declare-standing-view');
+    console.log(`STANDING ${place} ${mode} · all classes · collisions retained · exact withdrawals · replay identical · forged excluded`);
   }finally{
     // Optional test transcript: CLI output only, never fixture key material.
     const captureDir=process.env.BOUND_TEST_CAPTURE_DIR;

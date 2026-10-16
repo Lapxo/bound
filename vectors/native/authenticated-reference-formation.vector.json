@@ -3,7 +3,7 @@
   "measure": "count",
   "result": "failures",
   "execution": "independent",
-  "phase": "preparation before timed reference readings",
+  "phase": "fixture preparation before independent timed readings; existing public signed places, no private key",
   "cases": [
     {
       "program": "/usr/bin/env",
@@ -46,6 +46,60 @@
         {
           "stream": "stdout",
           "pattern": "FACT     landed 56 unique lines from 56 in TARGET \u00b7 0 of 56 signed lines fail admission by declared authority"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "land"
+      ],
+      "cwd": "samples/wasm/water-level",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/water-level/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+landed"
+        }
+      ]
+    },
+    {
+      "program": "runtime",
+      "args": [
+        "../../../dist/cli/verb.js",
+        "land"
+      ],
+      "cwd": "samples/wasm/editorial-notes",
+      "inputs": [
+        "dist/cli/verb.js",
+        "dist/wasm/node-worker.js",
+        "package.json",
+        "assets/wasm/manifest.json",
+        "assets/wasm/runtime.js",
+        "assets/wasm/runtime.wasm",
+        "assets/wasm/guest.js",
+        "samples/wasm/editorial-notes/TARGET.bound"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "FACT\\s+landed"
         }
       ]
     }

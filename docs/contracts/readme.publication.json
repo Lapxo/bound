@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/readme",
+  "members": [
+    {
+      "role": "contract",
+      "path": "README.md",
+      "digest": "sha256:ab734c17e719d29076e44e2560588a2fbd31e65dbf72980e0d02f587e3c18d10"
+    },
+    {
+      "role": "yes",
+      "path": "samples/readme/yes.json",
+      "digest": "sha256:37449e6ec4867f034463ca20218d370fe40c1d5dec759871c398fd73109f9f6e"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/readme.vector.json",
+      "digest": "sha256:b97b50e102fb6c34851d2769d6029663fb4838e2eb70a9bdb4c168141b8964f3"
+    },
+    {
+      "role": "no",
+      "path": "samples/readme/no.json",
+      "digest": "sha256:6bb243445b009fd94ba021342fca34ea00cf4c5257378d9d7c05840c13166f73"
+    }
+  ]
+}

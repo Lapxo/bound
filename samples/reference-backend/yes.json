@@ -1,0 +1,1 @@
+{"places":["water-level-reference","editorial-reference"],"backends":["esm@1","wasm@1"],"expectedState":"REQUIRED","projection":"byte-equal","commit":false}

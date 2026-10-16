@@ -1,9 +1,10 @@
+import {BoundRefusal} from './refusals.ts';
 /** reference-profile@1: platform URL parsing, no authority or transport effects. */
 export interface StandingReference {readonly class:'standing';readonly algorithm:'sha256';readonly digest:string;readonly blob:string;readonly source:string}
 interface InspectionPort {readonly maxBytes:number;readonly readSemanticStanding:(bytes:string)=>readonly string[];readonly semanticStandingBytes:(lines:readonly string[])=>string;readonly digestBytes:(bytes:Uint8Array)=>string}
 
 const hex = /^[0-9a-f]{64}$/;
-const refuse = (cause:string):never => { throw Error(`REFUSE·reference ${cause}`); };
+const refuse = (cause:string):never => { throw new BoundRefusal('reference/format',`REFUSE·reference ${cause}`); };
 const keys = ['class', 'algorithm', 'digest', 'blob', 'source'] as const;
 function check(reference:StandingReference):StandingReference {
   if (Object.keys(reference).length !== keys.length || keys.some(key => !Object.prototype.hasOwnProperty.call(reference, key))) refuse('fields');
