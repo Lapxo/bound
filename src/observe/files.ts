@@ -20,7 +20,14 @@ function bytesAt(at: string): Buffer | undefined {
   const stamp = `${st.ino}-${st.size}-${st.mtimeMs}`;
   const held = seen.get(at);
   if (held?.stamp === stamp) return held.bytes;
-  const bytes = readFileSync(at);
+  let bytes: Buffer;
+  try { bytes = readFileSync(at); }
+  catch (error) {
+    // A concurrent act can retire a coordinate after its stamp was read.
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    seen.delete(at);
+    return undefined;
+  }
   seen.set(at, { stamp, bytes });
   return bytes;
 }
