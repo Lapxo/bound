@@ -1,0 +1,116 @@
+{
+  "scope": "conformance/standing",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "standing-observations-journal",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public standing includes attest evidence in observations via journal",
+        "test/standing-result-cli.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "samples/standing/yes.json",
+        "samples/standing/no.json",
+        "docs/contracts/standing.bound",
+        "test/standing-result-cli.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "STANDING observations journal · all classes · collisions retained · exact withdrawals · replay identical · forged excluded"
+        }
+      ]
+    },
+    {
+      "name": "standing-observations-act",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public standing includes attest evidence in observations via act",
+        "test/standing-result-cli.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "samples/standing/yes.json",
+        "samples/standing/no.json",
+        "docs/contracts/standing.bound",
+        "test/standing-result-cli.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "STANDING observations act · all classes · collisions retained · exact withdrawals · replay identical · forged excluded"
+        }
+      ]
+    },
+    {
+      "name": "standing-inventory-journal",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public standing includes attest evidence in inventory via journal",
+        "test/standing-result-cli.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "samples/standing/yes.json",
+        "samples/standing/no.json",
+        "docs/contracts/standing.bound",
+        "test/standing-result-cli.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "STANDING inventory journal · all classes · collisions retained · exact withdrawals · replay identical · forged excluded"
+        }
+      ]
+    },
+    {
+      "name": "standing-inventory-act",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public standing includes attest evidence in inventory via act",
+        "test/standing-result-cli.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "samples/standing/yes.json",
+        "samples/standing/no.json",
+        "docs/contracts/standing.bound",
+        "test/standing-result-cli.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "STANDING inventory act · all classes · collisions retained · exact withdrawals · replay identical · forged excluded"
+        }
+      ]
+    }
+  ]
+}

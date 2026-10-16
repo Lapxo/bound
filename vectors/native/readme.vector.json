@@ -1,0 +1,76 @@
+{
+  "scope": "conformance/readme",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "readme/0",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "installed README example sensor",
+        "test/readme.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/readme.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "samples/readme/yes.json",
+        "samples/readme/no.json",
+        "README.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "README sensor \u00b7 REQUIRED \u00b7 altered carrier refused"
+        }
+      ]
+    },
+    {
+      "name": "readme/1",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "installed README example editorial",
+        "test/readme.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/readme.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "samples/readme/yes.json",
+        "samples/readme/no.json",
+        "README.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "README editorial \u00b7 REQUIRED \u00b7 altered carrier refused"
+        }
+      ]
+    }
+  ]
+}

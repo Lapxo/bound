@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/host-ports",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/host-ports.md",
+      "digest": "sha256:f3d646da2399c719469a37293b329d53b72b0478ca97f961b90c1f4e6adc2ae6"
+    },
+    {
+      "role": "yes",
+      "path": "samples/host-ports/yes.json",
+      "digest": "sha256:f8dc3c6939bd8f4bb91cb57e3e9b52a865645cc80ee0f5ce5a11570ef3f31ce3"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/host-ports.vector.json",
+      "digest": "sha256:58425f81fb4f1ef6e392d8fa3a5ee3a287ef6fbcbfb11e512fd2e30f24f465e6"
+    },
+    {
+      "role": "no",
+      "path": "samples/host-ports/no.json",
+      "digest": "sha256:ffc9dbb29743d4faa16c5c29eb73a7e0f24cf4da3255a979f628f5c3d8f4b7c1"
+    }
+  ]
+}

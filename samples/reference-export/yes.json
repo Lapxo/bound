@@ -1,0 +1,15 @@
+{
+  "source": "https://example.test/place/carrier.json",
+  "cell": {
+    "scope": "sample/value",
+    "params": {
+      "lo": 0,
+      "hi": 10
+    }
+  },
+  "claim": {
+    "origin": "one",
+    "value": "2..3"
+  },
+  "expectedState": "REQUIRED"
+}

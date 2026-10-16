@@ -1,0 +1,107 @@
+{
+  "scope": "conformance/host-ports",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "host-ports/0",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public host ports retain owned bytes and reject failed or interrupted operations",
+        "test/host-ports.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-ports.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "samples/host-ports/yes.json",
+        "samples/host-ports/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "PORTS owned content \u00b7 verified retention \u00b7 signer content persistence failures \u00b7 budget integrity cancellation timeout refused"
+        }
+      ]
+    },
+    {
+      "name": "host-ports/1",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native injected host ports host-sensor",
+        "test/host-ports.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-ports.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "samples/host-ports/yes.json",
+        "samples/host-ports/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST host-sensor \u00b7 declared signer and content injected \u00b7 real signature verified \u00b7 wrong binding refused \u00b7 no commit"
+        }
+      ]
+    },
+    {
+      "name": "host-ports/2",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native injected host ports host-editorial",
+        "test/host-ports.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-ports.test.ts",
+        "test/support/reference-root.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "samples/host-ports/yes.json",
+        "samples/host-ports/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST host-editorial \u00b7 declared signer and content injected \u00b7 real signature verified \u00b7 wrong binding refused \u00b7 no commit"
+        }
+      ]
+    }
+  ]
+}

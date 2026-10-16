@@ -5,14 +5,14 @@
       "place": "yes/weather-reading",
       "target": "yes/weather-reading/TARGET.bound",
       "data": "yes/weather-reading/inputs/yes.json",
-      "procedure": "keyless native land preparation, then public CLI fold of declared #bound reference",
+      "procedure": "public inspectAuthenticatedReference against independently prepared admitted authority; original carrier bytes retained; native receiver without explicit backend refuses reference/backend",
       "expected": "AUTHENTICATED with standing identity and two REQUIRED cells"
     },
     {
       "place": "yes/editorial-state",
       "target": "yes/editorial-state/TARGET.bound",
       "data": "yes/editorial-state/inputs/yes.json",
-      "procedure": "keyless native land preparation, then public CLI fold of declared #bound reference",
+      "procedure": "public inspectAuthenticatedReference against independently prepared admitted authority; original carrier bytes retained; native receiver without explicit backend refuses reference/backend",
       "expected": "AUTHENTICATED with standing identity and two REQUIRED cells"
     }
   ]

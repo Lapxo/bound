@@ -1,0 +1,9 @@
+{
+  "places": [
+    "host-sensor",
+    "host-editorial"
+  ],
+  "state": "REQUIRED",
+  "commit": false,
+  "retention": "bytes-only"
+}

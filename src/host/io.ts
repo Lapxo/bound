@@ -11,5 +11,5 @@ export { fileURLToPath } from 'node:url';
 export { parentPort, workerData } from 'node:worker_threads';
 export { gzipSync } from 'node:zlib';
 
-/** UTF-8 encoding for host byte formats. */
-export const encodeUTF8=(text:string):Uint8Array=>new TextEncoder().encode(text);
+/** UTF-8 encoding is shared with host-free protocol ports. */
+export {encodeUTF8} from '../engine/encoding.ts';

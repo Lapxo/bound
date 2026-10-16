@@ -1,0 +1,8 @@
+{
+  "profile": "reference-world-fixture@1",
+  "source": "https://github.com/Lapxo/bound/releases/download/v0.2.0/native-publication-readings.tgz",
+  "blob": "sha256:859a3684c434e66ee963ff13f6028863caa2c0d6864cdcde27718034a8730e58",
+  "bytes": 932057,
+  "timeoutMs": 15000,
+  "standing": "sha256:13ee36d217833cb78bc180a62303e3335f4f1020d120914d1ef7d674ae38f67e"
+}

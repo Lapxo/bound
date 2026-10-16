@@ -8,33 +8,6 @@
       "program": "runtime",
       "args": [
         "../../../dist/cli/verb.js",
-        "land"
-      ],
-      "cwd": "samples/wasm/water-level",
-      "inputs": [
-        "dist/cli/verb.js",
-        "dist/wasm/node-worker.js",
-        "package.json",
-        "assets/wasm/manifest.json",
-        "assets/wasm/runtime.js",
-        "assets/wasm/runtime.wasm",
-        "assets/wasm/guest.js",
-        "samples/wasm/water-level/TARGET.bound"
-      ],
-      "timeoutMs": 20000,
-      "maxBytes": 1048576,
-      "exit": 0,
-      "matches": [
-        {
-          "stream": "stdout",
-          "pattern": "FACT\\s+landed"
-        }
-      ]
-    },
-    {
-      "program": "runtime",
-      "args": [
-        "../../../dist/cli/verb.js",
         "fold",
         "TARGET.bound",
         "--as",
@@ -159,7 +132,7 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm object missing or ambiguous stack limit",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm object missing or ambiguous stack limit",
           "flags": "m"
         }
       ]
@@ -190,7 +163,7 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm initialized memory [0-9]+ exceeds declared memory 1",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm initialized memory [0-9]+ exceeds declared memory 1",
           "flags": "m"
         }
       ]
@@ -221,35 +194,8 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm worker lifetime",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm worker lifetime",
           "flags": "m"
-        }
-      ]
-    },
-    {
-      "program": "runtime",
-      "args": [
-        "../../../dist/cli/verb.js",
-        "land"
-      ],
-      "cwd": "samples/wasm/editorial-notes",
-      "inputs": [
-        "dist/cli/verb.js",
-        "dist/wasm/node-worker.js",
-        "package.json",
-        "assets/wasm/manifest.json",
-        "assets/wasm/runtime.js",
-        "assets/wasm/runtime.wasm",
-        "assets/wasm/guest.js",
-        "samples/wasm/editorial-notes/TARGET.bound"
-      ],
-      "timeoutMs": 20000,
-      "maxBytes": 1048576,
-      "exit": 0,
-      "matches": [
-        {
-          "stream": "stdout",
-          "pattern": "FACT\\s+landed"
         }
       ]
     },
@@ -381,7 +327,7 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm object missing or ambiguous stack limit",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm object missing or ambiguous stack limit",
           "flags": "m"
         }
       ]
@@ -412,7 +358,7 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm initialized memory [0-9]+ exceeds declared memory 1",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm initialized memory [0-9]+ exceeds declared memory 1",
           "flags": "m"
         }
       ]
@@ -443,10 +389,19 @@
       "matches": [
         {
           "stream": "stderr",
-          "pattern": "^[^\\s:]+: REFUSE·wasm worker lifetime",
+          "pattern": "^[^\\s:]+: REFUSE\u00b7wasm worker lifetime",
           "flags": "m"
         }
       ]
     }
-  ]
+  ],
+  "preparation": {
+    "vector": "vectors/native/authenticated-reference-formation.vector.json",
+    "phase": "before timed independent readings",
+    "places": [
+      "samples/wasm/water-level",
+      "samples/wasm/editorial-notes"
+    ],
+    "operation": "keyless native land of existing signed TARGET; original two land cases retained there with unchanged budgets"
+  }
 }

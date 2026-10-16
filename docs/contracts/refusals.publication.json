@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/refusals",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/refusals.md",
+      "digest": "sha256:ed549322f385e184b0defe705eac62cf546b8617ecb7f9fbe3f727431820f10c"
+    },
+    {
+      "role": "yes",
+      "path": "samples/refusals/yes.json",
+      "digest": "sha256:ea1c792b30ac00df4390343fe51359efe4e569964cd4da25daa5492b6db4dd03"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/refusals.vector.json",
+      "digest": "sha256:2e2833bc6388784e030b50232bd99f84ccb05b0fd6ed86f6db0a5a0b1dc38e05"
+    },
+    {
+      "role": "no",
+      "path": "samples/refusals/no.json",
+      "digest": "sha256:731fc1240064d52b90ca04f627821a1f241382cf159fa33d3d1e18e7fc778a70"
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "mutation": "flip-one-carrier-byte",
+  "expectedRefusal": "blob integrity",
+  "expectedResult": "no projection; no successful receipt"
+}

@@ -1,0 +1,21 @@
+{
+  "classes": [
+    "authorize",
+    "attest",
+    "read",
+    "fold"
+  ],
+  "delivery": [
+    "journal",
+    "act"
+  ],
+  "places": [
+    "observations",
+    "inventory"
+  ],
+  "expect": [
+    "collisions-retained",
+    "exact-withdrawals",
+    "replay-identical"
+  ]
+}

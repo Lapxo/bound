@@ -1,0 +1,78 @@
+{
+  "scope": "conformance/reference-export-native",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "native-export-native-reference-export",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native reference export from a real admitted place native-reference-export",
+        "test/reference-export.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-export.test.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "test/support/reference-root.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "EXPORT real-admission \u00b7 contracts-bound \u00b7 signatures-verified \u00b7 REQUIRED \u00b7 no commit"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "REFUSE altered-carrier \u00b7 blob integrity"
+        }
+      ]
+    },
+    {
+      "name": "native-export-editorial-delivery",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "native reference export from a real admitted place editorial-delivery",
+        "test/reference-export.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reference-export.test.ts",
+        "test/support/acting-root.ts",
+        "samples/reference-export/yes.json",
+        "samples/reference-export/no.json",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "assets/wasm/guest.js",
+        "test/support/reference-root.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "EXPORT real-admission \u00b7 contracts-bound \u00b7 signatures-verified \u00b7 REQUIRED \u00b7 no commit"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "REFUSE altered-carrier \u00b7 blob integrity"
+        }
+      ]
+    }
+  ]
+}

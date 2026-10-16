@@ -1,0 +1,9 @@
+{
+  "profile": "bound-refusals@1",
+  "required": [
+    "code",
+    "class",
+    "next"
+  ],
+  "expect": "catalog-bound"
+}

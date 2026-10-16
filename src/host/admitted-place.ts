@@ -53,3 +53,10 @@ export function authenticatedRootStanding(root:string):readonly string[]{
 
 /** Legacy Root lines remain unchanged; contextual public output has its own carrier. */
 export const authenticatedStanding=authenticatedRootStanding;
+
+/** Public current configuration omits withdrawal markers; typed effective history
+ * remains intact for the existing typed-object projection. Internal readers keep
+ * authenticatedStanding, including its historical markers. */
+export function publicStandingLines(root:string):readonly string[]{
+ return authenticatedRootStanding(root).filter(line=>!isConfig(line)||fieldOf(line,'value')!=='withdraw');
+}

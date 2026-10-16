@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/reference-port.md",
-      "digest": "sha256:ae500aaec7e94dc9bc7c4d45e3294b212b0ad5ade7647e3ce24807ca7a0ea7cc"
+      "digest": "sha256:d6198b9ab177086cb334e9e9cd7adb5c67b0af7165a79d23812aa2496d17674c"
     },
     {
       "role": "yes",
@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/authenticated-reference.vector.json",
-      "digest": "sha256:297c4942a847c42eb9d2cf000ab38d8a5f38b64e2e4a469919f0dfc88c9d8bd1"
+      "digest": "sha256:9aba7121fbbb98e63259dea78e52377cd71c628e0d17be20c9a51da27f2b31de"
     },
     {
       "role": "no",

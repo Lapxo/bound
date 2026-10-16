@@ -1,0 +1,16 @@
+{
+  "codes": [
+    "budget",
+    "cancelled",
+    "timeout",
+    "failed",
+    "integrity",
+    "response"
+  ],
+  "ports": [
+    "signer",
+    "content",
+    "persistence"
+  ],
+  "authority": "never-created"
+}

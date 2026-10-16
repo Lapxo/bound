@@ -1,6 +1,10 @@
 #!/usr/bin/env node
+import {BoundRefusal,describeRefusal,readRefusalCatalog} from '../host/refusals.ts';
+import {readFileSync as readCatalogFile} from 'node:fs';
+import {sha256 as catalogDigest} from '../host/hash.ts';
 import {printReleaseApproval} from './release-result.ts';
 import {inspectReference} from '../host/reference.ts';
+import {exportAuthenticatedReference} from '../host/reference-export.ts';
 import {authenticatedReferenceSelected,openAuthenticatedReference} from '../host/reference-native.ts';
 import {printActResult} from './act-result.ts';
 import {printStandingResult} from './standing-result.ts';
@@ -194,7 +198,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     return EXIT.refuse;
   }
   if(name==='act'){if(under||told.length)throw Error('REFUSE·act committed identity query only');printActResult(root,coord);return EXIT.closed;}
-  if(name==='standing'){if(under||told.length||coord||depth!==undefined)throw Error('REFUSE·standing local committed projection only');printStandingResult(root);return EXIT.closed;}
+  if(name==='standing'){if(under||told.length||coord||depth!==undefined)throw new BoundRefusal('standing/query','REFUSE·standing local committed projection only');printStandingResult(root);return EXIT.closed;}
   if(name==='evidence'&&!under&&!told.length&&ingressBundles(storeOf(root)).length){
     const declared=viewsOf(lockStanding(storeOf(root))).get(name);
     if(!declared||declared.shape||!declared.regions.some(region=>region.name==='evidence'))throw Error('REFUSE·view foreign evidence requires a declared evidence view');
@@ -337,6 +341,13 @@ async function view(root: string, under: string | undefined, asked: string, told
 }
 
 async function signVerb(root: string, rest: readonly string[]): Promise<number> {
+  const as=valueOf(rest,FLAGS.as);
+  if(as!==undefined){
+    const sources=positionalsOf(rest);
+    if(as!=='reference'||sources.length!==1||rest.includes(FLAGS.check))throw new BoundRefusal('reference-export/usage','REFUSE·reference-export usage: sign --as reference <source-url>');
+    const result=await exportAuthenticatedReference(root,sources[0]!,{key:valueOf(rest,FLAGS.key),keyFile:valueOf(rest,FLAGS.keyFile),signer:valueOf(rest,FLAGS.signer)});
+    process.stdout.write(JSON.stringify(result)+'\n');return EXIT.closed;
+  }
   const batch = await signedBatch(root, rest, positionalsOf(rest));
   if (batch.kind === 'exit') return batch.code;
   if (batch.kind === 'once') {
@@ -566,14 +577,32 @@ function main(argv: readonly string[]): number | Promise<number> {
   return EXIT.usage;
 }
 
+function printRefusal(error:BoundRefusal):void {
+ try{
+  const text=readCatalogFile(new URL('../../docs/contracts/refusals.bound',import.meta.url),'utf8');
+  const entry=describeRefusal(error,readRefusalCatalog(text));
+  process.stderr.write(JSON.stringify({profile:'bound-refusal@1',...entry,catalog:catalogDigest(text)})+'\n');
+ }catch{
+  // A missing/invalid catalog cannot supply trustworthy metadata. Keep the
+  // failure named instead of recursively failing while formatting a refusal.
+  process.stderr.write(JSON.stringify({profile:'bound-refusal@1',code:'catalog/invalid',unmeasured:['category','meaning','next','catalog']})+'\n');
+ }
+}
+// Legacy numeric refusals receive a generic code by exit result, never by parsing
+// a diagnostic. Specific causes retain their own typed code in the error path.
+function finished(code:number):void {
+ if(code===EXIT.refuse||code===EXIT.usage)printRefusal(new BoundRefusal(code===EXIT.usage?'operation/usage':'operation/failed',''));
+ process.exitCode=code;
+}
 // The same refusal boundary covers synchronous operations and asynchronous processes.
 const refused = (error: unknown): void => {
   const message = error instanceof Error ? error.message : String(error);
     process.stderr.write(`${selfName()}: ${message.startsWith('REFUSE·') ? message : `REFUSE·crash ${message}`}\n`);
+  printRefusal(error instanceof BoundRefusal?error:new BoundRefusal('operation/failed',message));
   process.exitCode = EXIT.refuse;
 };
 try {
   const ran = main(process.argv.slice(2));
-  if (ran instanceof Promise) ran.then((code) => { process.exitCode = code; }).catch(refused);
-  else process.exitCode = ran;
+  if (ran instanceof Promise) ran.then(finished).catch(refused);
+  else finished(ran);
 } catch (error) { refused(error); }
