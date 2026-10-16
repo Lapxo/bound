@@ -2,6 +2,7 @@
 
 | | |
 |---|---|
+| pin | ep-closure-reader |
 | pin | native-publication |
 | pin | process-readings |
 | pin | programs |

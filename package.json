@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
@@ -162,13 +162,14 @@
     "docs/contracts/readme.publication.json",
     "samples/readme/yes.json",
     "samples/readme/no.json",
-    "vectors/native/readme.vector.json"
+    "vectors/native/readme.vector.json",
+    "samples/engine-place/inputs/closure.json"
   ],
   "author": "Lapxo",
   "license": "MIT",
   "dependencies": {
-    "@lapxo/obligations": "0.3.5",
-    "@lapxo/topos": "^0.2.0",
+    "@lapxo/obligations": "0.4.3",
+    "@lapxo/topos": "^0.2.1",
     "acorn": "8.19.0"
   },
   "devDependencies": {

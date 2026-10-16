@@ -29,6 +29,13 @@ import { laidDiffers } from './laid.ts';
 import { heldBytes } from '../land/held.ts';
 import { capsuleAt, placesIn, worldAt } from './places.ts';
 
+/** Measurements of this invocation; never evidence of an earlier kept fold. */
+export function currentActReadings(under?: string): Readonly<Record<string, number>> {
+  const receipts = receiptsSeen();
+  return placeOnly({ idle: idleCount(), s: actSeconds(), 'walk-read': receipts.count, 'walk-ms': receipts.ms,
+    'kept-folds-read-under-another-instrument': foldsElsewhere() }, under);
+}
+
 type RoleOf = (coordinate: string) => CoordinateRole;
 
 const entered = { foreign: 0 };
@@ -217,12 +224,8 @@ export function ownReadings(input: {
     ...Object.fromEntries(standing.filter((line) => isCeiling(line) && (fieldOf(line, 'measure') === 'reader-modules' || fieldOf(line, 'scope').split('/').pop() === 'reader-modules'))
       .flatMap((line) => ((place) => place === undefined ? [] : [[fieldOf(line, 'scope'), tree(() => exporting(observed, `${place}/`, ['observe', 'run']))]])(fieldOf(line, 'scope').split('/').find((step) => capsuleAt(root, step))))),
     ...ownFrom(ceilingsNamed(standing, 'world-lines-outside-their-capsule').find((line) => fieldOf(line, 'form') === 'interval'), 'world-lines-outside-their-capsule', tree(() => outsideTheirCapsule(root, standing, standing).length)),
-    idle: idleCount(),
-    s: actSeconds(),
+    ...currentActReadings(),
     'cli-verbs': VERB_NAMES.length,
-    'walk-read': receiptsSeen().count,
-    'walk-ms': receiptsSeen().ms,
-    'kept-folds-read-under-another-instrument': tree(() => foldsElsewhere()),
     'accepts-that-refolded': tree(() => counted(store, standing, 'beat/accept', 'folded')),
     ...(keyOf(store, 'attest') === undefined ? {} : {[`${keyOf(store, 'attest')}-ms`]: tree(() => attestBeat(store, standing))}),
     ship: took('ship', () => shipped(root, store, standing, under)),

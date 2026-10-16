@@ -1,12 +1,10 @@
-import { existsSync, join } from '../host/io.ts';
+import{bootstrapAnchor}from'./bootstrap-anchor.ts';
 import { authorityOf, isKeyClaim, signersOf } from '@lapxo/topos/wire';
 import type { Published, Signer, SignerVerdict } from '@lapxo/topos/wire';
 import { verifiesFields } from '../land/sign.ts';
-import { fieldOf, selfName, parsedLine as parse } from './claims.ts';
+import { fieldOf, parsedLine as parse } from './claims.ts';
 import { keyFor, lockStanding } from './keys.ts';
-import { storeRoot } from '../host/ports/store.ts';
 import { storeOf } from '../land/ledger.ts';
-import { observeText } from '../observe/files.ts';
 
 /** A lock line about the signers: the authority fold reads it. */
 export function isSignerLock(line: string): boolean {
@@ -46,10 +44,8 @@ export function writerFor(standing: readonly string[], kind: string): string | u
 }
 
 export function publicKeyOf(root: string, keyId: string): string | undefined {
-  const at = [join(storeRoot(root), `${selfName()}.keys`), join(storeOf(root), `${selfName()}.keys`)].find((one) => existsSync(one));
-  const keys = at === undefined ? {} : JSON.parse(observeText(at) ?? '{}') as Record<string, { readonly publicKey?: string }>;
-  const anchored = keys[keyId]?.publicKey;
-  if (anchored !== undefined) return anchored;
+  const anchor=bootstrapAnchor(root);
+  if(anchor?.id===keyId)return anchor.publicKey;
   const said = lockStanding(storeOf(root))
     .find((line) => fieldOf(line, 'scope') === `keys/${keyId}` && fieldOf(line, 'measure') === 'public-key' && fieldOf(line, 'value') !== 'withdraw');
   return said === undefined ? undefined : fieldOf(said, 'value');

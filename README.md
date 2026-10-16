@@ -13,13 +13,13 @@ Unchanged regions can retain valid receipts. A changed input reopens the regions
 ## Install and use
 
 ```sh
-npm install @lapxo/bound@0.2.1
+npm install @lapxo/bound@0.2.2
 ```
 
 In a place with admitted declarations and closed public receipts, check the existing evidence without running its readers again:
 
 ```sh
-npx @lapxo/bound@0.2.1 fold --check
+npx @lapxo/bound@0.2.2 fold --check
 ```
 
 For a change, prepare a proposal, sign with a key already covered by the place, admit the signed lot, then fold and inspect the result. Signing and admission do not by themselves pay a requirement. The [usage guide](docs/usage.md) covers keys, coverage, proposals, withdrawals and release policy.
