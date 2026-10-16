@@ -1,3 +1,11 @@
+import {childFlags} from '../host/capsule.ts';
+import {readingProfile,readingExecution,withReadingBoundary} from '../host/reading-context.ts';
+import {readingIdentityBytes} from '@lapxo/topos/contract';
+import {portableReadingReceipt,verifiedReadingReceipts} from '../host/reading-closures.ts';
+import {bytesDigest,instrumentCoordinates} from '../fold/digests.ts';
+import {ownRoot,processOf} from './runner.ts';
+import {contentPolicy} from '../host/content-store.ts';
+import {carriedFrom} from '../fold/resolved.ts';
 import { selectedCapsules } from '../host/selected-capsules.ts';
 import { selectionLines, projectionLines } from '../fold/reach.ts';
 export { selectionLines } from '../fold/reach.ts';
@@ -30,6 +38,8 @@ import { isRegionDeclaration } from '../fold/region-declarations.ts';
 type Asking = { readonly name: string; readonly at: number };
 type Placed = Pick<PlaceFold, 'root' | 'store' | 'standing' | 'observed'> & { readonly under?: string; readonly second?: PlaceFold['second'] };
 type Row = { readonly scope: string; readonly measure: string; readonly role: string; readonly bound: { readonly kind: string; readonly values?: readonly string[]; readonly lo?: number; readonly hi?: number } };
+
+const receiptHasher = (store: Placed['store']) => (text: string): string => bytesDigest(store, new TextEncoder().encode(text));
 
 const fact = (scope: string, value: string, form = 'alphabet', measure = 'fact'): string => canonical({ scope, role: 'writes', form, measure, value, by: 'fold', at: 'place:fold' });
 const described = (local: readonly string[] = []): readonly string[] => {
@@ -183,12 +193,29 @@ function capsuleReadings(fold: Placed): readonly string[] {
 }
 
 function readingsAt(fold: Placed, place: string): readonly string[] {
-  const asking = askingOf(fold);
   const speaker = keyFor(fold.store, 'read');
   return capsulesOf(fold).flatMap((capsule) => {
     const writing = new Set(capsule.lines.filter((line) => fieldOf(line, 'scope').startsWith('region/') && fieldOf(line, 'measure') === 'writes').map((line) => fieldOf(line, 'scope').slice('region/'.length)));
     const receipts = Object.keys(capsule.declaration.writes).filter((name) => capsule.declaration.writes[name] === 'receipt' && !writing.has(name)).sort();
+    const target=modernReceiptInputs(fold,capsule.selection??capsule.digest);
+    const asking=askingOf({...fold,observed:target.current});
     const requests = receipts.flatMap((name) => ((request) => (request === undefined ? [] : [request]))(asking(capsule.declaration, { name, at: 3 }, 'read', '')));
+    const modern=readingProfile(fold.standing,fieldOf);
+    if(modern&&requests.length){
+      const hash=receiptHasher(fold.store);
+      const batch=hash(JSON.stringify([capsule.selection??capsule.digest,capsule.digest,receipts]));
+      const coordinates=instrumentCoordinates(fold.store,processOf('verb'),[],ownRoot(),ownLock(),true),instrument=hash([...coordinates.values()].sort().join('\n'));
+      const legacy=target.legacy;
+      return requests.flatMap(request=>{
+        const execution=readingExecution({instrument,implementation:capsule.digest,policy:hash(JSON.stringify([contentPolicy(),capsule.selection??null,capsule.lines])),inputs:[['world',capsule.selection??capsule.digest],['batch',batch],['request',hash(JSON.stringify(request))],...legacy,...[...coordinates].map(([name,id])=>['host/'+relative(ownRoot(),name),id] as const)]},hash,{env:process.env,cwd:fold.root,flags:childFlags()});
+        const closure=new TextDecoder().decode(readingIdentityBytes(execution.context)),input=hash(closure),said=withReadingBoundary(input,execution,()=>capsule.ask([request]))[0];
+        if(said?.kind!=='fact')throw Error(`REFUSE·capsule ${capsule.digest} · ${request.region} · ${said?.why??'no answer'}`);
+        const by=speaker+':'+batch.slice(7),at='place:'+input;
+        const lines=(said.claims??[]).map((row:any)=>canonical({scope:row.scope,role:row.role,measure:row.measure,form:row.bound.kind==='interval'?'interval':'alphabet',value:row.bound.kind==='interval'?`${row.bound.lo??0}..${row.bound.hi??0}`:(row.bound.values??[]).join('|'),by,at}));
+        const output=lines.join('\n')+(lines.length?'\n':''),scope='receipts/readings/'+hash(request.region??'').slice(7)+'/'+input.slice(7);
+        return [canonical({scope:place,role:'writes',form:'alphabet',measure:'observed',value:input.slice(7,23),by,at}),...lines,...portableReadingReceipt(scope,by,closure,output,hash)];
+      });
+    }
     const answers = capsule.ask(requests);
     const refused = requests.filter((_, i) => answers[i]?.kind !== 'fact');
     if (refused.length) throw new Error(`REFUSE·capsule ${capsule.digest} · ${place} · ${refused.length} of ${requests.length} regions: ${refused.map((one) => one.region).join(' ')} · ${answers[requests.indexOf(refused[0]!)]?.why ?? 'no answer'}`);
@@ -212,4 +239,41 @@ export function capsuleReadingsOver(fold: Placed): readonly string[] {
   const places = [...new Set(fold.standing.flatMap((line) => /^([^/]+)\/uses\//.exec(fieldOf(line, 'scope'))?.[1] ?? []))];
   return [...capsuleReadings(fold), ...places.flatMap((place) => capsuleReadings({ ...fold, under: `${place}/`,
     standing: [...new Set([...said.filter((one) => one.place === place).map((one) => one.line), ...fold.standing])] }))];
+}
+
+/** Current judgement excludes authenticated outcomes of the selected producer batches; retained evidence stays in its carrier. */
+export const currentReceiptObservations = (fold: Parameters<typeof capsulesOf>[0]):readonly string[] => modernReceiptInputs(fold).current;
+
+/** Preserve prior producer outcomes in the owning place's public carrier, independently of current judgement. */
+export const retiredReceiptHistory = (fold: Parameters<typeof capsulesOf>[0]):readonly string[] => { const carried=carriedFrom(fold.store,(observeText(join(fold.root,fold.under??'','receipts.bound'))??'').split('\n').filter(line=>line.startsWith('bound-lock/')))??[]; const all=[...new Set([...fold.observed,...carried])],current=new Set(modernReceiptInputs({...fold,observed:all}).current);return all.filter(line=>!current.has(line)); };
+
+/** A modern capsule batch cannot consume its own retained outcomes. Full context units bind history; legacy conversion never supplies a current answer. */
+function modernReceiptInputs(fold:Placed,target?:string):{current:readonly string[];legacy:readonly (readonly[string,string])[]}{
+ if(!readingProfile(fold.standing,fieldOf))return{current:fold.observed,legacy:[]};
+ const observed=[...new Set(fold.observed)];
+ const hash=receiptHasher(fold.store),allSelected=capsulesOf(fold),selected=allSelected.filter(c=>{const writing=new Set(c.lines.filter(l=>fieldOf(l,'measure')==='writes').map(l=>fieldOf(l,'scope').slice(7)));return Object.keys(c.declaration.writes).some(n=>c.declaration.writes[n]==='receipt'&&!writing.has(n));});
+ if(!selected.length)return{current:fold.observed,legacy:[]};
+ const speaker=keyFor(fold.store,'read'),removed=new Set<string>(),refs:(readonly[string,string])[]=[];
+ const units=observed.filter(l=>fieldOf(l,'scope').startsWith('receipts/readings/')&&fieldOf(l,'measure')==='bytes'&&fieldOf(l,'role')==='writes');
+ if(verifiedReadingReceipts(fold.store,observed,hash,undefined,true)===undefined)throw Error('REFUSE·capsule receipt carrier context invalid');
+ for(const capsule of selected){
+  if(target!==undefined&&(capsule.selection??capsule.digest)!==target)continue;
+  const writing=new Set(capsule.lines.filter(l=>fieldOf(l,'measure')==='writes').map(l=>fieldOf(l,'scope').slice(7))),receipts=Object.keys(capsule.declaration.writes).filter(n=>capsule.declaration.writes[n]==='receipt'&&!writing.has(n)).sort();if(!receipts.length)continue;
+  const batch=hash(JSON.stringify([capsule.selection??capsule.digest,capsule.digest,receipts])),knownLegacy=new Set<string>();
+  for(const unit of units){const about=fieldOf(unit,'about');if(!about)continue;let c:any;try{c=JSON.parse(about)}catch{continue}if(!Array.isArray(c)||c[0]!=='reading-context@1'||c[2]!==capsule.digest||!Array.isArray(c[4])||!c[4].some(([n,id]:any)=>n==='batch'&&id===batch)||!c[4].some(([n,id]:any)=>n==='world'&&id===(capsule.selection??capsule.digest)))continue;
+   const expectedBy=speaker+':'+batch.slice(7);if(fieldOf(unit,'by')!==expectedBy)continue;if(fold.standing.some(line=>fieldOf(line,'scope')==='keys/'+expectedBy&&fieldOf(line,'value')!=='withdraw'))throw Error('REFUSE·modern capsule receipt producer ambiguous');
+   const namedScope=fieldOf(unit,'scope'),inputIdentity=fieldOf(unit,'value');if(!receipts.some(name=>namedScope==='receipts/readings/'+hash(name).slice(7)+'/'+inputIdentity.slice(7)))throw Error('REFUSE·modern capsule receipt scope differs from declared region');
+   for(const[n,id]of c[4])if(typeof n==='string'&&n.startsWith('legacy/output/')&&n==='legacy/output/'+id){knownLegacy.add(id);refs.push([n,id]);}
+   const by=fieldOf(unit,'by'),input=fieldOf(unit,'value'),scope=fieldOf(unit,'scope'),output=observed.find(l=>fieldOf(l,'scope')===scope&&fieldOf(l,'by')===by&&fieldOf(l,'measure')==='count');
+   const payload=output?fieldOf(output,'at'):'';for(const l of observed)if(fieldOf(l,'by')===by&&(fieldOf(l,'at')==='place:'+input||fieldOf(l,'at')===payload||fieldOf(l,'scope')===scope||fieldOf(l,'scope')===[scope,'identity'].join('/')))removed.add(l);
+  }
+  const alias=capsule.digest.slice(7,19),by=speaker+':'+alias,groups=new Map<string,string[]>();for(const l of observed)if(fieldOf(l,'by')===by){const at=fieldOf(l,'at');groups.set(at,[...(groups.get(at)??[]),l]);}
+  if(groups.size){if(selected.filter(c=>c.digest===capsule.digest).length!==1||receipts.length!==1||new Set(allSelected.filter(c=>c.digest.slice(7,19)===alias).map(c=>c.digest)).size!==1||fold.standing.some(l=>fieldOf(l,'scope')==='keys/'+by&&fieldOf(l,'value')!=='withdraw'))throw Error('REFUSE·legacy capsule receipt producer ambiguous');
+   for(const[at,group]of groups){if(!/^place:sha256:[a-f0-9]{64}$/.test(at)||group.filter(l=>fieldOf(l,'measure')==='observed'&&fieldOf(l,'scope')===(fold.under||'./')).length!==1)throw Error('REFUSE·legacy capsule receipt occurrence ambiguous');const id=hash(group.join('\n'));if(!knownLegacy.has(id)){
+     const candidate=observed.filter(l=>!removed.has(l)&&!group.includes(l)),request=askingOf({...fold,observed:candidate})(capsule.declaration,{name:receipts[0]!,at:3},'read','');if(!request||at!=='place:'+hash(JSON.stringify(request)))throw Error('REFUSE·legacy capsule receipt context unavailable · expected '+at+' · current '+(request?hash(JSON.stringify(request)):'absent')); 
+    }refs.push(['legacy/output/'+id,id]);for(const l of group)removed.add(l);
+   }
+  }
+ }
+ return{current:observed.filter(l=>!removed.has(l)),legacy:[...new Map(refs.map(([n,id])=>[n+' '+id,[n,id] as const])).values()]};
 }

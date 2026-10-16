@@ -1,5 +1,5 @@
 import { mkdirSync, rmSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { Worker } from 'node:worker_threads';
 import { ENVELOPE, canonical, parse } from '@lapxo/topos/wire';
 import { foldPlace, standingOf } from './place.ts';
@@ -60,7 +60,7 @@ async function checked(root: string, entry: string, under: string | undefined): 
     return 1;
   }
   const standing = emptyLedger(store) ? ownLockOf(root,under?.replace(/\/$/,'') ?? '') : standingOf(root).standing;
-  const instrument = sealed === undefined ? instrumentOf(store, entry, standing, root, ownLock()) : instrumentDigest(store,entry,[],ownRoot(),ownLock());
+  const instrument = sealed === undefined ? instrumentOf(store, entry, standing, root, ownLock()) : instrumentDigest(store,resolve(root,entry),[],ownRoot(),ownLock());
   if (expectedInstrument !== instrument) {
     process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; a fold must close it\n`);
     return 1;
@@ -90,10 +90,10 @@ export async function pass(root: string, entry: string, under: string | undefine
     for (const coordinate of check ? swept.written : []) process.stdout.write(`DIFFERS  ${coordinate}\n`);
     // Byte seals describe the completed render pass, not its intermediate outputs.
     if (!swept.written.length) await closeReceipts(root, storeOf(root));
-    const closed = meets(root, storeOf(root), under ?? '') && !swept.written.length;
     // Sealed files do not imply an empty reading. If a retained fold is stale,
     // foldPlace must reload its evidence; a valid retained fold still costs no read.
     const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), ...(swept.settled ? {} : { observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }) }), free: !swept.settled });
+    const closed = meets(root, storeOf(root), under ?? '',true,fold.observed) && !swept.written.length;
     for (const line of releasePolicyLines(fold.release)) process.stdout.write(`${line}\n`);
     if (closed) {
       instrumentKeep(storeOf(root), instrumentOf(storeOf(root), entry, standingOf(root).standing, root, ownLock()));

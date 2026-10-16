@@ -12,8 +12,8 @@ import {ledgerLines,storeOf,writerFile} from '../src/land/ledger.ts';
 import {actingRootFixture} from './support/acting-root.ts';
 import {join} from 'node:path';
 
-test('one fresh Root inventory preserves historical grant cutoffs and ignores restored stamps',()=>{
- const fixture=actingRootFixture('historical-prefix'),later=generateKeyPairSync('ed25519');
+for(const signaturePrefix of ['wire','audit/wire'] as const)test(`one fresh Root inventory preserves historical grant cutoffs and ignores restored stamps (${signaturePrefix})`,()=>{
+ const fixture=actingRootFixture('historical-prefix',[],{signaturePrefix}),later=generateKeyPairSync('ed25519');
  try{
   const store=storeOf(fixture.root),journal=writerFile(store,'owner'),original=readFileSync(journal,'utf8');
   const row=(scope:string,measure:string,value:string,epoch:string,by='owner',key=fixture.owner.privateKey,form='alphabet')=>{
@@ -29,7 +29,7 @@ test('one fresh Root inventory preserves historical grant cutoffs and ignores re
   const history=admissionHistoryAt(fixture.root,Number.MAX_SAFE_INTEGER),anchor=admissionAnchor(fixture.root);
   const admitted=history.filter(line=>{
    const snapshot=admissionHistoryAt(fixture.root,Number(fieldOf(line,'epoch'))||0);
-   return authorityFor(snapshot,anchor,eraOf(foldClaims(snapshot.filter(record=>fieldOf(record,'scope').startsWith('wire/'))).standing).admitted).of(line).kind==='admitted';
+   return authorityFor(snapshot,anchor,eraOf(foldClaims(snapshot.filter(record=>{const scope=fieldOf(record,'scope');return scope.startsWith('wire/')||scope.startsWith('audit/wire/');})).standing).admitted).of(line).kind==='admitted';
   });
   const first=authenticatedRootStanding(fixture.root);
   assert.deepEqual(first,foldClaims(admitted).standing);

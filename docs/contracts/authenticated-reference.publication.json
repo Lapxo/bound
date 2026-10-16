@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/authenticated-reference",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/reference-port.md",
+      "digest": "sha256:ae500aaec7e94dc9bc7c4d45e3294b212b0ad5ade7647e3ce24807ca7a0ea7cc"
+    },
+    {
+      "role": "yes",
+      "path": "samples/authenticated-reference/yes/weather-reading/inputs/yes.json",
+      "digest": "sha256:f285a014cc9e9453aebd4c4ed94354fba5cac55c05929f4ad7cdd1b3348a9717"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/authenticated-reference.vector.json",
+      "digest": "sha256:297c4942a847c42eb9d2cf000ab38d8a5f38b64e2e4a469919f0dfc88c9d8bd1"
+    },
+    {
+      "role": "no",
+      "path": "samples/authenticated-reference/yes/weather-reading/inputs/signature.json",
+      "digest": "sha256:2049bbbf88077727911a0cfec3193ab6ce7bccb8d4e3bb22fc537c59f5addf58"
+    }
+  ]
+}

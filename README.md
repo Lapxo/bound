@@ -5,9 +5,9 @@
 From a project with an admitted lock and selected views, inspect its standing, ask for its evidence, then verify the committed outputs:
 
 ```sh
-npx @lapxo/bound@0.1.9 fold --as lines
-npx @lapxo/bound@0.1.9 fold --as receipts@1
-npx @lapxo/bound@0.1.9 fold --check
+npx @lapxo/bound@0.2.0 fold --as lines
+npx @lapxo/bound@0.2.0 fold --as receipts@1
+npx @lapxo/bound@0.2.0 fold --check
 ```
 
 Use this flow to review a project change or check a dependency's declared contract. `--check` verifies existing evidence; it does not execute a missing reading. A file fold names readings and explicitly says that it computed no encounters.
@@ -26,8 +26,8 @@ Bound reads a project's admitted statements, checks observations against its req
 ## Start in an admitted project
 
 ```sh
-npx @lapxo/bound@0.1.9 fold --as help
-npx @lapxo/bound@0.1.9 fold
+npx @lapxo/bound@0.2.0 fold --as help
+npx @lapxo/bound@0.2.0 fold
 ```
 
 The help view prints:
@@ -77,11 +77,11 @@ lot_dir="$(mktemp -d)"
 Have the selected view produce a proposal at `$lot_dir/proposal.bound`, or prepare the project's permitted lines there for review. Unsigned proposals use `by=target`, without a preassigned epoch or `sig`. Lots stay outside the repository; the committed bound files are only `TARGET.bound` and `receipts.bound`.
 
 ```sh
-npx @lapxo/bound@0.1.9 sign "$lot_dir/proposal.bound" \
+npx @lapxo/bound@0.2.0 sign "$lot_dir/proposal.bound" \
   --key "$BOUND_KEY_ID" --key-file "$BOUND_KEY_FILE" \
   > "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.9 land "$lot_dir/signed.bound" &&
-npx @lapxo/bound@0.1.9 fold
+npx @lapxo/bound@0.2.0 land "$lot_dir/signed.bound" &&
+npx @lapxo/bound@0.2.0 fold
 ```
 
 `sign` assigns the admitted epoch and writes the signed lot to stdout. `land` validates the whole lot before admission. A refusal is evidence to inspect; it is not success. Do not proceed after a failed signature or admission. The key file is a PKCS8 private key matching the admitted public key; do not put it in the lot, source tree, package or CI artifacts.
@@ -95,7 +95,7 @@ For typed object withdrawals, `takes` names the exact claim or mark id. Removing
 When the project has admitted a cells view:
 
 ```sh
-npx @lapxo/bound@0.1.9 fold --as cells
+npx @lapxo/bound@0.2.0 fold --as cells
 ```
 
 The installed interval scene printed this on an unchanged second reading:
@@ -109,7 +109,7 @@ Native receipts identify the live semantic inputs, declared rest, selected topos
 For judgement:
 
 ```sh
-npx @lapxo/bound@0.1.9 fold --check
+npx @lapxo/bound@0.2.0 fold --check
 ```
 
 Keep stdout, stderr and the exit status. `--check` is not an install-and-build replacement. A source test passing does not pay an unread ceiling, prove a cold clone, or accept a release.

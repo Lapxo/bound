@@ -1,0 +1,10 @@
+{
+  "reference": {
+    "class": "standing",
+    "algorithm": "sha256",
+    "digest": "6fd8ad2577a9e35ac974c9c12054315f86096f5de269a453382a3cf5f67447bc",
+    "blob": "sha256:24a36ce9c9703e683c3ec93e1028135d33010a71d2eeff7b2ef85b05c783a87a",
+    "source": "https://example.invalid/catalog.json"
+  },
+  "fragment": "#bound:1?class=standing&algorithm=sha256&digest=6fd8ad2577a9e35ac974c9c12054315f86096f5de269a453382a3cf5f67447bc&blob=sha256%3A24a36ce9c9703e683c3ec93e1028135d33010a71d2eeff7b2ef85b05c783a87a&source=https%3A%2F%2Fexample.invalid%2Fcatalog.json"
+}

@@ -6,7 +6,7 @@ import {canonical,objectHistory,parse,byBytes,wireAt,RECEIPTS} from '@lapxo/topo
 import {cellInputs,cellReceiptContract,cellInputProfile} from '@lapxo/topos/cell-inputs';
 import {renderCells} from '@lapxo/topos/cells-view';
 import {admittedObjects} from './objects.ts';
-import {objectFold} from '../fold/object.ts';
+import {objectFold} from '../engine/index.ts';
 import {fullDigest,bytesDigest} from './digest.ts';
 import {closeReceipts,noteIdle} from '../fold/closed.ts';
 import {authorityFor,rootSigner} from '../fold/signers.ts';

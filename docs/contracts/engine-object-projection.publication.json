@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/engine-object-projection",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/engine.md",
+      "digest": "sha256:2d54ddc75386a0706a3bc500e36deedc85ca9e7dc965eff5c795f02b1a716078"
+    },
+    {
+      "role": "yes",
+      "path": "samples/engine-interval/inputs/sample.json",
+      "digest": "sha256:ef476bda8c15b4967a88dc27a188ab25cfac42bdf381fb82f4e57a482d2fd27d"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/engine-order/inputs/sample.json",
+      "digest": "sha256:f2104a661541baf7f8e6d9224590210b272e24519dafce94ca7c588e5a78a20d"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/engine-object.cli.json",
+      "digest": "sha256:191920f597e2d8bafc9aeeff13934645c64a790dcad94b22c562b30c5fe6baa0"
+    }
+  ]
+}

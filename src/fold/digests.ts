@@ -153,8 +153,9 @@ const importsOf = (store: string, at: string, digest: string): readonly string[]
  * A fold is a function of its points and the instrument is one of them, so a fold kept by another bound is another
  * origin's fold — readable as history, never as this instrument's own state.
  */
-export function instrumentOf(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): string {
-  return instrumentDigest(store, entry, standing, root, releases).replace(/^[^:]*:/, '').slice(0, 12);
+export function instrumentOf(store: string, entry: string, standing: readonly string[] = [], root?: string, releases: readonly string[] = []): string {
+  const coordinate = root === undefined ? resolve(entry) : resolve(root,entry);
+  return instrumentDigest(store, coordinate, standing, root ?? dirname(coordinate), releases).replace(/^[^:]*:/, '').slice(0, 12);
 }
 
 export function instrumentDigest(store: string, entry: string, standing: readonly string[] = [], root = dirname(resolve(entry)), releases: readonly string[] = []): string {

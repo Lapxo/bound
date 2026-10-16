@@ -1,0 +1,12 @@
+bound-lock/1 at=place:sha256:ef476bda8c15b4967a88dc27a188ab25cfac42bdf381fb82f4e57a482d2fd27d by=reader:facdea234873 form=alphabet measure=observed role=writes scope=inputs/sample.json value=ef476bda8c15b496
+bound-lock/1 at=place:sha256:ef476bda8c15b4967a88dc27a188ab25cfac42bdf381fb82f4e57a482d2fd27d by=reader:facdea234873 form=interval measure=count role=writes scope=conformance/engine-object/interval value=0..0
+bound-lock/1 at=place:sha256:ec8b038a495f5fbf0bdc27bbb87187a9493860eb2cd6f0eff4f28fe40558246b by=bound form=alphabet measure=digest role=writes scope=instrument/implementation value=sha256:ec8b038a495f5fbf0bdc27bbb87187a9493860eb2cd6f0eff4f28fe40558246b
+
+bound-lock/1 at=place:sha256:349ccabca01171a7c5d5ba2479290e1c3b58835e3e1509b3a4474158c7c0eda7 by=bound form=alphabet measure=digest role=writes scope=receipts value=sha256:d06eecd9af3029f29b8ddd2b7a3609ff01472aa66169f2fc4e491dc89837b193
+
+bound-lock/1 at=place:sha256:5f806bb6af3d433c2e91894c5de9e55afc833ac4038570ea39644e71fc4dee14 by=bound form=interval measure=count role=writes scope=receipts/conformance value=1..1
+bound-lock/1 at=place:sha256:9d15c34a3540e0baa6bc6f6486a255668e82675a17f7f2a66179d8be1911782d by=bound form=alphabet measure=bytes role=writes scope=receipts/conformance value=sha256:9d15c34a3540e0baa6bc6f6486a255668e82675a17f7f2a66179d8be1911782d
+bound-lock/1 at=place:sha256:00e0bf01baa49755473dc3d8df2af1e4eaaec8eae96d6475e7222329788f9556 by=bound form=interval measure=count role=writes scope=receipts/inputs value=1..1
+bound-lock/1 at=place:sha256:1df9c3a47226191b49c489df107a4dec2a23584e5ae7c23ef72b7ff8d71318d1 by=bound form=alphabet measure=bytes role=writes scope=receipts/inputs value=sha256:1df9c3a47226191b49c489df107a4dec2a23584e5ae7c23ef72b7ff8d71318d1
+bound-lock/1 at=place:sha256:496fc1a40cdb9b48b96f534e5477b4fda6c803a7feb43409561384469bdf256b by=bound form=interval measure=count role=writes scope=receipts/instrument value=1..1
+bound-lock/1 at=place:sha256:9d15c34a3540e0baa6bc6f6486a255668e82675a17f7f2a66179d8be1911782d by=bound form=alphabet measure=bytes role=writes scope=receipts/instrument value=sha256:9d15c34a3540e0baa6bc6f6486a255668e82675a17f7f2a66179d8be1911782d

@@ -1,0 +1,8 @@
+{
+  "profile": "quartet-process@1",
+  "scope": "contract/published/additions",
+  "surface": [
+    "contract/published/engine-object-projection",
+    "contract/published/reference-port"
+  ]
+}

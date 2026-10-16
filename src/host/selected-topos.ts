@@ -3,6 +3,8 @@ import {readStanding} from '@lapxo/topos/standing';
 import type {StandingTopos} from '@lapxo/topos/standing';
 import {parse,wireAt,fromLine} from '@lapxo/topos/wire';
 import {fieldOf} from '../fold/claims.ts';
+import {moduleClosure} from './native/module-closure.ts';
+import {sha256,isSha256} from './hash.ts';
 
 export interface SelectedTopos {readonly digest:string; readonly topos:StandingTopos}
 export type ToposResolver=(digest:string)=>StandingTopos;
@@ -33,7 +35,12 @@ export function contentAt(digest:string,store?:string):Uint8Array {
 }
 
 /** The declared module runs from the store that supplied its verified bytes. No copy or live-checkout fallback. */
-export function contextModuleAt(digest:string,store?:string):string {
+export function contextModuleAt(digest:string,store?:string,dependencies?:readonly string[]):string {
+  if(dependencies!==undefined){
+    if(!isSha256(digest)||!dependencies.includes(digest)||dependencies.some(pin=>!isSha256(pin)))throw Error('REFUSE·context module closure requires declared SHA-256 members');
+    const pins=[...new Set(dependencies)].sort(),members=new Map(pins.map(pin=>[pin.slice(pin.indexOf(':')+1),{digest:pin,source:new TextDecoder('utf-8',{fatal:true}).decode(contentAt(pin,store))}]));
+    moduleClosure({identity:sha256(JSON.stringify(pins)),entry:digest.slice(digest.indexOf(':')+1),members},()=>undefined);
+  }
   return verifiedContent(digest,store).path;
 }
 

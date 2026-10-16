@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/optional-wasm-adapter",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/engine.md",
+      "digest": "sha256:2d54ddc75386a0706a3bc500e36deedc85ca9e7dc965eff5c795f02b1a716078"
+    },
+    {
+      "role": "yes",
+      "path": "samples/wasm/water-level/TARGET.bound",
+      "digest": "sha256:d2f3efc176a6fa7f695dcaab93ed6f35fac4e601d0b7e47f485ac15109d11a0c"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/wasm-object.cli.json",
+      "digest": "sha256:5f761fabd0592d7f8e9b95a9fc80583424a8e83fb7cb3c4b4905b62eca43db9e"
+    },
+    {
+      "role": "no",
+      "path": "samples/wasm/water-level/no-memory.bound",
+      "digest": "sha256:4c30cb6c77a9079a5961f0ff50c53830ad2c7ca8526ef63aa7c3eb4fa2af4554"
+    }
+  ]
+}

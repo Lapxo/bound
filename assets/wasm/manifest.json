@@ -1,0 +1,27 @@
+{
+  "profile": "bound-wasm-assets-proposed@1",
+  "runtime": "sha256:78daa39ad957affb2423846cf0e6754c4ed9e729829db84e58b25b3b241336e7",
+  "wasm": "sha256:105c3bed22d457e43e3d1c3c1c6959fda62a8fe06f0fc8a985303c3a2be72232",
+  "modules": {
+    "/bound/guest.js": "sha256:4a8cef02c4027ca2bd35aa2810f3c56ddd9884e8f245ede48d01f020f70e00f3"
+  },
+  "byteLengths": {
+    "runtime": 51308,
+    "wasm": 503134,
+    "modules": {
+      "/bound/guest.js": 29909
+    }
+  },
+  "forms": {
+    "sha256:13ee36d217833cb78bc180a62303e3335f4f1020d120914d1ef7d674ae38f67e": {
+      "form": "interval",
+      "export": "intervalForm",
+      "contextArtifact": "sha256:04942f6938e4e4ca1ff25257347df3d124d3f9dd554c3fe8b85e8eb31338b891"
+    },
+    "sha256:7ca38123f88692b8c38cb7673fc1885d3324bd1b8558113173b4add055b06d28": {
+      "form": "alphabet",
+      "export": "alphabetOfForm",
+      "contextArtifact": "sha256:04942f6938e4e4ca1ff25257347df3d124d3f9dd554c3fe8b85e8eb31338b891"
+    }
+  }
+}

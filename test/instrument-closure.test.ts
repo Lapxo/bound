@@ -1,10 +1,30 @@
 import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,relative} from 'node:path';
 import {test} from 'node:test';
 import {canonical} from '@lapxo/topos/wire';
-import {instrumentCoordinates,instrumentDigest} from '../src/fold/digests.ts';
+import {instrumentCoordinates,instrumentDigest,instrumentOf} from '../src/fold/digests.ts';
+
+test('a place-relative instrument entry is anchored to the selected place without losing imports',()=>{
+ const root=mkdtempSync(join(tmpdir(),'bound-entry-anchor-'));
+ try{
+  const store=join(root,'.bound');
+  writeFileSync(join(root,'TARGET.bound'),canonical({scope:'wire/digest-algorithms',role:'writes',form:'alphabet',measure:'id',value:'sha256',by:'target',at:'policy:wire'})+'\n');
+  mkdirSync(join(root,'modules'));
+  const entry=join(root,'modules','entry.js'),child=join(root,'modules','child.js');
+  writeFileSync(entry,'export {value} from "./child.js";\n');writeFileSync(child,'export const value=1;\n');
+  const short=(value:string)=>value.replace(/^[^:]*:/,'').slice(0,12);
+  const first=short(instrumentDigest(store,entry,[],root));
+  assert.equal(instrumentOf(store,'modules/entry.js',[],root),first);
+  assert.equal(instrumentOf(store,relative(process.cwd(),entry)),first,'omitting root retains the existing cwd-relative entry contract');
+  assert.equal(instrumentCoordinates(store,entry,[],root).size,2);
+  writeFileSync(child,'export const value=200;\n');
+  const second=instrumentOf(store,'modules/entry.js',[],root);
+  assert.notEqual(second,first,'import changes still invalidate the instrument identity');
+  assert.equal(second,short(instrumentDigest(store,entry,[],root)));
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
 
 test('implementation identity follows compiled imports, package exports and declared subprocesses, independently of location', () => {
   const root=mkdtempSync(join(tmpdir(),'bound-implementation-'));
