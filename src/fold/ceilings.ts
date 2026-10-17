@@ -151,3 +151,18 @@ export function foldCeilings(input: {
     readings: said,
   };
 }
+
+function listed(misses: readonly { readonly ceiling: string; readonly question: string; readonly got: string }[]): string[] {
+  const by = new Map<string, string[]>();
+  for (const o of misses) by.set(o.ceiling, [...(by.get(o.ceiling) ?? []), o.question === o.ceiling ? o.got : `${o.question}=${o.got}`]);
+  return [...by].map(([scope, got]) => `${scope} · ${got.length > 4 ? `${got.slice(0, 4).join(' ')} +${got.length - 4}` : got.join(' ')}`);
+}
+
+
+/** One summary for fresh and retained judgments over the same declared bounds. */
+export function ceilingSummary(fold: CeilingFold, total: number, shared: ReadonlySet<string> = new Set()) {
+  return { read: fold.read.length, total, unread: fold.unread.map(line => fieldOf(line, 'scope')),
+    vacuous: fold.vacuous.map(line => fieldOf(line, 'scope')),
+    short: listed(fold.over.filter(one => one.side === 'short' && !shared.has(one.question))),
+    over: listed(fold.over.filter(one => one.side === 'over')) };
+}

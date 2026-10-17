@@ -1,3 +1,4 @@
+import{bootstrapAnchor}from'../fold/bootstrap-anchor.ts';
 import {committedLocalActs} from '../host/ports/local-act.ts';
 import {fileURLToPath} from 'node:url';
 import {ingressReceipts} from '../host/ports/ingress.ts';
@@ -122,7 +123,7 @@ export function renderedLock(root: string, store: string, told: readonly string[
     const byLock = rendered.get(lockLines(store)) ?? rendered.set(lockLines(store), new Map()).get(lockLines(store))!;
     return byLock.get(told) ?? byLock.set(told, render()).get(told)!;
   }
-  const anchor = [join(storeRoot(root), `${selfName()}.keys`), join(storeOf(root), `${selfName()}.keys`)].map((at) => observeText(at) ?? '').join('\n');
+  const anchor = JSON.stringify(bootstrapAnchor(root)??null);
   const judged = ledgerLines(store, 'judge');
   const key = `lock ${fullDigest(store, [instrumentDigest(store, fileURLToPath(import.meta.url), [], root), new Date().toISOString().slice(0, 10), anchor, `${judged.length} ${judged.at(-1) ?? ''}`, ...owned])}`;
   const held = memoized(store, key, () => {

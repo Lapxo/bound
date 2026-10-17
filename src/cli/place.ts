@@ -1,3 +1,4 @@
+import { refreshRetainedJudgment } from './retained-judgment.ts';
 import { timing } from '../host/timing.ts';
 import {attestationObservations} from '../fold/evidence.ts';
 import {parse as parseEvidenceFields} from '@lapxo/topos/wire';
@@ -16,7 +17,7 @@ import { openCells } from '../render/open.ts';
 import { boundOf, packRegions, regionsNamed, regionsOf, unlikeReplay } from '../fold/region.ts';
 import type { Packed } from '../fold/region.ts';
 import type { OpenCell } from '../render/open.ts';
-import { answersElsewhere, foldCeilings } from '../fold/ceilings.ts';
+import { answersElsewhere, foldCeilings, ceilingSummary } from '../fold/ceilings.ts';
 import type { CeilingFold } from '../fold/ceilings.ts';
 import { keyOf, keyFor, lockLines, lockStanding } from '../fold/keys.ts';
 import { wordFrom, wordOf, wordOn } from '../fold/wire.ts';
@@ -27,7 +28,7 @@ import { classDefaults, kindsOf, placesIn, spoken } from '../fold/places.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { observedClaims, placedReadings } from '../fold/observed.ts';
 import { capsuleReadingsOver, currentReceiptObservations, retiredReceiptHistory } from '../observe/regions.ts';
-import { costReadings, ownReadings } from '../fold/own.ts';
+import { costReadings, ownReadings, currentActReadings } from '../fold/own.ts';
 import { paidOf } from '../fold/paid.ts';
 import { rolesOf } from '../fold/roles.ts';
 import { secondHead } from '../fold/second.ts';
@@ -106,11 +107,6 @@ function effectStates(_store: string): string {
   return 'none';
 }
 
-function listed(misses: readonly { readonly ceiling: string; readonly question: string; readonly got: string }[]): string[] {
-  const by = new Map<string, string[]>();
-  for (const o of misses) by.set(o.ceiling, [...(by.get(o.ceiling) ?? []), o.question === o.ceiling ? o.got : `${o.question}=${o.got}`]);
-  return [...by].map(([scope, got]) => `${scope} · ${got.length > 4 ? `${got.slice(0, 4).join(' ')} +${got.length - 4}` : got.join(' ')}`);
-}
 
 /**
  * The fold of a place: the standing lock and what readers saw, narrowed to the place when one is named. A demand is the
@@ -227,7 +223,7 @@ export function coneOf(root: string, entry: string, ceilings: readonly string[],
   // Receipt bytes, reader history and instrument identity must all still agree.
   if (meets(root, store, '') && instrumentKept(store) === instrumentOf(store, entry, standing, root, ownLock())) {
     const held = keptPlace(store);
-    if (held !== undefined) return { standing, observed: held.observed, own: held.own, kept: true };
+    if (held !== undefined) return { standing, observed: held.observed, own: { ...held.own, ...currentActReadings() }, kept: true };
   }
   const named = regionsNamed(standing);
   const reach = descent !== undefined && descent.length ? [...descent] : [...new Set(ceilings.map((line) => boundOf(named, line).region))];
@@ -257,7 +253,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     const prior = keptPlace(store, under, instrumentOf(store, entry, standingOf(root).standing, root, ownLock()));
     if (prior !== undefined) {
       process.stderr.write(`CLOSED   ${under || '.'} · digest ${digestMs} ms\n`);
-      return { ...prior, kept: true };
+      return refreshRetainedJudgment(prior, [...prior.standing.filter((line) => isCeiling(line) && !(under && fieldOf(line, 'measure') === 'unread')), ...ownCeilings(under)]);
     }
   }
   const { standing, lock: attested, rendered, owned } = given?.standing ?? standingOf(root, under);
@@ -303,14 +299,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     history: live.history.filter((line) => fieldOf(line, 'needs').split('|').filter(Boolean).some(inside)),
     observed,
     receiptHistory: retiredReceiptHistory({root,store,...(under?{under}:{}),standing,observed:read}),
-    ceilings: {
-      read: folded.read.length,
-      total: ceilings.length,
-      unread: folded.unread.map((line) => fieldOf(line, 'scope')),
-      vacuous: folded.vacuous.map((line) => fieldOf(line, 'scope')),
-      short: listed(folded.over.filter((o) => o.side === 'short' && !shared.has(o.question))),
-      over: listed(folded.over.filter((o) => o.side === 'over')),
-    },
+    ceilings: ceilingSummary(folded, ceilings.length, shared),
     orphans,
     lock,
     signed: signedByKey(store, standing, everywhere),
@@ -343,14 +332,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     release: releasePolicy({ standing: policyStanding, demands, paid: finalPaid, ceilings, readings: again, faults, verdicts:attestationObservations(policyStanding.map(line=>{const r=parseEvidenceFields(line);return r.kind==='fact'?r.value.fields:{};}),second), snapshot: { fold: taken, instrument: self } }),
     missing: owed,
     own: { ...place.own, ...docs },
-    ceilings: {
-      ...place.ceilings,
-      read: again.read.length,
-      unread: again.unread.map((line) => fieldOf(line, 'scope')),
-      vacuous: again.vacuous.map((line) => fieldOf(line, 'scope')),
-      short: listed(again.over.filter((o) => o.side === 'short' && !shared.has(o.question))),
-      over: listed(again.over.filter((o) => o.side === 'over')),
-    },
+    ceilings: ceilingSummary(again, ceilings.length, shared),
   };
   if (folder !== undefined && meets(root,store,under??'',true,whole.observed)) took('keep', () => keepFold(store, taken, whole, points, self));
   process.stderr.write(`SPENT    fold ${spent.join(' ms · ')} ms\n`);

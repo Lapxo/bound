@@ -50,17 +50,15 @@ for (const place of standingYes.places as string[]) for (const mode of standingY
     const publicRead=()=> { const r=run(['fold','--as','standing']); assert.equal(r.status,0,r.stderr); return r.stdout; };
     for(const member of auxiliary){
       const source=join(temp,member.id+'.bound');writeFileSync(source,row('sample/'+member.kind,'observed',member.kind)+'\n');
-      const signed=run(['sign',source,'--key',member.id,'--key-file',member.file]);assert.equal(signed.status,0,signed.stderr);writeFileSync(source,signed.stdout.split('\n').filter(line=>parse(line).kind==='fact').join('\n')+'\n');
-      const landed=run(['land',source]);assert.equal(landed.status,0,landed.stderr);
-      assert.match(publicRead(),new RegExp('by='+member.id+'.*scope=sample/'+member.kind));
+      const landed=run(['land',source,'--key',member.id,'--key-file',member.file]);assert.equal(landed.status,0,landed.stdout+landed.stderr);
     }
     // Same coordinate, incompatible admitted values, distinct writers: retain both.
     const collision=join(temp,'collision.bound');writeFileSync(collision,row('sample/reading','observed','alternative')+'\n');
     const collided=run(['land',collision,'--key','owner','--key-file',key]);assert.equal(collided.status,0,collided.stderr);
     const first=publicRead();assert.match(first,/by=owner.*scope=sample\/reading.*value=alternative/);
+    for(const member of auxiliary)assert.match(first,new RegExp('by='+member.id+'.*scope=sample/'+member.kind));
     // Test-only corrupt delivery: a stored inscription is not proof of authority.
     appendFileSync(join(root,'.bound','ledger','device.bound'),signed.replace('value=retained','value=forged'));
-    assert.doesNotMatch(publicRead(),/value=forged/);
     assert.match(first,/scope=sample\/reading.*value=retained/);
     assert.match(first,/by=device.*scope=sample\/reading/);
     const source=join(temp,'source.bound');
@@ -68,21 +66,17 @@ for (const place of standingYes.places as string[]) for (const mode of standingY
     const nextLand=run(['land',source,'--key','owner','--key-file',key]);assert.equal(nextLand.status,0,nextLand.stdout+nextLand.stderr);
     writeFileSync(source,row('sample/next','observed','new')+'\n');
     const revised=run(['land',source,'--key','owner','--key-file',key]);assert.equal(revised.status,0,revised.stderr);
-    const next=publicRead();assert.match(next,/scope=sample\/next.*value=new/);assert.doesNotMatch(next,/scope=sample\/next.*value=old/);
-    writeFileSync(source,row('sample/next','observed','withdraw')+'\n');
+    const next=publicRead();assert.match(next,/scope=sample\/next.*value=new/);assert.doesNotMatch(next,/scope=sample\/next.*value=old/);assert.doesNotMatch(next,/value=forged/);
+    // Independent declarations share one owner lot; the public snapshots retain every assertion.
+    const alternate=canonical({scope:'sample/exact',measure:'observed',value:'other',form:'alphabet',role:'writes',by:'target',at:'policy:other'});
+    writeFileSync(source,row('sample/next','observed','withdraw')+'\n'+row('sample/exact','observed','original')+'\n'+alternate+'\n');
     const withdrawal=run(['land',source,'--key','owner','--key-file',key]);assert.equal(withdrawal.status,0,withdrawal.stderr);
     const withdrawn=publicRead();assert.doesNotMatch(withdrawn,/value=withdraw/);assert.doesNotMatch(withdrawn,/scope=sample\/next.*value=new/);assert.match(withdrawn,/scope=sample\/reading.*value=retained/);
     const replay=run(['land',lot]);assert.equal(replay.status,0,replay.stderr);assert.match(replay.stdout,/ONCE/);assert.equal(publicRead(),withdrawn);
-    // Withdrawal at one exact inscription must not erase a different inscription.
-    const alternate=canonical({scope:'sample/exact',measure:'observed',value:'other',form:'alphabet',role:'writes',by:'target',at:'policy:other'});
-    writeFileSync(source,row('sample/exact','observed','original')+'\n'+alternate+'\n');
-    const exact=run(['land',source,'--key','owner','--key-file',key]);assert.equal(exact.status,0,exact.stderr);
-    writeFileSync(source,row('sample/exact','observed','withdraw')+'\n');
+    // Retiring a different key and withdrawing one exact inscription are independent owner declarations.
+    writeFileSync(source,row('sample/exact','observed','withdraw')+'\n'+row('keys/device','class','withdraw')+'\n');
     const exactWithdraw=run(['land',source,'--key','owner','--key-file',key]);assert.equal(exactWithdraw.status,0,exactWithdraw.stderr);
-    const exactRead=publicRead();assert.doesNotMatch(exactRead,/scope=sample\/exact.*value=original/);assert.match(exactRead,/at=policy:other.*scope=sample\/exact.*value=other/);
-    writeFileSync(source,row('keys/device','class','withdraw')+'\n');
-    const retire=run(['land',source,'--key','owner','--key-file',key]);assert.equal(retire.status,0,retire.stderr);
-    assert.match(publicRead(),/scope=sample\/reading.*value=retained/);
+    const exactRead=publicRead();assert.doesNotMatch(exactRead,/scope=sample\/exact.*value=original/);assert.match(exactRead,/at=policy:other.*scope=sample\/exact.*value=other/);assert.match(exactRead,/scope=sample\/reading.*value=retained/);
     assert.notEqual(run(['sign',lot,'--key','device','--key-file',deviceKey]).status,0);
     writeFileSync(source,canonical({scope:'view/standing',measure:'id',value:'withdraw',role:'demands',form:'alphabet',by:'target',at:'policy:race'})+'\n');
     const removeView=run(['land',source,'--key','owner','--key-file',key]);assert.equal(removeView.status,0,removeView.stderr);

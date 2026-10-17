@@ -18,16 +18,20 @@ export function moduleImportSyntax(source: string, coordinate: string): ModuleIm
  catch{throw Error('REFUSE·source module syntax cannot be read: '+coordinate)}
  const found=new Set<string>(),unresolved=new Set<string>();
  const literal=stringLiteral;
- const visit=(node:unknown,parent?:Record<string,unknown>,key?:string):void=>{
+ const visit=(node:unknown,parent?:Record<string,unknown>,key?:string,reexportSource=false):void=>{
   if(!node||typeof node!=='object')return;
-  if(Array.isArray(node)){for(const child of node)visit(child,parent,key);return;}
+  if(Array.isArray(node)){for(const child of node)visit(child,parent,key,reexportSource);return;}
   const n=node as Record<string,unknown>;
   // Escaped loader references do not become an empty inventory. This is
   // conservative syntax, not a complete JavaScript alias/data-flow proof.
   if(n['type']==='Identifier'&&n['name']==='require'){
    const direct=parent?.['type']==='CallExpression'&&key==='callee';
    const namedProperty=(parent?.['type']==='MemberExpression'&&key==='property'&&!parent['computed'])||((parent?.['type']==='Property'||parent?.['type']==='MethodDefinition')&&key==='key'&&!parent['computed']&&!parent['shorthand']);
-   if(!direct&&!namedProperty)unresolved.add('require reference at '+String(n['start']));
+   // Declaration names are not loader references. This does not resolve shadowing:
+   // references to a binding named require remain conservative, including local calls.
+   const declarationName=((parent?.['type']==='ImportSpecifier'||parent?.['type']==='ImportDefaultSpecifier'||parent?.['type']==='ImportNamespaceSpecifier')&&(key==='imported'||key==='local'))||(parent?.['type']==='FunctionDeclaration'&&key==='id');
+   const reexportName=parent?.['type']==='ExportSpecifier'&&(key==='exported'||(key==='local'&&reexportSource));
+   if(!direct&&!namedProperty&&!declarationName&&!reexportName)unresolved.add('require reference at '+String(n['start']));
   }
   let specifier:string|undefined;
   if(n['type']==='ImportDeclaration'||n['type']==='ExportNamedDeclaration'||n['type']==='ExportAllDeclaration'||n['type']==='ImportExpression'){
@@ -42,7 +46,7 @@ export function moduleImportSyntax(source: string, coordinate: string): ModuleIm
    }
   }
   if(specifier!==undefined)found.add(specifier);
-  for(const [childKey,child] of Object.entries(n))visit(child,n,childKey);
+  for(const [childKey,child] of Object.entries(n))visit(child,n,childKey,n['type']==='ExportNamedDeclaration'?n['source']!==null&&n['source']!==undefined:reexportSource);
  };
  visit(tree);
  return {imports:[...found],unresolved:[...unresolved]};
