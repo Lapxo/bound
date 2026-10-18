@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/closure-delivery",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/closure-delivery.md",
+      "digest": "sha256:bdadeefcf8042749e642a453adc7d07944ceab3fbd62de46209ea3ed25d05c2e"
+    },
+    {
+      "role": "yes",
+      "path": "samples/module-delivery/inputs/delivery.json",
+      "digest": "sha256:a6df1d11537a0792c9772b1874c7e127e0fda22203f756d6f0eb104d072a9df1"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/module-delivery.vector.json",
+      "digest": "sha256:3de9f160f89764e1153a2719ab04447142fe187bf476b3060d860e81e9c37c02"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/module-delivery/delivery.json",
+      "digest": "sha256:f95b1c3129896baaecb4ae7860afc11dcaaef0a2e47221b73044bc5a4681181f"
+    }
+  ]
+}

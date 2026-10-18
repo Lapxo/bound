@@ -11,7 +11,7 @@ const stripTypeScriptTypes=(nodeModule as unknown as {stripTypeScriptTypes:(sour
 export interface ModuleImportSyntax { readonly imports: readonly string[]; readonly unresolved: readonly string[] }
 
 /** Syntax inventory is not an execution-closure certificate: unresolved expressions stay explicit. */
-export function moduleImportSyntax(source: string, coordinate: string): ModuleImportSyntax {
+export function moduleImportSyntax(source: string, coordinate: string, options?: {readonly esmOnly: boolean}): ModuleImportSyntax {
  const code=extname(coordinate)==='.ts'?stripTypeScriptTypes(source,{mode:'transform'}):source;
  let tree: unknown;
  try{tree=parse(code,{ecmaVersion:'latest',sourceType:'module',allowReturnOutsideFunction:true,allowHashBang:true})}
@@ -41,6 +41,7 @@ export function moduleImportSyntax(source: string, coordinate: string): ModuleIm
   if(n['type']==='CallExpression'){
    const callee=n['callee'] as Record<string,unknown>|undefined;
    if(callee?.['type']==='Identifier'&&callee['name']==='require'){
+    if(options?.esmOnly)throw Error('REFUSE·module closure CommonJS load in ESM delivery '+coordinate);
     specifier=literal((n['arguments'] as unknown[])[0]);
     if(specifier===undefined)unresolved.add('require expression at '+String(n['start']));
    }
