@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
@@ -28,6 +28,10 @@
     "./reference/native": {
       "types": "./dist/host/reference-native-api.d.ts",
       "default": "./dist/host/reference-native-api.js"
+    },
+    "./closure/native": {
+      "types": "./dist/host/native/module-delivery.d.ts",
+      "default": "./dist/host/native/module-delivery.js"
     }
   },
   "scripts": {
@@ -163,7 +167,14 @@
     "samples/readme/yes.json",
     "samples/readme/no.json",
     "vectors/native/readme.vector.json",
-    "samples/engine-place/inputs/closure.json"
+    "samples/engine-place/inputs/closure.json",
+    "dist/host/native/module-delivery.d.ts",
+    "dist/host/native/module-closure.d.ts",
+    "docs/contracts/closure-delivery.md",
+    "docs/contracts/closure-delivery.publication.json",
+    "samples/module-delivery/inputs/delivery.json",
+    "samples/no/module-delivery/delivery.json",
+    "vectors/native/module-delivery.vector.json"
   ],
   "author": "Lapxo",
   "license": "MIT",

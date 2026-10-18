@@ -2,6 +2,7 @@
 
 | | |
 |---|---|
+| pin | closure-delivery |
 | pin | ep-closure-reader |
 | pin | native-publication |
 | pin | process-readings |
@@ -14,6 +15,7 @@
 | pin | source-readings |
 | pin | wire |
 
+- [closure-delivery](contracts/closure-delivery.md)
 - [archive](contracts/archive.md)
 - [cli](contracts/cli.md)
 - [documents](contracts/documents.md)

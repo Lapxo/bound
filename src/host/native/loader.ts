@@ -1,4 +1,5 @@
 import {sha256 as digest} from '../hash.ts';
+import {compareStrings as order} from '../order.ts';
 import {realpathSync} from 'node:fs';
 import {dirname,join,relative,isAbsolute,sep} from 'node:path';
 import {readBoundedFile} from './bounded-file.ts';
@@ -46,7 +47,6 @@ export function installNativeResolutionReuse(declaration:Declaration):()=>void{
  const coordinates=new Map(declaration.libraries.map(library=>[library.name,library.coordinate]));
  if(libraries.size!==declaration.libraries.length)fail('ambiguous declaration');
  const namedCoordinates=new Set<string>();for(const coordinate of coordinates.values())if(coordinate!==undefined){if(typeof coordinate!=='string'||!coordinate||isAbsolute(coordinate)||coordinate.includes('\\')||coordinate.split('/').some(step=>!step||step==='.'||step==='..')||namedCoordinates.has(coordinate))fail('invalid/ambiguous logical library coordinate');namedCoordinates.add(coordinate)}
- const order=(a:string,b:string)=>a<b?-1:a>b?1:0;
  const identity=digest(Buffer.from(JSON.stringify([declaration.platform,files.map(member=>[member.path,member.digest,member.bytes]).sort((a,b)=>order(String(a[0]),String(b[0]))),[...libraries].sort(([a],[b])=>order(a,b)).map(([name,manifest])=>[name,manifest,coordinates.get(name)??null])])));
  if(resolutionIdentity!==undefined){if(identity!==resolutionIdentity)fail('late resolution replacement');if(!resolutionCheck)fail('fixed resolution already closed');return()=>{}}
  resolutionIdentity=identity;
