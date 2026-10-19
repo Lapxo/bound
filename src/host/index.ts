@@ -13,5 +13,6 @@ export {nativePlaceActPersistence} from './ports/place-act.ts';
 export type {PlaceActTrust,PlaceActBudget} from './ports/place-act.ts';
 export type {PlaceActPersistence} from './place-act-transaction.ts';
 export type {PublicationStorage} from './ports/publication.ts';
-export {prepareNativeReadingIdentity} from './reading-identity.ts';
-export type {NativeReadingIdentityContext,NativeReadingIdentityResult,ReadingPreparationLimits,ReadingPreparationResult,PreparedReading} from './reading-identity.ts';
+export {prepareNativeReadingIdentity,prepareNativeViewIdentity} from './reading-identity.ts';
+export type {NativeReadingIdentityContext,NativeReadingIdentityResult,ReadingPreparationLimits,ReadingPreparationResult,PreparedReading,NativeViewIdentityContext,NativeViewIdentityResult} from './reading-identity.ts';
+

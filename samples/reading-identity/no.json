@@ -11,5 +11,10 @@
   "missing": "needs",
   "integrity": "refuse",
   "authority": "refuse",
-  "ownerSigning": false
+  "ownerSigning": false,
+  "nativeViews": {
+    "unsupported": "reading-identity/selection",
+    "changedSnapshot": "reading-identity/context",
+    "staleResultBytes": 0
+  }
 }

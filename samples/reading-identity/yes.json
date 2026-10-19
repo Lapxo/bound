@@ -29,5 +29,18 @@
     "reading-identity"
   ],
   "finalReadingDuringPreparation": false,
-  "existingReceipts": "verified and retained"
+  "existingReceipts": "verified and retained",
+  "nativeViews": {
+    "places": [
+      "editorial-notes",
+      "water-level"
+    ],
+    "views": [
+      "lines",
+      "evidence"
+    ],
+    "operation": "prepareNativeViewIdentity",
+    "noRootExclusion": true,
+    "resultBoundToConsumedIdentity": true
+  }
 }

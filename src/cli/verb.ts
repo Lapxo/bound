@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {prepareNativeReadingIdentity,declaredReadingIdentityLimits} from '../host/reading-identity.ts';
+import {prepareNativeReadingIdentity,prepareNativeViewIdentity,declaredReadingIdentityLimits} from '../host/reading-identity.ts';
 import {nativeHostInstrument} from '../host/native-receiver.ts';
 import {ownRoot,processOf} from '../observe/runner.ts';
 import {BoundRefusal,describeRefusal,readRefusalCatalog} from '../host/refusals.ts';
@@ -189,10 +189,16 @@ function beat(root: string, fold: PlaceFold, ms: number): void {
  * is what a batch would move, read before land.
  */
 async function view(root: string, under: string | undefined, asked: string, told: readonly string[] = [], coord?: string, key?: string, includePolicy = true, authorityHeld = false): Promise<number> {
-  const [name = asked, depth] = asked.split('@');
+  const [name = asked, depth, expectedIdentity, ...extraSelection] = asked.split('@');
   if (name === NAMED_VIEWS.help) {
     process.stdout.write(`${helpLines().join('\n')}\n`);
     return EXIT.closed;
+  }
+  if(name==='reading-identity'&&depth!==undefined){
+    if(under||told.length||coord||extraSelection.length||expectedIdentity==='')throw new BoundRefusal('reading-identity/selection','REFUSE·native view identity requires one local place and a declared selector');
+    const result=prepareNativeViewIdentity({place:root,instrument:nativeHostInstrument(ownRoot(),processOf('verb')),view:depth,...(expectedIdentity?{expectedIdentity}:{})});
+    if(result.kind==='refuse')throw new BoundRefusal(result.code,result.diagnostic);
+    process.stdout.write(JSON.stringify(expectedIdentity===undefined?{kind:result.kind,view:result.view,identity:result.identity}:result)+'\n');return EXIT.closed;
   }
   if(name==='reading-identity'){
     if(under||told.length||coord||depth!==undefined)throw new BoundRefusal('host/context','REFUSE·reading identity requires one local admitted place');
@@ -471,7 +477,8 @@ async function foldAt(root: string, under: string | undefined, argv: readonly st
 async function foldRequested(root: string, under: string | undefined, argv: readonly string[]): Promise<number> {
   const as = valueOf(argv, FLAGS.as);
   const prospective = as !== undefined && positionalsOf(argv).some(one => existsSync(resolve(one)) && !lstatSync(resolve(one)).isDirectory());
-  if(as==='release'||as?.split('@')[0]==='act'||as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
+  if(as?.split('@')[0]==='reading-identity'&&(prospective||under||argv.includes(FLAGS.check)))throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection preparation does not sign batches or check rendered output');
+  if(as?.split('@')[0]==='reading-identity'||as==='release'||as?.split('@')[0]==='act'||as===NAMED_VIEWS.help || prospective || argv.includes(FLAGS.check))return foldResolved(root,under,argv);
   return resolveRequested(digest=>resolveSources(standingOf(root,under).standing,[digest]),()=>foldResolved(root,under,argv));
 }
 

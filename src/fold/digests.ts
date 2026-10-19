@@ -1,3 +1,4 @@
+import {preparingView} from '../host/reading-context.ts';
 import {signatureEraOf} from '../host/signature-era.ts';
 import {ledgerLines,ledgerWriters} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
@@ -117,6 +118,7 @@ export function coordinateDigest(store: string, at: string): string | undefined 
 }
 
 export function memoized(store: string, key: string, compute: () => string): string {
+  if(preparingView())return compute();
   const memo = memoOf(store);
   const held = memo.get(key);
   if (held !== undefined) return held;
@@ -130,6 +132,7 @@ export function memoized(store: string, key: string, compute: () => string): str
 
 const imported = new Map<string, readonly string[]>();
 const importsOf = (store: string, at: string, digest: string): readonly string[] => {
+  if(preparingView())return moduleImports(new TextDecoder().decode(observeFile(at)??new Uint8Array()),at);
   const key = `imports ${fullDigest(store,importsOf.toString())} ${digest}`;
   const memo = memoOf(store);
   const held = imported.get(digest) ?? (readOnly() ? undefined : memo.get(key)?.split('|').filter(Boolean));

@@ -1,3 +1,4 @@
+import {viewInput} from '../host/reading-context.ts';
 import {receiptRegion} from './receipts.ts';
 import { releasePolicyLines } from '../fold/release-policy.ts';
 import { join } from '../host/io.ts';
@@ -26,14 +27,15 @@ import { helpLines } from '../cli/names.ts';
 type Region = (fold: PlaceFold) => readonly string[];
 
 /** Authenticated delivery history is evidence, not the place's normative standing. */
-const evidence: Region = (fold) => {
-  const authority = authorityFor(lockLines(fold.store), rootSigner(fold.root), signaturesOf(fold.store).admitted);
-  const place = (fold.under ?? '').replace(/\/$/, '');
-  const deliveries = place ? appliedIn(fold.root, place)
-    : [...new Set(authority.admitted.flatMap(key => ledgerLines(fold.store, key.id)))];
+export function evidenceLines(root:string,store:string,under?:string):readonly string[]{
+  const authority = authorityFor(lockLines(store), rootSigner(root), signaturesOf(store).admitted);
+  const place = (under ?? '').replace(/\/$/, '');
+  const deliveries = place ? appliedIn(root, place)
+    : [...new Set(authority.admitted.flatMap(key => viewInput('evidence-ledger:'+store+':'+key.id,()=>ledgerLines(store, key.id))))];
   return deliveries
     .filter(line => authority.of(line).kind === 'admitted');
-};
+}
+const evidence:Region=fold=>evidenceLines(fold.root,fold.store,fold.under);
 
 const block = (name: string, lines: readonly string[]): readonly string[] => (lines.length ? [`## ${name}`, '', '```', ...lines, '```'] : []);
 const seconds = (ms: number): string => `${(ms / 1000).toFixed(1)} s`;
