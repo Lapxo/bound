@@ -199,13 +199,12 @@
   "author": "Lapxo",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "@lapxo/topos": "^0.2.1",
+    "@types/node": "20.19.43",
+    "typescript": "5.9.3",
+    "@lapxo/topos": "0.2.1",
     "@lapxo/obligations": "0.4.4",
     "esbuild": "0.28.2",
-    "dts-bundle-generator": "9.5.1",
-    "@gfx/zopfli": "1.0.15"
+    "dts-bundle-generator": "9.5.1"
   },
   "sideEffects": false,
   "engines": {

@@ -1,15 +1,14 @@
 import {readFileSync,writeFileSync,mkdtempSync,mkdirSync,copyFileSync,chmodSync,rmSync,existsSync} from 'node:fs';
-import {gunzipSync} from 'node:zlib';
-import {gzipAsync} from '@gfx/zopfli';
+import {gunzipSync,gzipSync} from 'node:zlib';
 import {pathToFileURL} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
 import {join,dirname,resolve} from 'node:path';
 
-/** Optimize the gzip carrier only. Exact tar bytes and member metadata survive.
+/** Compress with the standard runtime. Exact tar bytes and member metadata survive.
  * A distinct, new output is required; an approved archive is never overwritten. */
 export async function compactArchive(input:Uint8Array):Promise<Uint8Array>{
- const tar=gunzipSync(input),packed=await gzipAsync(tar,{numiterations:5});
+ const tar=gunzipSync(input),packed=gzipSync(tar,{level:9});
  if(!gunzipSync(packed).equals(tar))throw Error('Archive compaction changed tar bytes');
  return packed;
 }
