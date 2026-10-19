@@ -1,4 +1,4 @@
-import {decodeReference} from '@lapxo/bound/reference';
+import {decodeReference} from '../../src/host/reference-profile.ts';
 import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,readdirSync,mkdirSync} from 'node:fs';
 import {join} from 'node:path';
@@ -13,7 +13,7 @@ const sha=(b:Uint8Array|string)=>'sha256:'+createHash('sha256').update(b).digest
 const verifyBytes=(bytes:string,key:string,signature:string,algorithms:readonly string[])=>{const parsed=parseSignature(signature);if(!parsed||!algorithms.includes(parsed.algorithm))return false;try{return verify(null,Buffer.from(bytes),createPublicKey({key:Buffer.from(key,'base64'),format:'der',type:'spki'}),Buffer.from(parsed.raw,'base64'))}catch{return false}};
 const repo=new URL('../../',import.meta.url),row=(scope:string,measure:string,value:string)=>canonical({scope,measure,value,role:'writes',form:'alphabet',by:'target',at:'policy:fixture'});
 /** Real admitted fixture shared by separate export and backend conformance regions. */
-export function referenceRootFixture(place:string,world?:{readonly standing:string;readonly members:ReadonlyMap<string,Uint8Array>},configuration:readonly string[]=[]){
+export function referenceRootFixture(place:string,world?:{readonly standing:string;readonly members:ReadonlyMap<string,Uint8Array>},configuration:readonly string[]=[],runtime:{readonly entry?:string;readonly decodeReference?:typeof decodeReference}={}){
   const require=createRequire(import.meta.url),sdk=join(require.resolve('@lapxo/topos/package.json'),'..');
   const yes=JSON.parse(readFileSync(new URL('samples/reference-export/yes.json',repo),'utf8')),no=JSON.parse(readFileSync(new URL('samples/reference-export/no.json',repo),'utf8'));
   const schema=JSON.parse(readFileSync(join(sdk,'samples/walk/interval.json'),'utf8'));
@@ -24,7 +24,7 @@ export function referenceRootFixture(place:string,world?:{readonly standing:stri
   const grammar=schema.historicalWire.filter((f:Record<string,string>)=>f.scope.startsWith('wire/object/')).map((f:Record<string,string>)=>canonical({...f,by:'target',epoch:undefined}));
   const extra=[...grammar,row('reference/authentication','id','authenticated-standing@1'),row('reference/proof-scope','id','sample/reference-proof'),row('reference/records','id','256'),canonical({scope:'reference/export-bytes',role:'writes',form:'interval',measure:'bytes',value:'262144..262144',by:'target',at:'policy:fixture'}),row('reference/contracts/refusals','id',contracts.refusals),row('reference/contracts/standing','id',contracts.standing),row('uses/interval','digest',toposPin),row('origin/one','id','owner')];
   if(world)extra.push(canonical({scope:'evidence/origin/one',role:'writes',form:'alphabet',measure:'id',value:'one',by:'target',at:'policy:fixture',condition:yes.cell.scope}));
-  const f=actingRootFixture(place,[],{entry:fileURLToPath(new URL('dist/cli/verb.js',repo)),fields:schema.historicalWire.find((r:Record<string,string>)=>r.scope==='wire/fields').value,families:[...new Set([...('keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|reference|uses|origin|engine|transport'+(world?'|evidence':'')).split('|'),...configuration.flatMap(line=>{const row=parse(line);return row.kind==='fact'?[row.value.fields.scope!.split('/')[0]!]:[]})])].join('|'),extraBootstrapRows:[...extra,...configuration]});
+  const f=actingRootFixture(place,[],{entry:runtime.entry??fileURLToPath(new URL('dist/cli/verb.js',repo)),fields:schema.historicalWire.find((r:Record<string,string>)=>r.scope==='wire/fields').value,families:[...new Set([...('keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|reference|uses|origin|engine|transport'+(world?'|evidence':'')).split('|'),...configuration.flatMap(line=>{const row=parse(line);return row.kind==='fact'?[row.value.fields.scope!.split('/')[0]!]:[]})])].join('|'),extraBootstrapRows:[...extra,...configuration]});
   try{
     // The disposable place receives fixture data by digest before the measured opening.
     const laid=join(f.root,'.bound/cas/blobs');mkdirSync(laid,{recursive:true});
@@ -35,7 +35,7 @@ export function referenceRootFixture(place:string,world?:{readonly standing:stri
     const ledger=()=>{const walk=(dir:string):string[]=>readdirSync(dir,{withFileTypes:true}).sort((a,b)=>a.name.localeCompare(b.name)).flatMap(e=>e.isDirectory()?walk(join(dir,e.name)):[join(dir,e.name)+' '+sha(readFileSync(join(dir,e.name)))]);return walk(join(f.root,'.bound/ledger'));};
     const before=ledger(),targetBefore=readFileSync(join(f.root,'TARGET.bound'),'utf8');
     const output=f.run(['sign','--as','reference',yes.source,'--key','owner','--key-file',f.key]);assert.equal(output.status,0,output.stderr);
-    const bundle=JSON.parse(output.stdout);assert.equal(bundle.profile,'reference-export@1');assert.equal(output.stdout.includes(f.temp),false);assert.doesNotMatch(output.stdout,/PRIVATE KEY/);assert.deepEqual(bundle.context.contracts,contracts);assert.equal(decodeReference(bundle.reference).blob,sha(bundle.carrier));assert.deepEqual(ledger(),before);assert.equal(readFileSync(join(f.root,'TARGET.bound'),'utf8'),targetBefore);
+    const bundle=JSON.parse(output.stdout);assert.equal(bundle.profile,'reference-export@1');assert.equal(output.stdout.includes(f.temp),false);assert.doesNotMatch(output.stdout,/PRIVATE KEY/);assert.deepEqual(bundle.context.contracts,contracts);assert.equal((runtime.decodeReference??decodeReference)(bundle.reference).blob,sha(bundle.carrier));assert.deepEqual(ledger(),before);assert.equal(readFileSync(join(f.root,'TARGET.bound'),'utf8'),targetBefore);
     const objects={admit:()=>true,resolve:()=>({digest:toposPin,form:intervalForm,params:{lo:0,hi:10}}),origin:()=>true,witness:()=>false};
     // The test host independently accepts its own fixture's authority and contract pins.
     // Production consumers must establish these expectations outside a downloaded carrier.
