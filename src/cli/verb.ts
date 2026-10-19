@@ -19,7 +19,12 @@ import {cellsWithReceipts} from '../host/cell-receipts.ts';
 import {renderCells} from '@lapxo/topos/cells-view';
 import {releasePolicyLines} from '../fold/release-policy.ts';
 import {admittedObjects} from '../host/objects.ts';
-import {objectFold} from '../engine/index.ts';
+import {objectFold,executeComputation} from '../engine/index.ts';
+import {readingEnvironment} from '../host/reading-context.ts';
+import {verifyBytes} from '../host/adapters/keys/ed25519.ts';
+import {instrumentDigest} from '../fold/digests.ts';
+import {authorityAtEpoch} from '@lapxo/topos/wire';
+import {toposAt,contentAt} from '../host/selected-topos.ts';
 import {foldObjectsWithWasm,usesWasmObject} from '../wasm/object.ts';
 import {OBJECT_VIEW} from '@lapxo/topos/wire';
 import {toposStanding} from '@lapxo/topos/standing';
@@ -39,7 +44,7 @@ import { authorityFor, releaseSigner, rootSigner, writerFor } from '../fold/sign
 import { land, ledgerLines, storeOf } from '../land/ledger.ts';
 import { lockLines, releaseOf } from '../fold/keys.ts';
 import { signConsentLot } from '../land/sign.ts';
-import { signerFor } from '../host/signing.ts';
+import { signerFor,frameSignerFor } from '../host/signing.ts';
 import { admittedIn, ownLockOf, tellOwn } from '../fold/signed.ts';
 import { hasVouchedTree, landCoordinates, coordinatesOf, locationsOf, vouching, sourced } from '../land/vouched.ts';
 import { observeText } from '../observe/files.ts';
@@ -491,18 +496,36 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
     return EXIT.closed;
   }
 
-  if(as===OBJECT_VIEW){
+  if(as===OBJECT_VIEW||as==='computation'){
     const inputs=positionalsOf(argv).filter(one=>existsSync(resolve(one))&&!lstatSync(resolve(one)).isDirectory());
     if(inputs.length>1)throw Error('REFUSE·object one history snapshot per fold');
     const history=inputs.length?claimLinesIn(inputs[0]!):signedOwnerLines(storeOf(root));
-    const held=await admittedObjects(root,history,text=>process.stdout.write(text+'\n'));
-    let cells:ReturnType<typeof objectFold>;
-    if(usesWasmObject(held.configuration)){
+    const held=await admittedObjects(root,history,text=>(as==='computation'?process.stderr:process.stdout).write(text+'\n'));
+    const project=async()=>{if(usesWasmObject(held.configuration)){
       const cancellation=new AbortController(),interrupt=()=>cancellation.abort();
       process.once('SIGINT',interrupt);
-      try{cells=await foldObjectsWithWasm(root,held.records,held.context,held.configuration,cancellation.signal);}
+      try{return await foldObjectsWithWasm(root,held.records,held.context,held.configuration,cancellation.signal);}
       finally{process.removeListener('SIGINT',interrupt);}
-    }else cells=objectFold(held.records,held.context);
+    }return objectFold(held.records,held.context)};
+    if(as==='computation'){
+      if(under||argv.includes(FLAGS.check))throw new BoundRefusal('computation/context','REFUSE·computation/context');
+      const one=(scope:string)=>{const rows=held.configuration.filter(f=>f.scope===scope&&f.value!=='withdraw');if(rows.length!==1)throw new BoundRefusal('computation/context','REFUSE·computation/context');return rows[0]!.value!};
+      if(one('view/computation')!=='computation@1')throw new BoundRefusal('computation/context','REFUSE·computation/context');
+      const resource=(scope:string)=>{const span=/^0\.\.([1-9][0-9]*)$/.exec(one(scope)),n=Number(span?.[1]);if(!span||!Number.isSafeInteger(n))throw new BoundRefusal('computation/budget','REFUSE·computation/budget');return n};
+      const key=valueOf(argv,FLAGS.key),era=signaturesOf(storeOf(root)),authority=authorityFor(history,rootSigner(root),era.admitted),signer=authority.admitted.find(s=>s.id===key),epoch=Math.max(...history.map(l=>Number(fieldOf(l,'epoch')||0)));
+      if(!key||!signer||authorityAtEpoch({scope:'computation',by:key},signer,epoch,'computation','authority').kind!=='admitted')throw new BoundRefusal('computation/authority','REFUSE·computation/authority');
+      const input=new TextEncoder().encode(history.join('\n')+'\n'),policy=catalogDigest(held.configuration.map(f=>canonical(f)).join('\n')),references=new Map<string,string>();
+      for(const pin of new Set(held.records.filter(r=>r.record==='cell').map(r=>r.fields.topos!))){
+        references.set('form/'+pin,pin);const selected=toposAt(pin),view=selected.parts.find(f=>f.scope==='wire/topos/context-view')?.value;
+        for(const offer of selected.parts.filter(f=>f.kind==='check'&&f.view===view))for(const dependency of (offer.restsOn??'').split('|').filter(Boolean)){contentAt(dependency);references.set('form-module/'+dependency,dependency)}
+      }
+      const engine=instrumentDigest(ownStore(),processOf('verb'),ownLock(),ownRoot()),assets=usesWasmObject(held.configuration)?['manifest.json','runtime.js','runtime.wasm','guest.js'].map(name=>[name,catalogDigest(readCatalogFile(new URL('../../assets/wasm/'+name,import.meta.url)))]):[],implementation=assets.length?catalogDigest(JSON.stringify([engine,assets])):engine;
+      const invoke=frameSignerFor(held.configuration.map(f=>canonical(f)),key,valueOf(argv,FLAGS.signer),valueOf(argv,FLAGS.keyFile)),limits={maxBytes:resource('computation/bytes'),timeoutMs:resource('computation/milliseconds')};
+      const context={contract:one('computation/contract'),numericPolicy:one('computation/numeric-policy'),reading:{instrument:engine,implementation,policy,inputs:[...references],environment:readingEnvironment(catalogDigest)},keyId:key,algorithm:era.era};
+      const result=await executeComputation(context,input,{digest:catalogDigest,evaluate:async()=>new TextEncoder().encode(JSON.stringify(await project())+'\n'),sign:invoke,verify:async(bytes,signature,algorithm)=>signature.keyId===key&&verifyBytes(bytes,signer.publicKey,signature.signature,[algorithm])},limits);
+      process.stdout.write(JSON.stringify({profile:'bound-computation-delivery@1',context,input:new TextDecoder().decode(input),statement:result.statement,output:new TextDecoder().decode(result.output)})+'\n');return EXIT.closed;
+    }
+    const cells=await project();
     for(const cell of cells)process.stdout.write('CELL '+JSON.stringify(cell)+'\n');
     process.stdout.write(`FACT     object fold ${cells.length} cells\n`);
     return EXIT.closed;

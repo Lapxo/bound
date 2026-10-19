@@ -1,20 +1,23 @@
-import{stringLiteral}from'../adapters/modules/javascript.ts';
-import type {parse as Parser} from 'acorn';
+import {parse} from '../../../vendor/syntax/parser.js';
 import * as nodeModule from 'node:module';
 import {extname} from 'node:path';
 
 /** Host module syntax, never wire or domain interpretation. Reading imports executes no module. */
 // The package's minimum Node runtime provides this API; older build-only Node types do not.
-const require=nodeModule.createRequire(import.meta.url);
-const {parse}=require('acorn') as {parse:typeof Parser};
 const stripTypeScriptTypes=(nodeModule as unknown as {stripTypeScriptTypes:(source:string,options:{mode:'transform'})=>string}).stripTypeScriptTypes;
+/** A literal is inventoried as data, never evaluated to discover a request. */
+const stringLiteral=(node:unknown):string|undefined=>{
+ if(!node||typeof node!=='object')return;
+ const n=node as Record<string,unknown>;
+ return n['type']==='Literal'&&typeof n['value']==='string'?n['value']:undefined;
+};
 export interface ModuleImportSyntax { readonly imports: readonly string[]; readonly unresolved: readonly string[] }
 
 /** Syntax inventory is not an execution-closure certificate: unresolved expressions stay explicit. */
-export function moduleImportSyntax(source: string, coordinate: string, options?: {readonly esmOnly: boolean}): ModuleImportSyntax {
+export function moduleImportSyntax(source: string, coordinate: string, options?: {readonly esmOnly: boolean;readonly staticOnly?:boolean}): ModuleImportSyntax {
  const code=extname(coordinate)==='.ts'?stripTypeScriptTypes(source,{mode:'transform'}):source;
  let tree: unknown;
- try{tree=parse(code,{ecmaVersion:'latest',sourceType:'module',allowReturnOutsideFunction:true,allowHashBang:true})}
+ try{tree=parse(code,{sourceType:'module',next:true,ranges:{start:true,end:false,range:false},lexical:true,globalReturn:true})}
  catch{throw Error('REFUSE·source module syntax cannot be read: '+coordinate)}
  const found=new Set<string>(),unresolved=new Set<string>();
  const literal=stringLiteral;
@@ -46,7 +49,7 @@ export function moduleImportSyntax(source: string, coordinate: string, options?:
     if(specifier===undefined)unresolved.add('require expression at '+String(n['start']));
    }
   }
-  if(specifier!==undefined)found.add(specifier);
+  if(specifier!==undefined&&(!options?.staticOnly||(n['type']!=='ImportExpression'&&n['type']!=='CallExpression')))found.add(specifier);
   for(const [childKey,child] of Object.entries(n))visit(child,n,childKey,n['type']==='ExportNamedDeclaration'?n['source']!==null&&n['source']!==undefined:reexportSource);
  };
  visit(tree);

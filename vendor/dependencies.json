@@ -1,0 +1,51 @@
+{
+  "format": "pinned-dependency-archives/1",
+  "packages": [
+    {
+      "name": "@lapxo/obligations",
+      "version": "0.4.4",
+      "archive": "lapxo-obligations-0.4.4.tgz",
+      "source": "https://registry.npmjs.org/@lapxo/obligations/-/obligations-0.4.4.tgz",
+      "digest": "sha256:b3e938d28f88a1851af303a40c749e12ebd5a686daac4f0b343b5cdd2e040419"
+    },
+    {
+      "name": "@lapxo/topos",
+      "version": "0.2.1",
+      "archive": "lapxo-topos-0.2.1.tgz",
+      "source": "https://registry.npmjs.org/@lapxo/topos/-/topos-0.2.1.tgz",
+      "digest": "sha256:50086958553b9376d600583f7dff354196bfeb41170fc6d1482ca7bea7c493e2"
+    }
+  ],
+  "delivery": {
+    "path": "fixed-modules.json",
+    "digest": "sha256:80f89cf723355a43836fea957050aeb8b8139598f641e8a74467cfacd8d7e2cb",
+    "limits": {
+      "members": 200,
+      "bytes": 1000000,
+      "responseBytes": 3000000
+    },
+    "kind": "verified fixed-module build input",
+    "runtimeIntegration": "build-relocation@1",
+    "content": "manifest; source bytes retained once in package-sources.json"
+  },
+  "openNeeds": [],
+  "sources": {
+    "path": "package-sources.json",
+    "digest": "sha256:9e026a1868e00f017dfba7aaf4eb36dcb4d45185d53d8001990740ba5cf94a83",
+    "format": "pinned-package-sources/1"
+  },
+  "syntax": {
+    "name": "meriyah",
+    "version": "7.4.0",
+    "archive": "sha256:62d8210fc778e731a6cf2fc8e61f1e30e007a1d2f0f2579fcee27832b960b26f",
+    "source": "https://registry.npmjs.org/meriyah/-/meriyah-7.4.0.tgz",
+    "sourceMember": "package/dist/meriyah.min.mjs",
+    "file": "syntax/parser.js",
+    "digest": "sha256:f6448e2d74a13bb7187da757d93dc2d68cbe39e0a28ea96cbb532b8bb221ac52",
+    "license": {
+      "member": "package/LICENSE.md",
+      "file": "syntax/LICENSE.md",
+      "digest": "sha256:e9a5df5a6ae5cd51ca430715f4c62fb5424946e8da07b7caa058a1ba0582a848"
+    }
+  }
+}

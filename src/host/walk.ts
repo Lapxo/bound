@@ -9,7 +9,7 @@ import {authorityFor,rootSigner} from '../fold/signers.ts';
 import {publicKeyOf} from '../fold/signers.ts';
 import {signaturesOf} from '../fold/digests.ts';
 import {fullDigest} from './digest.ts';
-import {toposAt,contextModuleAt} from './selected-topos.ts';
+import {toposAt,contextProviderServices} from './selected-topos.ts';
 import {signerFor} from './signing.ts';
 import {signConsentLot,verifiesFields} from '../land/sign.ts';
 import {storeOf} from '../land/ledger.ts';
@@ -60,7 +60,7 @@ async function validateHistory(root:string,selected:ReturnType<typeof context>,h
  if(!decoded.value.objects.length)return;
  const pinned=new Set(selected.topos.lines);
  const admit=(f:Readonly<Record<string,string>>)=>Boolean(f.sig)?selected.authority.of(canonical(f)).kind==='admitted':pinned.has(standingBytes([canonical(f)]).trim());
- const provider=await objectProvider(decoded.value.objects,decoded.value.configuration,{admit,emit:()=>{},topos:pin=>toposAt(pin,storeOf(root)),module:pin=>contextModuleAt(pin,storeOf(root))});
+ const provider=await objectProvider(decoded.value.objects,decoded.value.configuration,{admit,emit:()=>{},...contextProviderServices(storeOf(root))});
  const checked=validateObjectContext(decoded.value.objects,provider);if(checked.kind!=='fact')refuse('origin context '+checked.why);
 }
 async function readBundle(root:string,bundle:IngressBundle,earlier:readonly string[]=[]){

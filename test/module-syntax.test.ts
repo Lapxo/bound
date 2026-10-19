@@ -4,8 +4,18 @@ import { readFile } from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {dirname,join} from 'node:path';
 import { moduleImportSyntax } from '../src/host/native/module-syntax.ts';
+import { moduleImports as identityImports } from '../src/host/adapters/modules/javascript.ts';
 
 const syntax = (source: string) => moduleImportSyntax(source, 'dist/example.js');
+test('identity and delivery share one literal inventory without executing source', () => {
+ const source=`import 'static-input'; export * from 'reexport-input';
+ function unused() { import('dynamic-input'); require('common-input'); import(choice); }
+ throw Error('inventory must not execute');`;
+ const reading=syntax(source);
+ assert.deepEqual(identityImports(source,'dist/example.js'),reading.imports);
+ assert.deepEqual(reading.imports,['static-input','reexport-input','dynamic-input','common-input']);
+ assert.equal(reading.unresolved.length,1);
+});
 test('imported algebra name aliased away is not loader reference', () => {
  assert.deepEqual(syntax("import { require as requireFloor } from 'algebra'; requireFloor(1);"), { imports: ['algebra'], unresolved: [] });
 });

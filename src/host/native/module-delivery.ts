@@ -37,7 +37,7 @@ const resourceLimits=(limits:ClosureDeliveryLimits):void=>{
 
 /** The host selects already authenticated snapshots and resolution, never the
  * offered program. This prepares unchanged ESM files, not a JS sandbox, signer,
- * browser host or symbol-pruning bundler. Existing native/Acorn routes remain.
+ * browser host or symbol-pruning bundler. Native loading boundaries remain separately declared.
  */
 export function deliverModuleClosure(needs:readonly string[],entries:ReadonlyMap<string,ModuleClosureSnapshot>,library:Library,limits:ClosureDeliveryLimits,notices:readonly ClosureNotice[]=[]):ClosureDelivery {
  resourceLimits(limits);
