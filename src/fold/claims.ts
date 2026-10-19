@@ -3,6 +3,7 @@ import { contracts, exclusive, point, region } from '@lapxo/obligations/field';
 import { ENVELOPE, PROTOCOL, recordKind, signedBytes, parse } from '@lapxo/topos/wire';
 export { CAPSULE, EXTENSION, LOCK, RECEIPTS } from '@lapxo/topos/wire';
 import { ownRoot } from '../observe/runner.ts';
+import {hostInstrumentName} from '../host/call-context.ts';
 import type { Region } from '@lapxo/obligations/field';
 
 const decoded = new Map<string, Readonly<Record<string, string>>>();
@@ -31,7 +32,7 @@ function wireFields(line: string): Readonly<Record<string, string>> {
 export const fieldOf = (line: string, name: string): string => wireFields(line)[name] ?? '';
 export const fieldsOf = (line: string): Record<string, string> => ({ ...wireFields(line) });
 
-export function selfName(): string { return basename(ownRoot()); }
+export function selfName(): string { return hostInstrumentName()??basename(ownRoot()); }
 export function isWire(line: string): boolean { return line.startsWith(PROTOCOL); }
 export const wireLinesOf = (text: string | undefined): readonly string[] => (text ?? '').split('\n').filter(isWire);
 export const isConfig = (line:string):boolean => {const held=kinds.get(line);if(held!==undefined)return held;const k=recordKind(line),value=k.kind==='fact'&&k.value==='config';kinds.set(line,value);return value;};

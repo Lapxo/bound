@@ -1,9 +1,6 @@
 import{hashText}from'./hash.ts';
 import {admissionAnchor,admissionHistoryAt} from '../fold/admission-history.ts';
-import {authorityFor} from '../fold/signers.ts';
-import {eraOf} from '../fold/digests.ts';
-import {fieldOf,foldClaims,isConfig} from '../fold/claims.ts';
-import {foldedEvidence} from '@lapxo/topos/contract';
+import {projectAuthenticatedStanding,publishedStandingLines} from './standing-projection.ts';
 import {createHash} from 'node:crypto';
 
 // One bounded historical projection, never a current authority/lease verdict.
@@ -21,32 +18,7 @@ export function authenticatedRootStanding(root:string):readonly string[]{
   const history=admissionHistoryAt(root,Number.MAX_SAFE_INTEGER),anchor=admissionAnchor(root);
   const identity=historicalIdentity(history,anchor);
   if(historicalProjection?.identity===identity)return [...historicalProjection.standing];
-  const snapshots=new Map<number,ReturnType<typeof authorityFor>>();
-  const admitted=history.filter(line=>{
-    const epoch=Number(fieldOf(line,'epoch'))||0;
-    let authority=snapshots.get(epoch);
-    if(!authority){
-      // This invocation has freshly read the complete signed inventory. Derive
-      // the same historical cutoff without reopening it for every epoch; the
-      // next invocation still rereads every authority input.
-      const snapshot=history.filter(record=>!isConfig(record)||Number(fieldOf(record,'epoch'))<=epoch);
-      // The signature vocabulary is configuration, not the as-yet
-      // unauthenticated evidence whose values are about to be folded.
-      const wire=snapshot.filter(record=>{
-        const scope=fieldOf(record,'scope');
-        return scope.startsWith('wire/')||scope.startsWith('audit/wire/');
-      });
-      authority=authorityFor(snapshot,anchor,eraOf(foldClaims(wire).standing).admitted);
-      snapshots.set(epoch,authority);
-    }
-    return authority.of(line).kind==='admitted';
-  });
-  // The host authenticates against historical authority; Topos projects the
-  // authenticated history using the instrument's existing fold.
-  const {standing}=foldedEvidence(admitted,{
-    classification:()=> 'local',
-    fold:lines=>foldClaims(lines).standing,
-  });
+  const standing=projectAuthenticatedStanding(history,anchor);
   historicalProjection={identity,standing:Object.freeze([...standing])};
   return [...standing];
 }
@@ -58,5 +30,5 @@ export const authenticatedStanding=authenticatedRootStanding;
  * remains intact for the existing typed-object projection. Internal readers keep
  * authenticatedStanding, including its historical markers. */
 export function publicStandingLines(root:string):readonly string[]{
- return authenticatedRootStanding(root).filter(line=>!isConfig(line)||fieldOf(line,'value')!=='withdraw');
+ return publishedStandingLines(authenticatedRootStanding(root));
 }

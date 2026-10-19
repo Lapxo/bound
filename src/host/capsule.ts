@@ -1,3 +1,4 @@
+import {hostOutput} from './call-context.ts';
 import type {ReaderReference} from '@lapxo/topos/wire';
 import {readerLifetime,parse} from '@lapxo/topos/wire';
 import {contentStore,verifiedContent,contentPolicy} from './content-store.ts';
@@ -34,7 +35,7 @@ export interface Capsule {
 
 const declared = new Map<string, { readonly lines: readonly string[]; readonly declaration: Declaration }>();
 const laid = new Map<string, string>();
-process.on('exit', () => { for (const at of laid.values()) rmSync(at, { recursive: true, force: true }); });
+const releaseLaid = () => { for (const at of laid.values()) rmSync(at, { recursive: true, force: true }); };
 
 /** A blob is unpacked once in a process, where every run of it the process asks for reads it. */
 function unpacked(digest: string, bytes: Uint8Array): string {
@@ -44,6 +45,7 @@ function unpacked(digest: string, bytes: Uint8Array): string {
   try { unpack(bytes, at); }
   catch (error) { rmSync(at, { recursive: true, force: true }); throw error; }
   laid.set(digest, at);
+  if (!process.listeners('exit').includes(releaseLaid)) process.once('exit', releaseLaid);
   return at;
 }
 
@@ -108,7 +110,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   }
   const child = entry === undefined ? spawnOf(tree ?? unpacked(digest, bytes), names) : [entry];
   if (!child.length) {
-    process.stderr.write(`LOAD     regions · none of ${names.length} under the directories release/layout names\n`);
+    hostOutput('error',`LOAD     regions · none of ${names.length} under the directories release/layout names\n`);
     return requests.map(() => undefined);
   }
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
@@ -129,7 +131,7 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   });
   const missing = requests.filter((_, i) => held[i] === undefined);
   if (missing.length && readOnly()) throw Error(`REFUSE·preview capsule ${digest} has no verified answer for the proposed inputs; fold the declared inputs first`);
-  if (missing.length) process.stderr.write(`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
+  if (missing.length) hostOutput('error',`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
   if(native&&!lifetime)throw Error('REFUSE·native reader missing declared lifetime');
   const ran = !missing.length ? [] : native

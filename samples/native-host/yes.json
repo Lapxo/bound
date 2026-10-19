@@ -1,0 +1,20 @@
+{
+  "profile": "native-host@1",
+  "places": [
+    {
+      "name": "seed-library",
+      "scope": "sample/accession",
+      "value": "oat-archive"
+    },
+    {
+      "name": "coastal-survey",
+      "scope": "sample/tide-station",
+      "value": "outer-bay"
+    }
+  ],
+  "expected": [
+    "landed",
+    "historical recovery",
+    "already-held without signing"
+  ]
+}

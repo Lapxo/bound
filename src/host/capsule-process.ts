@@ -1,3 +1,4 @@
+import {hostOutput} from './call-context.ts';
 import {actCosts} from './act-cost.ts';
 import {fileURLToPath} from 'node:url';
 import {boundedProcess} from './process-lifetime.ts';
@@ -54,7 +55,7 @@ export function executeCapsule(command: string, args: readonly string[], request
   if (!Array.isArray(values) || values.length !== requests.length || !values.every((value, i) => validResponse(value, requests[i]!))) {
     throw new CapsuleProcessError(`returned an invalid batch; expected ${requests.length} responses`, run);
   }
-  if (run.stderr) process.stderr.write(run.stderr);
+  if (run.stderr) hostOutput('error',run.stderr);
   return values as readonly Response[];
   });
 }

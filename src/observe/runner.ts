@@ -1,3 +1,4 @@
+import {hostInstrumentRuntime} from '../host/call-context.ts';
 import { spawnSync } from 'node:child_process';
 import { sha } from '../host/hash.ts';
 import { existsSync, mkdirSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -11,7 +12,7 @@ import { EXTENSION, LOCK, publicLock } from '@lapxo/topos/wire';
 import {foldClaims,isWire} from '../fold/claims.ts';
 
 const self = (): string => process.argv[1] ?? '';
-const fromBlob = (): boolean => extname(existsSync(self()) ? realpathSync(self()) : self()) === '';
+const fromBlob = (): boolean => hostInstrumentRuntime()!==undefined?false:extname(existsSync(self()) ? realpathSync(self()) : self()) === '';
 
 /**
  * Where the instrument lies and what it is run from: from source or compiled modules, bound is two steps above this runner module; as a blob, the command is a blob of the tree's store, named by the digest bound's own lock names for
@@ -19,10 +20,12 @@ const fromBlob = (): boolean => extname(existsSync(self()) ? realpathSync(self()
  * before anything is started, never handed to the runtime as the store's own directory.
  */
 // Blob bundles have no module URL; source and compiled modules carry their own entry location.
-const moduleAt = fromBlob() ? undefined : fileURLToPath(import.meta.url);
-const runtimeAt = moduleAt === undefined ? '' : resolve(dirname(moduleAt), '..');
-const runtimeExtension = moduleAt === undefined ? '' : extname(moduleAt);
-export const ownRoot = (): string => (fromBlob() ? join(resolve(dirname(self()), '..', '..', '..'), 'bound') : resolve(runtimeAt, '..'));
+// Native library imports do not inspect the embedding application's argv.
+// The CLI discovers its default runtime only when a CLI operation requests it.
+const moduleAt = ():string|undefined => fromBlob() ? undefined : fileURLToPath(import.meta.url);
+const runtimeAt = ():string => {const explicit=hostInstrumentRuntime();if(explicit)return explicit.directory;const at=moduleAt();return at===undefined?'':resolve(dirname(at),'..')};
+const runtimeExtension = ():string => {const explicit=hostInstrumentRuntime();if(explicit)return explicit.extension;const at=moduleAt();return at===undefined?'':extname(at)};
+export const ownRoot = (): string => hostInstrumentRuntime()?.root??(fromBlob() ? join(resolve(dirname(self()), '..', '..', '..'), 'bound') : resolve(runtimeAt(), '..'));
 /** A published instrument carries its own content store even before any ledger
  * exists. Public-lock recognition grants no authority; legacy signed delivery
  * trees retain their historical colocated-ledger or sibling-store layout. */
@@ -36,6 +39,7 @@ export const ownStore = (): string => instrumentStoreAt(ownRoot());
 // An act is judged by the instrument it started with, even when that act changes its colocated lock.
 let instrumentLock: readonly string[] | undefined;
 export const ownLock = (): readonly string[] => {
+  const explicit=hostInstrumentRuntime();if(explicit)return explicit.lock;
   if (instrumentLock !== undefined) return instrumentLock;
   const lines=(observeText(join(ownRoot(),LOCK))??'').split('\n').filter(isWire);
   const published=publicLock(lines);
@@ -44,10 +48,10 @@ export const ownLock = (): readonly string[] => {
     : foldClaims(published).standing;
   return instrumentLock;
 };
-export const sourceOf = (): string => (fromBlob() ? join(ownRoot(), 'src', 'cli', 'verb.ts') : self());
+export const sourceOf = (): string => hostInstrumentRuntime()?.entry??(fromBlob() ? join(ownRoot(), 'src', 'cli', 'verb.ts') : self());
 
 export function processOf(name: string, folder?: string): string {
-  if (!fromBlob()) return join(runtimeAt, folder ?? 'cli', `${name}${runtimeExtension}`);
+  if (!fromBlob()) return join(runtimeAt(), folder ?? 'cli', `${name}${runtimeExtension()}`);
   const named = ownLock().find((line) => fieldOf(line, 'scope') === `runner/${name}`);
   const blob = fieldOf(named ?? '', 'value').replace(/^[^:]*:/, '');
   if (!blob || !existsSync(join(dirname(self()), blob))) {
@@ -87,7 +91,7 @@ export function bundleOf(module: string): string | undefined {
 
 /** A reader run by a blob is a blob itself: its bundle, with everything it imports but the compiler. */
 export function readerOf(module: string): { readonly path: string; readonly flags: readonly string[] } {
-  const source = { path: module, flags: runtimeExtension === '.ts' ? ['--disable-warning=ExperimentalWarning', '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON'] : [] };
+  const source = { path: module, flags: runtimeExtension() === '.ts' ? ['--disable-warning=ExperimentalWarning', '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON'] : [] };
   const hex = fromBlob() ? bundleOf(module) : undefined;
   return hex === undefined ? source : { path: join(ownStore(), 'cas', 'blobs', hex), flags: [] };
 }

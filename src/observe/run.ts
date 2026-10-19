@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import {boundedProcess} from '../host/process-lifetime.ts';
 import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { spawnSync } from 'node:child_process';
@@ -47,7 +48,7 @@ export function runReader(module: string, root: string, inputs: readonly Input[]
   const ran = limits===undefined?spawnSync(process.execPath, args, { cwd: root, input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 28 }):boundedProcess(process.execPath,args,JSON.stringify(requests),limits,root);
   if ('error' in ran && ran.error) throw Object.assign(new Error(`${module}: reader process failed: ${ran.error.message}`), { cause: ran.error });
   if (ran.status !== 0) throw new Error(`${module}: reader exited ${ran.status ?? `with signal ${ran.signal}`}\n${ran.stderr ?? ''}${ran.stdout ?? ''}`);
-  if (ran.stderr) process.stderr.write(ran.stderr);
+  if (ran.stderr) hostOutput('error',ran.stderr);
   return responsesOf(ran.stdout ?? '', inputs.length).map((answer) => {
     if (answer.kind !== 'fact') throw new Error(`REFUSE·reader ${module} · ${answer.why ?? 'no reading answered'}`);
     return (answer.claims ?? []) as readonly Row[];

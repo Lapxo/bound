@@ -1,4 +1,6 @@
 import{hashText}from'../hash.ts';
+import {ActCommitUnknown} from '../commit-result.ts';
+import {assertHostNotCancelled} from '../host-controls.ts';
 import {existsSync,readFileSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
@@ -123,16 +125,20 @@ export function localActResult(store: string,identity: string,verify: LocalActVe
  */
 export async function commitLocalAct(store: string,identity: string,regions: readonly string[],
   prepare: ()=>Promise<LocalActBundle>,verify: LocalActVerification,
-  storage: PublicationStorage=nativePublicationStorage): Promise<LocalActBundle & {readonly kind:'landed'|'once'}> {
+  storage: PublicationStorage=nativePublicationStorage,signal?:AbortSignal): Promise<LocalActBundle & {readonly kind:'landed'|'once'}> {
   requireEffects('local act commitment');
+  assertHostNotCancelled(signal);
   return underTheRegions(store,regions,'land',async()=>{
+    assertHostNotCancelled(signal);
     const prior=localActResult(store,identity,verify);
     if(prior)return {kind:'once',...prior};
     const bundle=await prepare();
+    assertHostNotCancelled(signal);
     if(!bundle.records || !bundle.receipt || verify(identity,bundle)!==true)throw Error('REFUSE·act prepared result does not verify');
     const files:Record<string,string>={'records.bound':bundle.records,'receipt.bound':bundle.receipt};
     for(const p of bundle.placements??[])files['place-'+encodeURIComponent(p.place)+'.bound']=p.records;
-    publishBundle(atOf(store,identity),files,storage);
+    assertHostNotCancelled(signal);
+    try{publishBundle(atOf(store,identity),files,storage)}catch(error){throw new ActCommitUnknown(identity,error)}
     return {kind:'landed',...bundle};
   });
 }

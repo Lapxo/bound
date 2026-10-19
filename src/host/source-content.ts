@@ -1,3 +1,4 @@
+import {hostOutput} from './call-context.ts';
 import {transportBytes} from './ports/transport.ts';
 import {contentStore,verifiedContent} from './content-store.ts';
 import {ContentNeeded} from './content-needed.ts';
@@ -68,7 +69,7 @@ export async function resolveSources(standing:readonly string[],requested:readon
   write:(digest,bytes)=>{landBlob(contentStore(),digest,bytes);},
   fetch:async (url,digest)=>transportBytes(url,digest!,[...ownLock(),...standing]),
  },requested);
- for(const digest of received)process.stdout.write(`FETCHED  ${digest} · verified\n`);
+ for(const digest of received)hostOutput('out',`FETCHED  ${digest} · verified\n`);
 }
 
 

@@ -1,3 +1,11 @@
+import {BoundRefusal} from '../host/refusals.ts';
+import {assertHostNotCancelled as notCancelled} from '../host/host-controls.ts';
+import {authorityAtEpoch} from '@lapxo/topos/wire';
+import type {SigningPort} from '../engine/ports.ts';
+import type {LocalActBundle} from '../host/ports/local-act.ts';
+import type {PublicationStorage} from '../host/ports/publication.ts';
+import {requireEffects} from '../host/read-only.ts';
+import {hostOutput} from '../host/call-context.ts';
 import {assertProspectiveRootClockSelection} from '../host/root-clock-source.ts';
 import {hasContextualPlace,landContextualPlace} from '../host/contextual-place.ts';
 import {commitLocalAct,intactLocalAct,committedLocalActs} from '../host/ports/local-act.ts';
@@ -47,6 +55,17 @@ import { FLAGS } from './names.ts';
 import { judgeDemand, landTake } from './takes.ts';
 import type { Judged } from './takes.ts';
 
+/** Explicit data input to the same native admission path. Not CLI arguments or
+ * offered host capabilities. The initial host operation admits Root lots only. */
+export interface RootAdmissionHost {
+ readonly records:readonly string[];
+ readonly keyId:string;
+ readonly signer:{readonly name:string;readonly sign:SigningPort;readonly signal?:AbortSignal};
+ readonly signal?:AbortSignal;
+ readonly storage?:PublicationStorage;
+ readonly prepared?:(identity:string)=>void;
+ readonly committed?:(identity:string,bundle:LocalActBundle,kind:'landed'|'once')=>void;
+}
 export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly records?:readonly string[]; readonly epoch: number; readonly base: { readonly digest: string; readonly places: readonly string[] }; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
 
 /** Admission reads an existing evidence snapshot; acquiring observations belongs to fold. */
@@ -80,8 +99,8 @@ function admissionEvidence(root: string, signed: readonly string[], standing: re
 function refusesWidening(signed: readonly string[], standing: readonly string[]): boolean {
   const widened = widenedWithoutWitness(signed, standing, isCeiling, wordOf(standing, 'at-classes', 'witness'));
   if (widened.length) {
-    for (const line of widened) process.stderr.write(`WIDER    ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
+    for (const line of widened) hostOutput('error',`WIDER    ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
     return true;
   }
   return false;
@@ -92,24 +111,24 @@ function refusesAdmission(root: string, signed: readonly string[], standing: rea
   if (refusesWidening(signed, standing)) return true;
   const store = storeOf(root);
   const outside = outsideTheirCapsule(root, standing, signed);
-  for (const line of outside) process.stderr.write(`OUTSIDE  ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
+  for (const line of outside) hostOutput('error',`OUTSIDE  ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
   if (outside.length) {
-    process.stderr.write(`${selfName()}: REFUSE·outside nothing landed · a reader or a capsule lands in the capsule of its world, never in the wire or the instrument\n`);
+    hostOutput('error',`${selfName()}: REFUSE·outside nothing landed · a reader or a capsule lands in the capsule of its world, never in the wire or the instrument\n`);
     return true;
   }
   const forks = forksJoinedBy(store, signed).filter(fork => forksItself(fork.lines) || fork.lines.filter(line => signed.includes(line)).length > 1);
   if (forks.length) {
     for (const fork of forks) {
-      process.stderr.write(`FORK     ${fork.key}\n`);
-      for (const line of fork.lines) process.stderr.write(`  ${signed.includes(line) ? 'new ' : 'held'}  by=${fieldOf(line, 'by')} ${sideOf(line, lockLines(store))}\n`);
+      hostOutput('error',`FORK     ${fork.key}\n`);
+      for (const line of fork.lines) hostOutput('error',`  ${signed.includes(line) ? 'new ' : 'held'}  by=${fieldOf(line, 'by')} ${sideOf(line, lockLines(store))}\n`);
     }
-    process.stderr.write(`${selfName()}: REFUSE·fork nothing landed · one signer never forks itself, and one act never forks itself: withdraw the held side in this batch, or sign the other reading under its own scope\n`);
+    hostOutput('error',`${selfName()}: REFUSE·fork nothing landed · one signer never forks itself, and one act never forks itself: withdraw the held side in this batch, or sign the other reading under its own scope\n`);
     return true;
   }
   const held = aliasPinned(root, signed);
   if (held.length) {
-    for (const one of held) process.stderr.write(`ALIAS    ${one.scope} · ${one.digest} · ${one.by.join(' ')}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·alias nothing landed · an alias is withdrawn only when no pin names its digest\n`);
+    for (const one of held) hostOutput('error',`ALIAS    ${one.scope} · ${one.digest} · ${one.by.join(' ')}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·alias nothing landed · an alias is withdrawn only when no pin names its digest\n`);
     return true;
   }
   return false;
@@ -117,22 +136,22 @@ function refusesAdmission(root: string, signed: readonly string[], standing: rea
 
 function refusesStandingPins(root:string, lines:readonly string[]):boolean {
   try {admitStandingPins(root,lines);return false;}
-  catch(error){process.stderr.write(`${selfName()}: ${error instanceof Error?error.message:String(error)}\n`);return true;}
+  catch(error){hostOutput('error',`${selfName()}: ${error instanceof Error?error.message:String(error)}\n`);return true;}
 }
 
 /** A batch signed as accept signs it: at the next epoch, by the key it names, each line read by the wire it would land under. */
-export async function signedBatch(root: string, args: readonly string[], files: readonly string[]): Promise<Batch> {
-  const byFile = files.map((file) => [placesOfFile(file), claimLinesIn(file)] as const);
+export async function signedBatch(root: string, args: readonly string[], files: readonly string[], host?:RootAdmissionHost): Promise<Batch> {
+  const byFile = host?[[[] as readonly string[],host.records] as const]:files.map((file) => [placesOfFile(file), claimLinesIn(file)] as const);
   const proposed = byFile.flatMap(([, lines]) => lines);
   if (!proposed.length) {
-    process.stderr.write(`${selfName()}: a batch is a file with claim lines\n`);
+    hostOutput('error',`${selfName()}: a batch is a file with claim lines\n`);
     return { kind: 'exit', code: 2 };
   }
   const drafted = proposed.filter((line) => !fieldOf(line, 'sig'));
   const bare = drafted.filter((line) => fieldOf(line, 'epoch') || !['', 'target'].includes(fieldOf(line, 'by')));
   if (bare.length) {
-    for (const line of bare) process.stderr.write(`BARE     ${fieldOf(line, 'scope')} · by=${fieldOf(line, 'by') || '∅'}${fieldOf(line, 'epoch') ? ` epoch=${fieldOf(line, 'epoch')}` : ''}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·bare nothing landed · ${bare.length} lines name a signer or an epoch they were not signed with: a drafted line proposes by=target and sign signs it, a line a lane signed carries its sig\n`);
+    for (const line of bare) hostOutput('error',`BARE     ${fieldOf(line, 'scope')} · by=${fieldOf(line, 'by') || '∅'}${fieldOf(line, 'epoch') ? ` epoch=${fieldOf(line, 'epoch')}` : ''}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·bare nothing landed · ${bare.length} lines name a signer or an epoch they were not signed with: a drafted line proposes by=target and sign signs it, a line a lane signed carries its sig\n`);
     return { kind: 'exit', code: 1 };
   }
   const store = storeOf(root);
@@ -140,7 +159,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   const rooted = lockStanding(store);
   const stray = destinations.filter(one => !placesIn(root).includes(one) && !foundableIn(root, rooted, wordOf(rooted, 'families', 'region'), one));
   if (stray.length) {
-    process.stderr.write(`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
+    hostOutput('error',`${selfName()}: REFUSE·place nothing landed · ${stray.join(', ')} is no place of the tree, and no line of the root founds it: --place names the own lock a line lands in\n`);
     return {kind:'exit',code:2};
   }
   const local = localActLines(root, destinations);
@@ -150,8 +169,8 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     ? [`${fieldOf(line, 'scope')} · the signature does not hold for ${by || '∅'}`]
     : []))(fieldOf(line, 'by'), publicKeyOf(root, fieldOf(line, 'by'))));
   if (stale.length) {
-    for (const one of stale) process.stderr.write(`SIGNED   ${one}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·signed nothing landed · ${stale.length} lines a lane signed stand at no epoch this act\n`);
+    for (const one of stale) hostOutput('error',`SIGNED   ${one}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·signed nothing landed · ${stale.length} lines a lane signed stand at no epoch this act\n`);
     return { kind: 'exit', code: 1 };
   }
   const [named, places] = [namedPlaces(args), placesIn(root)];
@@ -165,35 +184,40 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     ? at.every((place) => inPlace.get(place)?.has(sayingOf(line)))
     : delivered(line) || inLock.has(sayingOf(line)) || places.some((place) => inPlace.get(place)?.has(sayingOf(line)));
   if (proposed.every((line) => held(line))) {
-    if(proposed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...proposed]);}catch(e){process.stderr.write(`${selfName()}: ${String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
+    if(proposed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...proposed]);}catch(e){hostOutput('error',`${selfName()}: ${String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
     return { kind: 'once', proposed };
   }
   const outdated = proposed.filter(line => fieldOf(line, 'sig') && isConfig(line) && Number(fieldOf(line, 'epoch')) !== epoch);
   if (outdated.length) {
-    for (const line of outdated) process.stderr.write(`SIGNED   ${fieldOf(line, 'scope')} · signed by ${fieldOf(line, 'by')} at epoch ${fieldOf(line, 'epoch')}, and this act lands at ${epoch}: sign it again\n`);
-    process.stderr.write(`${selfName()}: REFUSE·signed nothing landed · ${outdated.length} lines a lane signed stand at no epoch this act\n`);
+    for (const line of outdated) hostOutput('error',`SIGNED   ${fieldOf(line, 'scope')} · signed by ${fieldOf(line, 'by')} at epoch ${fieldOf(line, 'epoch')}, and this act lands at ${epoch}: sign it again\n`);
+    hostOutput('error',`${selfName()}: REFUSE·signed nothing landed · ${outdated.length} lines a lane signed stand at no epoch this act\n`);
     return { kind: 'exit', code: 1 };
   }
-  const keyFile = valueOf(args, FLAGS.keyFile);
-  const keyId = valueOf(args, FLAGS.key) ?? ownerOf(store);
+  const keyFile = host?undefined:valueOf(args, FLAGS.keyFile);
+  const keyId = host?.keyId??valueOf(args, FLAGS.key)??ownerOf(store);
   const publicKey = drafted.length ? publicKeyOf(root, keyId) : undefined;
   if (drafted.length && !publicKey) {
-    process.stderr.write(`${selfName()}: unknown key ${keyId} — name it in ${selfName()}.keys\n`);
+    hostOutput('error',`${selfName()}: unknown key ${keyId} — name it in ${selfName()}.keys\n`);
     return { kind: 'exit', code: 2 };
   }
   let signed: string[] = proposed.filter((line) => fieldOf(line, 'sig'));
+  if(host&&drafted.length){
+    notCancelled(host.signal);
+    const selected=authorityFor(lockLines(store),rootSigner(root),signaturesOf(store).admitted).admitted.find(s=>s.id===keyId);
+    for(const line of drafted){const parsed=parse(line);if(parsed.kind!=='fact'||!selected||authorityAtEpoch({...parsed.value.fields,by:keyId,epoch:String(epoch)},selected,epoch,fieldOf(line,'scope'),'authority').kind!=='admitted')throw new BoundRefusal('host/receiver-authority','REFUSE·host/receiver-authority');}
+  }
   if (drafted.length) {
     let invoke;
     try { invoke = signerFor([...lockStanding(store), ...destinations.flatMap(place => ownLockOf(root, place))],
-      keyId, valueOf(args, FLAGS.signer), keyFile); }
+      keyId, host?.signer.name??valueOf(args, FLAGS.signer), keyFile,host?.signer); }
     catch (error) {
-      process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : 'REFUSE·signer unavailable'}\n`);
+      hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : 'REFUSE·signer unavailable'}\n`);
       return { kind: 'exit', code: 1 };
     }
     const got = await signConsentLot(drafted, { epoch, by: keyId, algorithm: signaturesOf(store).era },
       publicKey!, signaturesOf(store).admitted, invoke);
     if (got.kind === 'refuse') {
-      process.stderr.write(`${selfName()}: ${got.why}\n`);
+      hostOutput('error',`${selfName()}: ${got.why}\n`);
       return { kind: 'exit', code: 1 };
     }
     let index = 0;
@@ -206,7 +230,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   for (const line of signed) {
     const got = admittedLine(line, wireLines,Number(fieldOf(line, 'epoch')), foldClaims(signedOwnerLines(store)).standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw'));
     if (got.kind !== 'fact') {
-      process.stderr.write(`${selfName()}: REFUSE·wire ${fieldOf(line, 'scope')} · ${got.why} · nothing landed\n`);
+      hostOutput('error',`${selfName()}: REFUSE·wire ${fieldOf(line, 'scope')} · ${got.why} · nothing landed\n`);
       return { kind: 'exit', code: 1 };
     }
   }
@@ -214,10 +238,10 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   const taken = retractedTogether(signed);
   if (taken.length) {
     for (const pair of taken) {
-      process.stderr.write(`WITHDRAW ${sayingOf(pair.withdraw)}\n`);
-      process.stderr.write(`NEW      ${sayingOf(pair.line)}\n`);
+      hostOutput('error',`WITHDRAW ${sayingOf(pair.withdraw)}\n`);
+      hostOutput('error',`NEW      ${sayingOf(pair.line)}\n`);
     }
-    process.stderr.write(`${selfName()}: REFUSE·withdraw nothing landed · a withdraw matches a new line in this batch, so it takes that line too\n`);
+    hostOutput('error',`${selfName()}: REFUSE·withdraw nothing landed · a withdraw matches a new line in this batch, so it takes that line too\n`);
     return { kind: 'exit', code: 1 };
   }
   const authority = authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted);
@@ -225,18 +249,18 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     by => authority.admitted.find(one => one.id === by)?.coverage ?? [], named,
     line => { const heads = byFile.flatMap(([heads, lines]) => lines.some(draft => sayingOf(draft) === sayingOf(line)) ? heads : []); return heads.length ? heads : undefined; });
   if (ownership.nowhere.length) {
-    for (const line of ownership.nowhere) process.stderr.write(`${selfName()}: REFUSE·signer ${keyId} uncovered ${fieldOf(line, 'scope')} · nothing signed for delivery\n`);
+    for (const line of ownership.nowhere) hostOutput('error',`${selfName()}: REFUSE·signer ${keyId} uncovered ${fieldOf(line, 'scope')} · nothing signed for delivery\n`);
     return { kind: 'exit', code: 1 };
   }
   if (ownership.forked.length) {
-    for (const one of ownership.forked) process.stderr.write(`FORKED   ${one.place}/${LOCK} · ${one.key} · the lot would leave two standing claims where the lock had one\n`);
-    process.stderr.write(`${selfName()}: REFUSE·forked nothing landed · ${ownership.forked.length} claims an own lot would fork: a lot for many places lands the same lines at each, and lines meant for one place go in a lot of their own\n`);
+    for (const one of ownership.forked) hostOutput('error',`FORKED   ${one.place}/${LOCK} · ${one.key} · the lot would leave two standing claims where the lock had one\n`);
+    hostOutput('error',`${selfName()}: REFUSE·forked nothing landed · ${ownership.forked.length} claims an own lot would fork: a lot for many places lands the same lines at each, and lines meant for one place go in a lot of their own\n`);
     return {kind:'exit',code:1};
   }
   if (refusesAdmission(root, ownership.ledger, lockStanding(store))) return { kind: 'exit', code: 1 };
-  if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>process.stdout.write(text+'\n'));}catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
+  if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>hostOutput('out',text+'\n'));}catch(e){hostOutput('error',`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
   try { admissionEvidence(root, ownership.ledger, lockStanding(store)); }
-  catch(error) {process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return {kind:'exit',code:1};}
+  catch(error) {hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return {kind:'exit',code:1};}
   return { kind: 'signed', signed, epoch, base, ...(drafted.length ? { keyId } : {}) };
 }
 
@@ -253,19 +277,33 @@ export async function accept(root: string, args: readonly string[]): Promise<num
   const contextFiles=positionalsOf(args);
   if(contextFiles.length===1&&hasContextualPlace(root)&&!claimLinesIn(contextFiles[0]!).length){
     if(namedPlaces(args).length||valueOf(args,FLAGS.key)||valueOf(args,FLAGS.keyFile)||valueOf(args,FLAGS.signer))throw Error('REFUSE·contextual place accepts one already signed context envelope');
-    const result=await landContextualPlace(root,contextFiles[0]!);process.stdout.write(JSON.stringify({profile:'place-act-context@1',identity:result.identity,status:result.kind,context:result.context,receipts:result.receipts})+'\n');return 0;
+    const result=await landContextualPlace(root,contextFiles[0]!);hostOutput('out',JSON.stringify({profile:'place-act-context@1',identity:result.identity,status:result.kind,context:result.context,receipts:result.receipts})+'\n');return 0;
   }
   const named = namedPlaces(args);
   const placed = positionalsOf(args).reduce((all, file) => ((places) => (places.length ? claimLinesIn(file).reduce((got, line) => got.set(sayingOf(line), [...new Set([...(got.get(sayingOf(line)) ?? []), ...places])]), all) : all))(placesOfFile(file)), new Map<string, readonly string[]>());
   const batch = await signedBatch(root, args, positionalsOf(args));
+  return finishAcceptance(root,args,batch,placed,started);
+}
+
+/** Root host boundary, sharing signing, wire, coverage, takes and publication
+ * with accept(). No file is manufactured for a batch of already-owned bytes. */
+export async function acceptRootRecords(root:string,host:RootAdmissionHost):Promise<number>{
+ requireEffects('Root lot admission');notCancelled(host.signal);
+ if(!actResultProfile(lockStanding(storeOf(root))))throw new BoundRefusal('host/act','REFUSE·Root host requires the admitted atomic result profile');
+ const started=Date.now(),batch=await signedBatch(root,[],[],host);
+ return finishAcceptance(root,[],batch,new Map(),started,host);
+}
+
+async function finishAcceptance(root:string,args:readonly string[],batch:Batch,placed:ReadonlyMap<string,readonly string[]>,started:number,host?:RootAdmissionHost):Promise<number>{
+  const named=namedPlaces(args);
   if (batch.kind === 'exit') return batch.code;
   if (batch.kind === 'once') return underTheLock(storeOf(root), 'land', () => repaid(root, batch.proposed, started));
   const store = storeOf(root);
   const authority = authorityFor([...lockLines(store), ...batch.signed], rootSigner(root), signaturesOf(store).admitted);
   const owned = ownedOf(root, batch.signed, (line) => authority.of(line).kind === 'admitted', (by) => authority.admitted.find((one) => one.id === by)?.coverage ?? [], named, (line) => placed.get(sayingOf(line)));
   if (owned.nowhere.length) {
-    for (const line of owned.nowhere) process.stderr.write(`NOWHERE  ${fieldOf(line, 'scope')} · ${((got) => (got.kind === 'admitted' ? 'admitted' : got.why))(authority.of(line))}, and ${named.length ? `no place of ${named.join(', ')} takes it` : 'no one own lock it covers takes it: name the places with --place'}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·nowhere nothing landed · ${owned.nowhere.length} lines neither the ledger nor an own lock admits: a line is landed signed where it stands, never written in bare\n`);
+    for (const line of owned.nowhere) hostOutput('error',`NOWHERE  ${fieldOf(line, 'scope')} · ${((got) => (got.kind === 'admitted' ? 'admitted' : got.why))(authority.of(line))}, and ${named.length ? `no place of ${named.join(', ')} takes it` : 'no one own lock it covers takes it: name the places with --place'}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·nowhere nothing landed · ${owned.nowhere.length} lines neither the ledger nor an own lock admits: a line is landed signed where it stands, never written in bare\n`);
     return 1;
   }
   const places = placesIn(root);
@@ -274,18 +312,18 @@ export async function accept(root: string, args: readonly string[]): Promise<num
   const every = pinned.length === 0 && touched.length === places.length && places.length > 0;
   const regions = (pinned.length ? pinned : every ? places : touched).filter((one) => places.includes(one));
   const where = every ? 'every place · then the root, where the places join' : regions.length ? regions.map((one) => `${one}/`).join(' · ') : 'the root alone, where the places join';
-  process.stdout.write(`ACTS     ${where} · ${owned.ledger.length} lines to the ledger${[...owned.own].map(([place, lines]) => ` · ${lines.length} to ${place}'s own lock`).join('')} · before the lock\n`);
+  hostOutput('out',`ACTS     ${where} · ${owned.ledger.length} lines to the ledger${[...owned.own].map(([place, lines]) => ` · ${lines.length} to ${place}'s own lock`).join('')} · before the lock\n`);
   const asked = Date.now();
   // Root-ledger writes may change grants or inherited policies. Child-only
   // lots read that authority through publication, without excluding siblings.
   const rootWrite = owned.ledger.length > 0 || every || regions.length === 0;
   const enter = rootWrite ? underTheRegions : underAuthorityRegions;
-  return enter(store, rootWrite ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger, records:batch.signed }, started, owned, asked, regions));
+  return enter(store, rootWrite ? [...regions, ''] : regions, 'land', () => acceptNow(root, { ...batch, signed: owned.ledger, records:batch.signed }, started, owned, asked, regions,host));
 }
 
-async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 'signed' }>, started: number, owned: Owned, asked = started, descent: readonly string[] = []): Promise<number> {
+async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 'signed' }>, started: number, owned: Owned, asked = started, descent: readonly string[] = [],host?:RootAdmissionHost): Promise<number> {
   const waited = Date.now() - asked;
-  if (waited > 60_000) process.stdout.write(`RED      wait ${Math.round(waited / 1000)} s for the lock before the act · a wait over a minute is a red\n`);
+  if (waited > 60_000) hostOutput('out',`RED      wait ${Math.round(waited / 1000)} s for the lock before the act · a wait over a minute is a red\n`);
   const spent: string[] = [`sign ${asked - started}`, `wait ${waited}`];
   const took = timing(spent);
   const { signed, epoch } = batch;
@@ -293,26 +331,26 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const store = storeOf(root);
   const currentBase = fullDigest(store, localActLines(root, batch.base.places));
   if (currentBase !== batch.base.digest) {
-    process.stderr.write(`${selfName()}: REFUSE·base moved ${batch.base.digest} → ${currentBase} · nothing landed\n`);
+    hostOutput('error',`${selfName()}: REFUSE·base moved ${batch.base.digest} → ${currentBase} · nothing landed\n`);
     return 1;
   }
   try {assertProspectiveRootClockSelection(root,signed);}
-  catch(error){process.stderr.write(`${selfName()}: ${error instanceof Error?error.message:String(error)} · nothing landed\n`);return 1;}
+  catch(error){hostOutput('error',`${selfName()}: ${error instanceof Error?error.message:String(error)} · nothing landed\n`);return 1;}
   if(signed.some(line=>!isConfig(line))) {
     try {await admittedObjects(root,[...signedOwnerLines(store),...signed]);}
-    catch(e){process.stderr.write(`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return 1;}
+    catch(e){hostOutput('error',`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return 1;}
   }
   const snapshot = took('lines', () => standingOf(root));
   if (refusesAdmission(root, signed, snapshot.standing)) return 1;
   let evidence: ReturnType<typeof admissionEvidence>;
   try { evidence = took('evidence', () => admissionEvidence(root, signed, snapshot.standing)); }
-  catch(error) {process.stderr.write(`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return 1;}
+  catch(error) {hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return 1;}
   const fold = evidence.fold;
   const authority = took('authority', () => authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted));
   for (const line of signed) {
     const verdict = authority.of(line);
     if (verdict.kind !== 'admitted') {
-      process.stderr.write(`${selfName()}: ${verdict.kind === 'refuse' ? verdict.why : `REFUSE·authority grey: ${verdict.why}`}\n`);
+      hostOutput('error',`${selfName()}: ${verdict.kind === 'refuse' ? verdict.why : `REFUSE·authority grey: ${verdict.why}`}\n`);
       return 1;
     }
   }
@@ -329,12 +367,12 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   if (!cached) keepVerdict(store, tree, lot, judged.map(packTake));
   const refused = judged.filter((one) => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
   if (refused.length) {
-    for (const one of refused) process.stdout.write(`REFUSE   take ${one.scope} · ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·takes nothing landed · ${refused.length} takes refused: a batch lands whole or not at all\n`);
+    for (const one of refused) hostOutput('out',`REFUSE   take ${one.scope} · ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·takes nothing landed · ${refused.length} takes refused: a batch lands whole or not at all\n`);
     return 1;
   }
   const told = took('told', () => standingOf(root, undefined, signed));
-  for (const name of openedBy(descent, told.standing, signed)) process.stderr.write(`OPEN     ${name}\n`);
+  for (const name of openedBy(descent, told.standing, signed)) hostOutput('error',`OPEN     ${name}\n`);
   if (owned.own.size) layReleases(store, root, told.standing, store);
   const resultProfile=actResultProfile(snapshot.standing);
   let landed:readonly {at:string;appended:number}[]=[];
@@ -347,12 +385,14 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     if(!folder)throw Error('REFUSE·act native result requires a declared fold identity');
     const receipt=canonical({scope:resultProfile.scope,at:resultProfile.context,role:'writes',form:'alphabet',measure:'digest',value:identity,by:folder,epoch:String(epoch)});
     const bundle={records:records.join('\n')+'\n',receipt:receipt+'\n',placements:placements.map(p=>({place:p.place,records:p.records.join('\n')+'\n'}))};
-    await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct);
+    notCancelled(host?.signal);host?.prepared?.(identity);notCancelled(host?.signal);
+    const committed=await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct,host?.storage,host?.signal);
+    host?.committed?.(identity,committed,committed.kind);
     // Commitment precedes projections and conformance work. If either fails,
     // this public identity still names the admitted act; it is never rollback.
-    process.stdout.write(`ACT ${identity} · epoch ${epoch} · admitted · conformance not asserted\n`);
-    for(const line of records)process.stdout.write(line+'\n');
-    process.stdout.write(receipt+'\n');
+    hostOutput('out',`ACT ${identity} · epoch ${epoch} · admitted · conformance not asserted\n`);
+    for(const line of records)hostOutput('out',line+'\n');
+    hostOutput('out',receipt+'\n');
     landed=[{at:'committed act '+identity,appended:records.length}];
   }else landed=took('land',()=>[...new Set(signed.map(line=>fieldOf(line,'by')))].map(by=>land(store,by,signed.filter(line=>fieldOf(line,'by')===by))));
   for (const [place, lines] of owned.own) landOwned(root, place, lines,resultProfile!==undefined);
@@ -374,7 +414,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
       for (let dir = dirname(path); dir !== '.' && existsSync(join(root, dir)) && !entriesIn(join(root, dir)).length; dir = dirname(dir)) rmdirSync(join(root, dir));
     }
     landCoordinates(store, new Map(), coordinates.taken, `withdraw:epoch-${epoch}`);
-    for (const path of coordinates.taken) process.stdout.write(`GONE     ${path} · withdrawn by its line\n`);
+    for (const path of coordinates.taken) hostOutput('out',`GONE     ${path} · withdrawn by its line\n`);
   }
   for (const one of judged) landTake(root, one, []);
   const standingAsked = [...signed, ...fold.standing].filter((line) => fieldOf(line, 'role') === 'demands' && fieldOf(line, 'value') !== 'withdraw');
@@ -382,31 +422,31 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const late = lateFacts(store, [...signed, ...fold.standing], paidScopes);
   if (late.length) {
     land(store, 'judge', late);
-    for (const line of late) if (fieldOf(line, 'measure') !== 'cone') process.stdout.write(`LATE     ${fieldOf(line, 'scope')} · answered from the landed cone\n`);
+    for (const line of late) if (fieldOf(line, 'measure') !== 'cone') hostOutput('out',`LATE     ${fieldOf(line, 'scope')} · answered from the landed cone\n`);
   }
   if (signed.some((line) => fieldOf(line, 'scope').startsWith(`${basename(ownRoot())}/`) && !fieldOf(line, 'scope').split('/').slice(1, -1).includes('uses'))) {
     const code = instrumentOf(store, entryOf(root), told.standing, root, ownLock());
     if (instrumentKept(store) !== code) {
       const open = await closeReceipts(root, store);
       instrumentKeep(store, code);
-      process.stderr.write(`open by instrument · ${open.length}\n`);
+      hostOutput('error',`open by instrument · ${open.length}\n`);
     }
   }
   const rendered = took('render', () => renderInto(root, store));
-  process.stdout.write(`RENDER 0\n`);
+  hostOutput('out',`RENDER 0\n`);
   const own = new Set([...owned.own.values()].flat()).size;
   const perLine = Math.round((Date.now() - started) / Math.max(1, signed.length + own));
   const folder = writerFor(fold.standing, 'fold');
   const beat = (ms: number, at: string): string => canonical({ scope: 'beat/accept', role: 'writes', form: 'interval', measure: 'ms', value: `${ms}..${ms}`, by: folder ?? '', at: `place:${at}` });
   if (folder !== undefined) land(store, folder, [beat(perLine, 'line'), beat(1, fold.kept ? 'kept' : 'folded'), beat(Date.now() - started, 'total')]);
-  process.stdout.write(
+  hostOutput('out',
     `FACT     signed ${signed.length + own} · landed ${landed.length ? landed.map((one) => `${one.appended} in ${one.at}`).join(' · ') : '0'}${[...owned.own].map(([place, lines]) => ` · ${lines.length} in ${place}/${LOCK}`).join('')} · epoch ${epoch}\n`
     + `TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · readings · no encounters computed · ${Date.now() - started} ms\n`
     + `SPENT    ${spent.join(' ms · ')} ms · ${signed.length} lines\n`,
   );
   if (withdrawn) {
-    process.stdout.write(`WITHDRAW ${withdrawn.taken.length} taken · ${withdrawn.exact.length} exact on distributive scales · ${withdrawn.open.length} on open scales, not computed\n`);
-    for (const line of withdrawn.inexact) process.stdout.write(`INEXACT  ${fieldOf(line, 'scope')} · its scale is not distributive: what the others hold is not what they held without it\n`);
+    hostOutput('out',`WITHDRAW ${withdrawn.taken.length} taken · ${withdrawn.exact.length} exact on distributive scales · ${withdrawn.open.length} on open scales, not computed\n`);
+    for (const line of withdrawn.inexact) hostOutput('out',`INEXACT  ${fieldOf(line, 'scope')} · its scale is not distributive: what the others hold is not what they held without it\n`);
   }
   return 0;
   });
@@ -419,25 +459,25 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
 function repaid(root: string, proposed: readonly string[], started: number): number {
   const store = storeOf(root);
   const prior=committedLocalActs(store).find(act=>{const lines=act.bundle.records.trimEnd().split('\n');return lines.length===proposed.length&&lines.every((line,i)=>line===proposed[i])});
-  if(prior){process.stdout.write(`ACT ${prior.identity} · epoch ${fieldOf(prior.bundle.receipt.trim(),'epoch')} · admitted · replay\n`+prior.bundle.records+prior.bundle.receipt);}
+  if(prior){hostOutput('out',`ACT ${prior.identity} · epoch ${fieldOf(prior.bundle.receipt.trim(),'epoch')} · admitted · replay\n`+prior.bundle.records+prior.bundle.receipt);}
   const asked = new Set(proposed.filter((line) => fieldOf(line, 'role') === 'demands').map((line) => fieldOf(line, 'scope')));
   const view = `${wordOf(foldClaims(signedOwnerLines(store)).standing, 'families', 'view')}/`;
   const standingAsked = signedDemands(store).filter((line) => asked.has(fieldOf(line, 'scope')) && !fieldOf(line, 'scope').startsWith(view));
   const owed = paidOf(store, standingAsked, [], view).missing;
   if (!owed.length) {
-    process.stdout.write(`ONCE     ${proposed.length} lines · every one already landed and every demand of it paid: a batch landed twice is one, nothing landed\n`);
+    hostOutput('out',`ONCE     ${proposed.length} lines · every one already landed and every demand of it paid: a batch landed twice is one, nothing landed\n`);
     return 0;
   }
   const judged = owed.map((line) => judgeDemand(root, line));
-  process.stdout.write(`ONCE     ${proposed.length} lines · every one already landed · ${owed.length} of its demands unpaid, judged again\n`);
+  hostOutput('out',`ONCE     ${proposed.length} lines · every one already landed · ${owed.length} of its demands unpaid, judged again\n`);
   if (judged.every((one) => one.kind === 'owed')) {
     for (const one of judged) landTake(root, one, []);
     return 0;
   }
   const refused = judged.filter((one) => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
   if (refused.length) {
-    for (const one of refused) process.stdout.write(`REFUSE   take ${one.scope} · ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}\n`);
-    process.stderr.write(`${selfName()}: REFUSE·takes nothing landed · ${refused.length} takes refused: what a batch left unpaid is paid whole or not at all\n`);
+    for (const one of refused) hostOutput('out',`REFUSE   take ${one.scope} · ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}\n`);
+    hostOutput('error',`${selfName()}: REFUSE·takes nothing landed · ${refused.length} takes refused: what a batch left unpaid is paid whole or not at all\n`);
     return 1;
   }
   const standing = standingOf(root);
@@ -448,11 +488,11 @@ function repaid(root: string, proposed: readonly string[], started: number): num
   const late = lateFacts(store, standing.standing, paidScopes);
   if (late.length) {
     land(store, 'judge', late);
-    for (const line of late) if (fieldOf(line, 'measure') !== 'cone') process.stdout.write(`LATE     ${fieldOf(line, 'scope')} · answered from the landed cone\n`);
+    for (const line of late) if (fieldOf(line, 'measure') !== 'cone') hostOutput('out',`LATE     ${fieldOf(line, 'scope')} · answered from the landed cone\n`);
   }
   const rendered = renderInto(root, store);
-  process.stdout.write(`RENDER 0\n`);
-  process.stdout.write(`TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · readings · no encounters computed · ${Date.now() - started} ms\n`);
+  hostOutput('out',`RENDER 0\n`);
+  hostOutput('out',`TARGET   ${rendered.standing} claims · ${rendered.forks.length} forks · ${rendered.vacuous.length} vacuous · ${rendered.grey.length} grey · ${rendered.refused.length} refused · readings · no encounters computed · ${Date.now() - started} ms\n`);
   return 0;
 }
 

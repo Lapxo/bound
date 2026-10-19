@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
@@ -32,6 +32,10 @@
     "./closure/native": {
       "types": "./dist/host/native/module-delivery.d.ts",
       "default": "./dist/host/native/module-delivery.js"
+    },
+    "./host": {
+      "types": "./dist/host/index.d.ts",
+      "default": "./dist/host/index.js"
     }
   },
   "scripts": {
@@ -174,7 +178,33 @@
     "docs/contracts/closure-delivery.publication.json",
     "samples/module-delivery/inputs/delivery.json",
     "samples/no/module-delivery/delivery.json",
-    "vectors/native/module-delivery.vector.json"
+    "vectors/native/module-delivery.vector.json",
+    "dist/host/index.d.ts",
+    "dist/host/in-process.d.ts",
+    "dist/host/in-process-context.d.ts",
+    "dist/host/in-process-act.d.ts",
+    "dist/host/in-process-root.d.ts",
+    "dist/host/native-receiver.d.ts",
+    "dist/host/call-context.d.ts",
+    "dist/host/ports/place-act.d.ts",
+    "dist/host/place-act-transaction.d.ts",
+    "dist/host/ports/publication.d.ts",
+    "dist/host/root-clock-source.d.ts",
+    "dist/fold/claims.d.ts",
+    "dist/host/ports/local-act.d.ts",
+    "dist/host/place-clock-selection.d.ts",
+    "dist/host/commit-result.d.ts",
+    "docs/contracts/native-host.publication.json",
+    "samples/native-host/yes.json",
+    "samples/native-host/no.json",
+    "vectors/native/native-host.vector.json",
+    ".github/workflows/release.yml",
+    ".github/workflows/test.yml",
+    "CITATION.cff",
+    "docs/contracts/publication.inventory.json",
+    "docs/guide.md",
+    "docs/reference.md",
+    "docs/why.md"
   ],
   "author": "Lapxo",
   "license": "MIT",
