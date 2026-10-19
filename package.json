@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
@@ -204,7 +204,13 @@
     "docs/contracts/publication.inventory.json",
     "docs/guide.md",
     "docs/reference.md",
-    "docs/why.md"
+    "docs/why.md",
+    "dist/host/reading-identity.d.ts",
+    "dist/host/reading-identity-types.d.ts",
+    "docs/contracts/reading-identity.publication.json",
+    "samples/reading-identity/yes.json",
+    "samples/reading-identity/no.json",
+    "vectors/native/reading-identity.vector.json"
   ],
   "author": "Lapxo",
   "license": "MIT",

@@ -1,0 +1,33 @@
+{
+  "places": [
+    {
+      "name": "counts",
+      "inputs": [
+        "input.txt"
+      ],
+      "readings": [
+        "extent"
+      ]
+    },
+    {
+      "name": "catalogue",
+      "inputs": [
+        "input.txt"
+      ],
+      "readings": [
+        "extent",
+        "extent/total"
+      ],
+      "unpaidDependency": "extent"
+    }
+  ],
+  "surface": "@lapxo/bound/host",
+  "operation": "prepareNativeReadingIdentity",
+  "cli": [
+    "fold",
+    "--as",
+    "reading-identity"
+  ],
+  "finalReadingDuringPreparation": false,
+  "existingReceipts": "verified and retained"
+}

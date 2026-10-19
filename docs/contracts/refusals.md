@@ -37,6 +37,12 @@ Source of truth: `refusals.bound` (`bound-refusals@1`), read through the existin
 | host-port/failed | host | A declared host callback failed; no successful result is returned. | inspect-host-port |
 | host-port/integrity | integrity | Content bytes differ from the requested SHA-256 identity. | resolve-exact-bytes |
 | host-port/response | host | A host response has an unsupported shape or shared mutable bytes. | inspect-host-port |
+| reading-identity/context | interpretation | The reading lacks its complete declared execution context. | inspect-reading-context |
+| reading-identity/budget | resource | The place lacks one finite declared preparation limit. | inspect-resource-lines |
+| reading-identity/selection | interpretation | The requested reader is not adopted by this place. | inspect-reader-selection |
+| reading-identity/projection | interpretation | The adopted reader has no supported input projection. | declare-input-projection |
+| reading-identity/integrity | input | Current input or retained carrier bytes differ from their committed bytes. | resolve-verified-bytes |
+| reading-identity/failed | operation | The existing native preparation boundary refused; the diagnostic retains its cause. | inspect-native-diagnostic |
 
 Native quartet: `refusals.publication.json`. `vectors/native/refusals.vector.json` checks the wire catalog, its derived page, duplicate/missing records, and real export/inspection refusals in two places. No failed operation becomes a successful receipt. The captured semantic marker is:
 

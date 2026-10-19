@@ -92,3 +92,21 @@ bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next rol
 bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/response value=host-port/response
 bound-lock/1 about="A host response has an unsupported shape or shared mutable bytes." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/response value=host
 bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/response value=inspect-host-port
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/context value=reading-identity/context
+bound-lock/1 about="The reading lacks its complete declared execution context." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/context value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/context value=inspect-reading-context
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/budget value=reading-identity/budget
+bound-lock/1 about="The place lacks one finite declared preparation limit." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/budget value=resource
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/budget value=inspect-resource-lines
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/selection value=reading-identity/selection
+bound-lock/1 about="The requested reader is not adopted by this place." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/selection value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/selection value=inspect-reader-selection
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/projection value=reading-identity/projection
+bound-lock/1 about="The adopted reader has no supported input projection." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/projection value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/projection value=declare-input-projection
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/integrity value=reading-identity/integrity
+bound-lock/1 about="Current input or retained carrier bytes differ from their committed bytes." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/integrity value=input
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/integrity value=resolve-verified-bytes
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/failed value=reading-identity/failed
+bound-lock/1 about="The existing native preparation boundary refused; the diagnostic retains its cause." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/failed value=operation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/failed value=inspect-native-diagnostic

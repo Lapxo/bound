@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/reading-identity",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/reading-identity.md",
+      "digest": "sha256:01cfd7b67aae38bf744388ce7b1919550a50584def0442db56b290174561ebee"
+    },
+    {
+      "role": "yes",
+      "path": "samples/reading-identity/yes.json",
+      "digest": "sha256:488da47bd5a647ed52a5cc6f57781d677f62812f2b5e8ea2852e80a58e5fd32d"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/reading-identity.vector.json",
+      "digest": "sha256:3fe2e1d262d91d22a424f553d09c8055955523a0aef35e9a407d0b3c580e4df9"
+    },
+    {
+      "role": "no",
+      "path": "samples/reading-identity/no.json",
+      "digest": "sha256:0b348f9cbdbe421d10b425a489c55563c504165238dd5572e6cfd941fa7c2da7"
+    }
+  ]
+}

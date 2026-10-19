@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import {prepareNativeReadingIdentity,declaredReadingIdentityLimits} from '../host/reading-identity.ts';
+import {nativeHostInstrument} from '../host/native-receiver.ts';
+import {ownRoot,processOf} from '../observe/runner.ts';
 import {BoundRefusal,describeRefusal,readRefusalCatalog} from '../host/refusals.ts';
 import {readFileSync as readCatalogFile} from 'node:fs';
 import {sha256 as catalogDigest} from '../host/hash.ts';
@@ -185,6 +188,13 @@ async function view(root: string, under: string | undefined, asked: string, told
   if (name === NAMED_VIEWS.help) {
     process.stdout.write(`${helpLines().join('\n')}\n`);
     return EXIT.closed;
+  }
+  if(name==='reading-identity'){
+    if(under||told.length||coord||depth!==undefined)throw new BoundRefusal('host/context','REFUSE·reading identity requires one local admitted place');
+    const limits=declaredReadingIdentityLimits(lockStanding(storeOf(root)));
+    const result=await prepareNativeReadingIdentity({place:root,instrument:nativeHostInstrument(ownRoot(),processOf('verb')),limits});
+    if(result.kind==='refuse')throw new BoundRefusal(result.code,result.diagnostic);
+    process.stdout.write(JSON.stringify(result)+'\n');return EXIT.closed;
   }
   // A declared executable reader holds the acting Root's authority throughout
   // observation and publication. This predicate acquires exclusion only; the
