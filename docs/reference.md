@@ -31,6 +31,7 @@
 - [view-walk](contracts/view-walk.md)
 - [why](why.md)
 - [guide](guide.md)
+- [native-host](contracts/native-host.md)
 - [publication](contracts/publication.md)
 - [README](../README.md)
 - [reference](reference.md)

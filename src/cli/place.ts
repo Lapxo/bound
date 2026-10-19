@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import { refreshRetainedJudgment } from './retained-judgment.ts';
 import { timing } from '../host/timing.ts';
 import {attestationObservations} from '../fold/evidence.ts';
@@ -252,7 +253,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
   if (closed && given?.free !== true) {
     const prior = keptPlace(store, under, instrumentOf(store, entry, standingOf(root).standing, root, ownLock()));
     if (prior !== undefined) {
-      process.stderr.write(`CLOSED   ${under || '.'} · digest ${digestMs} ms\n`);
+      hostOutput('error',`CLOSED   ${under || '.'} · digest ${digestMs} ms\n`);
       return refreshRetainedJudgment(prior, [...prior.standing.filter((line) => isCeiling(line) && !(under && fieldOf(line, 'measure') === 'unread')), ...ownCeilings(under)]);
     }
   }
@@ -335,6 +336,6 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     ceilings: ceilingSummary(again, ceilings.length, shared),
   };
   if (folder !== undefined && meets(root,store,under??'',true,whole.observed)) took('keep', () => keepFold(store, taken, whole, points, self));
-  process.stderr.write(`SPENT    fold ${spent.join(' ms · ')} ms\n`);
+  hostOutput('error',`SPENT    fold ${spent.join(' ms · ')} ms\n`);
   return whole;
 }

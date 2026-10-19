@@ -1,0 +1,62 @@
+{
+  "scope": "conformance/native-host",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "native-host/seed-library",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public compiled host consumer: seed-library",
+        "test/host-api.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-api.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST seed-library \u00b7 admitted \u00b7 recovered \u00b7 held without signing \u00b7 altered coverage cancellation format refused"
+        }
+      ]
+    },
+    {
+      "name": "native-host/coastal-survey",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "public compiled host consumer: coastal-survey",
+        "test/host-api.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-api.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST coastal-survey \u00b7 admitted \u00b7 recovered \u00b7 held without signing \u00b7 altered coverage cancellation format refused"
+        }
+      ]
+    }
+  ]
+}

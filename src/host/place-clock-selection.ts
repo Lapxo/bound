@@ -4,7 +4,7 @@ import {createHash} from 'node:crypto';
 import {PLACE_ACT_CONTEXT,readPlaceActContext,type ClockBudget,type RootContext,type TrustedClockContract} from '@lapxo/topos/core';
 import {canonical,signedBytes,wireAt,type Signer} from '@lapxo/topos/wire';
 import {foldClaims,isConfig,fieldOf,parsedLine as parse} from '../fold/claims.ts';
-import {eraOf} from '../fold/digests.ts';
+import {signatureEraOf as eraOf} from './signature-era.ts';
 import {authorityFor} from '../fold/signers.ts';
 import {verifyBytes} from './adapters/keys/ed25519.ts';
 import {verifiesOwnerLine} from '../land/sign.ts';

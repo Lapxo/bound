@@ -1,3 +1,4 @@
+import {signatureEraOf} from '../host/signature-era.ts';
 import {ledgerLines,ledgerWriters} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
 import { appendFileSync, dirname, join, mkdirSync, readdirSync, realpathSync, relative, resolve } from '../host/io.ts';
@@ -88,13 +89,8 @@ export function signaturesOf(store: string, told: readonly string[] = []): { rea
   return eraOf(foldClaims([...signedLockLines(store, told), ...told]).standing);
 }
 
-export function eraOf(standing: readonly string[]): { readonly admitted: readonly string[]; readonly era: string } {
-  const said = wireLine(standing, 'signature-algorithms');
-  const admitted = (said === undefined ? [] : fieldOf(said, 'value').split('|')).filter(Boolean);
-  const current = wireLine(standing, 'era');
-  const era = (current === undefined ? undefined : admitted.find((one) => one.endsWith(`:${fieldOf(current, 'value')}`))) ?? admitted.find((one) => one.includes(':'));
-  if (era === undefined) throw new Error(`${selfName()}: REFUSE·runtime the lock names no signature algorithm by digest: nothing can be signed here`);
-  return { admitted, era };
+export function eraOf(standing:readonly string[]){
+ try{return signatureEraOf(standing)}catch(error){throw new Error(`${selfName()}: ${error instanceof Error?error.message:String(error)}`)}
 }
 
 export const bytesDigest = (store: string, bytes: Uint8Array): string => bytesWith(bytes, algorithmOf(store));

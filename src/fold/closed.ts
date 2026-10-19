@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {verifiedReadingReceipts} from '../host/reading-closures.ts';
 import {readingProfile} from '../host/reading-context.ts';
@@ -223,7 +224,7 @@ export function meets(root: string, store: string, place: string, current=true, 
           if(!fresh)closed=false;
         }
       }
-      if(closed&&readings)process.stderr.write(`RECEIPTS ${readings} read · 0 opened · reading closures\n`);
+      if(closed&&readings)hostOutput('error',`RECEIPTS ${readings} read · 0 opened · reading closures\n`);
     }
     seen = { count: named.size + (own.length > 0 ? 1 : 0), ms: Date.now() - at };
     return closed;

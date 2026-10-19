@@ -1,8 +1,10 @@
 import {existsSync,readdirSync,statSync,openSync,fstatSync,readSync,closeSync} from 'node:fs';
 import {join} from 'node:path';
-import {readPlaceActContext,verifyPlaceActContext,placeActReceiptsOf,type TrustedClockContract,type PlaceReceipt,type RootContext} from '@lapxo/topos/core';
-import {underAuthorityRegions,underTheRegions,underRootProjection} from '../../land/act.ts';
+import {readPlaceActContext,placeActReceiptsOf,type TrustedClockContract,type PlaceReceipt,type RootContext} from '@lapxo/topos/core';
+import {transactPlaceAct,type PlaceActPersistence} from '../place-act-transaction.ts';
+import {canonicalActStore,underAuthorityRegions,underTheRegions,underRootProjection} from '../../land/act.ts';
 import {requireEffects} from '../read-only.ts';
+import {receiverClock} from '../host-controls.ts';
 import {publishBundle,nativePublicationStorage,type PublicationStorage} from './publication.ts';
 
 export interface PlaceActBudget {readonly acts:number;readonly bytes:number}
@@ -18,8 +20,6 @@ export interface PlaceActTrust {
 }
 export interface PlaceActBundle {readonly context:string;readonly receipts:readonly PlaceReceipt[];readonly originals:readonly (readonly string[])[]}
 const fail=(why:string):never=>{throw Error('REFUSE·place act '+why)};
-const clock=(n:string)=>{if(!/^(0|[1-9][0-9]*)$/.test(n)||!Number.isSafeInteger(Number(n)))fail('unknown receiver clock');return Number(n)};
-const rootBytes=(r:RootContext)=>JSON.stringify([r.namespace,r.snapshot,r.epoch,r.prefix,r.head,r.policies]);
 const budget=(b:PlaceActBudget)=>{if(!b||!Number.isSafeInteger(b.acts)||b.acts<1||!Number.isSafeInteger(b.bytes)||b.bytes<1)fail('missing storage budget')};
 const base=(store:string)=>join(store,'ledger','place-acts');
 const at=(store:string,id:string)=>{if(!id||id.includes('\0'))fail('missing identity');return join(base(store),'committed-'+encodeURIComponent(id))};
@@ -49,40 +49,32 @@ export function placeActResult(store:string,id:string,trust:Pick<PlaceActTrust,'
  * authenticated host inputs, not inferred zero or legacy global epochs. */
 export function placeActHeads(store:string,initial:readonly PlaceActHead[],trust:Pick<PlaceActTrust,'historical'|'contract'>,limits:PlaceActBudget):readonly PlaceActHead[] {
  budget(limits);if(!initial.length||new Set(initial.map(h=>h.place)).size!==initial.length)fail('missing/ambiguous initial heads');
- const heads=new Map(initial.map(h=>{clock(h.epoch);if(!h.identity)fail('missing initial head');return[h.place,{...h}] as const}));
+ const heads=new Map(initial.map(h=>{receiverClock(h.epoch,fail);if(!h.identity)fail('missing initial head');return[h.place,{...h}] as const}));
  if(!existsSync(base(store)))return[...heads.values()];
  const {names}=storedInventory(store,limits);
  const pending=names.map(name=>{const id=decodeURIComponent(name.slice(10)),bundle=readBundle(join(base(store),name),limits);const context=authenticated(bundle,id,trust.historical(bundle.context));if(context.root.namespace!==trust.contract.root.namespace)fail('stored clock namespace mismatch');return{id,context}});
  while(pending.length){const next=pending.findIndex(a=>a.context.places.every(p=>heads.get(p.place)?.identity===p.previous));if(next<0)fail('receiver chain fork or missing predecessor');
-  const act=pending.splice(next,1)[0]!;for(const p of act.context.places){const prior=heads.get(p.place)!;const epoch=clock(prior.epoch)+1;if(!Number.isSafeInteger(epoch)||clock(p.epoch)!==epoch)fail('receiver chain clock mismatch');heads.set(p.place,{place:p.place,identity:act.id,epoch:p.epoch})}
+  const act=pending.splice(next,1)[0]!;for(const p of act.context.places){const prior=heads.get(p.place)!;const epoch=receiverClock(prior.epoch,fail)+1;if(!Number.isSafeInteger(epoch)||receiverClock(p.epoch,fail)!==epoch)fail('receiver chain clock mismatch');heads.set(p.place,{place:p.place,identity:act.id,epoch:p.epoch})}
  }
  return[...heads.values()];
 }
 /** Context, exact original bytes and complete signed receipts have one visibility
  * point. Real Root guard exclusion spans final authority/head comparison and
  * publication; this does not activate a CLI profile or reinterpret local-act@1. */
-export async function commitPlaceAct(store:string,encoded:string,receipts:readonly PlaceReceipt[],trust:PlaceActTrust,limits:PlaceActBudget,storage:PublicationStorage=nativePublicationStorage):Promise<PlaceActBundle&{readonly kind:'landed'|'once';readonly identity:string}> {
- requireEffects('place act commitment');budget(limits);
- const decoded=readPlaceActContext(encoded,trust.contract.budget),id=trust.contract.digest(encoded);
- const regions=decoded.places.map(p=>{if(p.place==='.')return '';const parts=p.place.split('/');if(parts.length<2||parts.pop()!=='TARGET.bound'||parts.some(s=>s===''||s==='.'||s==='..'))fail('unknown place namespace');return parts.join('/')});
- const enter=regions.includes('')?underTheRegions:underAuthorityRegions;
- return enter(store,regions,'place act',()=>underRootProjection(store,'place act publication',()=>{
-  const prior=placeActResult(store,id,trust,limits);if(prior){if(prior.context!==encoded)fail('replay bytes differ');
-   // Replay authenticates the supplied evidence too. Historical authentication
-   // grants no current authority and leaves the committed result unchanged.
-   placeActReceiptsOf(encoded,receipts,trust.historical(encoded));
-   return{...prior,identity:id,kind:'once' as const}}
-  const verified=verifyPlaceActContext(encoded,trust.contract);placeActReceiptsOf(encoded,receipts,trust.contract);
-  const originals=decoded.places.map(p=>p.records),files={'context.json':encoded,'receipts.json':JSON.stringify(receipts)+'\n','originals.json':JSON.stringify(originals)+'\n'};
-  const inventory=storedInventory(store,limits);if(inventory.bytes+Object.values(files).reduce((n,v)=>n+Buffer.byteLength(v),0)>limits.bytes)fail('publication byte budget');
-  if(inventory.names.length>=limits.acts)fail('publication act budget');
-  const current=trust.current();if(rootBytes(current.root)!==rootBytes(verified.dependencies))fail('authority changed before publication');
-  if(new Set(current.heads.map(h=>h.place)).size!==current.heads.length)fail('ambiguous receiver heads');
-  const storedHeads=placeActHeads(store,trust.initialHeads,trust,limits);
-  for(const p of decoded.places){const actual=storedHeads.find(h=>h.place===p.place),selected=current.heads.find(h=>h.place===p.place);if(!actual||!selected||actual.identity!==selected.identity||actual.epoch!==selected.epoch)fail('receiver snapshot is not committed head '+p.place);}
-  for(const p of decoded.places){const head=current.heads.find(h=>h.place===p.place)??fail('missing receiver head '+p.place);if(head.identity!==p.previous)fail('receiver head moved '+p.place);const next=clock(head.epoch)+1;if(!Number.isSafeInteger(next)||clock(p.epoch)!==next)fail('receiver epoch not next '+p.place)}
-  publishBundle(at(store,id),files,storage);return{context:encoded,receipts,originals,identity:id,kind:'landed' as const};
- }));
+/** Native persistence adapter. The transaction below is also the CLI path. */
+export function nativePlaceActPersistence(store:string,storage:PublicationStorage=nativePublicationStorage):PlaceActPersistence {
+ store=canonicalActStore(store);
+ return {
+  exclusive:(regions,run)=>{const enter=regions.includes('')?underTheRegions:underAuthorityRegions;return enter(store,regions,'place act',()=>underRootProjection(store,'place act publication',run))},
+  result:(identity,trust,limits)=>placeActResult(store,identity,trust,limits),
+  inventory:limits=>storedInventory(store,limits),
+  heads:(trust,limits)=>placeActHeads(store,trust.initialHeads,trust,limits),
+  publish:(identity,files)=>publishBundle(at(store,identity),files,storage),
+ };
+}
+export async function commitPlaceAct(store:string,encoded:string,receipts:readonly PlaceReceipt[],trust:PlaceActTrust,limits:PlaceActBudget,storage:PublicationStorage=nativePublicationStorage){
+ requireEffects('place act commitment');
+ return transactPlaceAct(encoded,receipts,trust,limits,nativePlaceActPersistence(store,storage));
 }
 
 /** Enumerates only committed, historically authenticated carriers. Namespace

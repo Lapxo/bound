@@ -9,6 +9,7 @@
     "contract/published/standing",
     "contract/published/refusals",
     "contract/published/host-ports",
-    "contract/published/readme"
+    "contract/published/readme",
+    "contract/published/native-host"
   ]
 }

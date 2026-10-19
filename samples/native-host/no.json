@@ -1,0 +1,10 @@
+{
+  "profile": "native-host@1",
+  "cases": [
+    "altered lot bytes",
+    "uncovered signer",
+    "cancelled before commit",
+    "noncanonical unsigned Root lot"
+  ],
+  "expected": "refuse without a visible act or an additional signature"
+}

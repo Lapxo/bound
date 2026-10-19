@@ -1,9 +1,24 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { randomUUID } from 'node:crypto';
-import { basename, dirname, existsSync, join, mkdirSync, rmSync, writeFileSync } from '../host/io.ts';
+import { basename, dirname, existsSync, join, mkdirSync, rmSync, writeFileSync, realpathSync, resolve } from '../host/io.ts';
+import {BoundRefusal} from '../host/refusals.ts';
 import { selfName } from '../fold/claims.ts';
 import { placesIn } from '../fold/places.ts';
 import { coordinatesUnder, observeText } from '../observe/files.ts';
+
+/** Diagnostics/cancellation belong to a call, never the embedding process. */
+interface ActHost {readonly name:string;readonly report:(text:string)=>void;readonly signal?:AbortSignal}
+const hostContext=new AsyncLocalStorage<ActHost>();
+export const withActHost=<T>(host:ActHost,run:()=>T):T=>hostContext.run(host,run);
+const actName=()=>hostContext.getStore()?.name??selfName();
+const report=(text:string)=>{const host=hostContext.getStore();if(host)host.report(text);else process.stderr.write(text)};
+const checkCancellation=()=>{if(hostContext.getStore()?.signal?.aborted)throw new BoundRefusal('host/cancelled','REFUSE·host/cancelled')};
+/** Resolve aliases before acquiring the same native lock protocol as the CLI. */
+export function canonicalActStore(store:string):string {
+ let at=resolve(store);const tail:string[]=[];
+ while(!existsSync(at)){const parent=dirname(at);if(parent===at)break;tail.unshift(basename(at));at=parent}
+ return join(realpathSync(at),...tail);
+}
 
 interface Holder { readonly pid: number; readonly what: string; readonly since: string; readonly token: string }
 interface Frame { readonly parent?: Frame; readonly locks: Map<string, string> }
@@ -23,8 +38,8 @@ const holderOf = (at: string): Holder | undefined => {
 function overAMinute(at: string, began: number, holder: Holder | undefined): void {
   if (Date.now() - began < MINUTE) return;
   const who = holder === undefined ? 'a process' : `${holder.pid} · ${holder.what} since ${holder.since}`;
-  process.stderr.write(`RED      wait · ${named(at)} is held by ${who} · a wait over a minute is a red, not a pause\n`);
-  throw new Error(`${selfName()}: REFUSE·stale nothing landed · a wait over a minute is a red, not a pause`);
+  report(`RED      wait · ${named(at)} is held by ${who} · a wait over a minute is a red, not a pause\n`);
+  throw new Error(`${actName()}: REFUSE·stale nothing landed · a wait over a minute is a red, not a pause`);
 }
 
 const alive = (pid: number): boolean => {
@@ -39,7 +54,7 @@ const alive = (pid: number): boolean => {
 
 const regionAt = (store: string, region: string): string => {
   const coordinate = region.replace(/\/+$/, '');
-  if ((coordinate && coordinate.split('/').some((step) => step === '..' || step === '.' || step === '')) || coordinate.startsWith('/')) throw new Error(`${selfName()}: REFUSE·lock invalid region coordinate`);
+  if ((coordinate && coordinate.split('/').some((step) => step === '..' || step === '.' || step === '')) || coordinate.startsWith('/')) throw new Error(`${actName()}: REFUSE·lock invalid region coordinate`);
   return join(store, 'locks', coordinate ? encodeURIComponent(coordinate).replace(/^\./, '%2E').replace(/^_root$/, '%5Froot') : ROOT);
 };
 const coordinateOf = (file: string): string => {
@@ -71,12 +86,13 @@ const projectionAt = (store: string): string => join(store, 'locks', '@projectio
 async function hold(at: string, what: string): Promise<void> {
   if (owns(at)) return;
   const frame = context.getStore();
-  if (frame === undefined) throw new Error(`${selfName()}: REFUSE·lock no act owns this request`);
+  if (frame === undefined) throw new Error(`${actName()}: REFUSE·lock no act owns this request`);
   const began = Date.now();
   const token = randomUUID();
   let told = false;
   mkdirSync(dirname(at), { recursive: true });
   for (;;) {
+    checkCancellation();
     try {
       writeFileSync(at, `${process.pid} ${what.replace(/\s+/g, '_')} ${new Date().toISOString()} ${token}\n`, { flag: 'wx' });
       break;
@@ -88,16 +104,16 @@ async function hold(at: string, what: string): Promise<void> {
     const holder = holderOf(at);
     // Removing a dead owner's lock here would race with another process's recovery. Recovery is a separate host act.
     if (holder !== undefined && !alive(holder.pid)) {
-      throw new Error(`${selfName()}: REFUSE·stale ${named(at)} belongs to exited process ${holder.pid}; host recovery required`);
+      throw new Error(`${actName()}: REFUSE·stale ${named(at)} belongs to exited process ${holder.pid}; host recovery required`);
     }
     overAMinute(at, began, holder);
     if (!told && holder !== undefined) {
-      process.stderr.write(`WAIT     ${named(at)} is held by ${holder.pid} · ${holder.what} since ${holder.since}\n`);
+      report(`WAIT     ${named(at)} is held by ${holder.pid} · ${holder.what} since ${holder.since}\n`);
       told = true;
     }
     await pauseFor(250);
   }
-  if (told) process.stderr.write(`HELD     ${named(at)} after ${Date.now() - began} ms waiting\n`);
+  if (told) report(`HELD     ${named(at)} after ${Date.now() - began} ms waiting\n`);
   held.set(at, token);
   frame.locks.set(at, token);
   if (!process.listeners('exit').includes(releaseAll)) process.once('exit', releaseAll);
@@ -114,17 +130,19 @@ function releaseAll(): void {
   for (const [at, token] of [...held]) release(at, token);
 }
 
-process.once('SIGTERM', () => {
-  process.stderr.write(`${selfName()}: REFUSE·crash signal\n`);
-  releaseAll();
-  process.exit(1);
-});
+/** Only the CLI installs process termination behavior. Importing a host does not. */
+export function installActSignalHandler():void {
+ process.once('SIGTERM',()=>{report(`${actName()}: REFUSE·crash signal\n`);releaseAll();process.exit(1)});
+}
+
 
 async function framed<T>(takes: () => Promise<void>, act: () => T | Promise<T>): Promise<T> {
   const frame: Frame = { parent: context.getStore(), locks: new Map() };
   return context.run(frame, async () => {
     try {
+      checkCancellation();
       await takes();
+      checkCancellation();
       return await act();
     } finally {
       for (const [at, token] of [...frame.locks].reverse()) release(at, token);
@@ -137,12 +155,12 @@ function guardedRegions<T>(store: string, regions: readonly string[], what: stri
   return framed(async () => {
     const tree = treeAt(store);
     const asked = [...new Set((regions.length ? regions : ['']).map((one) => one.replace(/\/+$/, '')))];
-    if (rootAuthority && (asked.includes('') || (ownsRegion(store) && !owns(tree) && !ownsAuthority(store)))) throw new Error(`${selfName()}: REFUSE·lock authority dependencies and child regions must be declared together`);
+    if (rootAuthority && (asked.includes('') || (ownsRegion(store) && !owns(tree) && !ownsAuthority(store)))) throw new Error(`${actName()}: REFUSE·lock authority dependencies and child regions must be declared together`);
     if (owns(tree) || asked.every((region) => owns(regionAt(store, region)))) {
       for (const region of asked) await hold(regionAt(store, region), what);
       return;
     }
-    if (ownsRegion(store)) throw new Error(`${selfName()}: REFUSE·lock declare every region before entering an act`);
+    if (ownsRegion(store)) throw new Error(`${actName()}: REFUSE·lock declare every region before entering an act`);
     const already = owns(tree);
     // The tree lock is the acquisition gate. A whole-tree act cannot enter between checking it and taking regions.
     await hold(tree, what);
@@ -157,15 +175,16 @@ function guardedRegions<T>(store: string, regions: readonly string[], what: stri
         const began = Date.now();
         let told = false;
         for (let holder = holderOf(at); holder !== undefined; holder = holderOf(at)) {
-          if (!alive(holder.pid)) throw new Error(`${selfName()}: REFUSE·stale ${named(at)} belongs to exited process ${holder.pid}; host recovery required`);
+          checkCancellation();
+          if (!alive(holder.pid)) throw new Error(`${actName()}: REFUSE·stale ${named(at)} belongs to exited process ${holder.pid}; host recovery required`);
           overAMinute(at, began, holder);
           if (!told) {
-            process.stderr.write(`WAIT     ${named(at)} is held by ${holder.pid} · ${holder.what} since ${holder.since}\n`);
+            report(`WAIT     ${named(at)} is held by ${holder.pid} · ${holder.what} since ${holder.since}\n`);
             told = true;
           }
           await pauseFor(250);
         }
-        if (told) process.stderr.write(`HELD     ${named(at)} after ${Date.now() - began} ms waiting\n`);
+        if (told) report(`HELD     ${named(at)} after ${Date.now() - began} ms waiting\n`);
       }
       // Registered under the same acquisition gate as every legacy writer.
       // Root writes overlap all locks; siblings keep distinct region locks.
@@ -187,6 +206,7 @@ function guardedRegions<T>(store: string, regions: readonly string[], what: stri
 }
 
 export function underTheRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>): Promise<T> {
+  store=canonicalActStore(store);
   return guardedRegions(store, regions, what, act, false);
 }
 
@@ -194,6 +214,7 @@ export function underTheRegions<T>(store: string, regions: readonly string[], wh
  * exclusion only: callers must authenticate contexts and compare prepared heads
  * while held. It creates no grant, clock advance, lease or automatic recovery. */
 export function underAuthorityRegions<T>(store: string, regions: readonly string[], what: string, act: () => T | Promise<T>): Promise<T> {
+  store=canonicalActStore(store);
   return guardedRegions(store, regions, what, act, true);
 }
 
@@ -202,10 +223,11 @@ export function underAuthorityRegions<T>(store: string, regions: readonly string
  * shared read; existing child acts continue independently. This is exclusion,
  * never authorization or a clock advance. */
 export function underRootAuthority<T>(store: string, what: string, act: () => T | Promise<T>): Promise<T> {
+  store=canonicalActStore(store);
   return framed(async () => {
     const tree = treeAt(store), root = regionAt(store, '');
     if (owns(tree) || owns(root) || ownsAuthority(store)) return;
-    if (ownsRegion(store)) throw new Error(`${selfName()}: REFUSE·lock authority dependencies must be declared before entering a region act`);
+    if (ownsRegion(store)) throw new Error(`${actName()}: REFUSE·lock authority dependencies must be declared before entering a region act`);
     await hold(tree, what);
     try {
       await hold(root, what);
@@ -230,12 +252,13 @@ export interface RootAuthorityProtection {
 /** The fixed host may hand its child evidence of an actual held exclusion.
  * It is an operational envelope, not a grant, signer or receipt identity. */
 export function rootAuthorityProtection(store: string): RootAuthorityProtection {
+  store=canonicalActStore(store);
   const locks=[treeAt(store),regionAt(store,''),...held.keys()].filter(at=>
     at===treeAt(store)||at===regionAt(store,'')||dirname(at)===join(store,'locks')&&basename(at).startsWith('@authority-'));
   const lock=locks.find(owns);
-  if(lock===undefined)throw Error(`${selfName()}: REFUSE·lock root authority is not protected`);
+  if(lock===undefined)throw Error(`${actName()}: REFUSE·lock root authority is not protected`);
   const holder=holderOf(lock);
-  if(holder?.pid!==process.pid||holder.token!==held.get(lock))throw Error(`${selfName()}: REFUSE·lock authority protection changed`);
+  if(holder?.pid!==process.pid||holder.token!==held.get(lock))throw Error(`${actName()}: REFUSE·lock authority protection changed`);
   return Object.freeze({store,lock,pid:holder.pid,token:holder.token});
 }
 
@@ -243,34 +266,38 @@ export function rootAuthorityProtection(store: string): RootAuthorityProtection 
  * channel, never from world data. Matching a live lock proves exclusion only;
  * signature, coverage and current context still require verification. */
 export function assertRootAuthorityProtection(proof: RootAuthorityProtection, expectedStore: string, expectedParent: number): void {
+  expectedStore=canonicalActStore(expectedStore);
   if(!proof||proof.store!==expectedStore||!Number.isSafeInteger(expectedParent)||expectedParent<=0||proof.pid!==expectedParent
     ||typeof proof.lock!=='string'||typeof proof.token!=='string'||!proof.token
     ||!(proof.lock===treeAt(expectedStore)||proof.lock===regionAt(expectedStore,'')
       ||dirname(proof.lock)===join(expectedStore,'locks')&&basename(proof.lock).startsWith('@authority-'))) {
-    throw Error(`${selfName()}: REFUSE·lock invalid inherited authority protection`);
+    throw Error(`${actName()}: REFUSE·lock invalid inherited authority protection`);
   }
   const holder=holderOf(proof.lock);
-  if(!alive(expectedParent)||holder?.pid!==proof.pid||holder.token!==proof.token)throw Error(`${selfName()}: REFUSE·lock inherited authority protection ended`);
+  if(!alive(expectedParent)||holder?.pid!==proof.pid||holder.token!==proof.token)throw Error(`${actName()}: REFUSE·lock inherited authority protection ended`);
 }
 
 /** A child can publish independently, but the joined root projection and its
  * derived ledger appends have one writer. Authority protection already excludes
  * root mutations, so this lock needs no acquisition-gate upgrade. */
 export function underRootProjection<T>(store: string, what: string, act: () => T | Promise<T>): Promise<T> {
+  store=canonicalActStore(store);
   return framed(async () => {
     if (owns(treeAt(store)) || owns(regionAt(store, ''))) return;
-    if (!ownsAuthority(store)) throw new Error(`${selfName()}: REFUSE·lock root projection requires authority protection`);
+    if (!ownsAuthority(store)) throw new Error(`${actName()}: REFUSE·lock root projection requires authority protection`);
     await hold(projectionAt(store), what);
   }, act);
 }
 
 export const holdRoot = async (store: string, what: string): Promise<void> => {
+  store=canonicalActStore(store);
   if (!owns(treeAt(store))) await hold(regionAt(store, ''), what);
 };
 
 export function underTheLock<T>(store: string, what: string, act: () => T | Promise<T>): Promise<T> {
+  store=canonicalActStore(store);
   return framed(async () => {
-    if (!owns(treeAt(store)) && ownsRegion(store)) throw new Error(`${selfName()}: REFUSE·lock a region act cannot upgrade to the tree; declare the tree before entering`);
+    if (!owns(treeAt(store)) && ownsRegion(store)) throw new Error(`${actName()}: REFUSE·lock a region act cannot upgrade to the tree; declare the tree before entering`);
     await hold(treeAt(store), what);
     const locks = join(store, 'locks');
     const active = lockFiles(locks);
@@ -280,4 +307,4 @@ export function underTheLock<T>(store: string, what: string, act: () => T | Prom
   }, act);
 }
 
-export const holds = (store: string, region: string): boolean => [treeAt(store), regionAt(store, region)].some(owns);
+export const holds = (store: string, region: string): boolean => {store=canonicalActStore(store);return [treeAt(store), regionAt(store, region)].some(owns)};

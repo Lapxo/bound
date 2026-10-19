@@ -6,7 +6,7 @@ import {committedLocalActs,actLines} from './ports/local-act.ts';
 import {verifiedLegacyActResult} from '../cli/act-result.ts';
 import {admissionAnchor,admissionHistoryAt} from '../fold/admission-history.ts';
 import {authorityFor} from '../fold/signers.ts';
-import {eraOf} from '../fold/digests.ts';
+import {signatureEraOf as eraOf} from './signature-era.ts';
 import {fieldOf,foldClaims,isConfig,selfName} from '../fold/claims.ts';
 import {authenticatedRootStanding} from './admitted-place.ts';
 import {verifiesOwnerLine} from '../land/sign.ts';
@@ -86,15 +86,17 @@ export function rootClockSource(root:string,selected:RootClockSourceSelection){
 
 /** Source mapping is an explicit Root declaration; absence never means a zero
  * clock or an inferred cursor. Existing legacy callers do not request it. */
-export function declaredRootClockSource(root:string){
- const live=authenticatedRootStanding(root),rows=live.filter(l=>fieldOf(l,'scope')==='wire/place-act-context-source'&&fieldOf(l,'measure')==='text'&&fieldOf(l,'value')!=='withdraw');
+export function rootClockSelectionOf(live:readonly string[],anchor:import('@lapxo/topos/wire').Signer):RootClockSourceSelection {
+ const rows=live.filter(l=>fieldOf(l,'scope')==='wire/place-act-context-source'&&fieldOf(l,'measure')==='text'&&fieldOf(l,'value')!=='withdraw');
  if(rows.length!==1)fail('requires one admitted source mapping');
- const line=rows[0]!,anchor=admissionAnchor(root),algorithms=eraOf(live).admitted;
+ const line=rows[0]!,algorithms=eraOf(live).admitted;
  if(fieldOf(line,'by')!==anchor.id||fieldOf(line,'role')!=='writes'||fieldOf(line,'form')!=='alphabet'||fieldOf(line,'value')!=='lock'||!verifiesOwnerLine(line,anchor.publicKey,algorithms))fail('mapping is not Root signed');
  const about=fieldOf(line,'about');let value:any;try{value=JSON.parse(about)}catch{return fail('mapping JSON invalid')}
  if(!value||Object.keys(value).sort().join(',')!=='bootstrapCheckpoint,inherited,profile,profileSelector,resources,selector'||value.profile!=='place-act-context@1'||JSON.stringify(value)!==about)fail('unknown/noncanonical mapping');
- return rootClockSource(root,value);
+ sourceSelection(value);return value;
 }
+export function declaredRootClockSource(root:string){return rootClockSource(root,rootClockSelectionOf(authenticatedRootStanding(root),admissionAnchor(root)))}
+
 export function hasRootClockSource(root:string):boolean{return authenticatedRootStanding(root).some(l=>fieldOf(l,'scope')==='wire/place-act-context-source'&&fieldOf(l,'measure')==='text'&&fieldOf(l,'value')!=='withdraw')}
 
 export interface PortablePlaceContext {readonly identity:string;readonly context:string;readonly receipts:readonly PlaceReceipt[];readonly authority:{anchor:import('@lapxo/topos/wire').Signer;history:readonly string[];checkpoint:string}}

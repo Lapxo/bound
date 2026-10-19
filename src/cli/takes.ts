@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fullDigest } from '../fold/digests.ts';
@@ -67,7 +68,7 @@ export function landTake(root: string, one: Judged, gates: readonly Gate[]): voi
   const store = storeOf(root);
   if (one.kind === 'refused') return;
   if (one.kind === 'owed') {
-    process.stdout.write(`OWED     take ${one.scope} · ${one.why}\n`);
+    hostOutput('out',`OWED     take ${one.scope} · ${one.why}\n`);
     return;
   }
   if (one.kind === 'conditioned') {
@@ -76,7 +77,7 @@ export function landTake(root: string, one: Judged, gates: readonly Gate[]): voi
       scope, role: 'writes', form: 'alphabet', measure: fieldOf(demand, 'measure') || 'status', value: fieldOf(demand, 'value') || 'present', by: 'judge', at: receipt, condition,
     })]);
     land(store, 'take', [canonical({ scope: `take/${scope}`, role: 'writes', form: 'alphabet', measure: 'status', value: 'fact', by: 'judge', at: receipt })]);
-    process.stdout.write(`FACT     take ${scope} · paid by ${receipt} · condition ${condition} · no moved set\n`);
+    hostOutput('out',`FACT     take ${scope} · paid by ${receipt} · condition ${condition} · no moved set\n`);
     return;
   }
   const { scope, demand, before, after, ignored, started } = one;
@@ -107,7 +108,7 @@ export function landTake(root: string, one: Judged, gates: readonly Gate[]): voi
     canonical({ scope: `take/${scope}`, role: 'writes', form: 'interval', measure: 'ms', value: `${ms}..${ms}`, by: 'judge', at: receipt }),
   ]);
   const effects = verdict.envelope.effects.map((e) => `${e.kind}@${e.at || '.'}:${e.admitted ? e.status : `${e.status}·grey`}(${e.ms} ms)`).join(' ') || 'none';
-  process.stdout.write(
+  hostOutput('out',
     `${verdict.kind === 'fact' ? 'FACT  ' : 'REFUSE'}   take ${scope} · ${verdict.why}\n`
     + `MOVED    ${verdict.changed.length} sources: ${verdict.changed.join(' ')}\n`
     + `IGNORED  ${[...ignored].map(([role, n]) => `${n} ${role}`).join(' · ') || 'none'} (not walked, never landed)\n`

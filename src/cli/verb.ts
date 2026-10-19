@@ -50,7 +50,7 @@ import { placesIn } from '../fold/places.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { readingsIn } from '../land/inert.ts';
 import { pass } from './pass.ts';
-import { underTheLock, underTheRegions, underRootAuthority } from '../land/act.ts';
+import { installActSignalHandler, underTheLock, underTheRegions, underRootAuthority } from '../land/act.ts';
 import { ownerOf, renderInto, signedDemands, targetFile } from './owner.ts';
 import { claimLinesIn, entryOf, namedPlaces, positionalIndexes, positionalsOf, valueOf } from './args.ts';
 import { EXIT, FLAGS, NAMED_VIEWS, helpLines } from './names.ts';
@@ -601,6 +601,7 @@ const refused = (error: unknown): void => {
   printRefusal(error instanceof BoundRefusal?error:new BoundRefusal('operation/failed',message));
   process.exitCode = EXIT.refuse;
 };
+installActSignalHandler();
 try {
   const ran = main(process.argv.slice(2));
   if (ran instanceof Promise) ran.then(finished).catch(refused);

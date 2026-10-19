@@ -31,10 +31,26 @@ export async function readContent(source:string,digest:string,ports:{readonly re
 export async function retainContent(digest:string,bytes:Uint8Array,ports:{readonly retain:PersistencePort;readonly digestBytes:DigestPort},limits:PortLimits,signal?:AbortSignal):Promise<{readonly digest:string;readonly bytes:number}>{
  limitsOf(limits);identity(digest);if(signal?.aborted)fail('cancelled');const copy=owned(bytes,limits.maxBytes);return bounded(limits,signal,async s=>{if(await ports.digestBytes(new Uint8Array(copy))!==digest)fail('integrity');if(s.aborted)fail('cancelled');const result=await ports.retain(digest,copy,s);if(result!==undefined)fail('response');return Object.freeze({digest,bytes:copy.byteLength});});
 }
-/** Acquire protocol-shaped signatures only; the existing consent path verifies them and decides authority. */
+/** Acquire canonical line signatures only. The line protocol is not widened
+ * for contextual receipt frames. Both operations share bounds and response checks. */
 export async function invokeSigningPort(lot:SigningLot,sign:SigningPort,limits:PortLimits,signal?:AbortSignal):Promise<readonly SignatureRecord[]>{
- limitsOf(limits);if(!lot||!Array.isArray(lot.bytes))fail('budget');let size=0;for(const bytes of lot.bytes){if(typeof bytes!=='string'||bytes.length>limits.maxBytes-size)fail('budget');size+=encoded(bytes).length+1;if(size>limits.maxBytes)fail('budget');}
- let request:string;try{request=signerRequestBytes(lot)}catch{return fail('response')}if(encoded(request).length>limits.maxBytes)fail('budget');
+ validateSigningLot(lot,limits);
+ let request:string;try{request=signerRequestBytes(lot)}catch{return fail('response')}
+ return invokeDeclaredSignatures(lot,request,sign,limits,signal);
+}
+/** Host-prepared signature frames. This acquires no authority: the contextual
+ * transaction validates the frame's domain/receiver and verifies every signature.
+ * A carrier cannot select this operation or supply a signature verifier. */
+export async function invokeFrameSigningPort(lot:SigningLot,sign:SigningPort,limits:PortLimits,signal?:AbortSignal):Promise<readonly SignatureRecord[]>{
+ validateSigningLot(lot,limits);
+ return invokeDeclaredSignatures(lot,JSON.stringify(lot)+'\n',sign,limits,signal);
+}
+function validateSigningLot(lot:SigningLot,limits:PortLimits):void {
+ limitsOf(limits);if(!lot||!Array.isArray(lot.bytes)||!lot.bytes.length||typeof lot.keyId!=='string'||!lot.keyId||typeof lot.algorithm!=='string'||!lot.algorithm)fail('budget');
+ let size=0;for(const bytes of lot.bytes){if(typeof bytes!=='string'||bytes.length>limits.maxBytes-size)fail('budget');size+=encoded(bytes).length+1;if(size>limits.maxBytes)fail('budget');}
+}
+function invokeDeclaredSignatures(lot:SigningLot,request:string,sign:SigningPort,limits:PortLimits,signal?:AbortSignal):Promise<readonly SignatureRecord[]>{
+ if(encoded(request).length>limits.maxBytes)fail('budget');
  const input=Object.freeze({...lot,bytes:Object.freeze([...lot.bytes])});return bounded(limits,signal,async s=>{const records=await sign(input,s);
  if(!Array.isArray(records)||records.length!==lot.bytes.length||records.some(r=>!r||typeof r.signature!=='string'||r.signature.length>limits.maxBytes))fail('response');
  let response:string;try{response=signerResponseBytes(records)}catch{return fail('response')}if(encoded(response).length>limits.maxBytes)fail('budget');
