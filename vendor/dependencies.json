@@ -3,10 +3,10 @@
   "packages": [
     {
       "name": "@lapxo/obligations",
-      "version": "0.4.5",
-      "archive": "lapxo-obligations-0.4.5.tgz",
-      "source": "https://registry.npmjs.org/@lapxo/obligations/-/obligations-0.4.5.tgz",
-      "digest": "sha256:db4d1ed06ecd8e5413feb2f79b846d4cec98ad12ac44ae3c3d96a35fe261b2bb"
+      "version": "0.4.6",
+      "archive": "lapxo-obligations-0.4.6.tgz",
+      "source": "https://registry.npmjs.org/@lapxo/obligations/-/obligations-0.4.6.tgz",
+      "digest": "sha256:077524d0fb48d4b9ba4fcb308e27b29784dc2591f25f601c8afd1f173ec48b04"
     },
     {
       "name": "@lapxo/topos",
@@ -18,7 +18,7 @@
   ],
   "delivery": {
     "path": "fixed-modules.json",
-    "digest": "sha256:ca87a1b47ae2821e277fc7cb7079a8b579b54e978ae570fc3de94bb89d92e576",
+    "digest": "sha256:d18be9e90360ecd535f449fa7c1d7afe73aaed58b84357ef0e3132f4c2249e39",
     "limits": {
       "members": 200,
       "bytes": 1000000,
@@ -31,7 +31,7 @@
   "openNeeds": [],
   "sources": {
     "path": "package-sources.json",
-    "digest": "sha256:3ef1a7c6b65fab68faeea8ae0a646827ba38c88fcc1516c80216cafc7bf5db1f",
+    "digest": "sha256:f11b235130dfa72c7ccf54f5070f78a096c7f6c7ac08b469988a0663e342bb75",
     "format": "pinned-package-sources/1"
   },
   "syntax": {

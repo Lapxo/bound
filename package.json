@@ -92,7 +92,7 @@
     "vectors/reference-port.cli.json",
     "docs/contracts/reference-port.publication.json",
     "assets/wasm/*",
-    "licenses/wasm/*",
+    "licenses/wasm/NOTICE.txt",
     "samples/authenticated-reference/no.json",
     "samples/authenticated-reference/yes/editorial-state/TARGET.bound",
     "samples/authenticated-reference/yes/editorial-state/inputs/arrival.json",
@@ -198,17 +198,18 @@
     "docs/contracts/module-inventory.publication.json",
     "vectors/native/module-inventory.vector.json",
     "samples/module-inventory/yes.json",
-    "samples/no/module-inventory/no.json"
+    "samples/no/module-inventory/no.json",
+    "!dist/vendor/sources.json"
   ],
   "author": "Lapxo",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "20.19.43",
-    "typescript": "5.9.3",
+    "@lapxo/obligations": "0.4.6",
     "@lapxo/topos": "0.2.1",
-    "@lapxo/obligations": "0.4.5",
+    "@types/node": "20.19.43",
+    "dts-bundle-generator": "9.5.1",
     "esbuild": "0.28.2",
-    "dts-bundle-generator": "9.5.1"
+    "typescript": "5.9.3"
   },
   "sideEffects": false,
   "engines": {
