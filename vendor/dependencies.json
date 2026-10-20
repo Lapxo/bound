@@ -18,7 +18,7 @@
   ],
   "delivery": {
     "path": "fixed-modules.json",
-    "digest": "sha256:f205f681c5a5db1f75172f5ebc106de0764ea452e2501fa6f8d9973cd963518d",
+    "digest": "sha256:ca87a1b47ae2821e277fc7cb7079a8b579b54e978ae570fc3de94bb89d92e576",
     "limits": {
       "members": 200,
       "bytes": 1000000,
@@ -26,7 +26,7 @@
     },
     "kind": "verified fixed-module build input",
     "runtimeIntegration": "build-relocation@1",
-    "content": "manifest; source bytes retained once in package-sources.json"
+    "content": "digest covers UTF-8 JSON.stringify({manifest,files}) without trailing newline; manifest stored here; source bytes retained once in package-sources.json"
   },
   "openNeeds": [],
   "sources": {

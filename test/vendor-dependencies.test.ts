@@ -11,11 +11,22 @@ import {verifyModuleDelivery} from '../src/host/native/module-delivery.ts';
 const limits={members:200,bytes:1_000_000,responseBytes:3_000_000};
 test('retained dependency source verifies the fixed build closure without runtime npm resolution',()=>{
  const pins=JSON.parse(readFileSync(new URL('../vendor/dependencies.json',import.meta.url),'utf8'));
- const manifest=JSON.parse(readFileSync(new URL('../vendor/'+pins.delivery.path,import.meta.url),'utf8'));
- const sources=JSON.parse(readFileSync(new URL('../vendor/'+pins.sources.path,import.meta.url),'utf8'));
+ const manifestBytes=readFileSync(new URL('../vendor/'+pins.delivery.path,import.meta.url));
+ const manifest=JSON.parse(manifestBytes.toString('utf8'));
+ const sourcesBytes=readFileSync(new URL('../vendor/'+pins.sources.path,import.meta.url));
+ assert.equal(sha256(sourcesBytes),pins.sources.digest);
+ const sources=JSON.parse(sourcesBytes.toString('utf8'));
  const files=[...manifest.modules.map((m:{path:string;snapshot:string;coordinate:string})=>({path:m.path,source:sources.packages.find((p:{archive:string})=>p.archive===m.snapshot).files.find((f:{coordinate:string})=>'package/'+f.coordinate===m.coordinate).source})),...manifest.notices.map((n:{path:string;snapshot:string})=>({path:n.path,source:sources.packages.find((p:{archive:string})=>p.archive===n.snapshot).license.source}))];
  const bytes=Buffer.from(JSON.stringify({manifest,files}));
+ // The delivery pin covers this raw UTF-8 bundle, not the stored manifest,
+ // a tar/gzip container or output from a compiler. A trailing LF is different bytes.
+ assert.equal(sha256(bytes),pins.delivery.digest);
+ assert.notEqual(sha256(manifestBytes),pins.delivery.digest);
  const delivery=verifyModuleDelivery(bytes,pins.delivery.digest,pins.delivery.limits);
+ assert.throws(()=>verifyModuleDelivery(manifestBytes,pins.delivery.digest,pins.delivery.limits),/bundle bytes differ/);
+ assert.throws(()=>verifyModuleDelivery(Buffer.concat([bytes,Buffer.from('\n')]),pins.delivery.digest,pins.delivery.limits),/bundle bytes differ/);
+ const altered=Buffer.from(bytes);altered[altered.length-1]^=1;
+ assert.throws(()=>verifyModuleDelivery(altered,pins.delivery.digest,pins.delivery.limits),/bundle bytes differ/);
  const archives=new Set(pins.packages.map((p:{digest:string})=>p.digest));
  assert.ok(delivery.manifest.modules.every(m=>archives.has(m.snapshot)));
  assert.ok(pins.packages.every((p:{digest:string})=>delivery.manifest.notices.some(n=>n.snapshot===p.digest)));
