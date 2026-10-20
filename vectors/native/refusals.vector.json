@@ -90,6 +90,110 @@
           "pattern": "REFUSALS editorial-delivery \u00b7 native usage budget context history query fallback \u00b7 named"
         }
       ]
+    },
+    {
+      "name": "complete-refusal-producers",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/conformance-catalog-complete.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/conformance-catalog-complete.test.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/conformance.json",
+        "docs/contracts/determinism.bound"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "fail 0"
+        }
+      ]
+    },
+    {
+      "name": "reference-conformance",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/conformance-reference.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/conformance-reference.test.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/conformance.json",
+        "docs/contracts/determinism.bound"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "fail 0"
+        }
+      ]
+    },
+    {
+      "name": "computation-ports",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/computation.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/computation.test.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/conformance.json",
+        "docs/contracts/determinism.bound"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "fail 0"
+        }
+      ]
+    },
+    {
+      "name": "computation-native",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/computation-cli.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/computation-cli.test.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/conformance.json",
+        "docs/contracts/determinism.bound"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "fail 0"
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,14 @@
+import{test}from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';import{objectFoldBytes,runConformance}from'../src/engine/index.ts';import{intervalForm,alphabetOfForm}from'@lapxo/topos/forms';
+const bytes=new Uint8Array(readFileSync(new URL('../docs/contracts/conformance.json',import.meta.url))),suite=JSON.parse(new TextDecoder().decode(bytes)),digest=(b:Uint8Array|string)=>'sha256:'+createHash('sha256').update(b).digest('hex'),rules=[...new Set(suite.cases.flatMap((c:any)=>c.covers.filter((n:string)=>n.startsWith('rule/')).map((n:string)=>n.slice(5))))] as string[],pins=new Map<string,string>();
+for(const vector of suite.cases){try{for(const r of JSON.parse(vector.request)[1]??[])if(r.record==='cell')pins.set(r.fields.topos,r.fields.form)}catch{}}
+const resolve=(c:any)=>{const family=pins.get(c.fields.topos);if(!family||family!==c.fields.form)throw Error('Unselected form');return{digest:c.fields.topos,form:family==='interval'?intervalForm:alphabetOfForm,params:JSON.parse(c.fields.params)}};
+const context={admit:()=>true,resolve,origin:()=>true,witness:()=>true},receiver={suite:digest(bytes),contract:suite.contract,implementation:digest('reference engine under test'),rules,refusals:['engine/input','engine/context']},limits={maxBytes:1048576,maxCases:64,timeoutMs:1000};
+test('public reference suite preserves twelve captured identities and rejects a failing stub',async()=>{
+ assert.equal(suite.cases.length,17);const actual=await runConformance(bytes,receiver,{digest,evaluate:async b=>objectFoldBytes(b,context)},limits);assert.equal(actual.met,true,JSON.stringify(actual.cases));
+ const stub=await runConformance(bytes,{...receiver,implementation:digest('wrong stub')},{digest,evaluate:async()=>new TextEncoder().encode('["fact",[]]\n')},limits);assert.equal(stub.met,false);assert.ok(stub.cases.every(c=>!c.met));
+});
+test('reference projection does not consume clock or locale, or form-map insertion order',async()=>{
+ const before=Date.now,compare=String.prototype.localeCompare;let calls=0;
+ Date.now=()=>{calls++;throw Error('undeclared clock')};String.prototype.localeCompare=function(){calls++;throw Error('undeclared locale')};
+ try{const backwards=new Map([...pins].reverse()),selected={...context,resolve:(c:any)=>{const family=backwards.get(c.fields.topos);return{digest:c.fields.topos,form:family==='interval'?intervalForm:alphabetOfForm,params:JSON.parse(c.fields.params)}}};for(const vector of suite.cases.filter((c:any)=>!c.covers.some((n:string)=>n.startsWith('refusal/')))){const input=new TextEncoder().encode(vector.request);assert.deepEqual(objectFoldBytes(input,selected),objectFoldBytes(input,context));assert.equal(new TextDecoder().decode(objectFoldBytes(input,selected)),vector.expected)}assert.equal(calls,0)}finally{Date.now=before;String.prototype.localeCompare=compare}
+});

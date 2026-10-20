@@ -1,3 +1,4 @@
+import {preparingView,viewInput} from '../host/reading-context.ts';
 import {actLines,committedLocalActs} from '../host/ports/local-act.ts';
 import {readdirSync} from 'node:fs';
 import {requireEffects} from '../host/read-only.ts';
@@ -47,7 +48,7 @@ function journalLines(store:string,writer:string,place:string,legacy:readonly st
 }
 function legacyWriters(store:string):readonly string[]{
   const at=join(store,'ledger');
-  return existsSync(at)?readdirSync(at).filter(name=>name.endsWith(EXTENSION)).map(name=>name.slice(0,-EXTENSION.length)):[];
+  return viewInput('ledger-writers:'+at,()=>existsSync(at)?readdirSync(at).filter(name=>name.endsWith(EXTENSION)).map(name=>name.slice(0,-EXTENSION.length)):[],false);
 }
 export function ledgerWriters(store:string):readonly string[]{
   const legacy=legacyWriters(store);
@@ -76,6 +77,7 @@ export function landShard(store: string, writer: string, region: string, lines: 
 }
 
 function linesAt(at: string): readonly string[] {
+  if(preparingView())return viewInput('ledger:'+at,()=>existsSync(at)?readFileSync(at,'utf8').split('\n').filter(line=>line.startsWith(PROTOCOL)):[],false);
   const st = statSync(at, { throwIfNoEntry: false });
   if (!st) return [];
   const stamp = `${Math.floor(st.mtimeMs)}-${st.size}`;

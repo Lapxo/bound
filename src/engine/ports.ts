@@ -9,6 +9,17 @@ export type ContentReadPort=(source:string,digest:string,signal:AbortSignal)=>Pr
 /** Atomic byte retention supplied by the host. This is neither admission nor a current-answer cache. */
 export type PersistencePort=(digest:string,bytes:Uint8Array,signal:AbortSignal)=>Promise<void>;
 export type DigestPort=(bytes:Uint8Array)=>string|Promise<string>;
+export type ByteComputationPort=(bytes:Uint8Array,signal:AbortSignal)=>Promise<Uint8Array>;
+export type SignatureVerificationPort=(bytes:string,signature:SignatureRecord,algorithm:string,signal:AbortSignal)=>Promise<boolean>;
+/** Each invocation has its own budget; evaluation and signing are separate acts. */
+export function invokeByteComputationPort(bytes:Uint8Array,evaluate:ByteComputationPort,limits:PortLimits,signal?:AbortSignal):Promise<Uint8Array>{
+ limitsOf(limits);const input=owned(bytes,limits.maxBytes);
+ return bounded(limits,signal,async s=>owned(await evaluate(input,s),limits.maxBytes));
+}
+export function invokeSignatureVerificationPort(bytes:string,signature:SignatureRecord,algorithm:string,verify:SignatureVerificationPort,limits:PortLimits,signal?:AbortSignal):Promise<boolean>{
+ limitsOf(limits);if(encoded(bytes).length+encoded(signature.signature).length>limits.maxBytes)fail('budget');
+ return bounded(limits,signal,async s=>{const valid=await verify(bytes,Object.freeze({...signature}),algorithm,s);if(typeof valid!=='boolean')fail('response');return valid});
+}
 class PortFault extends BoundRefusal{}
 const fail=(code:string):never=>{throw new PortFault('host-port/'+code,'REFUSE·host-port/'+code)};
 function limitsOf(limits:PortLimits){if(!limits||!Number.isSafeInteger(limits.timeoutMs)||limits.timeoutMs<1||limits.timeoutMs>2147483647||!Number.isSafeInteger(limits.maxBytes)||limits.maxBytes<1)fail('budget');}

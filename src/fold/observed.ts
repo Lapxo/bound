@@ -1,6 +1,8 @@
 import {authenticatedStanding} from '../host/admitted-place.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {readingClosures} from '../host/reading-closures.ts';
+import {prepareReadingIdentities,type ReadingPreparationLimits,type ReadingPreparationResult} from '../host/reading-preparation.ts';
+import {BoundRefusal} from '../host/refusals.ts';
 import {readingExecution,readingProfile} from '../host/reading-context.ts';
 import {withNativeReaderRoute} from '../host/native-reader-context.ts';
 import {prepareNativeReaderRoute,assertNativeRouteCurrent,materializeNativeRoute} from '../host/native/route.ts';
@@ -194,7 +196,7 @@ export function readerReaches(reach: readonly string[] | undefined, where: reado
   return where.some((one) => reached(trimmed(one)));
 }
 
-export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string>; readonly selected?: string } = {}): readonly string[] {
+export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string>; readonly selected?: string; readonly preparation?:{limits:ReadingPreparationLimits;results:ReadingPreparationResult[];used:{bytes:number;files:number;readings:number;probes:number}} } = {}): readonly string[] {
   refused.length = 0;
   if (readOnly()) {
     const carried = (observeText(resolve(root, 'receipts.bound')) ?? '').split('\n').filter(isWire);
@@ -210,7 +212,8 @@ export function observedClaims(root: string, store: string, options: { readonly 
     if (!/^sha256:[a-f0-9]{64}$/.test(options.selected) || options.only === undefined) throw Error('REFUSE·reader invalid internal background selector');
     if (readers.filter(reader => reader.module === options.only && readerSelection(reader) === options.selected).length !== 1) throw Error('REFUSE·reader internal background selector is not uniquely adopted');
   }
-  if (!readers.length) return carried(store);
+  if(options.preparation&&options.only!==undefined&&!readers.some(reader=>reader.module===options.only))throw new BoundRefusal('reading-identity/selection','REFUSE·reading preparation selector is not adopted');
+  if (!readers.length) return options.preparation?[]:carried(store);
   const modern=readingProfile(standing,fieldOf);
   const implementation=modern?instrumentCoordinates(store,processOf('verb'),[],ownRoot(),ownLock(),true):undefined;
   if(implementation)for(const module of [processOf('host'),processOf('lifetime','host')])for(const [coordinate,digest] of instrumentCoordinates(store,module,[],ownRoot(),ownLock(),true)) (implementation as Map<string,string>).set(coordinate,digest);
@@ -220,7 +223,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
   const speaker = keyFor(store, 'read');
   const regions = [...new Set(readers.flatMap((reader) => reader.where.map(trimmed)))];
   const whole = options.only === undefined && options.reach === undefined;
-  const legacy = whole ? legacyOf(store, speaker, regions) : undefined;
+  const legacy = whole && !options.preparation ? legacyOf(store, speaker, regions) : undefined;
   const reached = (region: string): boolean => readerReaches(options.reach, [region]);
   const shards = new Map<string, ReturnType<typeof opened>>();
   const lineages = lineagesOf(store, speaker, readers, regions);
@@ -287,7 +290,9 @@ export function observedClaims(root: string, store: string, options: { readonly 
     const projection = reader.capsule === undefined ? [] : (asked?.lines ?? []).filter(line=>fieldOf(line,'scope')===`region/${reader.capsule!.region}`&&fieldOf(line,'measure')==='input-projection'&&fieldOf(line,'value')!=='withdraw');
     if(projection.length){
       if(projection.length!==1||!asked)throw Error('REFUSE·input projection is ambiguous '+reader.module);
-      const files=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort().map(place=>({place,text:observeText(resolve(root,place))??''}));
+      const coordinates=[...new Set(reader.where.flatMap(where=>handedAt(root,reader,roleOf,look,where)))].sort();
+      if(options.preparation){const {limits,used}=options.preparation;if(limits.signal?.aborted)throw new BoundRefusal('host/cancelled','REFUSE·host/cancelled');if(coordinates.length>limits.files-used.files||coordinates.reduce((sum,place)=>sum+(existsSync(resolve(root,place))?statSync(resolve(root,place)).size:0),0)>limits.bytes-used.bytes||used.probes>=limits.probes)throw new BoundRefusal('host/budget','REFUSE·host/budget');}
+      const files=coordinates.map(place=>({place,text:observeText(resolve(root,place))??''}));
       const hash=(text:string)=>bytesDigest(store,Buffer.from(text));
       const allowsEmpty=readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module);
       const native=prepareNativeReaderRoute(store,{id:reader.id,module:reader.module});
@@ -295,10 +300,19 @@ export function observedClaims(root: string, store: string, options: { readonly 
       if(native&&asked.digest!==native.profile.selection.archive)throw Error('REFUSE·native reader implementation differs '+reader.module);
       const image=native?materializeNativeRoute(native):undefined;
       const execution=modern?readingExecution({instrument:code!,implementation:asked.digest,policy:hash(JSON.stringify([reader.id,reader.module,reader.kind,reader.shape,reader.where,lifetime??null,allowsEmpty])),inputs:[...transitive,...(native?.inputs??[]),...(image?[['native/mount',image.mountIdentity] as const]:[])]},hash,{env:process.env,cwd:image?.cwd??root,flags:native?[]:childFlags()}):undefined;
-      const result=withNativeReaderRoute(native,()=>readingClosures({root,store,...(execution?{context:execution.context,execution}:{}),reader:reader.module,speaker,digest:text=>bytesDigest(store,Buffer.from(text)),capsule:asked,...(native?{assertCurrent:()=>assertNativeRouteCurrent(native)}:{}),region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),livePlace:()=>authenticatedStanding(root),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty,files,emit:line=>process.stderr.write(line+'\n')}));
+      const closureOptions={root,store,...(execution?{context:execution.context,execution}:{}),reader:reader.module,speaker,digest:(text:string)=>bytesDigest(store,Buffer.from(text)),capsule:asked,...(native?{assertCurrent:()=>assertNativeRouteCurrent(native)}:{}),region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),livePlace:()=>authenticatedStanding(root),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty,files,emit:(line:string)=>process.stderr.write(line+'\n')};
+      if(options.preparation){
+        const {limits,used,results}=options.preparation,remaining={...limits,bytes:limits.bytes-used.bytes,files:limits.files-used.files,readings:limits.readings-used.readings,probes:limits.probes-used.probes};
+        const result=withNativeReaderRoute(native,()=>prepareReadingIdentities({...closureOptions,preparationLimits:remaining}));results.push(result);
+        if(result.kind==='fact'){used.bytes+=result.verifiedBytes;used.files+=files.length;used.readings+=result.readings.length;used.probes+=result.probes;}
+        if(result.kind==='refuse')throw new BoundRefusal(result.code,result.diagnostic);
+        return false;
+      }
+      const result=withNativeReaderRoute(native,()=>readingClosures(closureOptions));
       out.push(...result.lines);ran+=result.executed;read+=result.read-result.opened;
       return false;
     }
+    if(options.preparation)throw new BoundRefusal('reading-identity/projection','REFUSE·reading identity requires a declared input projection '+reader.module);
     if(modern)throw Error('REFUSE·reader '+reader.module+' complete reading identity requires a declared input projection');
     const endAct=actCosts.begin();try{
     const source = reader.capsule === undefined ? observeFile(module) : asked === undefined ? undefined : new Uint8Array();
@@ -482,9 +496,16 @@ export function observedClaims(root: string, store: string, options: { readonly 
     return false;
     }finally{endAct();}
   }
+  if(options.preparation)return [];
   if (spent.length) process.stderr.write(`SPENT    observe ${spent.join(' · ')} ms\n`);
   if (legacy) setAside(store, speaker);
   process.stderr.write(`OBSERVE  ${ran} run · ${read} read by key${whole_ ? ` · ${whole_} readers kept whole` : ''} · ${Date.now() - began} ms\n`);
   if (wait && refused.length) throw new Error(refused.join('\n'));
   return [...new Set(out)].sort();
+}
+
+/** Uses the same adopted readers, native routes and transitive inputs as execution. */
+export function prepareObservedReadings(root:string,store:string,limits:ReadingPreparationLimits,only?:string):readonly ReadingPreparationResult[]{
+ const results:ReadingPreparationResult[]=[],used={bytes:0,files:0,readings:0,probes:0};
+ observedClaims(root,store,{...(only?{only}:{}),preparation:{limits,results,used}});return results;
 }

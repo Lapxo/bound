@@ -3,6 +3,8 @@ import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import {dirname,join,normalize} from 'node:path';
+import {vendorBuild} from './vendor-build.ts';
+import {compactBuild} from './compact-build.ts';
 
 const require = createRequire(import.meta.url);
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -22,7 +24,10 @@ if (cache) {
 // Public type roots and their relative imports must be delivered together.
 // Internal declarations outside that closure are not part of the package API.
 const pkg = JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
-const delivered = new Set(pkg.files.filter((file:string)=>file.endsWith('.d.ts')));
+vendorBuild(root);
+const delivered = new Set(compactBuild(root));
+if(!pkg.files.includes('dist/vendor/'))throw Error('Vendored code, types and licenses are not delivered');
+
 const roots = new Set<string>([pkg.types]);
 function typeRoots(value:unknown):void {
   if(!value||typeof value!=='object')return;

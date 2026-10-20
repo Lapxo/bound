@@ -27,3 +27,11 @@ The programs view asks the selected Topos demand-status projection at resolution
 # Demand card
 
 The declared card view asks the selected Topos demand-card projection at resolution 8. It reads the selected demand coordinates, their explicit dependencies and the handed evidence region under selectors declared by that Topos. It does not infer progress from files or convert a declaration into proof. A requirement without evidence is unread; an unpaid predecessor blocks its dependant. The next coordinate is an unblocked unpaid demand. Deadline is unread when no elapsed receipt is handed; absence is not zero. These labels describe program evidence, not Obligations cell states. The sample pins the implementation member from the published Topos SDK, folds two unrelated places twice with equal stdout and refuses a declared dependency cycle. This sample intentionally has no evidence to close either program; it certifies the projection of absence and order, not stage acceptance.
+
+## Computation statements
+
+`fold --as computation --key <key> [--key-file <host-file>]` computes the existing authenticated object projection. It requires an admitted `view/computation=computation@1`, one digest each for `computation/contract` and `computation/numeric-policy`, and explicit `0..N` limits for `computation/bytes` and `computation/milliseconds`. The key must be current and cover `computation`. No implicit key or delivery approval is used.
+
+The CLI uses the same `executeComputation` operation exported by `/engine`. Its signer is the existing host-selected file or command mechanism; the original signed history is not modified. The returned `bound-computation-delivery@1` contains the public context, request bytes, signed statement and result bytes. Relevant environment values are committed as digests. Verification must use an independently chosen context and public key, not trust the supplied context merely because it was delivered.
+
+The implementation identity covers the native instrument closure and, when selected, the WASM assets. The selected form standings and their executable closures are transitive inputs. A statement names what ran; its signature authenticates that observation, not mathematical correctness, independence, a Root admission or permission to publish.

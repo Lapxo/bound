@@ -1,23 +1,19 @@
 import {actCosts} from './act-cost.ts';
-import {mkdirSync,readFileSync,existsSync} from 'node:fs';
-import {join,dirname} from 'node:path';
+import {readFileSync,existsSync} from 'node:fs';
+import {join} from 'node:path';
 import {canonical,parse,PROTOCOL,byBytes} from '@lapxo/topos/wire';
-import type {ReaderLifetime,ReaderReference} from '@lapxo/topos/wire';
-import type {Capsule} from './capsule.ts';
-import {replaceWhole,landShard,shardLines} from '../land/ledger.ts';
+import {landShard,shardLines} from '../land/ledger.ts';
 import {fieldOf} from '../fold/claims.ts';
 import {readOnly} from './read-only.ts';
-import {readingIdentityBytes,readingReceiptIdentity,responseIdentity,snapshotAccess,placeInputs,withPlaceInputs} from '@lapxo/topos/contract';
-import type {ReadingIdentityContext,Snapshot,ResponseContext} from '@lapxo/topos/contract';
-import {withReadingBoundary} from './reading-context.ts';
-import type {ReadingExecution,ReadingReference} from './reading-context.ts';
+import {readingIdentityBytes,readingReceiptIdentity} from '@lapxo/topos/contract';
+import type {ReadingIdentityContext} from '@lapxo/topos/contract';
+import type {ReadingReference} from './reading-context.ts';
 
-export interface CurrentReading {readonly snapshot:Snapshot;readonly kept:ResponseContext;readonly current:ResponseContext;readonly permission:Parameters<typeof snapshotAccess>[3]}
-type File={readonly place:string;readonly text:string};
-type Plan={scope:string;inputs:readonly string[];needs:readonly string[];resolution:number;line:string};
+export type {CurrentReading} from './reading-preparation.ts';
+import {readingPreparation,inputLines,readingFields as fields} from './reading-preparation.ts';
+import type {ReadingClosureOptions} from './reading-preparation.ts';
+export {inputLines} from './reading-preparation.ts';
 const receiptScope=(scope:string):string=>[scope,'identity'].join('/');
-const fields=(line:string)=>{const got=parse(line);if(got.kind!=='fact')throw Error('REFUSE·input projection contains a non-wire line');return got.value.fields;};
-export const inputLines=(files:readonly File[]):readonly string[]=>files.map(file=>canonical({scope:file.place,form:'alphabet',measure:'text',role:'writes',value:'lock',shape:file.place,about:file.text,by:'host',at:'policy:handed-input'}));
 /** One portable native receipt carrier shared by file plans and native capsule batches. */
 export function portableReadingReceipt(scope:string,by:string,closure:string,output:string,hash:(text:string)=>string,modern=true,costs:readonly string[]=[]):readonly string[]{
  const input=hash(closure),payload=hash(output),rows=output.split('\n').filter(Boolean);
@@ -25,72 +21,17 @@ export function portableReadingReceipt(scope:string,by:string,closure:string,out
 }
 
 /** The selected world owns input projection and reading. The host only verifies closures and keeps native count/bytes receipts. */
-export function readingClosures(options:{root:string;store:string;reader:string;speaker:string;digest:(text:string)=>string;capsule:Capsule;region:string;projection:string;readerReference?:ReaderReference;lifetime?:ReaderLifetime;allowsEmpty?:boolean;context?:ReadingIdentityContext;execution?:ReadingExecution;current?:CurrentReading;files:readonly File[];livePlace?:()=>readonly string[];assertCurrent?:()=>void;emit?:(line:string)=>void}):{lines:readonly string[];read:number;opened:number;executed:number}{
+export function readingClosures(options:ReadingClosureOptions):{lines:readonly string[];read:number;opened:number;executed:number}{
  const {root,store,reader,speaker,digest:hash,capsule,region,projection,files}=options,emit=options.emit??(()=>{});
- options.assertCurrent?.();
- if(options.context)readingIdentityBytes(options.context);
- let access:readonly ReadingReference[]=[];
- if(options.current){
-  if(!options.context)throw Error('REFUSE·current reading requires a declared identity');
-  const {snapshot,kept,current,permission}=options.current;
-  if(current.implementation!==options.context.implementation)throw Error('REFUSE·current reading implementation differs from its verified context');
-  const response=responseIdentity(snapshot,current,hash),allowed=snapshotAccess(snapshot,kept,current,permission,hash);
-  if(!allowed.inspect||!allowed.reuse)throw Error('REFUSE·current reading is not admitted for reuse');
-  access=[['response',response],['permission',hash(JSON.stringify([permission.inspect,permission.reuse,permission.freshness]))]];
- }
- if(options.execution&&(!options.context||JSON.stringify(readingIdentityBytes(options.execution.context))!==JSON.stringify(readingIdentityBytes(options.context))))throw Error('REFUSE·reading execution differs from declared context');
- const projectionFor=(name:string)=>{
-  if(!capsule.selectedWorld)return undefined;
-  const {standing,offer}=capsule.selectedWorld;
-  const selectors=standing.parts.some(part=>part.scope===`${offer}/place-inputs/${name}`&&part.measure==='reads');
-  if(!selectors)return undefined;
-  if(!options.context||!options.execution||!options.livePlace)throw Error('REFUSE·place inputs require authenticated shadow and reading context '+name);
-  return placeInputs(standing,offer,name,options.livePlace(),bytes=>hash(new TextDecoder().decode(bytes)));
- };
- const projectedPlace=projectionFor(projection),readingPlace=projectionFor(region);
- const commit=(context:ReadingIdentityContext|undefined,name:string,place:ReturnType<typeof placeInputs>)=>place&&context?withPlaceInputs(context,JSON.stringify(['place-inputs',capsule.selectedWorld!.offer,name]),place):context;
- const ask=(identity:string,requests:Parameters<Capsule['ask']>[0],context=options.context)=>withReadingBoundary(identity,options.execution&&context?{...options.execution,context}:options.execution,()=>capsule.ask(requests,options.readerReference));
- const projectionContext=commit(options.context,projection,projectedPlace);
- const base=projectionContext?hash(new TextDecoder().decode(readingIdentityBytes(projectionContext))):'';
- const algorithm=hash('').split(':')[0]!,handed=new Map(files.map(file=>[file.place,file.text]));
- if(handed.size!==files.length)throw Error('REFUSE·input projection has duplicate handed coordinates');
- const verify=()=>{for(const file of files)if(!readFileSync(join(root,file.place)).equals(Buffer.from(file.text)))throw Error('REFUSE·input changed '+file.place);};
- verify();
- const projected=ask(base,[{...(projectedPlace?{place:projectedPlace}:{}),protocol:PROTOCOL,verb:'render',rootScope:'',region:projection,at:1,reads:['**'],lines:inputLines(files),files:[]}],projectionContext)[0];
- if(projected?.kind!=='fact'||!Array.isArray(projected.lines))throw Error('REFUSE·input projection '+(projected?.why??'no lines'));
- const plans=new Map<string,Plan>();
- for(const line of projected.lines){const f=fields(line),scope=f.scope??'',resolution=/^receipt:(\d+)$/.exec(f.at??'');
-  if(!scope||plans.has(scope)||f.form!=='alphabet'||f.measure!=='reads'||f.role!=='reads'||!resolution)throw Error('REFUSE·input projection ambiguous reading '+scope);
-  const inputs=(f.value??'').split('|').filter(Boolean),needs=(f.needs??'').split('|').filter(Boolean);
-  // An aggregate reads its declared receipts; it need not reread a leaf file.
-  if((!inputs.length&&!needs.length)||new Set(inputs).size!==inputs.length||inputs.some(input=>!handed.has(input))||new Set(needs).size!==needs.length)throw Error('REFUSE·input projection has unhanded or duplicate dependencies '+scope);
-  const n=Number(resolution[1]);if(!Number.isSafeInteger(n))throw Error('REFUSE·input projection invalid resolution '+scope);
-  plans.set(scope,{scope,inputs,needs,resolution:n,line:canonical({scope,form:f.form,measure:f.measure,role:f.role,value:inputs.join('|'),needs:needs.join('|'),at:f.at})});
- }
- if(!plans.size)throw Error('REFUSE·input projection returned no readings');
- const ordered:Plan[]=[],visiting=new Set<string>(),done=new Set<string>();
- const visit=(scope:string)=>{if(done.has(scope))return;if(visiting.has(scope))throw Error('REFUSE·input projection dependency cycle '+scope);const p=plans.get(scope);if(!p)throw Error('REFUSE·input projection missing reading '+scope);visiting.add(scope);for(const need of p.needs)visit(need);visiting.delete(scope);done.add(scope);ordered.push(p);};
- for(const scope of plans.keys())visit(scope);
- const identity=hash([capsule.selection??'',capsule.digest,region,projection,...(options.lifetime===undefined?[]:[JSON.stringify(options.lifetime)])].join('\n')),by=speaker+':'+identity.split(':')[1]!.slice(0,12),journal='reading-closures/'+identity.split(':')[1];
- const prior=shardLines(store,speaker,journal),results=new Map<string,{digest:string;lines:readonly string[]}>(),out:string[]=[];
- const carried=(digest:string)=>join(store,'cas','carried',digest.split(':')[1]??'');
- const saved=(text:string)=>{const digest=hash(text),path=carried(digest);mkdirSync(dirname(path),{recursive:true});if(!existsSync(path)||hash(readFileSync(path,'utf8'))!==digest)replaceWhole(path,text);return digest;};
- const load=(digest:string)=>{if(!digest.startsWith(algorithm+':')||! /^[a-f0-9]+$/.test(digest.split(':')[1]??''))return;const path=carried(digest);if(!existsSync(path))return;const text=readFileSync(path,'utf8');return hash(text)===digest?text:undefined;};
+ const {ordered,identity,by,journal,prior,prepare,retained,verify,ask,load,saved,handed,readingPlace}=readingPreparation(options);
+ const results=new Map<string,{digest:string;lines:readonly string[]}>(),out:string[]=[];
  let read=0,opened=0,executed=0;
  for(const plan of ordered){actCosts.measure(()=>{
   // Retained evidence does not authorize a current answer.
   options.assertCurrent?.();
-  const legacyClosure=[plan.line,canonical({scope:'implementation',role:'writes',form:'alphabet',measure:'digest',value:identity,by:'host',at:'policy:input-identity'}),...plan.inputs.map(input=>canonical({scope:input,role:'writes',form:'alphabet',measure:'digest',value:hash(handed.get(input)!),by:'host',at:'policy:input-identity'})),...plan.needs.map(need=>canonical({scope:need,role:'writes',form:'alphabet',measure:'digest',value:results.get(need)!.digest,by:'host',at:'policy:input-identity'}))].sort(byBytes).join('\n')+'\n';
-  const leafContext=commit(options.context,region,readingPlace);
-  const context=leafContext&&{...leafContext,policy:hash(JSON.stringify([leafContext!.policy,options.allowsEmpty===true,options.lifetime??null,options.readerReference??null,capsule.selection??null,capsule.lines])),inputs:[...[...leafContext!.inputs,...access].map(([name,digest])=>[JSON.stringify(['context',name]),digest] as const),[JSON.stringify(['plan']),hash(plan.line)] as const,...plan.inputs.map(input=>[JSON.stringify(['file',input]),hash(handed.get(input)!)] as const),...plan.needs.map(need=>[JSON.stringify(['receipt',need]),results.get(need)!.digest] as const)]};
-  const closure=context?new TextDecoder().decode(readingIdentityBytes(context)):legacyClosure;
-  const input=hash(closure),scope='receipts/readings/'+hash(plan.scope).split(':')[1]+'/'+input.split(':')[1],matching=prior.filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='bytes'&&fieldOf(line,'value')===input).at(-1);
-  const count=matching&&prior.filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='count'&&fieldOf(line,'by')===by).at(-1);
-  const heldOutput=count&&load(fieldOf(count,'at').replace(/^place:/,''));
-  const heldLines=heldOutput?.split('\n').filter(Boolean);
-  const output=heldLines!==undefined&&fieldOf(count!,'value')===`${heldLines.length}..${heldLines.length}`&&heldLines.every(line=>{const f=fields(line);return f.by===by&&f.at==='place:'+input;})?heldOutput:undefined;
+  const {context,closure,input,scope}=prepare(plan,results),held=retained({context,closure,input,scope});
   let lines:readonly string[],payload:string;
-  if(output!==undefined&&load(input)===closure){if(output===''&&!options.allowsEmpty)throw Error('REFUSE·reading empty response is not admitted '+plan.scope);lines=output.split('\n').filter(Boolean);for(const line of lines)fields(line);payload=fieldOf(count!,'at').replace(/^place:/,'');}
+  if(held){lines=held.lines;payload=held.payload;}
   else {
    if(readOnly())throw Error('REFUSE·preview reading closure is unpaid '+plan.scope);
    const started=process.hrtime.bigint();

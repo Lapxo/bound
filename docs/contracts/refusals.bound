@@ -92,3 +92,54 @@ bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next rol
 bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=code role=writes scope=refusal/host-port/response value=host-port/response
 bound-lock/1 about="A host response has an unsupported shape or shared mutable bytes." at=policy:bound-host-ports by=target form=alphabet measure=class role=writes scope=refusal/host-port/response value=host
 bound-lock/1 at=policy:bound-host-ports by=target form=alphabet measure=next role=writes scope=refusal/host-port/response value=inspect-host-port
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/context value=reading-identity/context
+bound-lock/1 about="The reading lacks its complete declared execution context." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/context value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/context value=inspect-reading-context
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/budget value=reading-identity/budget
+bound-lock/1 about="The place lacks one finite declared preparation limit." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/budget value=resource
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/budget value=inspect-resource-lines
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/selection value=reading-identity/selection
+bound-lock/1 about="The requested reader is not adopted by this place." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/selection value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/selection value=inspect-reader-selection
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/projection value=reading-identity/projection
+bound-lock/1 about="The adopted reader has no supported input projection." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/projection value=interpretation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/projection value=declare-input-projection
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/integrity value=reading-identity/integrity
+bound-lock/1 about="Current input or retained carrier bytes differ from their committed bytes." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/integrity value=input
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/integrity value=resolve-verified-bytes
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=code role=writes scope=refusal/reading-identity/failed value=reading-identity/failed
+bound-lock/1 about="The existing native preparation boundary refused; the diagnostic retains its cause." at=policy:public-reading-identity by=target form=alphabet measure=class role=writes scope=refusal/reading-identity/failed value=operation
+bound-lock/1 at=policy:public-reading-identity by=target form=alphabet measure=next role=writes scope=refusal/reading-identity/failed value=inspect-native-diagnostic
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/engine/input value=engine/input
+bound-lock/1 about="The object byte request is not a supported canonical profile." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/engine/input value=input
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/engine/input value=inspect-request
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/engine/context value=engine/context
+bound-lock/1 about="The receiver-selected context does not admit the requested object history." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/engine/context value=interpretation
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/engine/context value=inspect-context
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/computation/context value=computation/context
+bound-lock/1 about="The question, implementation, policy, input or result does not match the receiver-selected computation context." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/computation/context value=interpretation
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/computation/context value=inspect-context
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/computation/budget value=computation/budget
+bound-lock/1 about="The computation lacks or exceeds its declared byte or execution budget." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/computation/budget value=resource
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/computation/budget value=inspect-resource-lines
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/computation/signature value=computation/signature
+bound-lock/1 about="The computation signature does not verify with the receiver-selected signer." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/computation/signature value=authority
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/computation/signature value=inspect-signer
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/computation/authority value=computation/authority
+bound-lock/1 about="The selected computation signer is absent, retired or outside coverage." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/computation/authority value=authority
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/computation/authority value=inspect-authority
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/conformance/context value=conformance/context
+bound-lock/1 about="The receiver supplied missing or invalid suite, implementation or contract identities." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/conformance/context value=interpretation
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/conformance/context value=inspect-context
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/conformance/budget value=conformance/budget
+bound-lock/1 about="The suite exceeds its declared byte or case budget." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/conformance/budget value=resource
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/conformance/budget value=inspect-resource-lines
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/conformance/coverage value=conformance/coverage
+bound-lock/1 about="The suite omits a required rule or refusal, or names undeclared coverage." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/conformance/coverage value=interpretation
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/conformance/coverage value=complete-suite
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/conformance/integrity value=conformance/integrity
+bound-lock/1 about="The supplied suite bytes do not match the digest chosen by the receiver." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/conformance/integrity value=integrity
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/conformance/integrity value=verify-suite-bytes
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=code role=writes scope=refusal/conformance/suite value=conformance/suite
+bound-lock/1 about="The suite is malformed, empty, duplicated or uses an unsupported byte profile." at=policy:bound/public-operations by=target form=alphabet measure=class role=writes scope=refusal/conformance/suite value=input
+bound-lock/1 at=policy:bound/public-operations by=target form=alphabet measure=next role=writes scope=refusal/conformance/suite value=inspect-suite

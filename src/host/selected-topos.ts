@@ -35,13 +35,35 @@ export function contentAt(digest:string,store?:string):Uint8Array {
 }
 
 /** The declared module runs from the store that supplied its verified bytes. No copy or live-checkout fallback. */
-export function contextModuleAt(digest:string,store?:string,dependencies?:readonly string[]):string {
-  if(dependencies!==undefined){
-    if(!isSha256(digest)||!dependencies.includes(digest)||dependencies.some(pin=>!isSha256(pin)))throw Error('REFUSE·context module closure requires declared SHA-256 members');
+export function contextModuleAt(digest:string,store:string|undefined,dependencies:readonly string[]):string {
+    if(!Array.isArray(dependencies)||!isSha256(digest)||!dependencies.includes(digest)||dependencies.some(pin=>!isSha256(pin)))throw Error('REFUSE·context module closure requires declared SHA-256 members');
     const pins=[...new Set(dependencies)].sort(),members=new Map(pins.map(pin=>[pin.slice(pin.indexOf(':')+1),{digest:pin,source:new TextDecoder('utf-8',{fatal:true}).decode(contentAt(pin,store))}]));
-    moduleClosure({identity:sha256(JSON.stringify(pins)),entry:digest.slice(digest.indexOf(':')+1),members},()=>undefined);
-  }
+    moduleClosure({identity:sha256(JSON.stringify(pins)),entry:digest.slice(digest.indexOf(':')+1),members},()=>undefined,{esmOnly:true});
   return verifiedContent(digest,store).path;
+}
+
+/** One host port for both local object projection and admitted foreign walks.
+ * Topos still chooses the authenticated offer. Its declared code closure must
+ * pass the existing verifier before Node is given a location to import.
+ */
+export function contextProviderServices(store:string){
+ const declared=new Map<string,readonly string[]>();
+ return {
+  topos:(digest:string)=>{
+   const selected=toposAt(digest,store);
+   for(const offer of selected.parts.filter(fields=>fields.kind==='check'&&fields.value)){
+    const dependencies=[...new Set((offer.restsOn??'').split('|').filter(Boolean))].sort(),prior=declared.get(offer.value!);
+    if(prior&&JSON.stringify(prior)!==JSON.stringify(dependencies))throw Error('REFUSE·context module has conflicting declared closures');
+    declared.set(offer.value!,dependencies);
+   }
+   return selected;
+  },
+  module:(digest:string)=>{
+   const dependencies=declared.get(digest);
+   if(dependencies===undefined)throw Error('REFUSE·context module has no declared closure');
+   return contextModuleAt(digest,store,dependencies);
+  }
+ };
 }
 
 /** Selection verifies standing identity. Requested capabilities verify their artifact bytes separately. */

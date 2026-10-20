@@ -47,14 +47,15 @@ export function moduleSnapshot(archive:Uint8Array,expected:string,entry:string):
  * Activation requires an admitted host policy; existing inventory callers are not silently changed.
  */
 export function moduleClosure(snapshot: ModuleClosureSnapshot,
- library: (specifier: string, parent: ModuleClosureSnapshot)=>ModuleClosureSnapshot|undefined): readonly ModuleClosureReading[] {
- return moduleClosures([snapshot],library);
+ library: (specifier: string, parent: ModuleClosureSnapshot)=>ModuleClosureSnapshot|undefined,
+ options?:{readonly esmOnly:boolean}): readonly ModuleClosureReading[] {
+ return moduleClosures([snapshot],library,undefined,options);
 }
 
 /** Multiple needs share the existing traversal and one optional act budget. */
 export function moduleClosures(snapshots: readonly ModuleClosureSnapshot[],
  library: (specifier: string, parent: ModuleClosureSnapshot)=>ModuleClosureSnapshot|undefined,
- limits?: ModuleClosureLimits): readonly ModuleClosureReading[] {
+ limits?: ModuleClosureLimits,options?:{readonly esmOnly:boolean}): readonly ModuleClosureReading[] {
  if(limits&&(!Number.isSafeInteger(limits.members)||limits.members<1||!Number.isSafeInteger(limits.bytes)||limits.bytes<1))throw Error('REFUSE·module closure missing input resources');
  const seen=new Map<string,ModuleClosureReading>();
  let totalBytes=0;
@@ -88,7 +89,7 @@ export function moduleClosures(snapshots: readonly ModuleClosureSnapshot[],
    if(limits?.portableESM){try{JSON.parse(member.source)}catch{throw Error('REFUSE·module closure invalid JSON member '+at)}}
    return;
   }
-  const syntax=moduleImportSyntax(member.source,at,limits?.portableESM?{esmOnly:true}:undefined);
+  const syntax=moduleImportSyntax(member.source,at,limits?.portableESM||options?.esmOnly?{esmOnly:true}:undefined);
   if(syntax.unresolved.length)throw Error('REFUSE·module closure unresolved '+at+' '+syntax.unresolved.join(' · '));
   for(const specifier of syntax.imports){
    if(limits?.portableESM&&/[%?#\\]/.test(specifier))throw Error('REFUSE·module closure unsupported URL specifier '+specifier+' from '+at);

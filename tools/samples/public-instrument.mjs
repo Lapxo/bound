@@ -18,6 +18,7 @@ export async function publicInstrument(reader) {
   const {ownLock,ownStore}=await import(pathToFileURL(join(source,'dist/observe/runner.js')).href);
   const published=publicationOf(ownLock());
   overlayTree(join(source,'dist'),join(root,'dist'));
+  overlayTree(join(source,'vendor','syntax'),join(root,'vendor','syntax'));
   writeFileSync(join(root,'TARGET.bound'),published.join('\n')+'\n');
   overlay(readFileSync(join(source,'package.json')),join(root,'package.json'));
   symlinkSync(join(source,'node_modules'),join(root,'node_modules'),'dir');

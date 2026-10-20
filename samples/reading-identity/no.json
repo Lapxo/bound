@@ -1,0 +1,20 @@
+{
+  "cases": [
+    "selected archive bytes altered",
+    "current native grant withdrawn",
+    "handed input differs",
+    "physical input missing",
+    "transitive reference changed",
+    "cancelled before projection",
+    "handed byte budget exhausted"
+  ],
+  "missing": "needs",
+  "integrity": "refuse",
+  "authority": "refuse",
+  "ownerSigning": false,
+  "nativeViews": {
+    "unsupported": "reading-identity/selection",
+    "changedSnapshot": "reading-identity/context",
+    "staleResultBytes": 0
+  }
+}

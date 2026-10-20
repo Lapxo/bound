@@ -18,6 +18,6 @@ Consumer verifies the expected container digest and repeats the same closure pre
 
 The host must verify actual mounted bytes again before execution; the test host demonstrates this but is not a public browser host.
 
-Existing native, program and worker custody remain unchanged. Acorn routes stay explicitly retained under A-F gate.
+Native, program and worker custody remains in force. A pinned syntax analyzer detects unsupported loading expressions before execution; Node inventories and links the executable modules. Authenticated world loads require a declared closure and verified mounted bytes. This preflight is not a JavaScript execution sandbox.
 
 No external fetch or general demand resolver is introduced. Missing bytes remain outside completed delivery and must be resolved by the existing host contract.

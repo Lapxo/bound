@@ -1,0 +1,101 @@
+{
+  "scope": "conformance/reading-identity",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "reading-identity/counts",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern",
+        "native public identity and quiet reuse preserve current authority: counts",
+        "test/native-quiet-grant.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-quiet-grant.test.ts",
+        "test/setup.ts",
+        "docs/contracts/reading-identity.md",
+        "samples/reading-identity/yes.json",
+        "samples/reading-identity/no.json"
+      ],
+      "timeoutMs": 90000,
+      "maxBytes": 67108864,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "native public identity and quiet reuse preserve current authority: counts"
+        }
+      ]
+    },
+    {
+      "name": "reading-identity/catalogue",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern",
+        "native public identity and quiet reuse preserve current authority: catalogue",
+        "test/native-quiet-grant.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-quiet-grant.test.ts",
+        "test/setup.ts",
+        "docs/contracts/reading-identity.md",
+        "samples/reading-identity/yes.json",
+        "samples/reading-identity/no.json"
+      ],
+      "timeoutMs": 90000,
+      "maxBytes": 67108864,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "native public identity and quiet reuse preserve current authority: catalogue"
+        }
+      ]
+    },
+    {
+      "name": "reading-identity/native-views",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/native-view-identity.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-view-identity.test.ts",
+        "test/support/acting-root.ts",
+        "test/setup.ts",
+        "docs/contracts/reading-identity.md",
+        "samples/reading-identity/yes.json",
+        "samples/reading-identity/no.json"
+      ],
+      "timeoutMs": 90000,
+      "maxBytes": 67108864,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "7. result names consumed identity"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "no Root lock or writes"
+        }
+      ]
+    }
+  ]
+}

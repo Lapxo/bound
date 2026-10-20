@@ -1,6 +1,6 @@
 # Pure object projection
 
-`@lapxo/bound/engine` exports `objectFold` and the existing `ObjectReading`, `ObjectRecord` and `ObjectContext` types. The CLI and receipt paths use that same implementation. Its Obligations 0.3.5 algebra is unchanged.
+`@lapxo/bound/engine` exports `objectFold` and the existing `ObjectReading`, `ObjectRecord` and `ObjectContext` types. The CLI and receipt paths use that same implementation. Its vendored runtime consumes Obligations 0.4.4. The 111-module selected dependency closure is byte-identical to the previously selected 0.4.3 closure; this equivalence covers consumed code, not every theorem or published contract in the two archives.
 
 The input is authenticated and context-admitted effective history with selected deterministic forms and parameters. This function does not admit records, verify signatures, resolve content, run commands, select clocks or write storage. Applications must perform preparation before projection.
 
@@ -37,3 +37,23 @@ The place declares five interval limits: `engine/wasm/memory`, `engine/wasm/stac
 Context initialization is measured before place execution. If observed initialized guest memory exceeds the declared memory budget, the operation refuses without running place code. Host initialization memory is outside that guest execution limit; the worker lifetime bounds the entire attempt. During execution the unchanged declared memory, stack and execution limits apply. SIGINT reaches the worker cancellation port; cancellation or failure emits no successful object result.
 
 For the opt-in `wasm@1` profile, the host verifies the selected context implementation before importing it. Every SHA-256 member declared by the context offer’s `restsOn` is checked by digest, and the existing `moduleClosure` validates the imported closure. Missing, altered, undeclared or unresolved imported members refuse before context code executes. This establishes content identity and import closure, not correctness, authority or sandbox confinement. Admission still precedes projection, and this check grants no permission to reuse a retained answer as current.
+
+## Deterministic byte projection
+
+`objectFoldBytes` consumes UTF-8 JSON `["bound-object-request@1", records]` and the receiver's selected `ObjectContext`. It validates that context with Topos and calls the same `objectFold`. Its successful output is `["fact", readings]` followed by one newline. It performs no clock, random, locale, filesystem, transport or environment lookup. The effective order and selected form implementations are inputs; an arbitrary transport permutation is not a new effective order. A callback supplied as a form implementation remains the receiver's responsibility. This contract does not declare arbitrary JavaScript programs deterministic.
+
+Numbers use the selected form's existing numeric policy. No integer-width conversion, rounding rule or meet is introduced. Map construction order for input-reference maps does not select a form or reorder admitted records. Wall-clock deadlines stop host work; they do not enter this semantic result. Runtime and other relevant host inputs still belong to a native reading receipt's environment.
+
+## External conformance
+
+`runConformance` accepts pinned suite bytes, receiver-selected contract and implementation identities, required rules and refusal codes, and a bounded byte evaluator. The suite cannot choose its verifier or declare its own coverage sufficient. A missing required rule or refusal rejects before evaluating the candidate. Every request, expected response and response digest is data; the protocol contains no Node paths. A false result is not a certificate, and a finite passing suite is not a proof of universal correctness.
+
+`@lapxo/bound/conformance` delivers the reference projection vectors. Their twelve conflict and withdrawal results retain the previously captured projection identities; four-state samples and named input/context refusals are additional vectors. This suite covers the declared pure projection profile. Passing it alone does not certify the native host, cryptographic admission, or every code in the complete refusal catalog. Those producer vectors remain required in the release acceptance record.
+
+## Signed computations
+
+`executeComputation` identifies the request before invoking the evaluator. It commits the contract, numeric policy, complete reading context, actual input bytes, implementation digest, result digest and receipt commitment. The digest names the implementation; it is not a signing key. The receiver supplies a signer and an independent signature-verification port. Evaluation, signature acquisition and verification have separate bounds.
+
+`verifyComputation` reconstructs these commitments from the receiver's expected context and actual input/result bytes, then verifies the signature with the receiver's port. No key, verifier or authority is accepted from a returned statement. Distinct implementation digests are distinct origins; redelivery adds no origin. Agreement is not proof of correctness or statistical independence. A disagreement can be compared only under the same declared question and comparison form; no automatic conflict algebra is invented here.
+
+Cancellation, failed evaluation, an invalid signer or an unverifiable signature produces no successful computation statement. The API signs an observation, not a Root admission or release approval. It does not persist a result automatically.

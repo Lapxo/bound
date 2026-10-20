@@ -1,3 +1,5 @@
+import {BoundRefusal} from './refusals.ts';
+import {sha256} from './hash.ts';
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {createHash} from 'node:crypto';
 import {readFileSync,realpathSync} from 'node:fs';
@@ -56,4 +58,27 @@ export function readingExecution(input:{instrument:string;implementation:string;
  const context={...input,environment:readingEnvironment(hash,env,cwd,flags)};
  readingIdentityBytes(context);
  return {context,env,cwd,flags};
+}
+
+interface Input {readonly value:unknown;readonly encoded:string;readonly read:()=>unknown;readonly identity:boolean}
+interface Capture {readonly inputs:Map<string,Input>;readonly bytes:number;readonly files:number;used:number}
+const viewInputs=new AsyncLocalStorage<Capture>();
+export const preparingView=():boolean=>viewInputs.getStore()!==undefined;
+/** One immutable value per semantic source, scoped to a synchronous preparation. */
+export function viewInput<T>(name:string,read:()=>T,identity=true):T{
+ const capture=viewInputs.getStore();if(!capture)return read();
+ const prior=capture.inputs.get(name);if(prior)return prior.value as T;
+ const value=read(),encoded=JSON.stringify(value)??'null';
+ if(capture.inputs.size>=capture.files||(capture.used+=Buffer.byteLength(name)+Buffer.byteLength(encoded))>capture.bytes)throw new BoundRefusal('reading-identity/budget','REFUSE·reading-identity/budget view inputs');
+ capture.inputs.set(name,{value,encoded,read,identity});return value;
+}
+export function captureViewInputs<T>(limits:{bytes:number;files:number},run:()=>T):{value:T;inputs:readonly (readonly [string,string])[]}{
+ const capture:Capture={inputs:new Map(),...limits,used:0};
+ return viewInputs.run(capture,()=>{
+  const value=run();
+  // A native commit is checked independently by the caller. Mutable legacy
+  // sources must still match the exact immutable values consumed here.
+  for(const input of capture.inputs.values())if((JSON.stringify(viewInputs.exit(input.read))??'null')!==input.encoded)throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context view inputs changed during preparation');
+  return {value,inputs:[...capture.inputs].filter(([,input])=>input.identity).map(([name,input])=>[name,sha256(input.encoded)] as const).sort(([a],[b])=>a<b?-1:a>b?1:0)};
+ });
 }

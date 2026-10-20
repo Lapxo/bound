@@ -1,0 +1,9 @@
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=profile role=writes scope=law/determinism value=deterministic-object-projection@1
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=inputs role=writes scope=law/determinism value=admitted-lines|effective-order|policy|selected-forms
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=assumptions role=writes scope=law/determinism value=deterministic-context-callbacks|standard-intrinsics|finite-admitted-history
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=semantic-exclusions role=writes scope=law/determinism value=wall-clock|randomness|locale|undeclared-environment
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=numeric-policy role=writes scope=law/determinism value=the-explicit-selected-form-policy
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=map-order role=writes scope=law/determinism value=lookup-by-declared-name|preserve-effective-record-order
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=receipts role=writes scope=law/determinism value=implementation|policy|transitive-inputs|environment
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=probes role=writes scope=law/determinism value=separate-operational-counter|not-semantic-input
+bound-lock/1 at=policy:bound/determinism by=target form=alphabet measure=claim-boundary role=writes scope=law/determinism value=reference-projection-only|no-universal-JavaScript-proof

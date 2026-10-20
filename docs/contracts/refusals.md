@@ -37,11 +37,26 @@ Source of truth: `refusals.bound` (`bound-refusals@1`), read through the existin
 | host-port/failed | host | A declared host callback failed; no successful result is returned. | inspect-host-port |
 | host-port/integrity | integrity | Content bytes differ from the requested SHA-256 identity. | resolve-exact-bytes |
 | host-port/response | host | A host response has an unsupported shape or shared mutable bytes. | inspect-host-port |
-
-Native quartet: `refusals.publication.json`. `vectors/native/refusals.vector.json` checks the wire catalog, its derived page, duplicate/missing records, and real export/inspection refusals in two places. No failed operation becomes a successful receipt. The captured semantic marker is:
+| reading-identity/context | interpretation | The reading lacks its complete declared execution context. | inspect-reading-context |
+| reading-identity/budget | resource | The place lacks one finite declared preparation limit. | inspect-resource-lines |
+| reading-identity/selection | interpretation | The requested reader is not adopted by this place. | inspect-reader-selection |
+| reading-identity/projection | interpretation | The adopted reader has no supported input projection. | declare-input-projection |
+| reading-identity/integrity | input | Current input or retained carrier bytes differ from their committed bytes. | resolve-verified-bytes |
+| reading-identity/failed | operation | The existing native preparation boundary refused; the diagnostic retains its cause. | inspect-native-diagnostic |
+| engine/input | input | The object byte request is not a supported canonical profile. | inspect-request |
+| engine/context | interpretation | The receiver-selected context does not admit the requested object history. | inspect-context |
+| computation/context | interpretation | The question, implementation, policy, input or result does not match the receiver-selected computation context. | inspect-context |
+| computation/budget | resource | The computation lacks or exceeds its declared byte or execution budget. | inspect-resource-lines |
+| computation/signature | authority | The computation signature does not verify with the receiver-selected signer. | inspect-signer |
+| computation/authority | authority | The selected computation signer is absent, retired or outside coverage. | inspect-authority |
+| conformance/context | interpretation | The receiver supplied missing or invalid suite, implementation or contract identities. | inspect-context |
+| conformance/budget | resource | The suite exceeds its declared byte or case budget. | inspect-resource-lines |
+| conformance/coverage | interpretation | The suite omits a required rule or refusal, or names undeclared coverage. | complete-suite |
+| conformance/integrity | integrity | The supplied suite bytes do not match the digest chosen by the receiver. | verify-suite-bytes |
+| conformance/suite | input | The suite is malformed, empty, duplicated or uses an unsupported byte profile. | inspect-suite |
 
 ```text
 REFUSALS lines · unique codes · exact metadata · duplicate refused
 ```
 
-Specific producers cover reference syntax, standing query/view, native export usage/source/context/budget/authority/signer/history, and authenticated inspection context/budget/transport/integrity/framing/wire/authority/history/object-context/identity. Numeric CLI usage and uncoded legacy failures use the explicitly generic codes above; diagnostics remain unclassified. B2/B5 may add codes only by changing these versioned contract bytes and their vectors.
+Specific producers cover reference syntax, standing query/view, native export usage/source/context/budget/authority/signer/history, and authenticated inspection context/budget/transport/integrity/framing/wire/authority/history/object-context/identity. Numeric CLI usage and uncoded legacy failures use the explicitly generic codes above; diagnostics remain unclassified. Additional public operations may add codes only by changing these versioned contract bytes and their vectors.

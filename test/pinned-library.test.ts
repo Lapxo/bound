@@ -56,7 +56,8 @@ for(const [missing,renamed,escaped] of [[false,false,false],[true,false,false],[
   const instrument=join(temp,'instrument'),library=join(temp,'library');mkdirSync(instrument);mkdirSync(library);
   cpSync(new URL('../src/',import.meta.url),join(instrument,'src'),{recursive:true});
   mkdirSync(join(instrument,'node_modules/@lapxo'),{recursive:true});
-  for(const pkg of ['@lapxo/topos','@lapxo/obligations','acorn'])symlinkSync(new URL('../node_modules/'+pkg,import.meta.url).pathname,join(instrument,'node_modules',pkg),'dir');
+  cpSync(new URL('../vendor/syntax/',import.meta.url),join(instrument,'vendor/syntax'),{recursive:true});
+  for(const pkg of ['@lapxo/topos','@lapxo/obligations'])symlinkSync(new URL('../node_modules/'+pkg,import.meta.url).pathname,join(instrument,'node_modules',pkg),'dir');
   writeFileSync(join(instrument,'package.json'),'{"type":"module"}');
   writeFileSync(join(library,'package.json'),JSON.stringify({name:'fixture-selected-library',type:'module',exports:{'.':'./index.js'}}));
   writeFileSync(join(library,'index.js'),'export const value=31;');writeFileSync(join(library,'private.js'),'export const hidden=99;');
@@ -77,7 +78,7 @@ for(const [missing,renamed,escaped] of [[false,false,false],[true,false,false],[
   const entry=join(instrument,'src/cli/provide-fixture.ts');
   writeFileSync(entry,`import assert from 'node:assert/strict';import {provide,pinPlace} from '../host/provide.ts';
    ${missing?`provide();console.log('UNUSED MISSING LIBRARY DID NOT OPEN');await assert.rejects(import('fixture-selected-library'),/REFUSE·pin declared library unavailable selected/);`:`provide();assert.equal((await import('fixture-selected-library')).value,31);${renamed?"await assert.rejects(import('forged-routing-name'),/selected library name differs/);":''}await assert.rejects(import('fixture-selected-library/private.js'),{code:'ERR_PACKAGE_PATH_NOT_EXPORTED'});assert.throws(()=>pinPlace('inactive-catalog'),/does not name its available bytes/);`}
-   assert.equal(typeof(await import('acorn')).parse,'function');console.log('PROVIDE VERIFIED');`);
+   assert.equal(typeof(await import('../../vendor/syntax/parser.js')).parse,'function');console.log('PROVIDE VERIFIED');`);
   const got=spawnSync(process.execPath,[entry],{encoding:'utf8'});assert.equal(got.status,0,got.stdout+got.stderr);assert.match(got.stdout,/PROVIDE VERIFIED/);assert.doesNotMatch(got.stdout,/UNVERIFIED OUTSIDE EXECUTED/);
  }finally{rmSync(temp,{recursive:true,force:true})}
 });

@@ -1,3 +1,4 @@
+import {preparingView,viewInput} from '../host/reading-context.ts';
 import { existsSync, lstatSync, statSync, readFileSync, readdirSync, readlinkSync } from 'node:fs';
 import type { Stats } from 'node:fs';
 import { join, relative, sep } from 'node:path';
@@ -32,9 +33,14 @@ function bytesAt(at: string): Buffer | undefined {
   return bytes;
 }
 
-export const observeFile = (at: string): Uint8Array | undefined => ((bytes) => (bytes === undefined ? undefined : new Uint8Array(bytes)))(bytesAt(at));
+function viewBytes(at:string):Buffer|undefined{
+ if(!preparingView())return bytesAt(at);
+ const encoded=viewInput('file:'+at,()=>{try{return readFileSync(at).toString('base64')}catch(e){if(['ENOENT','EISDIR'].includes((e as NodeJS.ErrnoException).code??''))return undefined;throw e}});
+ return encoded===undefined?undefined:Buffer.from(encoded,'base64');
+}
+export const observeFile = (at: string): Uint8Array | undefined => ((bytes) => (bytes === undefined ? undefined : new Uint8Array(bytes)))(viewBytes(at));
 
-export const observeText = (at: string): string | undefined => bytesAt(at)?.toString('utf8');
+export const observeText = (at: string): string | undefined => viewBytes(at)?.toString('utf8');
 
 export const exists = (at: string): boolean => existsSync(at);
 
@@ -60,7 +66,7 @@ export const linkOf = (at: string): string => readlinkSync(at);
 
 export function entriesIn(at: string): readonly { readonly name: string; readonly dir: boolean }[] {
   if (!stampable(at)?.isDirectory()) return [];
-  return readdirSync(at, { withFileTypes: true }).map((entry) => ({ name: entry.name, dir: entry.isDirectory() }));
+  return viewInput('entries:'+at,()=>readdirSync(at, { withFileTypes: true }).map((entry) => ({ name: entry.name, dir: entry.isDirectory() })));
 }
 
 export function coordinatesUnder(dir: string, root: string, into: (step: string) => boolean = () => true): string[] {

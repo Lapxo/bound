@@ -22,6 +22,7 @@
 - [engine](contracts/engine.md)
 - [evidence-view](contracts/evidence-view.md)
 - [host-ports](contracts/host-ports.md)
+- [reading-identity](contracts/reading-identity.md)
 - [reference-backend](contracts/reference-backend.md)
 - [reference-export](contracts/reference-export.md)
 - [refusals](contracts/refusals.md)

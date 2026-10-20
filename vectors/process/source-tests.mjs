@@ -7,7 +7,7 @@ import {join,resolve} from 'node:path';
 const source=process.cwd();
 const root=mkdtempSync(join(tmpdir(),'source-vector-'));
 try {
- for(const name of ['src','test','samples','package.json']) cpSync(join(source,name),join(root,name),{recursive:true});
+ for(const name of ['src','test','samples','vendor','package.json']) cpSync(join(source,name),join(root,name),{recursive:true});
  // A portable instrument carries published standing, never delivery history
  // whose authority exists only in the source checkout's private ledger.
  writeFileSync(join(root,'TARGET.bound'),publicationOf(ownLock()).join('\n')+'\n');
