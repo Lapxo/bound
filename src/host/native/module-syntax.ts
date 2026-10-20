@@ -36,6 +36,9 @@ export function moduleImportSyntax(source: string, coordinate: string, options?:
    const reexportName=parent?.['type']==='ExportSpecifier'&&(key==='exported'||(key==='local'&&reexportSource));
    if(!direct&&!namedProperty&&!declarationName&&!reexportName)unresolved.add('require reference at '+String(n['start']));
   }
+  // ESTree names and literals have no syntax children. Loader names above are
+  // still checked; text inside a string or regular expression is never code.
+  if(n['type']==='Identifier'||n['type']==='Literal')return;
   let specifier:string|undefined;
   if(n['type']==='ImportDeclaration'||n['type']==='ExportNamedDeclaration'||n['type']==='ExportAllDeclaration'||n['type']==='ImportExpression'){
    specifier=literal(n['source']);
@@ -50,7 +53,11 @@ export function moduleImportSyntax(source: string, coordinate: string, options?:
    }
   }
   if(specifier!==undefined&&(!options?.staticOnly||(n['type']!=='ImportExpression'&&n['type']!=='CallExpression')))found.add(specifier);
-  for(const [childKey,child] of Object.entries(n))visit(child,n,childKey,n['type']==='ExportNamedDeclaration'?n['source']!==null&&n['source']!==undefined:reexportSource);
+  const childExport=n['type']==='ExportNamedDeclaration'?n['source']!==null&&n['source']!==undefined:reexportSource;
+  for(const childKey of Object.keys(n)){
+   const child=n[childKey];
+   if(child&&typeof child==='object')visit(child,n,childKey,childExport);
+  }
  };
  visit(tree);
  return {imports:[...found],unresolved:[...unresolved]};

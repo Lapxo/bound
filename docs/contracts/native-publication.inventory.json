@@ -11,6 +11,7 @@
     "contract/published/host-ports",
     "contract/published/readme",
     "contract/published/native-host",
-    "contract/published/reading-identity"
+    "contract/published/reading-identity",
+    "contract/published/module-inventory"
   ]
 }

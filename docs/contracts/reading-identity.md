@@ -30,6 +30,20 @@ This operation performs configuration authentication and projection, not the reg
 
 Identity commits the native view, local place, authenticated configuration, selected authority/evidence histories and source bytes (including selected receipt inputs), exact implementation closure and instrument lock, effective runtime/environment, and UTC expiration-policy day. Input names and values are framed; no consumer directory fingerprint is accepted. Unconsumed fold caches, stamp memos and exclusion bookkeeping do not participate. The local execution identity is distinct from portable semantic standing identity.
 
+### Writes and derived storage
+
+The following classification applies to the declared native `lines` and `evidence` views. A path is not an authority boundary: selected bytes still participate wherever they are stored.
+
+| Write | Participates in the next identity | Reason |
+| --- | --- | --- |
+| Admitted declarations and authority changes | Yes | Authentication and effective declarations consume them. |
+| Admitted evidence, including consumed receipt or blob bytes | Yes when consumed by the selected view | A new observation changes what that view reads. |
+| Unconsumed maintenance: `.bound/cas/memo/`, `.bound/ledger/fold.bound`, `.bound/locks/` | No | These are derived caches or exclusion bookkeeping, not selected inputs. |
+
+The CAS blob directory is not excluded as a whole. A selected blob or receipt must verify against its committed digest; corruption refuses. A probe that adds no evidence preserves identity. Executing a reading that admits evidence may change it. Consumers request the public identity instead of reconstructing it from this table or scanning directories.
+
+Identity inspection is not promised constant-time over arbitrary mutable storage. Its measurement separates process startup, authentication, input capture, identity framing and result projection; a reused identity must still verify the inputs committed by its contract.
+
 The existing admitted preparation limits remain required for identity requests; inputs and implementation sources count against their byte/file budgets. Preparation does not execute projection probes or final readings. Only unqualified local native lines and a single unshaped native evidence view are supported. Foreign evidence needing an asynchronous transport snapshot and unsupported views refuse by name. No fallback executes their fold.
 
 Existing catalog codes apply: `reading-identity/selection` for unsupported selections, `reading-identity/context` for changed or mismatched snapshots, `reading-identity/budget` for missing/exhausted limits, and `reading-identity/failed` for unavailable implementation inputs. Public CLI machine records carry those codes.

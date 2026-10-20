@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/module-inventory",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/module-inventory.md",
+      "digest": "sha256:78a59399c1cc34dde341a163db30341695c1a8a731a051ae8c9086549cf60c6c"
+    },
+    {
+      "role": "yes",
+      "path": "samples/module-inventory/yes.json",
+      "digest": "sha256:fd65eb40a9478266afc4503dabb3cf9162791c6eb7576e4579ed86f29b41f41a"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/module-inventory.vector.json",
+      "digest": "sha256:b030fd7821ef69a3aa0cd36f15497074bbb55b6a614e27d5995ff20bb44922fe"
+    },
+    {
+      "role": "no",
+      "path": "samples/no/module-inventory/no.json",
+      "digest": "sha256:530195b262a957949ed0b6448fbd962f03456eaa6851f130c15b657560060303"
+    }
+  ]
+}

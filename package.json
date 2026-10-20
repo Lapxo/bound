@@ -194,7 +194,11 @@
     "vendor/syntax/LICENSE.md",
     "dist/public-types.d.ts",
     "docs/contracts/conformance.json",
-    "docs/contracts/determinism.bound"
+    "docs/contracts/determinism.bound",
+    "docs/contracts/module-inventory.publication.json",
+    "vectors/native/module-inventory.vector.json",
+    "samples/module-inventory/yes.json",
+    "samples/no/module-inventory/no.json"
   ],
   "author": "Lapxo",
   "license": "MIT",
@@ -202,7 +206,7 @@
     "@types/node": "20.19.43",
     "typescript": "5.9.3",
     "@lapxo/topos": "0.2.1",
-    "@lapxo/obligations": "0.4.4",
+    "@lapxo/obligations": "0.4.5",
     "esbuild": "0.28.2",
     "dts-bundle-generator": "9.5.1"
   },

@@ -1,0 +1,56 @@
+{
+  "scope": "conformance/module-inventory",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "module-inventory/field-notes",
+      "program": "runtime",
+      "args": [
+        "--input-type=module",
+        "-e",
+        "import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';import{moduleInventory}from'@lapxo/bound/closure/native';const digest=b=>'sha256:'+createHash('sha256').update(b).digest('hex'),limits={members:20,bytes:100000,responseBytes:200000},context={scope:'consumer/modules',by:'consumer',at:'policy:module-inventory'},fixture=JSON.parse(readFileSync('samples/module-inventory/yes.json','utf8')).find(one=>one.name==='field-notes'),negative=JSON.parse(readFileSync('samples/no/module-inventory/no.json','utf8')).find(one=>one.name==='field-notes'),yes=new TextEncoder().encode(fixture.carrier),inventory=moduleInventory(yes,fixture.pin,limits,fixture.sources,context);assert.equal(inventory.lines,fixture.expected);assert.equal(inventory.modules.length,2);assert.ok(!inventory.modules.some(one=>one.module==='unreached.js'));assert.equal(moduleInventory(yes,fixture.pin,limits,fixture.sources,context).lines,fixture.expected);const bad=new TextEncoder().encode(negative.carrier);assert.throws(()=>moduleInventory(bad,digest(bad),limits,fixture.sources,context),/REFUSE·closure delivery/);assert.throws(()=>moduleInventory(bad,fixture.pin,limits,fixture.sources,context),/bundle bytes differ/);assert.throws(()=>moduleInventory(yes,fixture.pin,limits,[],context),/source coverage/);console.log('INVENTORY field-notes · 2 modules · exact canonical lines · integrity and coverage refused');"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "package.json",
+        "samples/module-inventory/yes.json",
+        "samples/no/module-inventory/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "INVENTORY field-notes · 2 modules · exact canonical lines · integrity and coverage refused"
+        }
+      ]
+    },
+    {
+      "name": "module-inventory/water-level",
+      "program": "runtime",
+      "args": [
+        "--input-type=module",
+        "-e",
+        "import assert from 'node:assert/strict';import{readFileSync}from'node:fs';import{createHash}from'node:crypto';import{moduleInventory}from'@lapxo/bound/closure/native';const digest=b=>'sha256:'+createHash('sha256').update(b).digest('hex'),limits={members:20,bytes:100000,responseBytes:200000},context={scope:'consumer/modules',by:'consumer',at:'policy:module-inventory'},fixture=JSON.parse(readFileSync('samples/module-inventory/yes.json','utf8')).find(one=>one.name==='water-level'),negative=JSON.parse(readFileSync('samples/no/module-inventory/no.json','utf8')).find(one=>one.name==='water-level'),yes=new TextEncoder().encode(fixture.carrier),inventory=moduleInventory(yes,fixture.pin,limits,fixture.sources,context);assert.equal(inventory.lines,fixture.expected);assert.equal(inventory.modules.length,2);assert.ok(!inventory.modules.some(one=>one.module==='unreached.js'));assert.equal(moduleInventory(yes,fixture.pin,limits,fixture.sources,context).lines,fixture.expected);const bad=new TextEncoder().encode(negative.carrier);assert.throws(()=>moduleInventory(bad,digest(bad),limits,fixture.sources,context),/REFUSE·closure delivery/);assert.throws(()=>moduleInventory(bad,fixture.pin,limits,fixture.sources,context),/bundle bytes differ/);assert.throws(()=>moduleInventory(yes,fixture.pin,limits,[],context),/source coverage/);console.log('INVENTORY water-level · 2 modules · exact canonical lines · integrity and coverage refused');"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "package.json",
+        "samples/module-inventory/yes.json",
+        "samples/no/module-inventory/no.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "INVENTORY water-level · 2 modules · exact canonical lines · integrity and coverage refused"
+        }
+      ]
+    }
+  ]
+}
