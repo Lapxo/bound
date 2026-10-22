@@ -34,7 +34,7 @@ for(const signaturePrefix of ['wire','audit/wire'] as const)test(`one fresh Root
   const first=authenticatedRootStanding(fixture.root);
   assert.deepEqual(first,foldClaims(admitted).standing);
   assert.equal(first.includes(early),false);assert.equal(first.includes(late),true);
-  const expected=[...first];(first as string[]).splice(0,first.length,'caller mutation');
+  const expected=[...first];assert.throws(()=>(first as string[]).splice(0,first.length,'caller mutation'),TypeError,'the retained public projection is immutable');
   assert.deepEqual(authenticatedRootStanding(fixture.root),expected,'returned arrays cannot poison the retained projection');
   const fixed=Math.floor(Date.now()/1000);utimesSync(journal,fixed,fixed);ledgerLines(store,'owner');
   const stamp=statSync(journal),bytes=readFileSync(journal,'utf8'),changed=row('sample/late','id','other','4','later',later.privateKey);

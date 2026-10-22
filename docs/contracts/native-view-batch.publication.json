@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/native-view-batch",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/native-view-batch.md",
+      "digest": "sha256:8ca692baadda00de217f8b8b0fc4f20d60fdc478ec6d330fdd8e22ca94e1b78d"
+    },
+    {
+      "role": "yes",
+      "path": "samples/native-view-batch/yes.json",
+      "digest": "sha256:608d00c4a39b987b435560dddf6aa8e72f69aedbd8541c6798913504b4be01d1"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/native-view-batch.vector.json",
+      "digest": "sha256:bd5c598929ec1ed65d273f9ea1d271e79401fa7aea8467e48a7fc72de0bde381"
+    },
+    {
+      "role": "no",
+      "path": "samples/native-view-batch/no.json",
+      "digest": "sha256:6228f650501222593f46a9015a6e73908b3d302b8671348b54bd9c80f66c8bdc"
+    }
+  ]
+}

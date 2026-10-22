@@ -1,0 +1,10 @@
+{
+  "places": [
+    "field-catalogue",
+    "reservoir-log"
+  ],
+  "views": [
+    "lines",
+    "evidence"
+  ]
+}

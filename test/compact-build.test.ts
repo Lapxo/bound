@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import{test}from'node:test';
-import{readFileSync}from'node:fs';
+import{readFileSync,readdirSync}from'node:fs';
 import{fileURLToPath}from'node:url';
 import{join}from'node:path';
 import ts from'typescript';
@@ -12,5 +12,19 @@ test('compacted public declarations retain the exact export set of every source 
  const program=ts.createProgram([...files,...sources].map(f=>join(root,f)),{target:ts.ScriptTarget.ESNext,module:ts.ModuleKind.NodeNext,moduleResolution:ts.ModuleResolutionKind.NodeNext,skipLibCheck:true}),checker=program.getTypeChecker();
  const names=(file:string)=>{const source=program.getSourceFile(join(root,file))!;const symbol=checker.getSymbolAtLocation(source);return symbol?checker.getExportsOfModule(symbol).map(s=>s.name).sort():[]};
  for(const[i,file]of files.entries())assert.deepEqual(names(file),names(sources[i]!),file);
- assert.equal(roots.size,7);
+ assert.equal(roots.size,10,'the admitted public API declares ten type roots');
+ // The delivered bundle retains every relocation; the identical sidecar is build-only.
+ const provenance=JSON.parse(readFileSync(join(root,'dist/vendor/bundle.json'),'utf8'));
+ assert.deepEqual(provenance.sources,JSON.parse(readFileSync(join(root,'dist/vendor/sources.json'),'utf8')));
+ assert.ok(pkg.files.includes('!dist/vendor/sources.json'));
+
+});
+
+test('WASM notice selection retains every attribution and exact original license',()=>{
+ const root=fileURLToPath(new URL('../',import.meta.url)),dir=join(root,'licenses/wasm'),names=readdirSync(dir).filter(n=>n.endsWith('.txt')&&n!=='NOTICE.txt').sort(),notice=readFileSync(join(dir,'NOTICE.txt'),'utf8');
+ const verify=(text:string)=>{for(const name of names){assert.ok(text.includes(name),'missing attribution '+name);assert.ok(text.includes(readFileSync(join(dir,name),'utf8')),'changed license '+name)}};
+ verify(notice);assert.equal(names.length,7);
+ assert.throws(()=>verify(notice.replace('bound.txt','removed attribution')));
+ assert.throws(()=>verify(notice.replaceAll('Permission is hereby granted','Altered license text')));
+ const pkg=JSON.parse(readFileSync(join(root,'package.json'),'utf8'));assert.ok(pkg.files.includes('licenses/wasm/NOTICE.txt'));assert.ok(!pkg.files.includes('licenses/wasm/*'));
 });

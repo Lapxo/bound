@@ -1,3 +1,4 @@
+import {hostRequiresFreshBytes} from '../host/call-context.ts';
 import {preparingView,viewInput} from '../host/reading-context.ts';
 import { existsSync, lstatSync, statSync, readFileSync, readdirSync, readlinkSync } from 'node:fs';
 import type { Stats } from 'node:fs';
@@ -33,10 +34,32 @@ function bytesAt(at: string): Buffer | undefined {
   return bytes;
 }
 
+// Always read current bytes before reuse; metadata never establishes equality.
+const currentBytes=new Map<string,{readonly bytes:Buffer;readonly encoded:string}>();
+let retainedBytes=0;
+const CURRENT_BYTE_LIMIT=16*1024*1024,CURRENT_FILE_LIMIT=256;
+function currentFile(at:string):{readonly bytes:Buffer;readonly encoded:string}|undefined{
+ let bytes:Buffer;
+ try{bytes=readFileSync(at)}catch(error){
+  if(!['ENOENT','EISDIR'].includes((error as NodeJS.ErrnoException).code??''))throw error;
+  const old=currentBytes.get(at);if(old){retainedBytes-=old.bytes.length;currentBytes.delete(at)}return undefined;
+ }
+ const held=currentBytes.get(at);if(held&&bytes.equals(held.bytes))return held;
+ if(held){retainedBytes-=held.bytes.length;currentBytes.delete(at)}
+ const value={bytes,encoded:bytes.toString('base64')};
+ if(bytes.length<=CURRENT_BYTE_LIMIT){
+  while(currentBytes.size>=CURRENT_FILE_LIMIT||retainedBytes+bytes.length>CURRENT_BYTE_LIMIT){const first=currentBytes.keys().next().value!;retainedBytes-=currentBytes.get(first)!.bytes.length;currentBytes.delete(first)}
+  currentBytes.set(at,value);retainedBytes+=bytes.length;
+ }
+ return value;
+}
 function viewBytes(at:string):Buffer|undefined{
- if(!preparingView())return bytesAt(at);
- const encoded=viewInput('file:'+at,()=>{try{return readFileSync(at).toString('base64')}catch(e){if(['ENOENT','EISDIR'].includes((e as NodeJS.ErrnoException).code??''))return undefined;throw e}});
- return encoded===undefined?undefined:Buffer.from(encoded,'base64');
+ if(!preparingView())return hostRequiresFreshBytes()?currentFile(at)?.bytes:bytesAt(at);
+ const encoded=viewInput('file:'+at,()=>currentFile(at)?.encoded);
+ if(encoded===undefined)return undefined;
+ const held=currentBytes.get(at);
+ // Keep the captured value even if a later observation changed this coordinate.
+ return held?.encoded===encoded?held.bytes:Buffer.from(encoded,'base64');
 }
 export const observeFile = (at: string): Uint8Array | undefined => ((bytes) => (bytes === undefined ? undefined : new Uint8Array(bytes)))(viewBytes(at));
 

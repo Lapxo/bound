@@ -13,13 +13,13 @@ Unchanged regions can retain valid receipts. A changed input reopens the regions
 ## Install and use
 
 ```sh
-npm install @lapxo/bound@0.2.2
+npm install @lapxo/bound@0.2.6
 ```
 
 In a place with admitted declarations and closed public receipts, check the existing evidence without running its readers again:
 
 ```sh
-npx @lapxo/bound@0.2.2 fold --check
+npx @lapxo/bound@0.2.6 fold --check
 ```
 
 For a change, prepare a proposal, sign with a key already covered by the place, admit the signed lot, then fold and inspect the result. Signing and admission do not by themselves pay a requirement. The [usage guide](docs/usage.md) covers keys, coverage, proposals, withdrawals and release policy.
@@ -59,11 +59,28 @@ Opening and projecting a reference never commit an act. The authenticated contex
 | `/wasm` | Load the optional WASM adapter for the published object projection. |
 | `/refusals` and `/standing-contract` | Read the machine-readable contracts bound into authenticated exports. |
 
-Native opening selects **ESM or WASM explicitly**; an unsupported selection refuses rather than falling back. The WASM adapter covers the published object projection. Admission, effects and the whole CLI do not run inside WASM. Cross-machine evidence (L6) remains pending.
+Native opening selects **ESM or WASM explicitly**; an unsupported selection refuses rather than falling back. The WASM adapter covers the published object projection. Admission, effects and the whole CLI do not run inside WASM. Independent physical-machine verification remains pending.
 
 The host supplies bounded [signer, content and persistence ports](docs/contracts/host-ports.md). Their identities and limits are explicit. Retaining bytes is an explicit operation: it grants no admission or permission to reuse a response. The existing authority path verifies signatures before returning an authenticated carrier.
 
 [Complete standing](docs/contracts/standing.md) covers declared key classes and committed local acts, preserving attribution, exact withdrawals and conflicts. [Refusals](docs/contracts/refusals.md) have machine-readable codes, meanings and suggested next steps; human diagnostics are not parsed as authority.
+
+## Native consumer operations
+
+Applications can query `prepareNativeViewIdentities` from `/host` for `lines` and `evidence` in one read-only observation. Each result includes its own identity and the text captured under that identity. The CLI uses the same implementation:
+
+```sh
+bound fold --as reading-identities@lines+evidence
+bound fold --as probe@lines
+```
+
+A probe is a bounded reading attempt. The consumer owns its counter; Bound does not persist probe markers. Admitted input and response limits still apply. See [native view identities](docs/contracts/native-view-batch.md) and [probes](docs/contracts/native-probes.md).
+
+`/physical-lines` counts physical UTF-8 lines under declared selectors and binds a reading witness to its exact inputs. It delegates threshold and widening decisions to Bound's existing judges. `/profiles` prepares digest-pinned composition and selects exact release categories; preparation does not admit a change. `/package/native` produces a content identity for a verified installed inventory and its reached modules. That identity is distinct from the compressed archive digest.
+
+See [physical lines](docs/contracts/physical-lines.md), [profile composition](docs/contracts/profile-composition.md), [installed package identity](docs/contracts/installed-package.md) and [materialized outputs](docs/contracts/materialized-leaf-sequence.md).
+
+`await prepareNativeAuthorityCard(context)` from `/host` returns `allow`, `ask` or `deny` for exact configuration actions using current native authority and admission checks. The caller supplies an explicit clock, epoch and bounded ports. `fold --as authority-card@<scope>` reads a bounded request selected by admitted lines; the request cannot supply a trust anchor or select an instrument. A card is a preflight, and each eventual act still checks its signatures and current authority. See the [authority card contract](docs/contracts/authority-preflight.md).
 
 ## Contracts and foundations
 

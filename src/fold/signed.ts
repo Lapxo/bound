@@ -1,3 +1,5 @@
+import {AsyncLocalStorage} from 'node:async_hooks';
+import {realpathSync} from 'node:fs';
 import { join } from '../host/io.ts';
 import { region, within } from '@lapxo/obligations/field';
 import { LOCK, parse, windowAt } from '@lapxo/topos/wire';
@@ -13,9 +15,21 @@ import { observeText } from '../observe/files.ts';
 type Verified = { readonly text: string; readonly lock: readonly string[]; readonly lines: readonly string[]; readonly applied: ReadonlySet<string>; readonly projected: ReadonlySet<string>; readonly folded: Map<boolean, readonly string[]> };
 const held = new Map<string, Verified>();
 const told = new Map<string, readonly string[]>();
+const previewScopes=new AsyncLocalStorage<{readonly root:string;readonly told:Map<string,readonly string[]>}>();
+/** Synchronous speculative work gets its own Root-bound preview map. Nested
+ * previews restore their caller's exact state on success and refusal. */
+export function withOwnPreview<T>(root:string,body:()=>T):T {
+ const key=realpathSync(root),parent=previewScopes.getStore();
+ const scoped={root:key,told:new Map(parent?(parent.root===key?parent.told:[]):told)};
+ return previewScopes.run(scoped,()=>{try{
+  const result=body();if(result!==null&&(typeof result==='object'||typeof result==='function')&&'then' in result)throw Error('REFUSE·own preview requires synchronous work');
+  return result;
+ }finally{scoped.told.clear();}});
+}
+
 
 /** Lines told to a place's own lock for a preview: folded as if the file held them, and standing only as its signed lines do. */
-export const tellOwn = (place: string, lines: readonly string[]): void => void told.set(place, lines);
+export const tellOwn = (place: string, lines: readonly string[]): void => void (previewScopes.getStore()?.told??told).set(place, lines);
 
 function verified(root: string, place: string, preview=true): Verified {
   const store = storeOf(root);
@@ -25,7 +39,8 @@ function verified(root: string, place: string, preview=true): Verified {
   const algorithms = hasAuthority ? signaturesOf(store).admitted : [];
   const signers = algorithms.length ? authorityFor(lock, rootSigner(root), algorithms).admitted : [];
   const history = signers.flatMap(signer => place ? shardLines(store, signer.id, `${place}/${LOCK}`) : ledgerLines(store, signer.id)).filter(line => fieldOf(line, 'sig') !== '');
-  const text = [publicText, ...history, ...(preview?told.get(place)??[]:[])].join('\n');
+  const scope=previewScopes.getStore(),previewLines=scope?(scope.root===realpathSync(root)?scope.told.get(place):undefined):told.get(place);
+  const text = [publicText, ...history, ...(preview?previewLines??[]:[])].join('\n');
   const key = `${root} ${place}`;
   const last = held.get(key);
   if (last !== undefined && last.text === text && last.lock === lock) return last;

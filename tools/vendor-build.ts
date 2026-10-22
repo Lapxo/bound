@@ -34,7 +34,7 @@ export function relocateImports(source:string,file:string,select:(name:string,ty
 
 /** All archive-owned code is retained. This is vendoring, not a certificate that
  * the host's world-loading port is a closed static ESM program. */
-export function vendorBuild(root:string):readonly string[]{
+export function vendorBuild(root:string):{readonly declarations:readonly string[];readonly resolve:(name:string,types:boolean)=>string|undefined}{
  const pins=JSON.parse(readFileSync(join(root,'vendor/dependencies.json'),'utf8'));
  const check=(source:string|Uint8Array,digest:string)=>{if(sha256(source)!==digest)throw Error('Vendor build bytes differ')};
  for(const member of [pins.syntax,pins.syntax.license])check(readFileSync(join(root,'vendor',member.file)),member.digest);
@@ -76,5 +76,5 @@ export function vendorBuild(root:string):readonly string[]{
   if(next!==source){writeFileSync(at,next);relocations.push({coordinate:'dist/'+coordinate,original:sha256(source),relocated:sha256(next)})}
  }
  writeFileSync(join(root,'dist/vendor/sources.json'),JSON.stringify({format:'relocated-package-sources/1',sources:pins.sources.digest,packages:pins.packages.map((p:{name:string;digest:string})=>({name:p.name,archive:p.digest})),relocations})+'\n');
- return generated;
+ return {declarations:generated,resolve:select};
 }

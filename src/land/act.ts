@@ -12,6 +12,7 @@ const hostContext=new AsyncLocalStorage<ActHost>();
 export const withActHost=<T>(host:ActHost,run:()=>T):T=>hostContext.run(host,run);
 const actName=()=>hostContext.getStore()?.name??selfName();
 const report=(text:string)=>{const host=hostContext.getStore();if(host)host.report(text);else process.stderr.write(text)};
+export const currentActSignal=():AbortSignal|undefined=>hostContext.getStore()?.signal;
 const checkCancellation=()=>{if(hostContext.getStore()?.signal?.aborted)throw new BoundRefusal('host/cancelled','REFUSE·host/cancelled')};
 /** Resolve aliases before acquiring the same native lock protocol as the CLI. */
 export function canonicalActStore(store:string):string {

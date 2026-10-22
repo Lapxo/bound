@@ -82,11 +82,25 @@ export function runTypedSample(reader, capture, sample='yes.json', continuation,
     else if(f.reach==='travels')world=new Map(ceiling(lattice,world,f.scope,span,line));
     else {const next=opening(lattice,c,span,f.widens,at);world.set(f.scope,{...next,marks:next.marks.map((m,i)=>i===next.marks.length-1?{...m,id:f.id}:m)});}
   };
-  const land = fields => {
-    const records = fields.map(f=>{const stamped={...f, by:'device',epoch:String(epoch)};return canonical({...stamped,sig:formatSignature('ed25519:sample',sign(null,Buffer.from(signedBytes(stamped)),pair.privateKey).toString('base64'))});});
-    const at=epoch;
-    const path=join(root,'lot.txt');writeFileSync(path,records.join('\n')+'\n');const result=run(['land',path]);if(result.status===0){epoch++;for(const f of fields)oracle(f,at);}return result;
+  // Keep every original record epoch and order. Only transport calls with no
+  // intervening observation are grouped; the native admission judges stay in charge.
+  const landSeries = batches => {
+    const first=epoch;
+    const records=batches.flatMap((fields,index)=>fields.map(f=>{
+      const stamped={...f,by:'device',epoch:String(first+index)};
+      return canonical({...stamped,sig:formatSignature('ed25519:sample',sign(null,Buffer.from(signedBytes(stamped)),pair.privateKey).toString('base64'))});
+    }));
+    const path=join(root,'lot.txt');writeFileSync(path,records.join('\n')+'\n');
+    const result=run(['land',path]);
+    if(result.status===0){
+      const accepted=readFileSync(join(place,'.bound/ledger/device.bound'),'utf8').split('\n');
+      assert.ok(records.every(record=>accepted.includes(record)),'every signed epoch and record is retained exactly');
+      epoch+=batches.length;
+      batches.forEach((fields,index)=>{for(const field of fields)oracle(field,first+index);});
+    }
+    return result;
   };
+  const land=fields=>landSeries([fields]);
   try {
     const worldLock=join(root,'topos.bound');writeFileSync(worldLock,toposLines.join('\n')+'\n');
     const foldedTopos=run(['fold',worldLock]);ok(foldedTopos);
@@ -94,7 +108,7 @@ export function runTypedSample(reader, capture, sample='yes.json', continuation,
     assert.match(foldedTopos.stdout,/TOPOS/);
     ok(run(['land','--key','device','--key-file',key]));
     ok(land(yes.cells.map(c=>({...c,type:'cell',id:'def-'+c.scope,form:yes.form,measure:yes.measure,params:JSON.stringify(params),topos:pin}))));
-    for(const act of yes.acts) ok(land([act]));
+    ok(landSeries(yes.acts.map(act=>[act])));
     const snapshots=[];
     const read = label => {
       const folded=run(['fold','--as','cells']);ok(folded);
@@ -114,9 +128,9 @@ export function runTypedSample(reader, capture, sample='yes.json', continuation,
     const idle=run(['fold','--as','cells']);ok(idle);assert.match(idle.stdout,/0 opened.*idle.*provider 0/);
     ok(land([{type:'claim',scope:'C',id:'disagreement',sign:'+1',origin:'ana',value:yes.scenarios.conflicting}]));
     assert.equal(read('conflicting observations').find(c=>c.cell==='C').state,'CONFLICT');
-    for(const id of ['disagreement','c-C','c-L'])ok(land([{type:'claim',scope:'C',id:'withdraw-'+id,sign:'-1',takes:id}]));
+    ok(landSeries(['disagreement','c-C','c-L'].map(id=>[{type:'claim',scope:'C',id:'withdraw-'+id,sign:'-1',takes:id}])));
     assert.equal(read('exact claim withdrawals').find(c=>c.cell==='C').state,'REQUIRED');
-    for(const [id,origin] of [['outside-a','ana'],['outside-b','luis']])ok(land([{type:'claim',scope:'C',id,sign:'+1',origin,value:yes.scenarios.outside}]));
+    ok(landSeries([['outside-a','ana'],['outside-b','luis']].map(([id,origin])=>[{type:'claim',scope:'C',id,sign:'+1',origin,value:yes.scenarios.outside}])));
     assert.equal(read('outside travelling ceiling').find(c=>c.cell==='C').state,'FORBIDDEN');
     ok(land([{type:'mark',scope:'G',id:'incompatible-floor',sign:'+1',pole:'floor',reach:'travels',value:yes.scenarios.floorConflict}]));
     assert.equal(read('bounds conflict before origins').find(c=>c.cell==='G').state,'CONFLICT');

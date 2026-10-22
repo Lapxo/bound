@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/materialized-leaf-sequence",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/materialized-leaf-sequence.md",
+      "digest": "sha256:02cc03bb02c3f8d4f9ffabc1d18109fb1f05a65fecc613f75211a5a396f1d1fa"
+    },
+    {
+      "role": "yes",
+      "path": "samples/materialized-leaf-sequence/yes.json",
+      "digest": "sha256:7180af00a4df73b33edfe9a84a840916859dbf19226afbe156563ed16641f6e2"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/materialized-leaf-sequence.vector.json",
+      "digest": "sha256:64f8e08343b68d926d340058d41350a4d39396e5fb30ea1742655fa1911ca5c2"
+    },
+    {
+      "role": "no",
+      "path": "samples/materialized-leaf-sequence/no.json",
+      "digest": "sha256:3a487c275e646287ccab47a217ada65db7abc05c2e0b97af5d6d8ee87a70859f"
+    }
+  ]
+}

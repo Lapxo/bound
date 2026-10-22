@@ -1,4 +1,5 @@
 import {preparingView} from '../host/reading-context.ts';
+import {BoundRefusal} from '../host/refusals.ts';
 import {signatureEraOf} from '../host/signature-era.ts';
 import {ledgerLines,ledgerWriters} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
@@ -132,7 +133,18 @@ export function memoized(store: string, key: string, compute: () => string): str
 
 const imported = new Map<string, readonly string[]>();
 const importsOf = (store: string, at: string, digest: string): readonly string[] => {
-  if(preparingView())return moduleImports(new TextDecoder().decode(observeFile(at)??new Uint8Array()),at);
+  if(preparingView()){
+    const bytes=observeFile(at)??new Uint8Array();
+    if(bytesDigest(store,bytes)!==digest)throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context module bytes changed during capture');
+    // Only inventories parsed from these captured bytes enter this namespace.
+    // A private persisted memo never supplies the view's implementation closure.
+    const key=`view imports ${at}\0${digest}`;
+    const held=imported.get(key);
+    if(held!==undefined)return held;
+    const found=Object.freeze([...moduleImports(new TextDecoder().decode(bytes),at)]);
+    imported.set(key,found);
+    return found;
+  }
   const key = `imports ${fullDigest(store,importsOf.toString())} ${digest}`;
   const memo = memoOf(store);
   const held = imported.get(digest) ?? (readOnly() ? undefined : memo.get(key)?.split('|').filter(Boolean));

@@ -3,22 +3,22 @@
   "packages": [
     {
       "name": "@lapxo/obligations",
-      "version": "0.4.4",
-      "archive": "lapxo-obligations-0.4.4.tgz",
-      "source": "https://registry.npmjs.org/@lapxo/obligations/-/obligations-0.4.4.tgz",
-      "digest": "sha256:b3e938d28f88a1851af303a40c749e12ebd5a686daac4f0b343b5cdd2e040419"
+      "version": "0.4.7",
+      "digest": "sha256:28cba430228db1c04f446c93f81b09a2705d6bf3e222d35adbe5a4cee4061884",
+      "archive": "lapxo-obligations-0.4.7.tgz",
+      "source": "https://registry.npmjs.org/@lapxo/obligations/-/obligations-0.4.7.tgz"
     },
     {
       "name": "@lapxo/topos",
-      "version": "0.2.1",
-      "archive": "lapxo-topos-0.2.1.tgz",
-      "source": "https://registry.npmjs.org/@lapxo/topos/-/topos-0.2.1.tgz",
-      "digest": "sha256:50086958553b9376d600583f7dff354196bfeb41170fc6d1482ca7bea7c493e2"
+      "version": "0.2.4",
+      "digest": "sha256:7aca161279d14bc0e054dcc281cd110aeb95be2e026b42fdf527a260e58b2aae",
+      "archive": "lapxo-topos-0.2.4.tgz",
+      "source": "https://registry.npmjs.org/@lapxo/topos/-/topos-0.2.4.tgz"
     }
   ],
   "delivery": {
     "path": "fixed-modules.json",
-    "digest": "sha256:80f89cf723355a43836fea957050aeb8b8139598f641e8a74467cfacd8d7e2cb",
+    "digest": "sha256:271505e663abe3dfc257f22cfd26a455b3622d81a88b6616a64a31d53f051fc4",
     "limits": {
       "members": 200,
       "bytes": 1000000,
@@ -26,12 +26,12 @@
     },
     "kind": "verified fixed-module build input",
     "runtimeIntegration": "build-relocation@1",
-    "content": "manifest; source bytes retained once in package-sources.json"
+    "content": "digest covers UTF-8 JSON.stringify({manifest,files}) without trailing newline; manifest stored here; source bytes retained once in package-sources.json"
   },
   "openNeeds": [],
   "sources": {
     "path": "package-sources.json",
-    "digest": "sha256:9e026a1868e00f017dfba7aaf4eb36dcb4d45185d53d8001990740ba5cf94a83",
+    "digest": "sha256:92471c2933187fcb46b9edb7efec320471a5043679fecf06e41ac6a414da1903",
     "format": "pinned-package-sources/1"
   },
   "syntax": {

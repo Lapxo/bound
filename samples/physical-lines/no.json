@@ -1,0 +1,5 @@
+{
+  "over": "0..2",
+  "changedWitnessResult": "other result",
+  "invalidText": "invalid\rline"
+}

@@ -1,0 +1,105 @@
+{
+  "scope": "conformance/physical-lines",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "physical-lines/native-parameter-cases",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/physical-lines-place.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/physical-lines-place.test.ts",
+        "test/setup.ts",
+        "samples/physical-lines/yes.json",
+        "samples/physical-lines/no.json",
+        "docs/contracts/physical-lines.md"
+      ],
+      "timeoutMs": 180000,
+      "maxBytes": 16777216,
+      "exit": 0,
+      "matches": []
+    },
+    {
+      "name": "physical-lines/actual-native-witness-admission",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/physical-lines-policy-land.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/physical-lines-policy-land.test.ts",
+        "test/support/installed-consumer.mjs",
+        "test/support/native-physical-place.mjs",
+        "test/support/physical-witness-proof.mjs",
+        "samples/native/physical-line-reader.source.mjs",
+        "samples/native/physical-line-reader.mjs",
+        "samples/physical-lines/yes.json",
+        "samples/physical-lines/no.json",
+        "docs/contracts/reading-witness-admission.md",
+        "src/host/native/reading-witness-admission.ts"
+      ],
+      "timeoutMs": 180000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
+    },
+    {
+      "name": "physical-lines/public-refusals-and-compiled-resolution",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/physical-lines-public-refusals.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/physical-lines-public-refusals.test.ts",
+        "test/support/installed-consumer.mjs",
+        "docs/contracts/physical-lines.md"
+      ],
+      "timeoutMs": 30000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
+    },
+    {
+      "name": "physical-lines/source-hook-native-evidence-regression",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/reading-witness-hook.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/reading-witness-hook.test.ts",
+        "test/support/installed-consumer.mjs",
+        "test/support/native-physical-place.mjs",
+        "test/support/physical-witness-proof.mjs",
+        "samples/native/physical-line-reader.source.mjs",
+        "samples/native/physical-line-reader.mjs",
+        "src/host/native/reading-witness-admission.ts",
+        "src/host/physical-lines.ts",
+        "src/host/call-context.ts",
+        "docs/contracts/reading-witness-admission.md"
+      ],
+      "timeoutMs": 60000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
+    }
+  ]
+}

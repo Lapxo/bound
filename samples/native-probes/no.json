@@ -1,0 +1,7 @@
+{
+  "unsupportedView": "rank",
+  "responseBytes": 1,
+  "expectedIdentity": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "askedProbes": 9,
+  "invalidPort": ""
+}

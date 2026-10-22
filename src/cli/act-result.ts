@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import{hashText}from'../host/hash.ts';
 import {hasContextualPlace,contextualAct} from '../host/contextual-place.ts';
 import {createHash} from 'node:crypto';
@@ -74,7 +75,7 @@ export function printActResult(root:string,identity:string|undefined):void {
   const store=storeOf(root),standing=lockStanding(store),view=viewsOf(standing).get('act');
   if(!view||view.shape||!view.regions.some(region=>region.name==='act'))throw Error('REFUSE·view act requires an admitted result profile and act view');
   if(!identity)throw Error('REFUSE·act name one committed identity');
-  if(hasContextualPlace(root)){const contextual=contextualAct(root,identity);if(contextual){process.stdout.write(JSON.stringify(contextual)+'\n');return}}
+  if(hasContextualPlace(root)){const contextual=contextualAct(root,identity);if(contextual){hostOutput('out',JSON.stringify(contextual)+'\n');return}}
   const {result,bundle}=verifiedLegacyActResult(root,identity);
-  process.stdout.write(`ACT ${result.identity} · epoch ${result.epoch} · admitted · conformance not asserted\n`+bundle.records+bundle.receipt);
+  hostOutput('out',`ACT ${result.identity} · epoch ${result.epoch} · admitted · conformance not asserted\n`+bundle.records+bundle.receipt);
 }

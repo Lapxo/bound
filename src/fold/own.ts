@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import { timing } from '../host/timing.ts';
 import { basename, existsSync, relative, resolve } from '../host/io.ts';
 import { EXTENSION, matches } from '@lapxo/topos/wire';
@@ -230,7 +231,7 @@ export function ownReadings(input: {
     ...(keyOf(store, 'attest') === undefined ? {} : {[`${keyOf(store, 'attest')}-ms`]: tree(() => attestBeat(store, standing))}),
     ship: took('ship', () => shipped(root, store, standing, under)),
   };
-  process.stderr.write(`OWN      ${spent.join(' ms · ')} ms\n`);
+  hostOutput('error',`OWN      ${spent.join(' ms · ')} ms\n`);
   if (under) return placeOnly(local, under);
   return {
     ...placeOnly(local),

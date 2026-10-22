@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/physical-lines",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/physical-lines.md",
+      "digest": "sha256:d0b780a4573cee69ec6f68305c2b196340aa73dbc48114af003816333fdffb1a"
+    },
+    {
+      "role": "yes",
+      "path": "samples/physical-lines/yes.json",
+      "digest": "sha256:3d54c37d2010cc3baf7f6eef0781b6b22eb004ecdccf9f91a59b354038151dd1"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/physical-lines.vector.json",
+      "digest": "sha256:2626860abd968214a57f1ec54162c74890ea76476156984f8a5c7d6da90a8ffb"
+    },
+    {
+      "role": "no",
+      "path": "samples/physical-lines/no.json",
+      "digest": "sha256:faab4bdc0339583cab3b62e5ddb1d5a4c0b115df4bbd4455edb09cf878cd742b"
+    }
+  ]
+}

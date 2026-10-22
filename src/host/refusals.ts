@@ -7,6 +7,9 @@ export class BoundRefusal extends Error {
  constructor(code:string,diagnostic:string){super(diagnostic);this.name='BoundRefusal';this.code=code;}
 }
 /** Pure machine contract reader. A catalog is data, never an authority grant. */
+/** Raise the existing typed public cause with its canonical diagnostic prefix. */
+export function refuseBound(code:string):never{throw new BoundRefusal(code,'REFUSE·'+code)}
+
 export function readRefusalCatalog(text:string):readonly RefusalEntry[] {
  const groups=new Map<string,Map<string,Readonly<Record<string,string>>>>();let profile=false;
  for(const line of text.trimEnd().split('\n')){
@@ -28,4 +31,10 @@ export function readRefusalCatalog(text:string):readonly RefusalEntry[] {
 export function describeRefusal(error:BoundRefusal,catalog:readonly RefusalEntry[]):RefusalEntry {
  const entry=catalog.find(row=>row.code===error.code);
  if(!entry)throw new BoundRefusal('catalog/invalid','REFUSE·undeclared refusal code');return entry;
+}
+
+/** The CLI and in-process transport share one public error record formatter. */
+export function refusalRecord(error:BoundRefusal,text:string,digest:(text:string)=>string){
+ try{return {profile:'bound-refusal@1',...describeRefusal(error,readRefusalCatalog(text)),catalog:digest(text)}}
+ catch{return {profile:'bound-refusal@1',code:'catalog/invalid',unmeasured:['category','meaning','next','catalog']}}
 }

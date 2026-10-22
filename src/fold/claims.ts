@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import { basename } from '../host/io.ts';
 import { contracts, exclusive, point, region } from '@lapxo/obligations/field';
 import { ENVELOPE, PROTOCOL, recordKind, signedBytes, parse } from '@lapxo/topos/wire';
@@ -40,7 +41,7 @@ export const sayingOf = (line: string): string => !isConfig(line) ? ((p)=>p.kind
 
 /** One key per claim: scope, role and measure; what a line says, its envelope set aside, is one however often it landed. */
 export function claimKey(line: string): string {
-  const f = fieldsOf(line);
+  const f = wireFields(line);
   return `${f['scope'] ?? ''} ${f['role'] ?? ''} ${f['measure'] ?? ''}`;
 }
 
@@ -78,7 +79,7 @@ export interface Fork {
   readonly state?: string;
 }
 
-export function foldClaims(lines: readonly string[], receipts?: readonly { readonly scope: string; readonly moved: readonly string[] }[], _placed = false): {
+function foldClaimsUncached(lines: readonly string[], receipts?: readonly { readonly scope: string; readonly moved: readonly string[] }[], _placed = false): {
   readonly standing: readonly string[];
   readonly superseded: readonly string[];
   readonly retracted: readonly string[];
@@ -137,4 +138,26 @@ export function foldClaims(lines: readonly string[], receipts?: readonly { reado
   }
   const accounted = new Set([...standing, ...retracted, ...spent, ...vacuous]);
   return { standing, superseded: [...new Set([...spent, ...lines.filter((l) => !accounted.has(l))])], retracted, forks, vacuous };
+}
+
+// Pure projection only: every caller still obtains current ledger bytes and
+// checks current authority. No path, timestamp or caller-supplied digest is a key.
+// Keep a bounded working set; do not write this memo to the place or its CAS.
+const pureFolds = new Map<string,{readonly input:string;readonly result:ReturnType<typeof foldClaimsUncached>}>();
+let pureFoldBytes=0;
+const PURE_FOLD_BYTES=32*1024*1024;
+function copyFold(result:ReturnType<typeof foldClaimsUncached>):ReturnType<typeof foldClaimsUncached>{
+ return {...result,standing:[...result.standing],superseded:[...result.superseded],retracted:[...result.retracted],vacuous:[...result.vacuous],forks:result.forks.map(fork=>({...fork,lines:[...fork.lines]}))};
+}
+export function foldClaims(lines:readonly string[],receipts?:readonly {readonly scope:string;readonly moved:readonly string[]}[],placed=false):ReturnType<typeof foldClaimsUncached>{
+ const input=JSON.stringify([Array.from(lines),receipts===undefined?null:receipts.map(receipt=>[receipt.scope,Array.from(receipt.moved)]),placed]);
+ const digest=createHash('sha256').update(input).digest('hex'),held=pureFolds.get(digest);
+ if(held?.input===input)return copyFold(held.result);
+ const result=foldClaimsUncached(lines,receipts,placed),bytes=Buffer.byteLength(input);
+ if(bytes<=PURE_FOLD_BYTES){
+  if(held){pureFoldBytes-=Buffer.byteLength(held.input);pureFolds.delete(digest)}
+  while(pureFolds.size>=8||pureFoldBytes+bytes>PURE_FOLD_BYTES){const oldest=pureFolds.keys().next().value;if(oldest===undefined)break;pureFoldBytes-=Buffer.byteLength(pureFolds.get(oldest)!.input);pureFolds.delete(oldest)}
+  pureFolds.set(digest,{input,result:copyFold(result)});pureFoldBytes+=bytes;
+ }
+ return result;
 }

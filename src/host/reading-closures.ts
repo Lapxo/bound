@@ -60,18 +60,30 @@ export function readingClosures(options:ReadingClosureOptions):{lines:readonly s
 }
 
 /** Verify the native reading carriers before a file seal may reuse them. These are semantic receipts, not file-region seals. */
+// Successful *pure* unit validation is shared across calls by complete content
+// references. Both input and output carriers are freshly loaded and hashed
+// before lookup; duplicate rows and environment callbacks are never bypassed.
+const verifiedUnits=new Set<string>();
+const VERIFIED_UNIT_LIMIT=1024;
 export function verifiedReadingReceipts(store:string,lines:readonly string[],digest:(text:string)=>string,environment?:readonly ReadingReference[]|((context:ReadingIdentityContext)=>readonly ReadingReference[]|undefined),requireContext=false):number|undefined {
- const units=lines.filter(line=>fieldOf(line,'scope').startsWith('receipts/readings/')&&fieldOf(line,'measure')==='bytes'&&fieldOf(line,'role')==='writes');
+ // Index this invocation's exact rows once. Keep duplicate occurrences: they must still refuse.
+ const units:string[]=[],countsBy=new Map<string,string[]>(),identitiesBy=new Map<string,string[]>();
+ const key=(scope:string,by:string,at?:string)=>JSON.stringify(at===undefined?[scope,by]:[scope,by,at]);
+ const add=(index:Map<string,string[]>,name:string,line:string)=>{const rows=index.get(name);if(rows)rows.push(line);else index.set(name,[line]);};
+ for(const line of lines){const scope=fieldOf(line,'scope');if(!scope.startsWith('receipts/readings/')||fieldOf(line,'role')!=='writes')continue;const measure=fieldOf(line,'measure'),by=fieldOf(line,'by');if(measure==='bytes')units.push(line);else if(measure==='count')add(countsBy,key(scope,by),line);else if(measure==='digest')add(identitiesBy,key(scope,by,fieldOf(line,'at')),line);}
+
  const load=(id:string,row:string)=>{const hex=id.split(':')[1];if(!hex||!/^[a-f0-9]+$/.test(hex))return;
   const supplied=fields(row).about;
   // A supplied carrier must authenticate even if an old local copy still exists.
   if(supplied!==undefined)return digest(supplied)===id?supplied:undefined;
   const path=join(store,'cas','carried',hex);if(!existsSync(path))return;const bytes=readFileSync(path,'utf8');return digest(bytes)===id?bytes:undefined;};
  for(const unit of units){
-  const input=fieldOf(unit,'value'),scope=fieldOf(unit,'scope'),by=fieldOf(unit,'by'),counts=lines.filter(line=>fieldOf(line,'scope')===scope&&fieldOf(line,'measure')==='count'&&fieldOf(line,'by')===by&&fieldOf(line,'role')==='writes');
-  if(counts.length!==1||load(input,unit)===undefined)return;
+  const input=fieldOf(unit,'value'),scope=fieldOf(unit,'scope'),by=fieldOf(unit,'by'),counts=countsBy.get(key(scope,by))??[],inputBytes=load(input,unit);
+  if(counts.length!==1||inputBytes===undefined)return;
   const count=counts[0]!,output=load(fieldOf(count,'at').replace(/^place:/,''),count);if(output===undefined)return;
-  const inputBytes=load(input,unit)!;
+  const identityRows=identitiesBy.get(key(receiptScope(scope),by,'place:'+input))??[];
+  const unitKey=environment?undefined:digest(JSON.stringify([input,fieldOf(count,'at'),scope,by,fieldOf(count,'value'),identityRows,requireContext]));
+  if(unitKey&&verifiedUnits.has(unitKey))continue;
   if(inputBytes.trimStart().startsWith('[')){
    let context:unknown;try{context=JSON.parse(inputBytes);}catch{return;}
    if(!Array.isArray(context)||context.length!==6||context[0]!=='reading-context@1')return;
@@ -79,12 +91,13 @@ export function verifiedReadingReceipts(store:string,lines:readonly string[],dig
    try{if(new TextDecoder().decode(readingIdentityBytes(canonicalContext))!==inputBytes)return;}catch{return;}
    if(environment){const expected=typeof environment==='function'?environment(canonicalContext as ReadingIdentityContext):environment;
     if(expected===undefined||JSON.stringify([...expected].sort((a,b)=>byBytes(a[0],b[0])))!==JSON.stringify(context[5]))return;}
-   const identity=lines.filter(line=>fieldOf(line,'scope')===receiptScope(scope)&&fieldOf(line,'measure')==='digest'&&fieldOf(line,'by')===by&&fieldOf(line,'role')==='writes'&&fieldOf(line,'at')==='place:'+input);
+   const identity=identitiesBy.get(key(receiptScope(scope),by,'place:'+input))??[];
    const expected=readingReceiptIdentity(input,fieldOf(count,'at').replace(/^place:/,''),bytes=>digest(new TextDecoder().decode(bytes)));
    if(identity.length!==1||fieldOf(identity[0]!,'value')!==expected)return;
   }else if(requireContext||!inputBytes.endsWith('\n')||inputBytes.split('\n').filter(Boolean).some(line=>parse(line).kind!=='fact'))return;
   const rows=output.split('\n').filter(Boolean);
   if(fieldOf(count,'value')!==`${rows.length}..${rows.length}`||rows.some(line=>fieldOf(line,'by')!==by||fieldOf(line,'at')!=='place:'+input))return;
+  if(unitKey){if(verifiedUnits.size>=VERIFIED_UNIT_LIMIT)verifiedUnits.delete(verifiedUnits.values().next().value!);verifiedUnits.add(unitKey);}
  }
  return units.length;
 }

@@ -1,0 +1,8 @@
+{
+  "source": "tools/samples/engine-reader.ts",
+  "outputs": [
+    "samples/engine-alphabet/reader.js",
+    "samples/engine-interval/reader.js",
+    "samples/no/engine-order/reader.js"
+  ]
+}

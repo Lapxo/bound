@@ -30,11 +30,10 @@ export function renderTarget(
 } {
   const folded = foldClaims(ownerLines.filter((line) => isRootPolicyLine(line) && !isExpired(line, today)), receipts);
   const forked = new Map(folded.forks.map((f) => [f.key, f]));
-  const sorted = folded.standing.slice().sort((a, b) => {
-    const left = `${scopeOf(a)} ${claimKey(a)}`;
-    const right = `${scopeOf(b)} ${claimKey(b)}`;
-    return left < right ? -1 : left > right ? 1 : 0;
-  });
+  // Sorting compares the same keys as before. Construct each key once rather
+  // than re-decoding and allocating it at every comparison.
+  const sorted = folded.standing.map(line=>({line,key:`${scopeOf(line)} ${claimKey(line)}`}))
+    .sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0).map(entry=>entry.line);
   const body: string[] = [];
   const announced = new Set<string>();
   const grey: string[] = [];

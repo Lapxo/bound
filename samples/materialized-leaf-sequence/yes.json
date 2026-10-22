@@ -1,0 +1,10 @@
+{
+  "places": [
+    "field-notes",
+    "stock-register"
+  ],
+  "originalVersion": "1.0.0",
+  "revisedVersion": "1.0.1",
+  "originalProsePrefix": "Original prose for ",
+  "revisedProsePrefix": "Revised prose for "
+}

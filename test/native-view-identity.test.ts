@@ -14,7 +14,7 @@ const row=(scope:string,measure:string,value:string,form='alphabet',role='writes
 const families='keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|reading-identity';
 const views=[row('view/lines','id','lines@8','alphabet','demands'),row('view/evidence','id','evidence@8','alphabet','demands')];
 const budgets=Object.entries({bytes:16777216,files:2048,readings:16,probes:1}).map(([k,n])=>row('reading-identity/'+k,k,'0..'+n,'interval'));
-const entry=new URL('../dist/cli/verb.js',import.meta.url).pathname,instrument=nativeHostInstrument(resolve('.'),entry);
+const entry=process.env.BOUND_TEST_READER??new URL('../dist/cli/verb.js',import.meta.url).pathname,instrument=nativeHostInstrument(resolve(entry,'../../..'),entry);
 test('native view identity: seven vectors, readonly concurrency and two places',async t=>{
  const a=actingRootFixture('editorial-notes',[],{entry,families,extraBootstrapRows:[...views,...budgets]}),b=actingRootFixture('water-level',[],{entry,families,extraBootstrapRows:[...views,...budgets]});
  const query=(f:typeof a,view='lines')=>{const r=f.run(['fold','--as','reading-identity@'+view]);assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout) as {identity:string;view:string}};
@@ -28,7 +28,7 @@ test('native view identity: seven vectors, readonly concurrency and two places',
   });
   await t.test('2. admitted evidence changes identity',()=>{for(const f of [a,b]){const before=query(f,'evidence');land(f,row('sample/observation','id','observed','alphabet','writes','witness:fixture'));assert.notEqual(query(f,'evidence').identity,before.identity)}});
   await t.test('3. admitted lock declaration changes identity',()=>{for(const f of [a,b]){const before=query(f);land(f,row('sample/configuration','id','configured'));assert.notEqual(query(f).identity,before.identity)}});
-  await t.test('4. fold cache and exclusion bookkeeping do not change identity',()=>{for(const f of [a,b])for(const view of ['lines','evidence']){const before=query(f,view);writeFileSync(join(f.root,'.bound/ledger/fold.bound'),'maintenance cache\n');mkdirSync(join(f.root,'.bound/locks'),{recursive:true});writeFileSync(join(f.root,'.bound/locks','unrelated'),'bookkeeping');assert.equal(query(f,view).identity,before.identity);rmSync(join(f.root,'.bound/locks','unrelated'))}});
+  await t.test('4. fold cache, unconsumed CAS memo and exclusion bookkeeping do not change identity',()=>{for(const f of [a,b])for(const view of ['lines','evidence']){const before=query(f,view);writeFileSync(join(f.root,'.bound/ledger/fold.bound'),'maintenance cache\n');mkdirSync(join(f.root,'.bound/cas/memo'),{recursive:true});writeFileSync(join(f.root,'.bound/cas/memo','unconsumed'),'derived memo\n');mkdirSync(join(f.root,'.bound/locks'),{recursive:true});writeFileSync(join(f.root,'.bound/locks','unrelated'),'bookkeeping');assert.equal(query(f,view).identity,before.identity);rmSync(join(f.root,'.bound/locks','unrelated'))}});
   await t.test('5. distinct places have distinct identities',()=>{for(const view of ['lines','evidence'])assert.notEqual(query(a,view).identity,query(b,view).identity)});
   await t.test('6. unsupported views refuse with no identity',()=>{const r=a.run(['fold','--as','reading-identity@rank']);assert.notEqual(r.status,0);assert.equal(r.stdout,'');assert.equal(JSON.parse(r.stderr.trim().split('\n').at(-1)!).code,'reading-identity/selection')});
   await t.test('7. result names consumed identity; stale expected identity returns no output',()=>{
@@ -63,4 +63,19 @@ test('view preparation refuses changed sources and frames field boundaries',()=>
  const second=captureViewInputs({bytes:4096,files:4},()=>viewInput('input.txtb',()=> 'c'));
  assert.notDeepEqual(first.inputs,second.inputs);
  assert.throws(()=>captureViewInputs({bytes:1,files:1},()=>viewInput('selected',()=> 'too large')),/reading-identity\/budget/);
+});
+
+/** Two places, two public views, eight identical calls per view. Include all
+ * persisted files and CAS/memo bytes, without exclusions or collection. */
+test('unchanged native view queries preserve every persisted byte across repeated calls',()=>{
+ const captures:unknown[]=[];
+ for(const place of ['coastal-readings','archive-register']){const f=actingRootFixture(place,[],{entry,families,extraBootstrapRows:[...views,...budgets]});
+  try{const snapshot=(root:string):{path:string;bytes:number;digest:string}[]=>readdirSync(root,{withFileTypes:true}).flatMap(e=>{const p=join(root,e.name);return e.isDirectory()?snapshot(p):[{path:p.slice(f.root.length+1),bytes:readFileSync(p).length,digest:sha256(readFileSync(p))}]}).sort((a,b)=>a.path<b.path?-1:a.path>b.path?1:0);
+   const before=snapshot(f.root),baseline=new Map(['lines','evidence'].map(view=>{const r=prepareNativeViewIdentity({place:f.root,instrument,view});assert.equal(r.kind,'fact',JSON.stringify(r));return[view,r]}));
+   for(let repetition=0;repetition<8;repetition++)for(const view of ['lines','evidence']){assert.deepEqual(prepareNativeViewIdentity({place:f.root,instrument,view}),baseline.get(view));assert.deepEqual(snapshot(f.root),before,'query preserves TARGET, receipts, ledger and every CAS/memo byte');}
+   captures.push({place,views:['lines','evidence'],repetitions:8,queries:16,filesBefore:before.length,filesAfter:snapshot(f.root).length,bytesBefore:before.reduce((n,f)=>n+f.bytes,0),bytesAfter:snapshot(f.root).reduce((n,f)=>n+f.bytes,0),newFiles:snapshot(f.root).length-before.length,newBytes:snapshot(f.root).reduce((n,f)=>n+f.bytes,0)-before.reduce((n,f)=>n+f.bytes,0)});
+   const bad=join(f.root,'.bound','growth-negative');writeFileSync(bad,'a persistence-writing stub');assert.throws(()=>assert.deepEqual(snapshot(f.root),before),'growth vector must reject a writer even when its returned identity could be unchanged');rmSync(bad);assert.deepEqual(snapshot(f.root),before);
+  }finally{f.close()}
+ }
+ if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE+'.growth.json',JSON.stringify(captures,null,2)+'\n');
 });

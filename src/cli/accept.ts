@@ -1,3 +1,4 @@
+import {readingWitnessAdmission} from '../host/native/reading-witness-admission.ts';
 import {BoundRefusal} from '../host/refusals.ts';
 import {assertHostNotCancelled as notCancelled} from '../host/host-controls.ts';
 import {authorityAtEpoch} from '@lapxo/topos/wire';
@@ -25,7 +26,7 @@ import { lockLines, lockStanding } from '../fold/keys.ts';
 import { keepVerdict, keptVerdict, land, landBlob, ledgerLines, storeOf } from '../land/ledger.ts';
 import { signConsentLot, verifiesOwnerLine } from '../land/sign.ts';
 import { signerFor } from '../host/signing.ts';
-import { appliedIn, ownLockOf } from '../fold/signed.ts';
+import { appliedIn, ownLockOf, withOwnPreview } from '../fold/signed.ts';
 import { wordOf } from '../fold/wire.ts';
 import { hasVouchedTree, landCoordinates, locationsOf, vouchedCoordinates } from '../land/vouched.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
@@ -36,7 +37,7 @@ import { retractedTogether, withdrawal } from '../land/withdraw.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { inertIn } from '../land/inert.ts';
 import { landSaid } from './pass.ts';
-import { underTheLock, underTheRegions, underAuthorityRegions, underRootProjection } from '../land/act.ts';
+import { currentActSignal, underTheLock, underTheRegions, underAuthorityRegions, underRootProjection, underRootAuthority } from '../land/act.ts';
 import { openedBy } from '../fold/opened.ts';
 import { touchedBy } from '../fold/reach.ts';
 import { landOwned, ownedOf } from '../land/owned.ts';
@@ -69,69 +70,93 @@ export interface RootAdmissionHost {
 export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly records?:readonly string[]; readonly epoch: number; readonly base: { readonly digest: string; readonly places: readonly string[] }; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
 
 /** Admission reads an existing evidence snapshot; acquiring observations belongs to fold. */
-function admissionEvidence(root: string, signed: readonly string[], standing: readonly string[]) {
+export function admissionEvidence(root: string, signed: readonly string[], standing: readonly string[], now: number) {
+  if(!Number.isSafeInteger(now))throw new BoundRefusal('admission/clock','REFUSE·admission clock is required');
   return withoutEffects(() => {
     const store = storeOf(root);
     assertProspectiveRootClockSelection(root,signed);
     const reads = !signed.some(isReaderLock) && signed.some(isCeiling);
     const fold = reads ? coneOf(root, entryOf(root), signed.filter(isCeiling)) : { standing, observed: [], own: {}, kept: true };
     const inert = inertIn(signed, { standing: fold.standing, ceiling: isCeiling, signsReader: !reads, observed: fold.observed, own: fold.own, epoch: epochOf([...lockLines(store), ...signed]) });
-    if (inert.length) throw Error('REFUSE·inert no existing reading meets these ceilings; fold the declared inputs first');
+    if (inert.length) throw new BoundRefusal('admission/inert','REFUSE·inert no existing reading meets these ceilings; fold the declared inputs first');
     const coordinates = coordinatesWithdrawn(root, store, signed, [...signed, ...standing]);
-    if (coordinates.refused.length) throw Error(`REFUSE·withdraw a file is still read: ${coordinates.refused.map(one => `${one.path} by ${one.by}`).join(' · ')}`);
-    const view = `${wordOf(standing, 'families', 'view')}/`;
+    if (coordinates.refused.length) throw new BoundRefusal('admission/withdraw',`REFUSE·withdraw a file is still read: ${coordinates.refused.map(one => `${one.path} by ${one.by}`).join(' · ')}`);
+    const view = `${wordOf(lockStanding(store), 'families', 'view')}/`;
     const judged: Judged[] = signed.filter(one => isConfig(one) && fieldOf(one, 'role') === 'demands' && fieldOf(one, 'value') !== 'withdraw' && !fieldOf(one, 'scope').startsWith(view)).map(one => {
       const scope = fieldOf(one, 'scope');
       const alreadyDemanded = standing.some(held => isConfig(held) && fieldOf(held, 'role') === 'demands'
         && fieldOf(held, 'value') !== 'withdraw' && fieldOf(held, 'scope') === scope
         && fieldOf(held, 'form') === fieldOf(one, 'form') && fieldOf(held, 'measure') === fieldOf(one, 'measure'));
       // Declaring an obligation is not a claim to have discharged it.
-      return alreadyDemanded ? judgeDemand(root, one)
+      return alreadyDemanded ? judgeDemand(root, one, {now})
         : {kind: 'owed', scope, why: 'new demand declared; no conformance reading is claimed'};
     });
     const refused = judged.filter(one => one.kind === 'refused' || (one.kind === 'judged' && one.verdict.kind === 'refuse'));
-    if (refused.length) throw Error(`REFUSE·takes ${refused.map(one => `${one.scope}: ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}`).join(' · ')}`);
+    if (refused.length) throw new BoundRefusal('admission/takes',`REFUSE·takes ${refused.map(one => `${one.scope}: ${one.kind === 'judged' ? one.verdict.why : one.kind === 'refused' ? one.why : ''}`).join(' · ')}`);
     return { coordinates, judged, fold };
   });
 }
 
-/** One witness rule for prospective admission and the locked act. */
-function refusesWidening(signed: readonly string[], standing: readonly string[]): boolean {
-  const widened = widenedWithoutWitness(signed, standing, isCeiling, wordOf(standing, 'at-classes', 'witness'));
-  if (widened.length) {
-    for (const line of widened) hostOutput('error',`WIDER    ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
-    hostOutput('error',`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
-    return true;
-  }
-  return false;
+export type AdmissionEvidenceResult=
+ |{readonly kind:'fact';readonly evidence:ReturnType<typeof admissionEvidence>}
+ |{readonly kind:'refuse';readonly code:string;readonly diagnostic:string};
+export function admissionEvidenceResult(root:string,signed:readonly string[],standing:readonly string[],now:number):AdmissionEvidenceResult {
+ try{return {kind:'fact',evidence:admissionEvidence(root,signed,standing,now)}}
+ catch(error){return {kind:'refuse',code:error instanceof BoundRefusal?error.code:'admission/evidence',diagnostic:error instanceof Error?error.message:String(error)}}
 }
 
-/** Admission-only checks; observation and mutation belong to the later act. */
-function refusesAdmission(root: string, signed: readonly string[], standing: readonly string[]): boolean {
-  if (refusesWidening(signed, standing)) return true;
-  const store = storeOf(root);
-  const outside = outsideTheirCapsule(root, standing, signed);
-  for (const line of outside) hostOutput('error',`OUTSIDE  ${fieldOf(line, 'scope')} · ${fieldOf(line, 'value')}\n`);
-  if (outside.length) {
-    hostOutput('error',`${selfName()}: REFUSE·outside nothing landed · a reader or a capsule lands in the capsule of its world, never in the wire or the instrument\n`);
-    return true;
-  }
-  const forks = forksJoinedBy(store, signed).filter(fork => forksItself(fork.lines) || fork.lines.filter(line => signed.includes(line)).length > 1);
-  if (forks.length) {
-    for (const fork of forks) {
-      hostOutput('error',`FORK     ${fork.key}\n`);
-      for (const line of fork.lines) hostOutput('error',`  ${signed.includes(line) ? 'new ' : 'held'}  by=${fieldOf(line, 'by')} ${sideOf(line, lockLines(store))}\n`);
-    }
-    hostOutput('error',`${selfName()}: REFUSE·fork nothing landed · one signer never forks itself, and one act never forks itself: withdraw the held side in this batch, or sign the other reading under its own scope\n`);
-    return true;
-  }
-  const held = aliasPinned(root, signed);
-  if (held.length) {
-    for (const one of held) hostOutput('error',`ALIAS    ${one.scope} · ${one.digest} · ${one.by.join(' ')}\n`);
-    hostOutput('error',`${selfName()}: REFUSE·alias nothing landed · an alias is withdrawn only when no pin names its digest\n`);
-    return true;
-  }
-  return false;
+/** The same signed-lot epoch check used before native admission. */
+export function configurationEpochCheck(proposed:readonly string[],epoch:number,held:(line:string)=>boolean):readonly string[] {
+ return proposed.every(held)?[]:proposed.filter(line=>fieldOf(line,'sig')&&isConfig(line)&&Number(fieldOf(line,'epoch'))!==epoch);
+}
+
+/** Shared wire, pin, withdrawal and placement checks for a named configuration lot. */
+export function configurationAdmissionGuards(root:string,signed:readonly string[],named:readonly string[]=[],placedAt?:(line:string)=>readonly string[]|undefined):
+ {readonly kind:'fact';readonly ownership:Owned}|{readonly kind:'refuse';readonly code:string;readonly evidence:readonly unknown[];readonly diagnostic:string} {
+ const store=storeOf(root),history=signedOwnerLines(store),standing=foldClaims(history).standing;
+ const wireLines=[...history,...signed].flatMap(line=>{const got=parse(line);return got.kind==='fact'?[got.value.fields]:[]});
+ for(const line of signed){const got=admittedLine(line,wireLines,Number(fieldOf(line,'epoch')),standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw'));if(got.kind!=='fact')return {kind:'refuse',code:'wire',evidence:[line,got],diagnostic:got.why};}
+ try{admitStandingPins(root,signed)}catch(error){return {kind:'refuse',code:'standing-pin',evidence:signed,diagnostic:error instanceof Error?error.message:String(error)}}
+ const taken=retractedTogether(signed);if(taken.length)return {kind:'refuse',code:'withdraw',evidence:taken,diagnostic:'a withdrawal takes a new line in the same batch'};
+ const authority=authorityFor([...lockLines(store),...signed],rootSigner(root),signaturesOf(store).admitted);
+ const ownership=withOwnPreview(root,()=>ownedOf(root,signed,line=>authority.of(line).kind==='admitted',by=>authority.admitted.find(one=>one.id===by)?.coverage??[],named,placedAt));
+ if(ownership.nowhere.length)return {kind:'refuse',code:'signer',evidence:ownership.nowhere,diagnostic:'the requested records are not covered at their selected destination'};
+ if(ownership.forked.length)return {kind:'refuse',code:'forked',evidence:ownership.forked,diagnostic:'the lot would fork a selected own lock'};
+ return {kind:'fact',ownership};
+}
+
+/** Structured admission checks shared by the native view and the act. */
+export type AdmissionCheck =
+ | {readonly kind:'fact';readonly evidence?:readonly string[]}
+ | {readonly kind:'ask';readonly code:'widening'|'reading-witness';readonly evidence:readonly string[];readonly needs:readonly string[]}
+ | {readonly kind:'refuse';readonly code:'outside'|'fork'|'alias'|'reading-witness';readonly evidence:readonly unknown[];readonly diagnostic:string};
+export function admissionWideningChecks(root:string,signed:readonly string[],standing:readonly string[],vocabulary:readonly string[]=standing,place:string='.'):AdmissionCheck {
+ const physical=readingWitnessAdmission(root,signed,standing,vocabulary,place);
+ if(physical.kind==='ask')return physical;
+ if(physical.kind==='refuse')return {kind:'refuse',code:physical.code,evidence:physical.evidence,diagnostic:physical.why};
+ const widened=widenedWithoutWitness(signed,standing,isCeiling,wordOf(vocabulary,'at-classes','witness'));
+ if(widened.length)return {kind:'ask',code:'widening',evidence:widened,needs:widened.map(line=>'witness:'+fieldOf(line,'scope'))};
+ return {kind:'fact',evidence:physical.evidence};
+}
+export function admissionChecks(root:string,signed:readonly string[],standing:readonly string[]):AdmissionCheck {
+ const widening=admissionWideningChecks(root,signed,standing);if(widening.kind!=='fact')return widening;
+ const store=storeOf(root),outside=outsideTheirCapsule(root,standing,signed);
+ if(outside.length)return {kind:'refuse',code:'outside',evidence:outside,diagnostic:'a reader or capsule lands in its own world'};
+ const forks=forksJoinedBy(store,signed).filter(fork=>forksItself(fork.lines)||fork.lines.filter(line=>signed.includes(line)).length>1);
+ if(forks.length)return {kind:'refuse',code:'fork',evidence:forks,diagnostic:'one signer and one act cannot fork themselves'};
+ const aliases=aliasPinned(root,signed);
+ if(aliases.length)return {kind:'refuse',code:'alias',evidence:aliases,diagnostic:'an alias is still named by a pin'};
+ return {kind:'fact',evidence:widening.evidence};
+}
+/** Presentation consumes the same structured verdict as the native card. */
+function refusesAdmission(root:string,signed:readonly string[],standing:readonly string[]):boolean {
+ const result=admissionChecks(root,signed,standing);if(result.kind==='fact')return false;
+ if(result.kind==='ask'&&result.code==='reading-witness'){hostOutput('error',`${selfName()}: REFUSE·reading-witness ${result.needs.join(' · ')} · nothing landed\n`);}
+ else if(result.kind==='ask'){
+  for(const line of result.evidence)hostOutput('error',`WIDER    ${fieldOf(line,'scope')} · ${fieldOf(line,'value')}\n`);
+  hostOutput('error',`${selfName()}: REFUSE·widening nothing landed · a ceiling that admits more than it did gives back freedom the lock had spent: sign it under a witness that names what made the old ceiling wrong\n`);
+ }else hostOutput('error',`${selfName()}: REFUSE·${result.code} nothing landed · ${result.diagnostic}\n`);
+ return true;
 }
 
 function refusesStandingPins(root:string, lines:readonly string[]):boolean {
@@ -187,7 +212,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     if(proposed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...proposed]);}catch(e){hostOutput('error',`${selfName()}: ${String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
     return { kind: 'once', proposed };
   }
-  const outdated = proposed.filter(line => fieldOf(line, 'sig') && isConfig(line) && Number(fieldOf(line, 'epoch')) !== epoch);
+  const outdated = configurationEpochCheck(proposed,epoch,held);
   if (outdated.length) {
     for (const line of outdated) hostOutput('error',`SIGNED   ${fieldOf(line, 'scope')} · signed by ${fieldOf(line, 'by')} at epoch ${fieldOf(line, 'epoch')}, and this act lands at ${epoch}: sign it again\n`);
     hostOutput('error',`${selfName()}: REFUSE·signed nothing landed · ${outdated.length} lines a lane signed stand at no epoch this act\n`);
@@ -211,6 +236,7 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     try { invoke = signerFor([...lockStanding(store), ...destinations.flatMap(place => ownLockOf(root, place))],
       keyId, host?.signer.name??valueOf(args, FLAGS.signer), keyFile,host?.signer); }
     catch (error) {
+      if(error instanceof BoundRefusal)throw error;
       hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : 'REFUSE·signer unavailable'}\n`);
       return { kind: 'exit', code: 1 };
     }
@@ -223,44 +249,13 @@ export async function signedBatch(root: string, args: readonly string[], files: 
     let index = 0;
     signed = proposed.map(line => fieldOf(line, 'sig') ? line : got.lines[index++]!);
   }
-  const wireLines = [...signedOwnerLines(store), ...signed].flatMap((line) => {
-    const got = parse(line);
-    return got.kind === 'fact' ? [got.value.fields] : [];
-  });
-  for (const line of signed) {
-    const got = admittedLine(line, wireLines,Number(fieldOf(line, 'epoch')), foldClaims(signedOwnerLines(store)).standing.filter(one=>fieldOf(one,'scope').startsWith('uses/')&&fieldOf(one,'value')!=='withdraw'));
-    if (got.kind !== 'fact') {
-      hostOutput('error',`${selfName()}: REFUSE·wire ${fieldOf(line, 'scope')} · ${got.why} · nothing landed\n`);
-      return { kind: 'exit', code: 1 };
-    }
-  }
-  if(refusesStandingPins(root,signed))return {kind:'exit',code:1};
-  const taken = retractedTogether(signed);
-  if (taken.length) {
-    for (const pair of taken) {
-      hostOutput('error',`WITHDRAW ${sayingOf(pair.withdraw)}\n`);
-      hostOutput('error',`NEW      ${sayingOf(pair.line)}\n`);
-    }
-    hostOutput('error',`${selfName()}: REFUSE·withdraw nothing landed · a withdraw matches a new line in this batch, so it takes that line too\n`);
-    return { kind: 'exit', code: 1 };
-  }
-  const authority = authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted);
-  const ownership = ownedOf(root, signed, line => authority.of(line).kind === 'admitted',
-    by => authority.admitted.find(one => one.id === by)?.coverage ?? [], named,
-    line => { const heads = byFile.flatMap(([heads, lines]) => lines.some(draft => sayingOf(draft) === sayingOf(line)) ? heads : []); return heads.length ? heads : undefined; });
-  if (ownership.nowhere.length) {
-    for (const line of ownership.nowhere) hostOutput('error',`${selfName()}: REFUSE·signer ${keyId} uncovered ${fieldOf(line, 'scope')} · nothing signed for delivery\n`);
-    return { kind: 'exit', code: 1 };
-  }
-  if (ownership.forked.length) {
-    for (const one of ownership.forked) hostOutput('error',`FORKED   ${one.place}/${LOCK} · ${one.key} · the lot would leave two standing claims where the lock had one\n`);
-    hostOutput('error',`${selfName()}: REFUSE·forked nothing landed · ${ownership.forked.length} claims an own lot would fork: a lot for many places lands the same lines at each, and lines meant for one place go in a lot of their own\n`);
-    return {kind:'exit',code:1};
-  }
+  const guarded=configurationAdmissionGuards(root,signed,named,line=>{const heads=byFile.flatMap(([heads,lines])=>lines.some(draft=>sayingOf(draft)===sayingOf(line))?heads:[]);return heads.length?heads:undefined});
+  if(guarded.kind==='refuse'){hostOutput('error',`${selfName()}: REFUSE·${guarded.code} ${guarded.diagnostic} · nothing landed\n`);return {kind:'exit',code:1};}
+  const ownership=guarded.ownership;
   if (refusesAdmission(root, ownership.ledger, lockStanding(store))) return { kind: 'exit', code: 1 };
   if(signed.some(line=>!isConfig(line))) {try {await admittedObjects(root,[...signedOwnerLines(store),...signed],text=>hostOutput('out',text+'\n'));}catch(e){hostOutput('error',`${selfName()}: ${e instanceof Error?e.message:String(e)} · nothing landed\n`);return {kind:'exit',code:1};}}
-  try { admissionEvidence(root, ownership.ledger, lockStanding(store)); }
-  catch(error) {hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return {kind:'exit',code:1};}
+  const evidence=await underRootAuthority(store,'prospective admission evidence',()=>admissionEvidenceResult(root,ownership.ledger,lockStanding(store),Date.now()));
+  if(evidence.kind==='refuse'){hostOutput('error',`${selfName()}: ${evidence.diagnostic} · nothing landed\n`);return {kind:'exit',code:1};}
   return { kind: 'signed', signed, epoch, base, ...(drafted.length ? { keyId } : {}) };
 }
 
@@ -343,8 +338,9 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   const snapshot = took('lines', () => standingOf(root));
   if (refusesAdmission(root, signed, snapshot.standing)) return 1;
   let evidence: ReturnType<typeof admissionEvidence>;
-  try { evidence = took('evidence', () => admissionEvidence(root, signed, snapshot.standing)); }
-  catch(error) {hostOutput('error',`${selfName()}: ${error instanceof Error ? error.message : String(error)} · nothing landed\n`);return 1;}
+  const checkedEvidence=took('evidence',()=>admissionEvidenceResult(root,signed,snapshot.standing,Date.now()));
+  if(checkedEvidence.kind==='refuse'){hostOutput('error',`${selfName()}: ${checkedEvidence.diagnostic} · nothing landed\n`);return 1;}
+  evidence=checkedEvidence.evidence;
   const fold = evidence.fold;
   const authority = took('authority', () => authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted));
   for (const line of signed) {
@@ -385,8 +381,8 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     if(!folder)throw Error('REFUSE·act native result requires a declared fold identity');
     const receipt=canonical({scope:resultProfile.scope,at:resultProfile.context,role:'writes',form:'alphabet',measure:'digest',value:identity,by:folder,epoch:String(epoch)});
     const bundle={records:records.join('\n')+'\n',receipt:receipt+'\n',placements:placements.map(p=>({place:p.place,records:p.records.join('\n')+'\n'}))};
-    notCancelled(host?.signal);host?.prepared?.(identity);notCancelled(host?.signal);
-    const committed=await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct,host?.storage,host?.signal);
+    notCancelled((host?.signal??currentActSignal()));host?.prepared?.(identity);notCancelled((host?.signal??currentActSignal()));
+    const committed=await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct,host?.storage,(host?.signal??currentActSignal()));
     host?.committed?.(identity,committed,committed.kind);
     // Commitment precedes projections and conformance work. If either fails,
     // this public identity still names the admitted act; it is never rollback.

@@ -20,10 +20,13 @@ for(const sample of ['origins','stock'])test('public preparation retains executi
   const preparationLimits={bytes:65536,files:8,readings:8,probes:1};
   const prepare=(extra:object={})=>prepareReadingIdentities({...options,preparationLimits,...extra});
   const first=prepare();assert.equal(first.kind,'fact');if(first.kind!=='fact')return;
+  assert.equal(first.probes,1);assert.equal(probes,1,'one projection request is counted separately from final readings');
   assert.equal(reads,0);assert.equal(existsSync(options.store),false,'preparation writes no reading journal or carrier');
   assert.equal(first.readings[0]!.kind,'ready');assert.deepEqual(first.readings[1],{scope:sample+'/total',kind:'needs',needs:[sample]});
   const executed=readingClosures(options);assert.equal(executed.opened,2);assert.equal(reads,2);
+  const probesBeforePreparation=probes;
   const next=prepare();assert.equal(next.kind,'fact');if(next.kind!=='fact')return;
+  assert.equal(next.probes,1);assert.equal(probes-probesBeforePreparation,1,'retained evidence does not suppress or duplicate the projection probe counter');
   assert.equal(next.retained,2);assert.equal(reads,2);assert.equal(next.readings[0]!.kind,'ready');
   assert.equal((next.readings[0] as any).identity,(first.readings[0] as any).identity);
   const quiet=readingClosures(options);assert.equal(quiet.opened,0);assert.equal(reads,2);

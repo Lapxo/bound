@@ -7,6 +7,14 @@ for(const name of ['survey','inventory'])test('declared semantic context and rec
  const read=(ctx:ReadingIdentityContext|undefined)=>readingClosures({root,store:join(root,'.bound'),reader:name,speaker:'reader',digest:hash,capsule,region:'reading',projection:'inputs',context:ctx,files:[{place:'input.txt',text:readFileSync(join(root,'input.txt'),'utf8')}]});
  const first=read(context);assert.equal(first.opened,1);assert.equal(calls,1);assert.equal(verifiedReadingReceipts(join(root,'no-store'),first.lines,hash),1);
  assert.equal(verifiedReadingReceipts(join(root,'no-store'),first.lines,hash,ctx=>ctx.implementation===capsule.digest?context.environment:undefined,true),1);
+ const counts=first.lines.filter(l=>{const f=parse(l).value.fields;return f.scope.startsWith('receipts/readings/')&&f.measure==='count'});assert.equal(counts.length,1);
+ assert.equal(verifiedReadingReceipts(join(root,'no-store'),[...first.lines,counts[0]!],hash,undefined,true),undefined,'a duplicate count remains ambiguous');
+ const identityRow=first.lines.find(l=>parse(l).value.fields.scope.endsWith('/identity'))!;assert.equal(verifiedReadingReceipts(join(root,'no-store'),[...first.lines,identityRow],hash,undefined,true),undefined,'a duplicate identity remains ambiguous');
+ const carried=join(root,'portable-copy'),carriers=new Map<string,string>();mkdirSync(join(carried,'cas/carried'),{recursive:true});
+ const portable=first.lines.map(line=>{const f=parse(line).value.fields;if(f.scope.startsWith('receipts/readings/')&&['bytes','count'].includes(f.measure)&&f.about!==undefined){const id=f.measure==='bytes'?f.value:f.at.replace(/^place:/,'');carriers.set(id,f.about);writeFileSync(join(carried,'cas/carried',id.split(':')[1]!),f.about);const {about,...without}=f;return canonical(without);}return line;});
+ assert.equal(verifiedReadingReceipts(carried,portable,hash,undefined,true),1);
+ for(const[id,text]of carriers){const file=join(carried,'cas/carried',id.split(':')[1]!);writeFileSync(file,text+' ');assert.equal(verifiedReadingReceipts(carried,portable,hash,undefined,true),undefined,'current carrier bytes are checked on every invocation');writeFileSync(file,text);assert.equal(verifiedReadingReceipts(carried,portable,hash,undefined,true),1);}
+
  assert.equal(verifiedReadingReceipts(join(root,'no-store'),first.lines,hash,()=>undefined,true),undefined,'unknown current execution boundary does not authorize retained evidence');
  assert.equal(verifiedReadingReceipts(join(root,'no-store'),first.lines,hash,()=>[['a','different'],['b','declared-b']],true),undefined,'reconstructing a boundary still compares every environment reference');
  const quiet=read({...context,environment:[...context.environment].reverse()});assert.equal(quiet.opened,0);assert.equal(calls,1);assert.deepEqual(quiet.lines,first.lines);

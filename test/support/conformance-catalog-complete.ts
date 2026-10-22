@@ -1,3 +1,4 @@
+import{currentProducerFixture}from'./conformance-catalog-current.ts';
 import assert from'node:assert/strict';
 import{createHash,sign}from'node:crypto';
 import{cpSync,mkdirSync,readFileSync,writeFileSync}from'node:fs';
@@ -11,7 +12,7 @@ const row=(scope:string,measure:string,value:string,extra:Record<string,string>=
 export const remainingProducerCases=[
  ['a01','authenticated-reference/budget'],['a02','authenticated-reference/transport'],['a03','authenticated-reference/integrity'],['a04','authenticated-reference/framing'],['a05','authenticated-reference/wire'],['a06','authenticated-reference/authority'],['a07','authenticated-reference/history'],['a08','authenticated-reference/object-context'],['a09','authenticated-reference/identity'],
  ['n01','reference-export/source'],['n02','reference-export/context'],['n03','reference-export/budget'],['n04','reference-export/authority'],['n05','reference-export/signer'],['n06','reference-export/history'],['n07','reference-export/usage'],['n08','standing/view'],['n09','standing/query'],['n10','operation/failed'],['n11','operation/usage'],['n12','reference/backend'],['n13','reference/cancelled'],['n14','computation/authority'],
- ['r01','reading-identity/context'],['r02','reading-identity/budget'],['r03','reading-identity/selection'],['r04','reading-identity/projection'],['r05','reading-identity/integrity'],['r06','reading-identity/failed'],
+ ['r01','reading-identity/context'],['r02','reading-identity/budget'],['r03','reading-identity/selection'],['r04','reading-identity/projection'],['r05','reading-identity/integrity'],['r06','reading-identity/failed'],['n15','reference/transport'],['n16','reader/response'],
 ]as const;
 export const completeProducerCases=[...catalogProducerCases,...additionalProducerCases,...remainingProducerCases]as const;
 export interface CompleteProducerReceiver{readonly engine:any;readonly reference:any;readonly native:any;readonly host:any;readonly candidateRoot:string;readonly hostModule:string;readonly cli:string}
@@ -37,6 +38,7 @@ export async function completeProducerFixture(receiver:CompleteProducerReceiver,
   // preloads absent. Its context is selected by this receiver, not by a request.
   const budget=actingRootFixture(name+'-budget');fixtures.push(budget);
   const plain=actingRootFixture(name+'-plain',[],{families:'keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|reading-identity',fields:'scope|role|form|measure|value|by|at|epoch|sig|about|shape|needs',extraBootstrapRows:[row('wire/shapes','id','run|TARGET.bound'),row('wire/region-measures','id','coordinates'),row('wire/region-coordinate','id','coordinates'),row('reader/sample','reader','reader.js',{shape:'TARGET.bound',needs:'/'}),...Object.entries(limits).map(([key,n])=>row('reading-identity/'+key,key,'0..'+n,{form:'interval'}))]});fixtures.push(plain);writeFileSync(join(plain.root,'reader.js'),'export const observe=()=>[];\n');
+  const malformed=actingRootFixture(name+'-malformed',[],{entry:receiver.cli,families:'keys|signer|wire|sample|tree|write|leaf|view|reader|read|fold|receipts|rendered|resolved|beat|region|vector|cost|source|class|pipeline|host',fields:'scope|role|form|measure|value|by|at|epoch|sig|about|shape|needs',extraBootstrapRows:[row('wire/shapes','id','run|input.txt'),row('wire/region-measures','id','coordinates'),row('wire/region-coordinate','id','coordinates'),row('reader/sample','reader','reader.js',{shape:'input.txt',needs:'src/'}),row('view/evidence','id','receipts@8',{role:'demands'})]});fixtures.push(malformed);mkdirSync(join(malformed.root,'src'));writeFileSync(join(malformed.root,'src/input.txt'),'reader input');writeFileSync(join(malformed.root,'reader.js'),`exports.observe=()=>[];setImmediate(()=>process.stdout.write(JSON.stringify([{protocol:'bound-lock/99',kind:'fact',claims:[]}])+'\\n'));`);
   const legacy=catalogProjectedFixture(name+'-legacy',false),modern=catalogProjectedFixture(name+'-modern',true);fixtures.push(legacy,modern);
   const instrument=join(f.temp,'instrument');mkdirSync(instrument);cpSync(join(receiver.candidateRoot,'dist'),join(instrument,'dist'),{recursive:true});mkdirSync(join(instrument,'vendor'));cpSync(join(receiver.candidateRoot,'vendor/syntax'),join(instrument,'vendor/syntax'),{recursive:true});writeFileSync(join(instrument,'package.json'),'{"type":"module"}\n');
   const grammar=readFileSync(join(receiver.candidateRoot,'TARGET.bound'),'utf8').split('\n').filter(line=>{const p=parse(line);return p.kind==='fact'&&(p.value.fields.scope.startsWith('wire/')||p.value.fields.scope.startsWith('audit/wire/'))&&p.value.fields.measure==='id'});writeFileSync(join(instrument,'TARGET.bound'),[...grammar,row('wire/region-leaf','id','leaves'),row('store/vouches','id','tree'),row('store/source','id','write|leaf')].join('\n')+'\n');
@@ -47,12 +49,14 @@ export async function completeProducerFixture(receiver:CompleteProducerReceiver,
   const nativeCode=(root:string,args:string[])=>{const result=run(root,args);assert.notEqual(result.status,0,result.stdout);const line=result.stderr.trim().split('\n').findLast(line=>line.startsWith('{'));assert.ok(line,result.stderr);const record=JSON.parse(line!);assert.equal(record.profile,'bound-refusal@1');assert.equal(typeof record.code,'string');return encode(JSON.stringify(['refuse',record.code])+'\n')};
   const rawPacket=JSON.parse(bundle.carrier),history=structuredClone(rawPacket),fields={scope:'sample/withdrawn',role:'writes',form:'alphabet',measure:'id',value:'withdraw',by:'owner',epoch:String(trust.epoch),at:'policy:fixture'};
   history[1].push(canonical({...fields,sig:formatSignature('ed25519:sample',sign(null,Buffer.from(signedBytes(fields)),f.owner.privateKey).toString('base64'))}));const parsed=parse(history[2]);assert.equal(parsed.kind,'fact');if(parsed.kind!=='fact')throw Error('Fixture proof');const bound={...parsed.value.fields,value:hash(JSON.stringify(['authenticated-standing@1',history[1]])+'\n')};history[2]=canonical({...bound,sig:formatSignature('ed25519:sample',sign(null,Buffer.from(signedBytes(bound)),f.owner.privateKey).toString('base64'))});
+  const current=await currentProducerFixture(receiver.host,receiver.candidateRoot,name),currentOperations=[...current.operations.values()],cases=[...completeProducerCases,...[...current.operations.keys()].map((code,index)=>['u'+String(index).padStart(3,'0'),code]as const)];
   const first=catalogProducerAdapter({...receiver.reference,readContent:receiver.engine.readContent},hash),second=additionalProducerAdapter(receiver.engine,hash);
   const observed:any[]=[];
   const produce=async(input:Uint8Array)=>{
-   const request=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(input));if(!Array.isArray(request)||request.length!==2||request[0]!=='catalog-complete@1'||!completeProducerCases.some(([id])=>id===request[1]))throw Error('Unknown receiver operation');const id=request[1];
+   const request=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(input));if(!Array.isArray(request)||request.length!==2||request[0]!=='catalog-complete@1'||!cases.some(([id])=>id===request[1]))throw Error('Unknown receiver operation');const id=request[1];
    if(catalogProducerCases.some(([known])=>known===id))return first(encode(JSON.stringify(['catalog-producer@1',id])));
    if(additionalProducerCases.some(([known])=>known===id))return second(encode(JSON.stringify(['public-producer@1',id])));
+   if(id.startsWith('u')){const result:any=await currentOperations[Number(id.slice(1))]!();return encode(JSON.stringify(result?.kind==='refuse'||result?.status==='refused'?['refuse',result.code]:['fact',null])+'\n')}
    if(id.startsWith('r')){const result=prepare(id);assert.equal(result.kind,'refuse',JSON.stringify(result));return encode(JSON.stringify(['refuse',result.code])+'\n')}
    const reference=receiver.reference.decodeReference(bundle.reference),changed=(bytes:Uint8Array)=>receiver.reference.inspectAuthenticatedReference(receiver.reference.encodeReference({...reference,blob:hash(bytes)}),{...trust,fetchBytes:async()=>bytes});
    if(id==='a01')await receiver.reference.inspectAuthenticatedReference(bundle.reference,{...trust,maxRecords:0});
@@ -80,11 +84,13 @@ export async function completeProducerFixture(receiver:CompleteProducerReceiver,
     if(id==='n10')return nativeCode(paths.get('base')!,['fold','--as','not-declared']);
     if(id==='n11')return nativeCode(paths.get('base')!,['fold','--unsupported-option']);
     if(id==='n14')return nativeCode(paths.get('base')!,['fold','--as','computation']);
+    if(id==='n15')await receiver.native.inspectReference(receiver.reference.encodeReference({class:'standing',algorithm:'sha256',digest:'0'.repeat(64),blob:'sha256:'+'0'.repeat(64),source:'https://example.invalid/content'}),[]);
+    if(id==='n16')return nativeCode(malformed.root,['fold','--as','evidence']);
    }
    return encode('["fact",null]\n');
   };
   const evaluate=async(input:Uint8Array)=>{const id=JSON.parse(new TextDecoder().decode(input))[1];try{const result=await produce(input);observed.push({id,result:new TextDecoder().decode(result)});return result}catch(error){observed.push({id,code:(error as any)?.code,name:(error as any)?.name,message:(error as any)?.message});throw error}};
-  return{evaluate,observed,close:()=>{for(const fixture of fixtures)fixture.close();f.close()}};
+  return{evaluate,observed,cases,close:()=>{current.close();for(const fixture of fixtures)fixture.close();f.close()}};
  }catch(error){for(const fixture of fixtures)fixture.close();f.close();throw error}
 }
-export function completeProducerSuite(contract:string){return{profile:'bound-conformance@1' as const,contract,cases:completeProducerCases.map(([id,code])=>({id,covers:['refusal/'+code],request:JSON.stringify(['catalog-complete@1',id])+'\n',expected:JSON.stringify(['refuse',code])+'\n'}))};}
+export function completeProducerSuite(contract:string,cases:readonly(readonly[string,string])[]){return{profile:'bound-conformance@1' as const,contract,cases:cases.map(([id,code])=>({id,covers:['refusal/'+code],request:JSON.stringify(['catalog-complete@1',id])+'\n',expected:JSON.stringify(['refuse',code])+'\n'}))};}

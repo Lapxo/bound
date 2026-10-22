@@ -1,0 +1,53 @@
+{
+  "scope": "conformance/profile-composition",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "profile-composition/native-parameter-cases",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/profile-composition.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/profile-composition.test.ts",
+        "test/setup.ts",
+        "samples/profile-composition/yes.json",
+        "samples/profile-composition/no.json",
+        "docs/contracts/profile-composition.md"
+      ],
+      "timeoutMs": 180000,
+      "maxBytes": 16777216,
+      "exit": 0,
+      "matches": []
+    },
+    {
+      "name": "profile-composition/actual-native-land-and-effective-meet",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "test/profile-composition-meaning.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/profile-composition-meaning.test.ts",
+        "test/support/installed-consumer.mjs",
+        "samples/profile-composition/yes.json",
+        "samples/profile-composition/no.json",
+        "docs/contracts/profile-preparation-native-meaning.md"
+      ],
+      "timeoutMs": 60000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
+    }
+  ]
+}

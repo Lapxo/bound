@@ -1,0 +1,31 @@
+{
+  "scope": "conformance/native-view-batch",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "native-view-batch/native-parameter-cases",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/native-view-batch.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-view-batch.test.ts",
+        "test/setup.ts",
+        "samples/native-view-batch/yes.json",
+        "samples/native-view-batch/no.json",
+        "docs/contracts/native-view-batch.md"
+      ],
+      "timeoutMs": 180000,
+      "maxBytes": 16777216,
+      "exit": 0,
+      "matches": []
+    }
+  ]
+}

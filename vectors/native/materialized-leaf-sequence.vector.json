@@ -1,0 +1,31 @@
+{
+  "scope": "conformance/materialized-leaf-sequence",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "materialized-leaf-sequence/native-parameter-cases",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/materialized-leaf-sequence.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/materialized-leaf-sequence.test.ts",
+        "test/setup.ts",
+        "samples/materialized-leaf-sequence/yes.json",
+        "samples/materialized-leaf-sequence/no.json",
+        "docs/contracts/materialized-leaf-sequence.md"
+      ],
+      "timeoutMs": 180000,
+      "maxBytes": 16777216,
+      "exit": 0,
+      "matches": []
+    }
+  ]
+}

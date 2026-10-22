@@ -6,5 +6,10 @@
     "cancelled before commit",
     "noncanonical unsigned Root lot"
   ],
-  "expected": "refuse without a visible act or an additional signature"
+  "expected": "refuse without a visible act or an additional signature",
+  "persistent": {
+    "unsupportedView": "unknown",
+    "unboundKey": "lane",
+    "startupTimeoutMs": 1
+  }
 }

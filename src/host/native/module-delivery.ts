@@ -4,6 +4,7 @@ import {archiveCoordinate} from '../archive.ts';
 import {compareStrings as compare} from '../order.ts';
 import {moduleClosures,type ModuleClosureSnapshot,type ModuleClosureLimits} from './module-closure.ts';
 export {moduleSnapshot,type ModuleClosureSnapshot} from './module-closure.ts';
+export {moduleInventory,type ModuleInventory,type ModuleInventorySource,type ModuleInventoryLine,type ModuleInventoryContext} from './module-inventory.ts';
 
 export interface ClosureDeliveryLimits extends Omit<ModuleClosureLimits,'portableESM'> {readonly responseBytes:number}
 export interface ClosureNotice {readonly snapshot:string;readonly coordinate:string;readonly digest:string;readonly source:string}

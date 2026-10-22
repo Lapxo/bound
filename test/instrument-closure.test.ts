@@ -1,10 +1,35 @@
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
+import {mkdtempSync,mkdirSync,rmSync,symlinkSync,writeFileSync,statSync,utimesSync,realpathSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join,relative} from 'node:path';
 import {test} from 'node:test';
 import {canonical} from '@lapxo/topos/wire';
 import {instrumentCoordinates,instrumentDigest,instrumentOf} from '../src/fold/digests.ts';
+import {captureViewInputs} from '../src/host/reading-context.ts';
+import {withoutEffects} from '../src/host/read-only.ts';
+
+test('captured import reuse still binds exact bytes, formats and changed dependencies',()=>{
+ const root=realpathSync(mkdtempSync(join(tmpdir(),'bound-captured-imports-'))),store=join(root,'.bound');
+ try{
+  writeFileSync(join(root,'TARGET.bound'),canonical({scope:'wire/digest-algorithms',role:'writes',form:'alphabet',measure:'id',value:'sha256',by:'target',at:'policy:wire'})+'\n');
+  const entry=join(root,'entry.js'),one=join(root,'one.js'),two=join(root,'two.js');
+  writeFileSync(entry,'export {value} from "./one.js";\n');
+  utimesSync(entry,1700000000,1700000000);
+  for(const file of [one,two])writeFileSync(file,'export const value=1;\n');
+  const fresh=(file=entry)=>captureViewInputs({bytes:1048576,files:32},()=>withoutEffects(()=>[...instrumentCoordinates(store,file,[],root,[],true)]));
+  fresh();const before=fresh();assert.deepEqual(fresh(),before);
+  mkdirSync(join(store,'cas'),{recursive:true});writeFileSync(join(store,'cas','stamps.bound'),'forged private import hints\n');
+  assert.deepEqual(fresh(),before,'private hints do not supply captured imports');
+  const stamp=statSync(entry);writeFileSync(entry,'export {value} from "./two.js";\n');utimesSync(entry,stamp.atime,stamp.mtime);
+  const restored=statSync(entry);assert.deepEqual([restored.ino,restored.size,restored.mtimeMs],[stamp.ino,stamp.size,stamp.mtimeMs]);
+  const after=fresh();assert.notDeepEqual(after.inputs,before.inputs);
+  assert(after.value.some(([name])=>name===two));assert(!after.value.some(([name])=>name===one));
+  writeFileSync(two,'export const value=2;\n');assert.notDeepEqual(fresh(),after,'descendant bytes remain consumed');
+  const typed=join(root,'typed.ts'),plain=join(root,'plain.js');
+  for(const file of [typed,plain])writeFileSync(file,'export const value: number=1;\n');
+  fresh(typed);assert.throws(()=>fresh(plain),/module syntax/,'equal bytes in a different syntax format are checked separately');
+ }finally{rmSync(root,{recursive:true,force:true});}
+});
 
 test('a place-relative instrument entry is anchored to the selected place without losing imports',()=>{
  const root=mkdtempSync(join(tmpdir(),'bound-entry-anchor-'));

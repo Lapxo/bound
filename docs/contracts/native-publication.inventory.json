@@ -11,6 +11,14 @@
     "contract/published/host-ports",
     "contract/published/readme",
     "contract/published/native-host",
-    "contract/published/reading-identity"
+    "contract/published/reading-identity",
+    "contract/published/module-inventory",
+    "contract/published/native-view-batch",
+    "contract/published/native-probes",
+    "contract/published/physical-lines",
+    "contract/published/profile-composition",
+    "contract/published/installed-package",
+    "contract/published/materialized-leaf-sequence",
+    "contract/published/authority-preflight"
   ]
 }
