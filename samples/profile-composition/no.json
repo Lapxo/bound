@@ -1,0 +1,6 @@
+{
+  "intervalWidening": "0..9",
+  "alphabetWidening": "a|b|c",
+  "changedParent": "changed",
+  "disjointInterval": "10..20"
+}

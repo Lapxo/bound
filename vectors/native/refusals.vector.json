@@ -92,12 +92,14 @@
       ]
     },
     {
-      "name": "complete-refusal-producers",
+      "name": "refusals/complete-producers/catalog-register",
       "program": "runtime",
       "args": [
         "--experimental-strip-types",
         "--test",
         "--test-concurrency=1",
+        "--test-name-pattern",
+        "public producers: catalog-register$",
         "test/conformance-catalog-complete.test.ts"
       ],
       "cwd": ".",
@@ -105,7 +107,39 @@
         "test/conformance-catalog-complete.test.ts",
         "docs/contracts/refusals.bound",
         "docs/contracts/conformance.json",
-        "docs/contracts/determinism.bound"
+        "docs/contracts/determinism.bound",
+        "test/support/conformance-catalog-current.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "fail 0"
+        }
+      ]
+    },
+    {
+      "name": "refusals/complete-producers/tidal-ledger",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern",
+        "public producers: tidal-ledger$",
+        "test/conformance-catalog-complete.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/conformance-catalog-complete.test.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/conformance.json",
+        "docs/contracts/determinism.bound",
+        "test/support/conformance-catalog-current.ts",
+        "test/support/pinned-host-instrument.ts"
       ],
       "timeoutMs": 15000,
       "maxBytes": 262144,

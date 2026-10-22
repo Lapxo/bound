@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import {authenticatedStanding} from '../host/admitted-place.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {readingClosures} from '../host/reading-closures.ts';
@@ -198,6 +199,7 @@ export function readerReaches(reach: readonly string[] | undefined, where: reado
 
 export function observedClaims(root: string, store: string, options: { readonly wait?: boolean; readonly only?: string; readonly reach?: readonly string[]; readonly answered?: Map<string, string>; readonly selected?: string; readonly preparation?:{limits:ReadingPreparationLimits;results:ReadingPreparationResult[];used:{bytes:number;files:number;readings:number;probes:number}} } = {}): readonly string[] {
   refused.length = 0;
+  const namedRefusals: BoundRefusal[] = [];
   if (readOnly()) {
     const carried = (observeText(resolve(root, 'receipts.bound')) ?? '').split('\n').filter(isWire);
     const evidence = carriedFrom(store, carried);
@@ -300,7 +302,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
       if(native&&asked.digest!==native.profile.selection.archive)throw Error('REFUSE·native reader implementation differs '+reader.module);
       const image=native?materializeNativeRoute(native):undefined;
       const execution=modern?readingExecution({instrument:code!,implementation:asked.digest,policy:hash(JSON.stringify([reader.id,reader.module,reader.kind,reader.shape,reader.where,lifetime??null,allowsEmpty])),inputs:[...transitive,...(native?.inputs??[]),...(image?[['native/mount',image.mountIdentity] as const]:[])]},hash,{env:process.env,cwd:image?.cwd??root,flags:native?[]:childFlags()}):undefined;
-      const closureOptions={root,store,...(execution?{context:execution.context,execution}:{}),reader:reader.module,speaker,digest:(text:string)=>bytesDigest(store,Buffer.from(text)),capsule:asked,...(native?{assertCurrent:()=>assertNativeRouteCurrent(native)}:{}),region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),livePlace:()=>authenticatedStanding(root),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty,files,emit:(line:string)=>process.stderr.write(line+'\n')};
+      const closureOptions={root,store,...(execution?{context:execution.context,execution}:{}),reader:reader.module,speaker,digest:(text:string)=>bytesDigest(store,Buffer.from(text)),capsule:asked,...(native?{assertCurrent:()=>assertNativeRouteCurrent(native)}:{}),region:reader.capsule!.region,projection:fieldOf(projection[0]!,'value'),livePlace:()=>authenticatedStanding(root),readerReference:{id:reader.id,module:reader.module},lifetime,allowsEmpty,files,emit:(line:string)=>hostOutput('error',line+'\n')};
       if(options.preparation){
         const {limits,used,results}=options.preparation,remaining={...limits,bytes:limits.bytes-used.bytes,files:limits.files-used.files,readings:limits.readings-used.readings,probes:limits.probes-used.probes};
         const result=withNativeReaderRoute(native,()=>prepareReadingIdentities({...closureOptions,preparationLimits:remaining}));results.push(result);
@@ -435,7 +437,7 @@ export function observedClaims(root: string, store: string, options: { readonly 
         writeFileSync(marker, `${reader.module}\n${child.pid ?? ''}\n`);
       }
       behind.push({ module: reader.module, places: due.length });
-      process.stderr.write(`GREY     reading: ${reader.module} · ${due.length} places · runs behind${running ? ', already running' : ''}\n`);
+      hostOutput('error',`GREY     reading: ${reader.module} · ${due.length} places · runs behind${running ? ', already running' : ''}\n`);
       if (level.length) landShard(store, speaker, home, level);
       if (Date.now() - started > 250) spent.push(`${reader.module.split('/').pop()} behind ${Date.now() - started}`);
       return false;
@@ -456,17 +458,18 @@ export function observedClaims(root: string, store: string, options: { readonly 
       } catch (error) {
         const why = `REFUSE·reader ${reader.module} · ${error instanceof Error ? error.message : String(error)}`;
         refused.push(why);
-        process.stderr.write(`${why}\n`);
+        if(error instanceof BoundRefusal)namedRefusals.push(error);
+        hostOutput('error',`${why}\n`);
         return false;
       }
       if (rows.every((mine) => !mine.length) && !readerAllowsEmpty(standing.flatMap(line=>{const p=parseLifetime(line);return p.kind==='fact'?[p.value.fields]:[];}),reader.module)) {
         const why = `REFUSE·reader ${reader.module} · answered none of ${due.length} places · nothing landed, they stay due`;
         refused.push(why);
-        process.stderr.write(`${why}\n`);
+        hostOutput('error',`${why}\n`);
         return false;
       }
       ran += due.length;
-      process.stderr.write(`READER   ${reader.module} · ${due.length} run · ${Date.now() - at} ms\n`);
+      hostOutput('error',`READER   ${reader.module} · ${due.length} run · ${Date.now() - at} ms\n`);
       const fresh = new Map<string, string[]>();
       due.forEach((d, i) => fresh.set(d.place, (rows[i] ?? []).map((row) => lineOf(row, d.digest, by, speaker))));
       for (const plan of plans.filter((one) => one.said === undefined)) {
@@ -497,10 +500,14 @@ export function observedClaims(root: string, store: string, options: { readonly 
     }finally{endAct();}
   }
   if(options.preparation)return [];
-  if (spent.length) process.stderr.write(`SPENT    observe ${spent.join(' · ')} ms\n`);
+  if (spent.length) hostOutput('error',`SPENT    observe ${spent.join(' · ')} ms\n`);
   if (legacy) setAside(store, speaker);
-  process.stderr.write(`OBSERVE  ${ran} run · ${read} read by key${whole_ ? ` · ${whole_} readers kept whole` : ''} · ${Date.now() - began} ms\n`);
-  if (wait && refused.length) throw new Error(refused.join('\n'));
+  hostOutput('error',`OBSERVE  ${ran} run · ${read} read by key${whole_ ? ` · ${whole_} readers kept whole` : ''} · ${Date.now() - began} ms\n`);
+  if (wait && refused.length) {
+    const codes=new Set(namedRefusals.map(error=>error.code));
+    if(namedRefusals.length===refused.length&&codes.size===1)throw new BoundRefusal(namedRefusals[0]!.code,refused.join('\n'));
+    throw new Error(refused.join('\n'));
+  }
   return [...new Set(out)].sort();
 }
 

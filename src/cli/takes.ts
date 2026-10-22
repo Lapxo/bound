@@ -25,7 +25,8 @@ export type Judged =
     readonly ignored: ReadonlyMap<string, number>; readonly started: number;
   };
 
-export function judgeDemand(root: string, demand: string): Judged {
+export function judgeDemand(root: string, demand: string, clock?:{readonly now:number}): Judged {
+  if(clock&&!Number.isSafeInteger(clock.now))throw Error('REFUSE·demand invalid explicit clock');
   const started = Date.now();
   const store = storeOf(root);
   const scope = fieldOf(demand, 'scope');

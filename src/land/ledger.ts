@@ -1,3 +1,4 @@
+import {hostRequiresFreshBytes} from '../host/call-context.ts';
 import {preparingView,viewInput} from '../host/reading-context.ts';
 import {actLines,committedLocalActs} from '../host/ports/local-act.ts';
 import {readdirSync} from 'node:fs';
@@ -27,6 +28,23 @@ export function writerFile(store: string, writer: string): string {
 }
 
 const held = new Map<string, { readonly stamp: string; readonly size: number; readonly lines: readonly string[] }>();
+// A current read precedes every lookup. Only exact text-to-lines parsing is
+// retained, bounded in memory; this namespace never consults file metadata.
+const currentText = new Map<string,{readonly text:string;readonly lines:readonly string[]}>();
+let currentTextBytes=0;
+function currentLinesAt(at:string):readonly string[]{
+  const text=existsSync(at)?readFileSync(at,'utf8'):'';
+  const previous=currentText.get(at);
+  if(previous?.text===text)return previous.lines;
+  const lines=Object.freeze(text.split('\n').filter(line=>line.startsWith(PROTOCOL))),bytes=Buffer.byteLength(text);
+  if(previous){currentTextBytes-=Buffer.byteLength(previous.text);currentText.delete(at)}
+  if(bytes<=32*1024*1024){
+    while(currentText.size>=32||currentTextBytes+bytes>32*1024*1024){const oldest=currentText.keys().next().value;if(oldest===undefined)break;currentTextBytes-=Buffer.byteLength(currentText.get(oldest)!.text);currentText.delete(oldest)}
+    currentText.set(at,{text,lines});currentTextBytes+=bytes;
+  }
+  return lines;
+}
+
 
 export function ledgerLines(store: string, writer: string): readonly string[] {
   return journalLines(store,writer,'.',linesAt(writerFile(store, writer)));
@@ -59,14 +77,20 @@ export function ledgerWriters(store:string):readonly string[]{
 /** One synchronous root-history read, not a retained authority snapshot.
  * Preserve writer order and each writer's legacy-before-committed ordering.
  * Every call rereads the complete committed inventory exactly once. */
+let currentRootHistory:{readonly store:string;readonly writers:readonly string[];readonly parts:readonly (readonly string[])[];readonly lines:readonly string[]}|undefined;
 export function rootLedgerLines(store:string):readonly string[]{
   const legacy=legacyWriters(store),acts=committedLocalActs(store);
+  if(!acts.length){
+    const parts=legacy.map(writer=>currentLinesAt(writerFile(store,writer))),held=currentRootHistory;
+    if(held?.store===store&&held.writers.length===legacy.length&&held.writers.every((writer,index)=>writer===legacy[index])&&held.parts.every((part,index)=>part===parts[index]))return held.lines;
+    const lines=Object.freeze(parts.flat());currentRootHistory={store,writers:[...legacy],parts,lines};return lines;
+  }
   const fresh=acts.flatMap(act=>act.bundle.placements?.filter(p=>p.place==='.').flatMap(p=>actLines(p.records))??[]);
   const writers=[...new Set([...legacy,...fresh.map(line=>fieldOf(line,'by'))])];
   return writers.flatMap(writer=>{
     // Authority-history identity needs actual bytes. A writer's size and mtime
     // cannot distinguish a same-size edit or stand in for an admission proof.
-    const at=writerFile(store,writer),prior=existsSync(at)?readFileSync(at,'utf8').split('\n').filter(line=>line.startsWith(PROTOCOL)):[];
+    const at=writerFile(store,writer),prior=currentLinesAt(at);
     const committed=fresh.filter(line=>fieldOf(line,'by')===writer);
     return committed.length?[...new Set([...prior,...committed])]:prior;
   });
@@ -77,7 +101,8 @@ export function landShard(store: string, writer: string, region: string, lines: 
 }
 
 function linesAt(at: string): readonly string[] {
-  if(preparingView())return viewInput('ledger:'+at,()=>existsSync(at)?readFileSync(at,'utf8').split('\n').filter(line=>line.startsWith(PROTOCOL)):[],false);
+  if(preparingView())return viewInput('ledger:'+at,()=>currentLinesAt(at),false);
+  if(hostRequiresFreshBytes())return currentLinesAt(at);
   const st = statSync(at, { throwIfNoEntry: false });
   if (!st) return [];
   const stamp = `${Math.floor(st.mtimeMs)}-${st.size}`;

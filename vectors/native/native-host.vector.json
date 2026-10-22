@@ -57,6 +57,220 @@
           "pattern": "HOST coastal-survey \u00b7 admitted \u00b7 recovered \u00b7 held without signing \u00b7 altered coverage cancellation format refused"
         }
       ]
+    },
+    {
+      "name": "native-host/persistent-catalog",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "persistent native host shares CLI bytes and authority: catalog",
+        "test/persistent-host.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "PERSISTENT-HOST catalog \u00b7 CLI identity text sign refusal act matched \u00b7 no retained request files \u00b7 closed"
+        }
+      ]
+    },
+    {
+      "name": "native-host/persistent-weather",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "persistent native host shares CLI bytes and authority: weather",
+        "test/persistent-host.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "PERSISTENT-HOST weather \u00b7 CLI identity text sign refusal act matched \u00b7 no retained request files \u00b7 closed"
+        }
+      ]
+    },
+    {
+      "name": "native-host/persistent-lifecycle",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "environment sanitation|cancelling an active|consumer dies|startup deadline|bounded queue",
+        "test/persistent-host.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "a native host exits and removes its scratch when its consumer dies"
+        }
+      ]
+    },
+    {
+      "name": "native-host/persistent-current-bytes",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "persistent non-view|externally edited public lock|receiver-selected instrument",
+        "test/persistent-host.test.ts",
+        "test/persistent-current-bytes.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host.test.ts",
+        "test/persistent-current-bytes.test.ts",
+        "test/support/acting-root.ts",
+        "samples/native-host/yes.json",
+        "samples/native-host/no.json",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "receiver-selected instrument bytes are checked again before sign and land"
+        }
+      ]
+    },
+    {
+      "name": "native-host/signers-and-foundation",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "host signer selection and birth state",
+        "test/persistent-host-gaps.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host-gaps.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "host signer selection and birth state"
+        }
+      ]
+    },
+    {
+      "name": "native-host/installed-pin",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "installed instrument pins",
+        "test/persistent-host-gaps.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host-gaps.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "installed instrument pins"
+        }
+      ]
+    },
+    {
+      "name": "native-host/cross-process-serialization",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "two independent host processes",
+        "test/persistent-host-gaps.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-host-gaps.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "two independent host processes"
+        }
+      ]
+    },
+    {
+      "name": "native-host/request-act-cost",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "test/persistent-act-cost.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/persistent-act-cost.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "request accounting preserves a red"
+        }
+      ]
     }
   ]
 }

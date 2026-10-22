@@ -1,16 +1,19 @@
 import {readFileSync} from 'node:fs';
 import {contentRequest,transportSelection,parse} from '@lapxo/topos/wire';
 import {boundedProcess} from '../process-lifetime.ts';
-import {fetchBytes} from '../adapters/transport/http.ts';
+import {BoundRefusal} from '../refusals.ts';
+import {fetchBytes,type HTTPOptions} from '../adapters/transport/http.ts';
 
-export async function transportBytes(location:string,digest:string,lines:readonly string[]):Promise<Uint8Array> {
+export async function transportBytes(location:string,digest:string,lines:readonly string[],options:HTTPOptions={}):Promise<Uint8Array> {
  const scheme=new URL(location).protocol.slice(0,-1);
+ if(options.allowedOrigins&&!options.allowedOrigins.includes(new URL(location).origin))throw new BoundRefusal('reference/transport','REFUSE·transport origin is not allowed');
+ if(options.signal?.aborted)throw new BoundRefusal('reference/cancelled','REFUSE·reference cancelled');
  const fields=lines.flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];});
  const selected=transportSelection(fields,scheme);
  if(selected===undefined)throw Error(`REFUSE·transport ${scheme} no admitted content-request/1 policy`);
  if(selected.name==='fetch'){
   if(!['http','https'].includes(scheme))throw Error(`REFUSE·transport ${scheme} is not supported by this host adapter`);
-  return fetchBytes(location,selected);
+  return fetchBytes(location,selected,options);
  }
  const registryPath=process.env['BOUND_TRANSPORTS'];
  if(!registryPath)throw Error(`REFUSE·transport ${scheme} no host binding for ${selected.name}`);

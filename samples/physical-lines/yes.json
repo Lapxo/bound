@@ -1,0 +1,9 @@
+{
+  "places": [
+    "native-lines-one-",
+    "native-lines-other-"
+  ],
+  "coreSource": "// comment\n\nexport const n=1;\n",
+  "portsSource": "// comment\r\n\r\nexport const n=2;",
+  "within": "0..3"
+}

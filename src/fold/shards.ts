@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import { dirname, existsSync, mkdirSync, renameSync, writeFileSync } from '../host/io.ts';
 import { canonical } from '@lapxo/topos/wire';
 import { bytesDigest } from './digests.ts';
@@ -100,6 +101,6 @@ export function setAside(store: string, speaker: string): void {
   const kept = blobAt(store, bytesDigest(store, bytes));
   mkdirSync(dirname(kept), { recursive: true });
   renameSync(at, kept);
-  process.stderr.write(`SHARDED  ${speaker} · one file of ${bytes.length} bytes laid out by region · kept as ${bytesDigest(store, bytes)}\n`);
+  hostOutput('error',`SHARDED  ${speaker} · one file of ${bytes.length} bytes laid out by region · kept as ${bytesDigest(store, bytes)}\n`);
 }
 

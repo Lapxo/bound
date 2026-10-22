@@ -1,3 +1,4 @@
+import{traceWork}from'../host/work-trace.ts';
 import {hostOutput} from '../host/call-context.ts';
 import { refreshRetainedJudgment } from './retained-judgment.ts';
 import { timing } from '../host/timing.ts';
@@ -153,8 +154,8 @@ function viewReadings(place: PlaceFold): { readonly readings: Readonly<Record<st
     .filter((view) => observeText(at(view.shape)) !== undefined);
   const named = (view: View): boolean => placesOf(place.standing, view).includes(place.under ?? '');
   const shaped = every.filter((view) => named(view) || (!placesOf(place.standing, view).length && !every.some((other) => other.shape === view.shape && named(other))));
-  prerender(place, shaped);
-  const same = new Set(shaped.filter((view) => observeText(at(view.shape)) === viewOf(place, view)).map((view) => view.name));
+  const rendered = prerender(place, shaped);
+  const same = new Set(shaped.filter((view) => observeText(at(view.shape)) === rendered.get(view)).map((view) => view.name));
   const differ = shaped.length - same.size;
   const twice = [...every.filter((view) => named(view) || !placesOf(place.standing, view).length)
     .reduce((by, view) => by.set(view.shape, (by.get(view.shape) ?? 0) + 1), new Map<string, number>()).values()].filter((n) => n > 1).length;
@@ -245,34 +246,42 @@ export function coneOf(root: string, entry: string, ceilings: readonly string[],
 export const ownCeilings = (under?: string): readonly string[] => ((home) => (under === undefined || under === `${home}/`
   ? ownLock().filter(isCeiling).map((line) => canonical({ ...fieldsOf(line), scope: `${home}/${fieldOf(line, 'scope')}` })) : []))(basename(ownRoot()));
 
+/** One native selection and judge for the current act, including work after a
+ * semantic fold was prepared. It never re-executes observations or changes policy. */
+export function currentJudgment(prior:PlaceFold):PlaceFold{
+ return refreshRetainedJudgment(prior,[...prior.standing.filter(line=>isCeiling(line)&&!(prior.under&&fieldOf(line,'measure')==='unread')),...ownCeilings(prior.under)]);
+}
+
 export function foldPlace(root: string, entry: string, under?: string, look = true, given?: { readonly standing: ReturnType<typeof standingOf>; readonly observed?: readonly string[]; readonly free?: boolean }): PlaceFold {
+  return traceWork('fold/place',()=>foldPlaceCurrent(root,entry,under,look,given));
+}
+function foldPlaceCurrent(root: string, entry: string, under?: string, look = true, given?: { readonly standing: ReturnType<typeof standingOf>; readonly observed?: readonly string[]; readonly free?: boolean }): PlaceFold {
+  const spent:string[]=[],took=timing(spent);
   const store = storeOf(root);
   const digestAt = Date.now();
-  const closed = meets(root, store, under ?? '');
+  const closed = took('closure',()=>meets(root, store, under ?? ''));
   const digestMs = Date.now() - digestAt;
   if (closed && given?.free !== true) {
     const prior = keptPlace(store, under, instrumentOf(store, entry, standingOf(root).standing, root, ownLock()));
     if (prior !== undefined) {
       hostOutput('error',`CLOSED   ${under || '.'} · digest ${digestMs} ms\n`);
-      return refreshRetainedJudgment(prior, [...prior.standing.filter((line) => isCeiling(line) && !(under && fieldOf(line, 'measure') === 'unread')), ...ownCeilings(under)]);
+      return currentJudgment(prior);
     }
   }
-  const { standing, lock: attested, rendered, owned } = given?.standing ?? standingOf(root, under);
+  const { standing, lock: attested, rendered, owned } = given?.standing ?? took('standing',()=>standingOf(root, under));
   const folder = writerFor(standing, 'fold');
   const answered = given === undefined && under ? new Map<string, string>() : undefined;
-  const reached = given?.observed ?? observedClaims(root, store, { wait: look, ...(under ? { reach: [under], answered } : {}) });
-  const self = instrumentOf(store, entry, standing, root, ownLock());
+  const reached = given?.observed ?? took('observed',()=>observedClaims(root, store, { wait: look, ...(under ? { reach: [under], answered } : {}) }));
+  const self = took('instrument',()=>instrumentOf(store, entry, standing, root, ownLock()));
   const inside = (place: string): boolean => !under || within(point(place.replace(/\/\*$/, '')), region(under));
-  const history = historyOf(root, store, standingDemands(store));
+  const history = took('history',()=>historyOf(root, store, standingDemands(store)));
   const theirs = history.live.filter((line) => ((needs) => !under || (needs.length > 0 && needs.every(inside)))(fieldOf(line, 'needs').split('|').filter(Boolean)));
   const reads = under && under !== `${basename(ownRoot())}/` ? { owned, place: under, scopes: new Set(theirs.map((line) => fieldOf(line, 'scope'))) } : undefined;
-  const spent: string[] = [];
-  const took = timing(spent);
   const read = given?.observed ?? (under ? took('observe', () => observedClaims(root, store, { wait: look })) : reached);
-  const current = currentReceiptObservations({root,store,...(under?{under}:{}),standing,observed:read});
+  const current = took('current-receipts',()=>currentReceiptObservations({root,store,...(under?{under}:{}),standing,observed:read}));
   const everywhere = [...current, ...took('capsules', () => capsuleReadingsOver({ root, store, ...(under ? { under } : {}), standing, observed: read }))];
-  const points = foldPoints(store, standing, under, folder, self, reached, root, answered, reads);
-  const taken = bytesDigest(store, new TextEncoder().encode(points.join('\n'))).replace(/^sha256:/, '');
+  const points = took('points',()=>foldPoints(store, standing, under, folder, self, reached, root, answered, reads));
+  const taken = took('point-digest',()=>bytesDigest(store, new TextEncoder().encode(points.join('\n'))).replace(/^sha256:/, ''));
   const observed = everywhere.filter((line) => !/ measure=observed /.test(line) || inside(fieldOf(line, 'scope')));
   const shared = new Set(under ? placedReadings(everywhere).filter((r) => !inside(r.place)).map((r) => r.question) : []);
   const live = history;
@@ -289,7 +298,7 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
   const folded = took('ceilings', () => fold({}));
   const { paid, missing } = took('paid', () => paidOf(store, demands, observed, `${wordFrom(standing, 'families', 'view', lockStanding(store))}/`));
   const lock = (observeText(join(root, under ?? '', LOCK)) ?? '').split('\n').filter(isWire).length;
-  const second = secondOf(root, store, attested, owned);
+  const second = took('second',()=>secondOf(root, store, attested, owned));
   const policyStanding = standing.filter((line) => !rendered.grey.includes(line) && !rendered.refused.includes(line));
   const faults = releaseFaults({ forks: rendered.forks, refused: rendered.refused, grey: rendered.grey, orphans, second });
   const place: PlaceFold = {
@@ -299,11 +308,11 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     demands, paid, missing,
     history: live.history.filter((line) => fieldOf(line, 'needs').split('|').filter(Boolean).some(inside)),
     observed,
-    receiptHistory: retiredReceiptHistory({root,store,...(under?{under}:{}),standing,observed:read}),
+    receiptHistory: took('receipt-history',()=>retiredReceiptHistory({root,store,...(under?{under}:{}),standing,observed:read})),
     ceilings: ceilingSummary(folded, ceilings.length, shared),
     orphans,
     lock,
-    signed: signedByKey(store, standing, everywhere),
+    signed: took('signatures',()=>signedByKey(store, standing, everywhere)),
     second,
     effects: effectStates(store),
     key: taken,
@@ -311,9 +320,9 @@ export function foldPlace(root: string, entry: string, under?: string, look = tr
     own,
     open: openCells({ store, standing, observed, grey: rendered.grey, epoch: epochOf(owned) }),
     regions: packRegions(regions),
-    beats: beatsOf(store, standing, under),
+    beats: took('beats',()=>beatsOf(store, standing, under)),
     landed: [...vouchedCoordinates(store).keys()].filter((coordinate) => !under || coordinate.startsWith(under)).length,
-    costs: costsOf(store),
+    costs: took('cost-history',()=>costsOf(store)),
   };
   const { readings: found, same, here } = took('docs', () => viewReadings(place));
   const family = `${wordFrom(standing, 'families', 'view', lockStanding(store))}/`;

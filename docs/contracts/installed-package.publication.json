@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/installed-package",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/installed-package.md",
+      "digest": "sha256:b7fd04fc1318f405fce1c785047cf59a2185216452f83ea86774d7416b7b92b4"
+    },
+    {
+      "role": "yes",
+      "path": "samples/installed-package/yes.json",
+      "digest": "sha256:2563ba668607ea7166dcdcd7c8c5f0f61c981cf4c4bfbb45c701fd7a0ea62459"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/installed-package.vector.json",
+      "digest": "sha256:1c971130a6c718dbdbb023caada2623123ebcef7d364f18df3b36ed62bb6edad"
+    },
+    {
+      "role": "no",
+      "path": "samples/installed-package/no.json",
+      "digest": "sha256:de51ebb969b78bc278daf27443cf699a377e18a391bab248ce92f022f30a5606"
+    }
+  ]
+}

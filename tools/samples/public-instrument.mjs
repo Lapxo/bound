@@ -21,6 +21,7 @@ export async function publicInstrument(reader) {
   overlayTree(join(source,'vendor','syntax'),join(root,'vendor','syntax'));
   writeFileSync(join(root,'TARGET.bound'),published.join('\n')+'\n');
   overlay(readFileSync(join(source,'package.json')),join(root,'package.json'));
+  overlay(readFileSync(join(source,'docs/contracts/refusals.bound')),join(root,'docs/contracts/refusals.bound'));
   symlinkSync(join(source,'node_modules'),join(root,'node_modules'),'dir');
   const store=join(root,'.bound');mkdirSync(join(store,'ledger'),{recursive:true});mkdirSync(join(store,'cas/blobs'),{recursive:true});
   const wanted=new Set(published.map(parse).filter(p=>p.kind==='fact'&&p.value.fields.scope.startsWith('dep/')&&p.value.fields.value.includes(':')).map(p=>p.value.fields.value));

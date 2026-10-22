@@ -94,6 +94,44 @@
         {
           "stream": "stdout",
           "pattern": "no Root lock or writes"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "unchanged native view queries preserve every persisted byte"
+        }
+      ]
+    },
+    {
+      "name": "reading-identity/rendered-leaves",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "test/pass-receipt-order.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/pass-receipt-order.test.ts",
+        "test/setup.ts",
+        "docs/contracts/reading-identity.md"
+      ],
+      "timeoutMs": 20000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "completed calibration renders seal native file receipts"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "completed inventory renders seal native file receipts"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "materialized delivery preserves required-output refusals"
         }
       ]
     }

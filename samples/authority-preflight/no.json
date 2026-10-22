@@ -1,0 +1,6 @@
+{
+  "unknownRequest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "staleNow": 111,
+  "outsideScope": "sample/outside",
+  "widened": "0..2"
+}

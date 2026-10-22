@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/native-probes",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/native-probes.md",
+      "digest": "sha256:c2d62182203539ed42a5833fe6d528309f43207286600559a387eaec6cccf545"
+    },
+    {
+      "role": "yes",
+      "path": "samples/native-probes/yes.json",
+      "digest": "sha256:4d32c55b4d14a85b6231eb017fac96f95453db5b35bb1eaa4cb8213aa9744a09"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/native-probes.vector.json",
+      "digest": "sha256:14788a562ba51c8bfb3bfd3d2b9abfca67f4236f748ff724ad528917b77574ef"
+    },
+    {
+      "role": "no",
+      "path": "samples/native-probes/no.json",
+      "digest": "sha256:72ff9a3c323836e1fcb814afebe7dbb5d196db505138b2a80a0e9e34a8c3128f"
+    }
+  ]
+}

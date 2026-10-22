@@ -1,0 +1,55 @@
+{
+  "scope": "conformance/authority-preflight",
+  "measure": "count",
+  "result": "failures",
+  "execution": "independent",
+  "cases": [
+    {
+      "name": "authority-preflight/coverage-and-retirement",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "test/native-authority-card.test.ts",
+        "test/authority-dependency-withdrawal.test.ts",
+        "test/native-authority-card-view.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "src/host/native/authority-card.ts",
+        "src/cli/accept.ts",
+        "src/cli/takes.ts",
+        "src/fold/signed.ts",
+        "test/native-authority-card.test.ts",
+        "test/authority-dependency-withdrawal.test.ts",
+        "docs/contracts/authority-preflight.md",
+        "samples/authority-preflight/yes.json",
+        "samples/authority-preflight/no.json",
+        "test/setup.ts",
+        "test/support/acting-root.ts",
+        "src/host/reference-contracts.ts",
+        "docs/contracts/refusals.bound",
+        "docs/contracts/standing.bound",
+        "src/host/native/reading-witness-admission.ts",
+        "src/host/physical-lines.ts",
+        "test/native-authority-card-view.test.ts",
+        "src/host/native/authority-card-view.ts"
+      ],
+      "timeoutMs": 30000,
+      "maxBytes": 16777216,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "native authority card checks admission and rechecks current grants"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "native dependency reading refuses withdrawal through the authority port"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/profile-composition",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/profile-composition.md",
+      "digest": "sha256:19b8a7d8b08590e39d23aa3775116e96c787d9bc22d9cd53b911b8f5a3c49314"
+    },
+    {
+      "role": "yes",
+      "path": "samples/profile-composition/yes.json",
+      "digest": "sha256:48a5524520182e7e64fb0aa3b27e7931f4a2a3dbe096589dbaa3caaa0dde556a"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/profile-composition.vector.json",
+      "digest": "sha256:ce43584069b3957fd6c2967975367cf398aa77e54b137c7ccb312fa5a5625252"
+    },
+    {
+      "role": "no",
+      "path": "samples/profile-composition/no.json",
+      "digest": "sha256:13b00555d7e00a1c2d05cae2aaa42e7c4301ca74cf60f9ca3428f623a1358948"
+    }
+  ]
+}

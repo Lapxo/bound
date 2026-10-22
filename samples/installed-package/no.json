@@ -1,0 +1,10 @@
+{
+  "alteredLeaf": "export const leaf=9;",
+  "extraSource": "export const extra=1;",
+  "changedLibrary": "export const n=99;",
+  "badExport": "private",
+  "wrongShape": "other",
+  "invalidUtf8Bytes": [
+    255
+  ]
+}

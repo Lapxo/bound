@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import {parse} from '@lapxo/topos/wire';
 import {authorityFor,writerFor,releaseSigner} from '../fold/signers.ts';
 import {eraOf} from '../fold/digests.ts';
@@ -53,5 +54,5 @@ export function printReleaseApproval(root:string,file:string):void {
   const text=observeText(file);
   if(text===undefined)throw Error('REFUSE·release approval file is absent');
   const lines=text.split('\n').filter(line=>line.trim().length>0);
-  process.stdout.write(releaseApproval(claimLinesIn(join(root,LOCK)),lines)+'\n');
+  hostOutput('out',releaseApproval(claimLinesIn(join(root,LOCK)),lines)+'\n');
 }

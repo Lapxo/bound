@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import { existsSync, join, readdirSync } from '../host/io.ts';
 import { LOCK } from '@lapxo/topos/wire';
 import { fieldOf, isWire } from './claims.ts';
@@ -17,8 +18,8 @@ export function sayStranger(root: string): void {
     return scope.startsWith('uses/') && !scope.slice('uses/'.length).includes('/') && fieldOf(line, 'value') !== 'withdraw';
   }).map((line) => fieldOf(line, 'scope'));
   const shape = fieldOf(lines.find((line) => fieldOf(line, 'scope').startsWith('view/') && fieldOf(line, 'shape') !== '' && fieldOf(line, 'value') !== 'withdraw') ?? '', 'shape');
-  process.stdout.write('RECEIPTS 0 read · 1 opened\n');
-  process.stdout.write(`NEEDS    ${needs.join(' ')}\n`);
-  for (const scope of uses) process.stdout.write(`OPEN     ${scope}/\n`);
-  if (shape) process.stdout.write(`RENDER   ${shape}\n`);
+  hostOutput('out','RECEIPTS 0 read · 1 opened\n');
+  hostOutput('out',`NEEDS    ${needs.join(' ')}\n`);
+  for (const scope of uses) hostOutput('out',`OPEN     ${scope}/\n`);
+  if (shape) hostOutput('out',`RENDER   ${shape}\n`);
 }

@@ -16,5 +16,22 @@
     "landed",
     "historical recovery",
     "already-held without signing"
-  ]
+  ],
+  "persistent": {
+    "places": [
+      "catalog",
+      "weather"
+    ],
+    "views": [
+      "lines",
+      "evidence"
+    ],
+    "limits": {
+      "requestBytes": 16777216,
+      "responseBytes": 33554432,
+      "timeoutMs": 15000,
+      "heapMiB": 256,
+      "queuedRequests": 8
+    }
+  }
 }

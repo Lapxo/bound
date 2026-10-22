@@ -1,3 +1,4 @@
+import {hostRequiresFreshBytes} from '../host/call-context.ts';
 import {viewInput} from '../host/reading-context.ts';
 import { dirname, existsSync, join } from '../host/io.ts';
 import { ledgerLines, ledgerWriters, signedLines } from '../land/ledger.ts';
@@ -75,7 +76,7 @@ const releases = new Map<string, readonly string[] | undefined>();
  * and never written. What it says is true where a pin names the release; no ledger is made of it.
  */
 export function releaseOf(store: string): readonly string[] | undefined {
-  if (releases.has(store)) return releases.get(store);
+  if (!hostRequiresFreshBytes() && releases.has(store)) return releases.get(store);
   const at = join(dirname(store), LOCK);
   const lines = ledgerKeyLines(store).length || !existsSync(at) ? [] : (observeText(at) ?? '').split('\n').filter(isWire);
   const published = lines.some(line => fieldOf(line, 'scope').startsWith('keys/') && fieldOf(line, 'measure') === 'public-key' && fieldOf(line, 'sig'))

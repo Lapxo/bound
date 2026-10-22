@@ -166,9 +166,9 @@ const AT: Readonly<Record<string, (fold: PlaceFold, at: number) => readonly stri
 export const unrendered = (fold: PlaceFold, view: { readonly regions: readonly { readonly name: string }[] }): readonly string[] =>
   ((declared) => view.regions.map((asked) => asked.name).filter((name) => REGIONS[name] === undefined && !declared.some((glob) => matches(glob, name))))(declaredBy(fold));
 
-export function render(fold: PlaceFold, regions: readonly { readonly name: string; readonly at: number }[], shape = ''): string {
+export function render(fold: PlaceFold, regions: readonly { readonly name: string; readonly at: number }[], shape = '', prepared?: ReadonlyMap<string, readonly string[]>): string {
   const out: string[] = [];
-  const capsules = capsuleRegions(fold, regions.filter((asked) => REGIONS[asked.name] === undefined), shape);
+  const capsules = prepared ?? capsuleRegions(fold, regions.filter((asked) => REGIONS[asked.name] === undefined), shape);
   for (const asked of regions) {
     const region: Region | undefined = REGIONS[asked.name];
     const resolving = AT[asked.name];
@@ -187,17 +187,20 @@ function read(body: readonly string[], at: number): readonly string[] {
   return [...body.slice(0, head + 1), ...kept, '```'];
 }
 
-export function prerender(fold: PlaceFold, views: readonly View[]): void {
+/** Prepare and consume one batch within this fold; no cross-call cache or byte-check bypass. */
+export function prerender(fold: PlaceFold, views: readonly View[]): ReadonlyMap<View, string> {
   const due = views.filter((view) => 'regions' in view && !(fold.key && keptRender(fold.store, fold.key, view.name) !== undefined));
-  capsuleViews(fold, due.map((view) => ({ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape })));
+  const answers = capsuleViews(fold, due.map((view) => ({ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape })));
+  const prepared = new Map(due.map((view, i) => [view, answers[i]!]));
+  return new Map(views.map(view => [view, viewOf(fold, view, prepared.get(view))]));
 }
 
-export function viewOf(fold: PlaceFold, view: View): string {
+export function viewOf(fold: PlaceFold, view: View, prepared?: ReadonlyMap<string, readonly string[]>): string {
   // Native receipts project current file bytes, not only the cached fold's observations.
   const live = !view.shape || view.regions.some(asked => asked.name === 'receipts');
   const kept = !live && fold.key ? keptRender(fold.store, fold.key, view.name) : undefined;
   if (kept !== undefined) return kept;
-  const text = render(fold, view.regions, view.shape);
+  const text = render(fold, view.regions, view.shape, prepared);
   const folder = writerFor(fold.standing, 'fold');
   if (!live && fold.key && folder !== undefined) keepRender(fold.store, folder, fold.key, view.name, fold.epoch, text);
   return text;

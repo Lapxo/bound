@@ -41,6 +41,29 @@
     ],
     "operation": "prepareNativeViewIdentity",
     "noRootExclusion": true,
-    "resultBoundToConsumedIdentity": true
+    "resultBoundToConsumedIdentity": true,
+    "unchangedQueryProtocol": {
+      "places": [
+        "coastal-readings",
+        "archive-register"
+      ],
+      "repetitionsPerView": 8,
+      "persistentFileDelta": 0,
+      "persistentByteDelta": 0,
+      "treeExclusions": []
+    }
+  },
+  "renderedLeaves": {
+    "places": [
+      "calibration",
+      "inventory"
+    ],
+    "admittedChange": "sample/edition",
+    "nextOrdinaryFold": "renders current bytes and closes",
+    "delivery": {
+      "selection": "captured from the manifest before copying a closed source",
+      "sourceOnlyOutput": "view capability retained, not materialized or certified present",
+      "selectedOutput": "same native rendering, public check passes"
+    }
   }
 }

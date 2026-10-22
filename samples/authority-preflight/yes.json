@@ -1,0 +1,30 @@
+{
+  "places": [
+    "orchard-register",
+    "museum-inventory"
+  ],
+  "action": "record-coverage",
+  "clock": {
+    "name": "test-clock",
+    "unit": "ticks",
+    "now": 100
+  },
+  "horizon": {
+    "clock": "test-clock",
+    "unit": "ticks",
+    "from": 90,
+    "through": 110
+  },
+  "limits": {
+    "bytes": 262144,
+    "items": 512
+  },
+  "expected": [
+    "allow",
+    "ask",
+    "deny",
+    "open",
+    "card-stale",
+    "not-in-card"
+  ]
+}

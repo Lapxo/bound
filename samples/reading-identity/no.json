@@ -6,7 +6,13 @@
     "physical input missing",
     "transitive reference changed",
     "cancelled before projection",
-    "handed byte budget exhausted"
+    "handed byte budget exhausted",
+    "a query stub persists bytes despite returning an unchanged identity",
+    "receipt-only projection over an obsolete rendered leaf",
+    "byte-only sealing attempts to close an obsolete rendered leaf",
+    "selected delivery leaf is missing",
+    "selected delivery leaf differs from its native rendering",
+    "missing outputs implicitly select a delivery subset"
   ],
   "missing": "needs",
   "integrity": "refuse",

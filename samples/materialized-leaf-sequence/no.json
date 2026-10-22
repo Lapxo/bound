@@ -1,0 +1,11 @@
+{
+  "outputNames": [
+    "README.md",
+    "manifest.json"
+  ],
+  "states": [
+    "altered",
+    "absent"
+  ],
+  "alteredOutput": "altered output\n"
+}

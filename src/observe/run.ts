@@ -1,10 +1,8 @@
-import {hostOutput} from '../host/call-context.ts';
-import {boundedProcess} from '../host/process-lifetime.ts';
+import {executeCapsule} from '../host/capsule-process.ts';
+import {BoundRefusal} from '../host/refusals.ts';
 import type {ReaderLifetime} from '@lapxo/topos/wire';
-import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { PROTOCOL } from '@lapxo/topos/wire';
-import { responsesOf } from '@lapxo/topos/contract';
 import type { Request } from '@lapxo/topos/contract';
 import { processOf, readerOf } from './runner.ts';
 
@@ -45,12 +43,11 @@ export function runReader(module: string, root: string, inputs: readonly Input[]
   const reader = readerOf(module);
   if (!existsSync(reader.path)) throw new Error(`REFUSE·reader ${module} unavailable; its declared capability needs an admitted provider`);
   const args=[...reader.flags, hostOf(), reader.path, module];
-  const ran = limits===undefined?spawnSync(process.execPath, args, { cwd: root, input: JSON.stringify(requests), encoding: 'utf8', maxBuffer: 1 << 28 }):boundedProcess(process.execPath,args,JSON.stringify(requests),limits,root);
-  if ('error' in ran && ran.error) throw Object.assign(new Error(`${module}: reader process failed: ${ran.error.message}`), { cause: ran.error });
-  if (ran.status !== 0) throw new Error(`${module}: reader exited ${ran.status ?? `with signal ${ran.signal}`}\n${ran.stderr ?? ''}${ran.stdout ?? ''}`);
-  if (ran.stderr) hostOutput('error',ran.stderr);
-  return responsesOf(ran.stdout ?? '', inputs.length).map((answer) => {
-    if (answer.kind !== 'fact') throw new Error(`REFUSE·reader ${module} · ${answer.why ?? 'no reading answered'}`);
-    return (answer.claims ?? []) as readonly Row[];
+  let answers;
+  try{answers=executeCapsule(process.execPath,args,requests,{cwd:root,maxBuffer:1<<28},limits);}
+  catch(error){throw new BoundRefusal('reader/response',`REFUSE·reader ${module} · ${error instanceof Error?error.message:String(error)}`);}
+  return answers.map(answer=>{
+    if(answer.kind!=='fact')throw new BoundRefusal('reader/response',`REFUSE·reader ${module} · ${answer.why??'no reading answered'}`);
+    return answer.claims as readonly Row[];
   });
 }

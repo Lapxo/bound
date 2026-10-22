@@ -1,0 +1,25 @@
+{
+  "scope": "contract/published/authority-preflight",
+  "members": [
+    {
+      "role": "contract",
+      "path": "docs/contracts/authority-preflight.md",
+      "digest": "sha256:5befc60061e202b1db514a1d591fd193276e3d158b26860ebe534d5d7eef4d64"
+    },
+    {
+      "role": "yes",
+      "path": "samples/authority-preflight/yes.json",
+      "digest": "sha256:4cc9fb389fad93be81262c450a279f5c7545a0c14e35360fdf046ed7895b66aa"
+    },
+    {
+      "role": "no",
+      "path": "samples/authority-preflight/no.json",
+      "digest": "sha256:803eeb7b829c32e05dbee392e249e3c304eb77f5f7876982e64eed1bf4533c78"
+    },
+    {
+      "role": "vector",
+      "path": "vectors/native/authority-preflight.vector.json",
+      "digest": "sha256:87c018d8997e83ef7cf618c7b239552fdb8ef392f9ef9d0678914752fd6a28d4"
+    }
+  ]
+}

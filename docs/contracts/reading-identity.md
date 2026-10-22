@@ -20,7 +20,7 @@ The native test forms two unrelated disposable admitted places, counts and catal
 
 The negative places retain a receipt but withdraw the current native grant, and alter the archive bytes under their selected digest. Both refuse. Focused vectors also cover missing physical input, changed dependency, stale handed bytes, cancellation, resource exhaustion and unrelated maintenance. Existing environment, authority and descendant-receipt vectors remain applicable and are reused.
 
-Two places on this Mac do not establish another-machine portability. L6 stays pending. This quartet neither admits Root's new reader bindings nor certifies the full 0.2.5 release.
+Two local places do not establish cross-machine conformance. This quartet neither admits Root reader bindings nor certifies a complete release.
 
 ## Native lines and evidence
 
@@ -48,4 +48,14 @@ The existing admitted preparation limits remain required for identity requests; 
 
 Existing catalog codes apply: `reading-identity/selection` for unsupported selections, `reading-identity/context` for changed or mismatched snapshots, `reading-identity/budget` for missing/exhausted limits, and `reading-identity/failed` for unavailable implementation inputs. Public CLI machine records carry those codes.
 
-Seven native vectors cover repeated identity, added evidence, changed configuration, unchanged fold maintenance, distinct places, unsupported selections and identity-to-result binding with a stale refusal. Both unrelated places also answer while a Root writer holds exclusion; complete store comparison verifies no writes. Existing view/landing behavior without identity budgets is retained. These vectors do not establish L6.
+Seven native vectors cover repeated identity, added evidence, changed configuration, unchanged fold maintenance, distinct places, unsupported selections and identity-to-result binding with a stale refusal. Both unrelated places also answer while a Root writer holds exclusion; complete store comparison verifies no writes. Existing view/landing behavior without identity budgets is retained. These vectors do not establish cross-machine conformance.
+
+## Repeated unchanged queries
+
+For the declared local native `lines` and `evidence` projections, repeated queries without changed consumed inputs preserve both identity and exact result text and write no persistent files or bytes. This includes the first query and every CAS/memo and ledger file, without exclusions, garbage collection or a consumer-maintained cache key. This guarantee does not cover final reading execution, other view forms or storage written by an embedding application. The consumer retains its own query counter.
+
+The executable protocol queries each view eight times in two unrelated admitted places, compares the complete persisted tree after every query and reports file/byte counts. A deliberately writing stub is rejected by the same tree comparison. The fixtures use disposable authority, and this protocol does not inspect unrelated consumer stores or claim to resolve their storage incidents. No GC, LRU, storage-size policy or constant-time claim is introduced.
+
+The quartet also checks that receipt-only projection and the byte-only sealer cannot close an obsolete declared output after an admitted source change. The normal native fold renders current bytes before sealing, as specified in the publication contract. This applies to every declared output shape, without application-specific selectors.
+
+The rendered-leaf vector also projects two manifest-selected public subsets. Each keeps the declared view capabilities while omitting one source-only output. The same native renderer accepts those subsets, refuses a missing or altered selected leaf and preserves the default full-place refusal. Selection is captured before copying a closed source; it is never inferred from file absence.

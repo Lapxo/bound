@@ -1,8 +1,12 @@
 import {canonical} from '@lapxo/topos/wire';
+import {viewsOf,placesOf} from '../fold/views.ts';
+import {viewOf} from './view.ts';
+import {join} from '../host/io.ts';
+import {observeText} from '../observe/files.ts';
 import {selectedWireList} from '../host/selected-topos.ts';
 import {fieldOf} from '../fold/claims.ts';
 import {ownLockOf} from '../fold/signed.ts';
-import {receiptProjection} from '@lapxo/topos/receipts';
+import {projectedReceipts} from './receipt-projection.ts';
 import {receiptsOf, keepCarried} from '../fold/resolved.ts';
 import {bytesDigest} from '../fold/digests.ts';
 import {keyOf} from '../fold/keys.ts';
@@ -13,7 +17,7 @@ import {ownLock,ownRoot,sourceOf} from '../observe/runner.ts';
 import {wireLine} from '../fold/wire.ts';
 import type {PlaceFold} from '../cli/place.ts';
 /** Native receipts are a protocol projection of actual fold observations, not a domain renderer or an acceptance verdict. */
-export function receiptRegion(fold: PlaceFold, at: number): readonly string[] {
+export function receiptRegion(fold: PlaceFold, at: number, materializedOutputs?: readonly string[]): readonly string[] {
   const local = fold.under ? ownLockOf(fold.root, fold.under.replace(/\/$/, '')) : fold.standing;
   const prefix = 'uses/';
   const pins = local.filter(line => {
@@ -28,10 +32,24 @@ export function receiptRegion(fold: PlaceFold, at: number): readonly string[] {
   const observed = [...receiptsOf(fold).filter(line => !coordinate || fieldOf(line,'scope') !== coordinate), ...(coordinate && implementation ? [canonical({scope:coordinate,role:'writes',form:'alphabet',measure:'digest',value:implementation,at:`place:${implementation}`,by:'bound'})] : [])];
   const hash = (bytes: string): string => bytesDigest(fold.store, new TextEncoder().encode(bytes));
   const head = keyOf(fold.store, 'attest');
-  const projection = receiptProjection(observed, fields, hash, head ? [head] : []);
+  const projection = projectedReceipts(observed, fields, hash, head ? [head] : []);
   const set = keepCarried(fold.store, observed);
   if (at === 0) return [canonical({scope: 'receipts', role: 'writes', form: 'alphabet', measure: 'digest', value: projection.root, at: `place:${set}`, by: 'bound'})];
   if (at === 1) {
+    // Byte seals cannot certify an old output against a new admitted source.
+    // Reuse the declared view renderer; receipt views are excluded to avoid
+    // self-reference. Withhold region counts too, so the byte-only sealer
+    // cannot manufacture a closure from these incomplete semantic receipts.
+    const place=fold.under??'';
+    const materialized=materializedOutputs===undefined?undefined:new Set(materializedOutputs);
+    for(const view of viewsOf(fold.standing).values()){
+      if(!view.shape||view.regions.some(region=>region.name==='receipts'))continue;
+      const places=placesOf(fold.standing,view);if(places.length&&!places.includes(place))continue;
+      // Delivery selection is captured before copying an already closed source.
+      // Missing selected outputs still fail; absence never selects a subset.
+      if(materialized&&!materialized.has(join(place,view.shape)))continue;
+      if(observeText(join(fold.root,place,view.shape))!==viewOf(fold,view))return [];
+    }
     const algorithm = hash('').split(':')[0]!;
     const current = readersBehind().length === 0;
     return projection.regions.flatMap(region => {

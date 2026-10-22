@@ -4,22 +4,22 @@
     {
       "role": "contract",
       "path": "docs/contracts/reading-identity.md",
-      "digest": "sha256:f6f7f06b1cd1368273794219bb5fc2fa231372af783cb31ca66d1a2238e0060a"
+      "digest": "sha256:7a561c902daacc69beb256ed20b04e2b840b7af47c9e64596e1b8d1ebea06b1c"
     },
     {
       "role": "yes",
       "path": "samples/reading-identity/yes.json",
-      "digest": "sha256:5b40b3546e99bf7c646a15fc04241400199b6130b5ff35c142d70a4f68bf12fb"
+      "digest": "sha256:660c07bcca7237dcdec5c0db294e8d164c1ff89c0061a3b4c1f0c2d3813b2cc2"
     },
     {
       "role": "vector",
       "path": "vectors/native/reading-identity.vector.json",
-      "digest": "sha256:42bac03e64bd525398e9843cb8e8a256c46041a0c22e0d6774f523b1b283cb9d"
+      "digest": "sha256:e9a5f2b0318c1495e951edf05c99c7403f438e8b0bce66cc55749237fc2b4865"
     },
     {
       "role": "no",
       "path": "samples/reading-identity/no.json",
-      "digest": "sha256:77b63c1eb80a98e66d38cf357698166b178ae1d344939ec2bcaf74e5a2fd96c4"
+      "digest": "sha256:1775647462c2a933173be57269cbf21a8ac33b54e579539536543386a085ecff"
     }
   ]
 }

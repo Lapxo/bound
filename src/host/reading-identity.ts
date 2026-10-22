@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
 import {sha256} from './hash.ts';
-import {captureViewInputs,viewInput,readingEnvironment} from './reading-context.ts';
+import {captureViewInputs,viewInput,readingEnvironment,withViewInputObservation,sharedViewInputs} from './reading-context.ts';
 import {withoutEffects} from './read-only.ts';
 import {committedInventoryFingerprint,committedLocalActs,withCommittedLocalActObservation} from './ports/local-act.ts';
 import {ingressBundles} from './ports/ingress.ts';
@@ -55,35 +55,57 @@ export type NativeViewIdentityResult={readonly kind:'fact';readonly view:'lines'
  * executable reader, resolver, persistence, lease or Root exclusion is entered.
  * The returned text and identity share one immutable committed observation. */
 export function prepareNativeViewIdentity(context:NativeViewIdentityContext):NativeViewIdentityResult{
+ const result=prepareNativeViewIdentities(context&&{place:context.place,instrument:context.instrument,views:[context.view],...(context.expectedIdentity===undefined?{}:{expectedIdentities:{[context.view]:context.expectedIdentity}})});
+ if(result.kind==='refuse')return result;
+ return result.views[0]!;
+}
+export interface NativeViewIdentitiesContext {
+ readonly place:string;readonly instrument:NativeHostInstrument;readonly views:readonly string[];
+ readonly expectedIdentities?:Readonly<Record<string,string>>;
+}
+export type NativeViewIdentitiesResult={readonly kind:'fact';readonly views:readonly Extract<NativeViewIdentityResult,{kind:'fact'}>[]}|Extract<NativeViewIdentityResult,{kind:'refuse'}>;
+/** Each view retains its own input identity. A batch shares one fresh observation,
+ * never a persistent cache, and returns nothing if any selection or check fails. */
+export function prepareNativeViewIdentities(context:NativeViewIdentitiesContext):NativeViewIdentitiesResult{
  try{
   if(!context||!context.instrument?.runtime||typeof context.place!=='string'||!context.place)throw new BoundRefusal('host/context','REFUSE·host/context');
-  if(context.view!=='lines'&&context.view!=='evidence')throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection supports lines and evidence');
-  const view=context.view,root=resolve(context.place),store=storeOf(root),instrument=context.instrument;
-  return withHostCall({instrumentName:instrument.name,runtime:structuredClone(instrument.runtime),output:()=>{}},()=>withoutEffects(()=>{
+  if(!Array.isArray(context.views)||!context.views.length||new Set(context.views).size!==context.views.length||context.views.some(view=>view!=='lines'&&view!=='evidence'))throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection requires distinct supported native views');
+  if(context.expectedIdentities&&Object.keys(context.expectedIdentities).some(view=>!context.views.includes(view)))throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection expected identity names an unselected view');
+  const views=[...context.views] as ('lines'|'evidence')[],expected={...context.expectedIdentities},root=resolve(context.place),store=storeOf(root),instrument=structuredClone(context.instrument);
+  return withHostCall({instrumentName:instrument.name,runtime:instrument.runtime,output:()=>{}},()=>withoutEffects(()=>{
    const before=committedInventoryFingerprint(committedLocalActs(store));
    const limits=declaredReadingIdentityLimits(authenticatedStanding(root)),day=new Date().toISOString().slice(0,10),environment=readingEnvironment(sha256);
-   const captured=captureViewInputs(limits,()=>withCommittedLocalActObservation(store,()=>{
-    const current=declaredReadingIdentityLimits(viewInput('authenticated-configuration:'+root,()=>authenticatedStanding(root)));
-    if(JSON.stringify(current)!==JSON.stringify(limits))throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context identity budget changed');
-    // Foreign transport is a separate asynchronous contract. Do not return a
-    // local-only identity for evidence whose actual view would read a peer.
-    if(view==='evidence'&&viewInput('foreign-ingress:'+store,()=>ingressBundles(store)).length)throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection foreign view identity requires a transport snapshot');
+   if(views.length>limits.readings)throw new BoundRefusal('reading-identity/budget','REFUSE·reading-identity/budget selected views exceed admitted readings');
+   const common=sharedViewInputs(()=>{
     const standing=standingOf(root).standing;
-    if(view==='evidence'){
-     const declared=viewsOf(standing).get(view);
-     if(!declared||declared.shape||declared.regions.length!==1||declared.regions[0]?.name!=='evidence')throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection requires the native evidence projection');
-    }
-    const lines=view==='lines'?standing.filter(isWire):evidenceLines(root,store);
     const implementation=[...instrumentCoordinates(store,instrument.runtime.entry,[],instrument.runtime.root,[],true)].map(([name,digest])=>[name,digest]);
     if(!implementation.length)throw new BoundRefusal('reading-identity/failed','REFUSE·reading-identity/failed is unavailable');
-    return {text:lines.length?lines.join('\n')+'\n':'',implementation,instrumentLock:sha256(viewInput('instrument-lock:'+instrument.runtime.root,()=>readFileSync(join(instrument.runtime.root,LOCK),'utf8')))};
-   }));
+    const instrumentLock=sha256(viewInput('instrument-lock:'+instrument.runtime.root,()=>readFileSync(join(instrument.runtime.root,LOCK),'utf8')));
+    return {standing,implementation,instrumentLock};
+   });
+   const prepared=withViewInputObservation(()=>withCommittedLocalActObservation(store,()=>views.map(view=>{
+    const captured=captureViewInputs(limits,()=>{
+     const current=declaredReadingIdentityLimits(viewInput('authenticated-configuration:'+root,()=>authenticatedStanding(root)));
+     if(JSON.stringify(current)!==JSON.stringify(limits))throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context identity budget changed');
+     if(view==='evidence'&&viewInput('foreign-ingress:'+store,()=>ingressBundles(store)).length)throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection foreign view identity requires a transport snapshot');
+     const {standing,implementation,instrumentLock}=common();
+     if(view==='evidence'){
+      const declared=viewsOf(standing).get(view);
+      if(!declared||declared.shape||declared.regions.length!==1||declared.regions[0]?.name!=='evidence')throw new BoundRefusal('reading-identity/selection','REFUSE·reading-identity/selection requires the native evidence projection');
+     }
+     const lines=view==='lines'?standing.filter(isWire):evidenceLines(root,store);
+     return {text:lines.length?lines.join('\n')+'\n':'',implementation,instrumentLock};
+    });
+    return {view,captured};
+   })));
    const after=committedInventoryFingerprint(committedLocalActs(store));
    if(before!==after||day!==new Date().toISOString().slice(0,10)||JSON.stringify(environment)!==JSON.stringify(readingEnvironment(sha256)))throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context committed inputs changed during preparation');
-   const identity=sha256(JSON.stringify(['native-view-inputs@1',root,view,before,captured.inputs,captured.value.implementation,
-    captured.value.instrumentLock,environment,day]));
-   if(context.expectedIdentity!==undefined&&context.expectedIdentity!==identity)throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context view identity differs from the expected snapshot');
-   return {kind:'fact' as const,view,identity,text:captured.value.text};
+   const results=prepared.map(({view,captured})=>{
+    const identity=sha256(JSON.stringify(['native-view-inputs@1',root,view,before,captured.inputs,captured.value.implementation,captured.value.instrumentLock,environment,day]));
+    if(expected[view]!==undefined&&expected[view]!==identity)throw new BoundRefusal('reading-identity/context','REFUSE·reading-identity/context view identity differs from the expected snapshot');
+    return {kind:'fact' as const,view,identity,text:captured.value.text};
+   });
+   return {kind:'fact' as const,views:results};
   }));
  }catch(error){return {kind:'refuse',code:error instanceof BoundRefusal?error.code:'reading-identity/failed',diagnostic:error instanceof Error?error.message:'REFUSE·view identity failed'};}
 }

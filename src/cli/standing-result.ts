@@ -1,3 +1,4 @@
+import {hostOutput} from '../host/call-context.ts';
 import {hasContextualPlace,contextualStanding} from '../host/contextual-place.ts';
 import {publicStandingLines} from '../host/admitted-place.ts';
 import {assertStandingView} from '../host/standing-projection.ts';
@@ -10,7 +11,7 @@ import {storeOf} from '../land/ledger.ts';
  * and delivery mode do not enter this public boundary. */
 export function printStandingResult(root:string):void {
   const store=storeOf(root);assertStandingView(lockStanding(store));
-  if(hasContextualPlace(root)){process.stdout.write(JSON.stringify(contextualStanding(root))+'\n');return}
+  if(hasContextualPlace(root)){hostOutput('out',JSON.stringify(contextualStanding(root))+'\n');return}
   const standing=publicStandingLines(root);
-  process.stdout.write(standing.length?standing.join('\n')+'\n':'');
+  hostOutput('out',standing.length?standing.join('\n')+'\n':'');
 }

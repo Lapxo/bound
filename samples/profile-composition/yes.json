@@ -1,0 +1,14 @@
+{
+  "places": [
+    "orchard",
+    "harbor"
+  ],
+  "interval": {
+    "parent": "0..5",
+    "narrow": "0..3"
+  },
+  "alphabet": {
+    "parent": "a|b",
+    "narrow": "a"
+  }
+}

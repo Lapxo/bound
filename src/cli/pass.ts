@@ -1,8 +1,11 @@
+import{traceWork,withWorkTrace}from'../host/work-trace.ts';
+import{actCosts}from'../host/act-cost.ts';
+import {hostOutput} from '../host/call-context.ts';
 import { mkdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { Worker } from 'node:worker_threads';
 import { ENVELOPE, canonical, parse } from '@lapxo/topos/wire';
-import { foldPlace, standingOf } from './place.ts';
+import { foldPlace, standingOf, currentJudgment } from './place.ts';
 import type { PlaceFold } from './place.ts';
 import { fieldOf, selfName } from '../fold/claims.ts';
 import { observedClaims } from '../fold/observed.ts';
@@ -48,7 +51,7 @@ async function checked(root: string, entry: string, under: string | undefined): 
   const started = Date.now();
   const store = storeOf(root);
   if (!meets(root, store, under ?? '',false)) {
-    process.stderr.write(`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
+    hostOutput('error',`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
     return 1;
   }
   const contract = wireLine(ownLock(), 'receipt-instrument');
@@ -56,22 +59,22 @@ async function checked(root: string, entry: string, under: string | undefined): 
   const sealed = contract === undefined ? undefined : evidence?.find(line=>fieldOf(line,'scope')===fieldOf(contract,'value')&&fieldOf(line,'measure')==='digest');
   const expectedInstrument = sealed === undefined ? instrumentKept(store) : fieldOf(sealed,'value');
   if (!expectedInstrument) {
-    process.stderr.write(`${selfName()}: REFUSE·check no verified instrument identity is available for these receipts\n`);
+    hostOutput('error',`${selfName()}: REFUSE·check no verified instrument identity is available for these receipts\n`);
     return 1;
   }
   const standing = emptyLedger(store) ? ownLockOf(root,under?.replace(/\/$/,'') ?? '') : standingOf(root).standing;
   const instrument = sealed === undefined ? instrumentOf(store, entry, standing, root, ownLock()) : instrumentDigest(store,resolve(root,entry),[],ownRoot(),ownLock());
   if (expectedInstrument !== instrument) {
-    process.stderr.write(`${selfName()}: REFUSE·check receipt instrument differs; a fold must close it\n`);
+    hostOutput('error',`${selfName()}: REFUSE·check receipt instrument differs; a fold must close it\n`);
     return 1;
   }
   const read = receiptsSeen();
   const ms = Date.now() - started;
-  if (under === undefined) process.stderr.write(`RECEIPTS ${read.count || receiptPlaces(root, store).length} read · 0 opened · ${ms} ms\n`);
-  else process.stderr.write(`CLOSED   ${under} · ${ms} ms\n`);
+  if (under === undefined) hostOutput('error',`RECEIPTS ${read.count || receiptPlaces(root, store).length} read · 0 opened · ${ms} ms\n`);
+  else hostOutput('error',`CLOSED   ${under} · ${ms} ms\n`);
   const seconds = actSeconds();
-  process.stderr.write(`COST     act ${seconds} s\n`);
-  process.stdout.write(`PASS     closed · ${under ? 1 : receiptPlaces(root, store).length} places · ${ms} ms\n`);
+  hostOutput('error',`COST     act ${seconds} s\n`);
+  hostOutput('out',`PASS     closed · ${under ? 1 : receiptPlaces(root, store).length} places · ${ms} ms\n`);
   return 0;
 }
 
@@ -86,25 +89,30 @@ export async function pass(root: string, entry: string, under: string | undefine
   }
   const started = Date.now();
   const run = async (): Promise<number> => {
-    const swept = await sweep(root, entry, under, check, []);
-    for (const coordinate of check ? swept.written : []) process.stdout.write(`DIFFERS  ${coordinate}\n`);
+    const swept = await traceWork('pass/sweep',()=>sweep(root, entry, under, check, []));
+    for (const coordinate of check ? swept.written : []) hostOutput('out',`DIFFERS  ${coordinate}\n`);
     // Byte seals describe the completed render pass, not its intermediate outputs.
-    if (!swept.written.length) await closeReceipts(root, storeOf(root));
+    if (!swept.written.length) await traceWork('pass/seal',()=>closeReceipts(root, storeOf(root)));
     // Sealed files do not imply an empty reading. If a retained fold is stale,
     // foldPlace must reload its evidence; a valid retained fold still costs no read.
-    const fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), ...(swept.settled ? {} : { observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }) }), free: !swept.settled });
+    let fold = foldPlace(root, entry, under, false, { standing: swept.standingAt.get(under ?? '') ?? standingOf(root, under), ...(swept.settled ? {} : { observed: swept.observed.length ? swept.observed : observedClaims(root, storeOf(root), { wait: false }) }), free: !swept.settled });
     const closed = meets(root, storeOf(root), under ?? '',true,fold.observed) && !swept.written.length;
-    for (const line of releasePolicyLines(fold.release)) process.stdout.write(`${line}\n`);
+    // The judgement must include sealing, rendering and final byte checks too.
+    fold=traceWork('pass/final-judgement',()=>({...currentJudgment(fold),kept:fold.kept}));
+    for (const line of releasePolicyLines(fold.release)) hostOutput('out',`${line}\n`);
     if (closed) {
       instrumentKeep(storeOf(root), instrumentOf(storeOf(root), entry, standingOf(root).standing, root, ownLock()));
-      process.stdout.write(`PASS     closed · ${swept.places} places · ${Date.now() - started} ms\n`);
+      hostOutput('out',`PASS     closed · ${swept.places} places · ${Date.now() - started} ms\n`);
       return 0;
     }
-    process.stdout.write(`PASS     ${swept.same + swept.written.length} renders · ${swept.same} same${swept.written.length ? ` · ${swept.written.length} ${check ? 'differ' : 'still written after three rounds'}` : ''} · ${swept.places} places · ${Date.now() - started} ms\n`);
-    process.stdout.write(render(fold, [{ name: 'programs', at: 1 }]));
+    hostOutput('out',`PASS     ${swept.same + swept.written.length} renders · ${swept.same} same${swept.written.length ? ` · ${swept.written.length} ${check ? 'differ' : 'still written after three rounds'}` : ''} · ${swept.places} places · ${Date.now() - started} ms\n`);
+    hostOutput('out',render(fold, [{ name: 'programs', at: 1 }]));
     return swept.written.length ? 1 : 0;
   };
-  return underTheLock(storeOf(root), 'pass', run);
+  return withWorkTrace(()=>underTheLock(storeOf(root), 'pass', run),report=>{
+    const act=actCosts.measurement(),before=Math.max(0,act.elapsedMilliseconds-report.totalMilliseconds);
+    hostOutput('error','SPENT pass '+JSON.stringify({...report,scope:'full native pass; read-only views and check remain unchanged',beforePassMilliseconds:before,accountedActElapsedMilliseconds:report.exclusiveMilliseconds+before,act})+'\n');
+  });
 }
 
 export type Journal = Map<string, { readonly held: Uint8Array | undefined; readonly made: string | undefined }>;
@@ -152,12 +160,12 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     const hash = Math.max(0, ms - lock);
     if (lock > 0) {
       noteIdle();
-      process.stderr.write(`RED      fold/idle · ${idleCount()} · lock ${lock} ms · hash ${hash} ms · a fold over a closed region\n`);
+      hostOutput('error',`RED      fold/idle · ${idleCount()} · lock ${lock} ms · hash ${hash} ms · a fold over a closed region\n`);
     }
-    if (under === undefined) process.stderr.write(`RECEIPTS ${read.count} read · 0 opened · ${ms} ms\n`);
-    else process.stderr.write(`CLOSED   ${under} · lock ${lock} ms · hash ${hash} ms\n`);
+    if (under === undefined) hostOutput('error',`RECEIPTS ${read.count} read · 0 opened · ${ms} ms\n`);
+    else hostOutput('error',`CLOSED   ${under} · lock ${lock} ms · hash ${hash} ms\n`);
     const seconds = actSeconds();
-    process.stderr.write(`COST     act ${seconds} s\n`);
+    hostOutput('error',`COST     act ${seconds} s\n`);
     return { same: 0, written: [], places: under === undefined ? read.count : 1, observed: [], standingAt: new Map(), folds: new Map(), said: [], settled: true };
   }
   const lock = standingOf(root, undefined, told);
@@ -236,32 +244,30 @@ async function sweep(root: string, entry: string, under: string | undefined, che
     if (!under && round === 1) {
       if (!receiptsSeen().count) meets(root, store, '');
       const read = receiptsSeen();
-      process.stderr.write(`RECEIPTS ${read.count} read · ${open.length} opened · ${read.ms} ms\n`);
+      hostOutput('error',`RECEIPTS ${read.count} read · ${open.length} opened · ${read.ms} ms\n`);
     }
-    if (open.length) process.stderr.write(`OPEN     ${open.map((place) => place || '.').join(' ')}\n`);
+    if (open.length) hostOutput('error',`OPEN     ${open.map((place) => place || '.').join(' ')}\n`);
     const aside = open.filter((place) => place !== '' && !keep?.has(place) && !meets(root, store, place));
-    const drawn = aside.length > 1 ? await drawParallel(aside.map((place) => ({ root, entry, place, told, observed, views: writes(place) }))) : new Map<string, readonly Drawn[]>();
+    const drawn = aside.length > 1 ? await drawParallel(aside.map((place) => ({ root, entry, place, told, observed, views: writes(place).filter(view=>!view.regions.some(region=>region.name==='receipts')) }))) : new Map<string, readonly Drawn[]>();
     for (const place of open) {
       if (!check && place === '') await holdRoot(store, 'join');
       if (!check && !holds(store, place)) {
-        process.stderr.write(`OUTSIDE  ${place} · not settled, and no region this act holds: the next pass renders it\n`);
+        hostOutput('error',`OUTSIDE  ${place} · not settled, and no region this act holds: the next pass renders it\n`);
         continue;
       }
       const ready = drawn.get(place);
-      if (ready !== undefined) {
-        paint(place, ready, moved);
-        continue;
-      }
       const standing = standingAt.get(place) ?? lock;
       const fold = foldPlace(root, entry, place || undefined, false, { standing, observed, free: true });
       if (keep?.has(place)) folds.set(place, fold);
-      paint(place, writes(place).map((view) => {
-        const missing = unrendered(fold, view);
-        return { shape: view.shape, missing, text: missing.length ? '' : viewOf(fold, view), said: missing.length ? [] : renderedOf(fold, view) };
-      }), moved);
+      const views=writes(place),isReceipt=(view:View)=>view.regions.some(region=>region.name==='receipts');
+      const draw=(view:View)=>{const missing=unrendered(fold,view);return {shape:view.shape,missing,text:missing.length?'':viewOf(fold,view),said:missing.length?[]:renderedOf(fold,view)};};
+      // Complete ordinary outputs before asking the same native receipt renderer
+      // to certify them. Worker-produced outputs obey the same two phases.
+      traceWork('pass/ordinary-leaves',()=>paint(place,ready??views.filter(view=>!isReceipt(view)).map(draw),moved));
+      traceWork('pass/receipt-leaves',()=>paint(place,views.filter(isReceipt).map(draw),moved));
     }
     if (check || !written.length) break;
-    for (const coordinate of written) process.stdout.write(`RENDERED ${coordinate} · round ${round}\n`);
+    for (const coordinate of written) hostOutput('out',`RENDERED ${coordinate} · round ${round}\n`);
     if (!moved.at) {
       same += written.length;
       written = [];

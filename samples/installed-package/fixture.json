@@ -1,0 +1,48 @@
+{
+  "files": [
+    {
+      "coordinate": "package.json",
+      "source": "{\"name\":\"fixture-installed\",\"version\":\"1.0.0\",\"type\":\"module\",\"exports\":{\".\":\"./index.js\"}}",
+      "digest": "sha256:6fbb4840c2bd58a173a96aeac13083d2ce62ce735fbfd88545bb35d9ec1a6bcc"
+    },
+    {
+      "coordinate": "index.js",
+      "source": "import {n} from 'fixture-math';import {leaf} from './leaf.js';export const visible=n+leaf;export const unusedSymbol='kept';\n",
+      "digest": "sha256:3b73434097f0e207f0c0a82ef17f4eebec9e5d0218b1c4f41205f62e9b7beec7"
+    },
+    {
+      "coordinate": "leaf.js",
+      "source": "export const leaf=2;\n",
+      "digest": "sha256:5a23b35ac6e9b1a5145160808971135a2490a1cdea3093f3dfa35f071e44c771"
+    },
+    {
+      "coordinate": "unreachable.js",
+      "source": "export const unreachable=41;\n",
+      "digest": "sha256:f4ead11fa0d9683e45b3993b2b961792a9b180bf2d31fb953e358a0041d58073"
+    },
+    {
+      "coordinate": "NOTICE",
+      "source": "A complete package also carries non-module bytes.\n",
+      "digest": "sha256:48278ab65f9a9040938b07e0b1b5a6054ed5ab22779778506bfe916eea01f709"
+    }
+  ],
+  "exports": [
+    [
+      "exports",
+      "."
+    ]
+  ],
+  "library": {
+    "identity": "sha256:fcdf73da58275a7ac691352309dea09ed8b31c63d7724a1f94e73084de029410",
+    "entry": "lib.js",
+    "sourceName": "fixture-math",
+    "version": "2.0.0",
+    "source": "export const n=5;export const unusedLibrarySymbol=99;\n",
+    "digest": "sha256:c6e5fc9a46fee273cca1b079767064eda69b790f9164e62c77c28ea90181c0cd"
+  },
+  "mutation": {
+    "coordinate": "unreachable.js",
+    "source": "export const unreachable=42;\n",
+    "digest": "sha256:8d7dfda12330e2cf0a7d1b9ff8919f7c0b89fd1a086c637a3c3c874a598c6d79"
+  }
+}

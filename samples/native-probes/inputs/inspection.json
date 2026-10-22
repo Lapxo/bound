@@ -1,0 +1,28 @@
+{
+  "forms": [
+    "lines",
+    "evidence"
+  ],
+  "repetitions": 6,
+  "port": {
+    "coordinate": "port/public-inspection",
+    "probes": 6,
+    "responseBytes": 16777216
+  },
+  "declaredIdentityLimits": {
+    "bytes": 16777216,
+    "files": 2048,
+    "readings": 16,
+    "probes": 8
+  },
+  "places": [
+    "harbor-log",
+    "library-index"
+  ],
+  "expected": {
+    "newPersistentBytes": 0,
+    "newPersistentLines": 0,
+    "identitiesUnchanged": true,
+    "textMatchesNativeView": true
+  }
+}

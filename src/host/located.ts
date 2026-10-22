@@ -1,3 +1,4 @@
+import {hostOutput} from './call-context.ts';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -72,17 +73,17 @@ export const locate = async (root: string, dir: string, ext: string): Promise<Mo
     try {
       module = await import(pathToFileURL(join(root, dir, `${name}${ext}`)).href) as Module;
     } catch (error) {
-      process.stderr.write(`LOAD     ${name} · module error · ${text(error)}\n`);
+      hostOutput('error',`LOAD     ${name} · module error · ${text(error)}\n`);
       return undefined;
     }
     const has = wanted(role).filter((key) => isFn(module, key));
     const exported = foreign(role).filter((key) => isFn(module, key));
     if (!has.length && exported.length) {
-      process.stderr.write(`LOAD     ${name} · role mismatch · ${role} exports ${exported.join('|')}\n`);
+      hostOutput('error',`LOAD     ${name} · role mismatch · ${role} exports ${exported.join('|')}\n`);
       return undefined;
     }
     if (!has.length) {
-      process.stderr.write(`LOAD     ${name} · missing export · ${wanted(role)[0]}\n`);
+      hostOutput('error',`LOAD     ${name} · missing export · ${wanted(role)[0]}\n`);
       return undefined;
     }
     const picked = role === 'reader' ? { observe: module['observe'], run: module['run'] } : { region: module[role] };

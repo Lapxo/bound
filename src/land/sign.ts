@@ -47,7 +47,19 @@ export function verifiesOwnerLine(line: string, publicKeyPem: string, admitted: 
   return typeof sig === 'string' && verifyBytes(signedBytes(rest), publicKeyPem, sig, admitted);
 }
 
+// Only the cryptographic predicate is retained, never admission or coverage.
+// Frozen wire fields contain exact observed record bytes; a changed record is
+// a different parser value. The current key and signature vocabulary are also
+// required to match, and mutable caller-owned fields are checked every time.
+const verifiedFields = new WeakMap<Readonly<Record<string,string>>, {readonly publicKey:string;readonly algorithms:string;readonly valid:boolean}>();
 export function verifiesFields(fields: Readonly<Record<string, string>>, publicKey: string, admitted: readonly string[]): boolean {
+  const algorithms=JSON.stringify(admitted),held=verifiedFields.get(fields);
+  if(held&&held.publicKey===publicKey&&held.algorithms===algorithms)return held.valid;
+  // An entry exists only after the complete frozen-data proof below. Freezing
+  // is irreversible, so matching inputs need not repeat that proof either.
+  const immutable=held!==undefined||Object.isFrozen(fields)&&Object.prototype.hasOwnProperty.call(fields,'sig')&&Object.values(Object.getOwnPropertyDescriptors(fields)).every(field=>'value'in field&&typeof field.value==='string');
   const { sig, ...rest } = fields;
-  return typeof sig === 'string' && verifyBytes(signedBytes(rest), publicKey, sig, admitted);
+  const valid=typeof sig === 'string' && verifyBytes(signedBytes(rest), publicKey, sig, admitted);
+  if(immutable)verifiedFields.set(fields,{publicKey,algorithms,valid});
+  return valid;
 }
