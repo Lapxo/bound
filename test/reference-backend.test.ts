@@ -34,7 +34,9 @@ let retainedWorld:ReturnType<typeof referenceWorldFixture>|undefined;
 const preparedWorld=()=>retainedWorld??=referenceWorldFixture();
 for(const place of backendYes.places)test('complete authenticated WASM opening '+place,async()=>{
  const {f,bundle,ledger}=referenceRootFixture(place,await preparedWorld());let payload=bundle.carrier,requests=0;
- const server=createServer((_req,res)=>{requests++;res.end(payload)});
+ const sockets=new Set<unknown>();
+ // Each phase tests fresh carrier bytes, without inheriting an idle HTTP connection from WASM.
+ const server=createServer((req,res)=>{requests++;sockets.add(req.socket);res.setHeader('Connection','close');res.end(payload)});
  try{
   await new Promise<void>((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve)});
   const address=server.address();assert.ok(address&&typeof address!=='string');
@@ -46,7 +48,7 @@ for(const place of backendYes.places)test('complete authenticated WASM opening '
   admit([row('engine/object','id','wasm@1'),span('engine/wasm/memory','bytes','0..67108864'),span('engine/wasm/stack','bytes','0..1048576'),span('engine/wasm/execution','milliseconds','0..10000'),span('engine/wasm/worker-lifetime','milliseconds','0..15000'),span('engine/wasm/response','bytes','0..262144')]);
   const beforeWasm=ledger(),wasm=await openAuthenticatedReference(f.root,reference);
   assert.equal(wasm.backend,'wasm@1');assert.equal(esm.backend,'esm@1');assert.equal(wasm.semanticIdentity,bundle.context.semanticIdentity);assert.equal(wasm.semanticIdentity,esm.semanticIdentity);assert.equal(wasm.authorityContextIdentity,esm.authorityContextIdentity);assert.deepEqual(wasm.records,esm.records);assert.equal(JSON.stringify(wasm.readings),JSON.stringify(esm.readings));assert.equal(wasm.readings[0]?.state,backendYes.expectedState);assert.deepEqual(backendYes.backends,[esm.backend,wasm.backend]);assert.equal(backendYes.projection,'byte-equal');assert.equal(backendYes.commit,false);assert.equal(requests,2);assert.deepEqual(ledger(),beforeWasm);
-  assert.equal(backendNo.mutation,'append-one-carrier-byte');assert.equal(backendNo.commit,false);payload=bundle.carrier+' ';await assert.rejects(()=>openAuthenticatedReference(f.root,reference),error=>error instanceof BoundRefusal&&error.code===backendNo.expectedCode);assert.deepEqual(ledger(),beforeWasm);
+  assert.equal(backendNo.mutation,'append-one-carrier-byte');assert.equal(backendNo.commit,false);payload=bundle.carrier+' ';await assert.rejects(()=>openAuthenticatedReference(f.root,reference),error=>error instanceof BoundRefusal&&error.code===backendNo.expectedCode);assert.equal(requests,3,'the integrity negative receives its own HTTP response');assert.equal(sockets.size,3,'ESM, WASM and corruption use separate HTTP connections');assert.deepEqual(ledger(),beforeWasm);
   console.log('WASM '+place+' · authenticated download · same standing · same records · byte-equal ESM projection · altered carrier refused · no commit');
  }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));f.close()}
 });
