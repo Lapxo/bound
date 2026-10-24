@@ -75,3 +75,12 @@ export function placesOf(standing: readonly string[], view: View): readonly stri
   known.set(`${view.name} ${view.shape}`, places);
   return places;
 }
+
+/** Exact output selection shared by materialization and receipt validation.
+ * Presence selects only unnamed leaves; named outputs remain required when absent. */
+export function materializedViews(standing:readonly string[],place:string,own:readonly string[],tree:ReadonlyMap<string,View>,worldNames:readonly string[],present:(shape:string)=>boolean):readonly View[]{
+ const mine=[...viewsOf(standing).values()].filter(view=>view.shape);
+ const named=(view:View)=>placesOf(standing,view);
+ return mine.filter(view=>named(view).includes(place)||(own.length>0&&defaulted(standing,view,own,tree))
+  ||(!worldNames.includes(view.name)&&!named(view).length&&present(view.shape)&&!mine.some(other=>other.shape===view.shape&&named(other).includes(place))));
+}

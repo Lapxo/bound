@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
@@ -50,14 +50,15 @@
     "./package/native": {
       "types": "./dist/host/native/installed-package.d.ts",
       "default": "./dist/host/native/installed-package.js"
-    }
+    },
+    "./parity": "./docs/contracts/native-parity.json"
   },
   "scripts": {
     "test": "node --import ./test/setup.ts --test --test-concurrency=2 test/*.test.ts",
     "clean": "rm -rf dist .tsbuildinfo* tsconfig.tsbuildinfo",
-    "build": "node --experimental-strip-types tools/build.ts",
+    "build": "node --experimental-strip-types build/build.ts",
     "prepack": "npm run build",
-    "compact-archive": "node --experimental-strip-types tools/compact-archive.ts"
+    "compact-archive": "node --experimental-strip-types build/compact-archive.ts"
   },
   "files": [
     "LICENSE",
@@ -255,7 +256,8 @@
     "docs/contracts/authority-preflight.publication.json",
     "samples/authority-preflight/yes.json",
     "samples/authority-preflight/no.json",
-    "vectors/native/authority-preflight.vector.json"
+    "vectors/native/authority-preflight.vector.json",
+    "docs/contracts/native-parity.json"
   ],
   "author": "Lapxo",
   "license": "MIT",

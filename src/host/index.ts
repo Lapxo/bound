@@ -29,3 +29,5 @@ export type {NativeAuthorityAction,NativeAuthorityCardContext,NativeAuthorityJud
 export {nativeAuthorityCardView} from './native/authority-card-view.ts';
 export {startNativeHost,nativeHostEnvironment} from './persistent-host.ts';
 export type {NativeCommandHost,NativeHostOptions,NativeHostLimits,NativeCommand,NativeCommandResult} from './persistent-host.ts';
+
+export type {HTTPReceiverPolicy,HTTPHop} from './adapters/transport/http.ts';

@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "tools/samples/check-publication.mjs",
+        "samples/readers/check-publication.mjs",
         "evidence",
         "samples/yes/attest-evidence.json",
         "samples/no/attest-evidence.json"
@@ -137,14 +137,14 @@
         "dist/render/shape.js",
         "dist/render/target.js",
         "dist/render/view.js",
-        "tools/samples/check-publication.mjs",
-        "tools/samples/module-closure.mjs",
-        "tools/samples/run-evidence.mjs",
-        "tools/samples/run-typed-walk.mjs",
-        "tools/samples/run-typed.mjs",
-        "tools/samples/run-walk-refinement.mjs",
-        "tools/samples/run-walk.mjs",
-        "tools/samples/typed-provider.mjs",
+        "samples/readers/check-publication.mjs",
+        "samples/readers/module-closure.mjs",
+        "samples/readers/run-evidence.mjs",
+        "samples/readers/run-typed-walk.mjs",
+        "samples/readers/run-typed.mjs",
+        "samples/readers/run-walk-refinement.mjs",
+        "samples/readers/run-walk.mjs",
+        "samples/readers/typed-provider.mjs",
         "samples/typed/artifacts.json",
         "samples/typed/artifacts.vector.json",
         "samples/typed/contract.json",
@@ -154,7 +154,7 @@
         "samples/typed/yes.json",
         "samples/yes/attest-evidence.json",
         "samples/no/attest-evidence.json",
-        "tools/samples/public-instrument.mjs",
+        "samples/readers/public-instrument.mjs",
         "TARGET.bound",
         "dist/host/act-cost.js"
       ]

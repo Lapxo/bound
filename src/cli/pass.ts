@@ -1,3 +1,4 @@
+import {BoundRefusal} from '../host/refusals.ts';
 import{traceWork,withWorkTrace}from'../host/work-trace.ts';
 import{actCosts}from'../host/act-cost.ts';
 import {hostOutput} from '../host/call-context.ts';
@@ -15,7 +16,7 @@ import { landLaid } from '../fold/laid.ts';
 import { actSeconds, closeReceipts, idleCount, instrumentKeep, instrumentKept, meets, noteIdle, receiptPlaces, receiptsSeen } from '../fold/closed.ts';
 import { algorithmCost, instrumentOf, instrumentDigest } from '../fold/digests.ts';
 import { writerFor } from '../fold/signers.ts';
-import { defaulted, placesOf, viewsOf } from '../fold/views.ts';
+import { materializedViews, placesOf, viewsOf } from '../fold/views.ts';
 import { ownLockOf } from '../fold/signed.ts';
 import { localDirectoriesIn, worldAt, worldsIn } from '../fold/places.ts';
 import { wordsOf } from '../fold/wire.ts';
@@ -24,7 +25,7 @@ import { land, ledgerLines, replaceWhole, storeOf } from '../land/ledger.ts';
 import { holdRoot, holds, underTheLock } from '../land/act.ts';
 import { emptyLedger, sayStranger } from '../fold/stranger.ts';
 import { observeFile, observeText } from '../observe/files.ts';
-import { render, renderedOf, unrendered, viewOf } from '../render/view.ts';
+import { render, renderedOf, renderedViews, unrendered, viewOf } from '../render/view.ts';
 import { releasePolicyLines } from '../fold/release-policy.ts';
 import { carriedFrom } from '../fold/resolved.ts';
 import { wireLine } from '../fold/wire.ts';
@@ -51,8 +52,7 @@ async function checked(root: string, entry: string, under: string | undefined): 
   const started = Date.now();
   const store = storeOf(root);
   if (!meets(root, store, under ?? '',false)) {
-    hostOutput('error',`${selfName()}: REFUSE·check receipts are open; a fold must close them\n`);
-    return 1;
+    throw new BoundRefusal('receipts/open','REFUSE·check receipts are open; a fold must close them');
   }
   const contract = wireLine(ownLock(), 'receipt-instrument');
   const evidence = carriedFrom(store, (observeText(join(root, under ?? '', RECEIPTS)) ?? '').split('\n').filter(isWire));
@@ -195,11 +195,8 @@ async function sweep(root: string, entry: string, under: string | undefined, che
   const standingAt = new Map([...places, ''].map((place) => [place, place ? standingOf(root, place, told) : lock] as const));
   const writes = (place: string): readonly View[] => {
     const { standing } = standingAt.get(place) ?? lock;
-    const mine = shaped(standing);
     const own = worldAt(root, place.slice(0, -1)) ? ownLockOf(root, place.slice(0, -1)) : [];
-    const namedOf = (view: View): readonly string[] => placesOf(standing, view);
-    return mine.filter((view) => namedOf(view).includes(place) || (own.length > 0 && defaulted(standing, view, own, tree))
-      || (!worldList.includes(view.name) && !namedOf(view).length && observeText(join(root, place, view.shape)) !== undefined && !mine.some((other) => other.shape === view.shape && namedOf(other).includes(place))));
+    return materializedViews(standing,place,own,tree,worldList,shape=>observeText(join(root,place,shape))!==undefined);
   };
   let same = 0;
   let written: string[] = [];
@@ -260,7 +257,8 @@ async function sweep(root: string, entry: string, under: string | undefined, che
       const fold = foldPlace(root, entry, place || undefined, false, { standing, observed, free: true });
       if (keep?.has(place)) folds.set(place, fold);
       const views=writes(place),isReceipt=(view:View)=>view.regions.some(region=>region.name==='receipts');
-      const draw=(view:View)=>{const missing=unrendered(fold,view);return {shape:view.shape,missing,text:missing.length?'':viewOf(fold,view),said:missing.length?[]:renderedOf(fold,view)};};
+      const prepared=ready?undefined:renderedViews(fold,views.filter(view=>!isReceipt(view)&&!unrendered(fold,view).length));
+      const draw=(view:View)=>{const missing=unrendered(fold,view),held=prepared?.get(view);return {shape:view.shape,missing,text:missing.length?'':held?.text??viewOf(fold,view),said:missing.length?[]:held?.said??renderedOf(fold,view)};};
       // Complete ordinary outputs before asking the same native receipt renderer
       // to certify them. Worker-produced outputs obey the same two phases.
       traceWork('pass/ordinary-leaves',()=>paint(place,ready??views.filter(view=>!isReceipt(view)).map(draw),moved));

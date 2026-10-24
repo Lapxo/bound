@@ -1,34 +1,87 @@
-# @lapxo/bound
+<p align="center"><img src="docs/readme-assets/atlas.svg" alt="Bound: a folded cell with its origin at the crease" width="96"></p>
 
-Bound turns signed statements, observations and requirements into a place you can inspect. It keeps who said what, preserves incompatible declarations, and projects the views selected by that place. Missing evidence stays missing; a rendered page is not proof that every requirement has been met.
+<h1 align="center">@lapxo/bound</h1>
 
-The same pure engine is available to applications and to the CLI. Topos supplies the wire and interpretation contracts; Obligations supplies the constraint algebra. Bound adds admission, authenticated reading, retained receipts and declared host operations around that core.
+<p align="center"><b>Keep who said what. Name what is still missing.</b></p>
 
-## A place, its readings and its receipts
+<p align="center">
+<a href="https://www.npmjs.com/package/@lapxo/bound"><img src="https://img.shields.io/badge/version-0.2.7-475569" alt="Version 0.2.7"></a>
+<img src="https://img.shields.io/badge/runtime_dependencies-0-15803d" alt="Zero runtime dependencies">
+<img src="https://img.shields.io/badge/Node-%3E%3D22.15-475569" alt="Node 22.15 or later">
+<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-475569" alt="MIT license"></a>
+<a href="https://doi.org/10.5281/zenodo.21858428"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21858428-475569" alt="The mathematical foundation"></a>
+</p>
 
-A place declares its rules and selected worlds in `TARGET.bound`. Worlds supply readers and renderers for their own domains. A fold reads the declared inputs, applies the admitted constraints, and renders the selected views. `receipts.bound` carries the public evidence needed to check the resulting files; private admission history stays in the local `.bound/` store.
+Bound folds signed statements, observations and requirements into a place you can
+inspect. Every declaration keeps its origin. Incompatible declarations stay
+visible; missing evidence stays missing. Rendering a page does not pay a requirement.
 
-Unchanged regions can retain valid receipts. A changed input reopens the regions it affects, while incompatible admitted statements remain visible. A digest identifies content; it grants neither authority nor permission to reuse an old answer as current. A receipt records a reading under its declared context, rather than establishing the truth or independence of its sources.
+## See it
 
-## Install and use
+In an existing place with admitted declarations and valid public receipts:
 
 ```sh
-npm install @lapxo/bound@0.2.6
+npx @lapxo/bound@0.2.7 fold --check
 ```
 
-In a place with admitted declarations and closed public receipts, check the existing evidence without running its readers again:
+Captured from the verified checkout:
+
+```text
+PASS     closed · 1 places · 1836 ms
+```
+
+A check validates the current bytes against retained receipts. It does not run the
+external readers again. Changed inputs reopen the readings that depend on them;
+absent or altered selected outputs cannot pass as closed.
+
+The installed reference example also captures two independently admitted fixture
+places and refuses an altered carrier in each:
+
+```text
+README sensor · REQUIRED · altered carrier refused
+README editorial · REQUIRED · altered carrier refused
+```
+
+## Quick start
 
 ```sh
-npx @lapxo/bound@0.2.6 fold --check
+npm install @lapxo/bound@0.2.7
 ```
 
-For a change, prepare a proposal, sign with a key already covered by the place, admit the signed lot, then fold and inspect the result. Signing and admission do not by themselves pay a requirement. The [usage guide](docs/usage.md) covers keys, coverage, proposals, withdrawals and release policy.
+A **place** is a folder with `TARGET.bound`: its declarations, selected readers
+and renderers, and the rules under which changes can be admitted. Start inside
+such a place; installation alone does not create authority or a closed place.
+
+```sh
+npx bound fold                 # read declared inputs and render selected views
+npx bound fold --check         # validate retained evidence against current bytes
+npx bound fold --as lines      # inspect one selected view
+```
+
+To change a place, prepare a proposal, sign with a key already covered by the
+place, admit the signed lot, then fold and inspect the result. Signing and
+admission do not themselves pay a requirement. The [usage guide](docs/usage.md)
+covers keys, coverage, proposals, exact withdrawals and release policy.
+
+## What the fold keeps
+
+- **Declarations and origins.** Who supports each statement remains available for
+  explanation and exact withdrawal; a later value does not silently erase a conflict.
+- **Requirements and evidence.** A reader supplies observations for its domain.
+  Bound applies the admitted forms and constraints; it does not invent missing evidence.
+- **Views and receipts.** Selected views have declared inputs. Unchanged regions
+  can retain valid receipts; a receipt records a reading in its context.
+- **Refusals.** Machine-readable codes name the failed condition and its next step.
+  Human diagnostics are not parsed as authority.
+
+A digest identifies content; it grants neither authority nor network permission.
+A receipt does not prove that a source is true or independent. Two signing keys
+are not evidence of two independent people.
 
 ## Embed the engine
 
-`objectFold` projects already admitted records in effective order. It does not acquire content, verify signatures, choose authority, commit an act or write storage. Those preparation steps belong to the host.
-
-For an authenticated reference, your host supplies the independently accepted trust context: signer grants and epoch, selected form, policy, byte and record bounds, content and cryptographic ports. The carrier cannot choose those inputs. This example verifies the carrier through `/reference`, then uses the same `/engine` projection as the CLI:
+The CLI and applications use the same implementation. The pure engine projects
+already admitted object records in effective order:
 
 ```js
 import { objectFold } from '@lapxo/bound/engine';
@@ -40,53 +93,60 @@ export async function openAndProject(reference, trust) {
 }
 ```
 
-Captured on a clean installed consumer, with two independently admitted fixture places and an altered carrier in each:
+Your host supplies the independently accepted trust context, selected form,
+policy, bounded content and cryptographic ports. The carrier cannot choose them.
+`objectFold` itself does not fetch content, verify signatures, choose authority,
+commit acts or write storage.
 
-```text
-README sensor · REQUIRED · altered carrier refused
-README editorial · REQUIRED · altered carrier refused
-```
+For native effects, `/host` provides a persistent host with explicitly bound
+signers and a pinned instrument. Host document requests refuse by name rather
+than returning an unrelated successful view. Digest-pinned redirects check the
+receiver's network policy before each connection; integrity never grants access.
+See [host transport and refusals](docs/contracts/host-document-targets.md) and
+[receiver policy](docs/contracts/bounded-redirects.md).
 
-Opening and projecting a reference never commit an act. The authenticated context binds the standing contract and refusal catalog by digest, so consumers can identify the contracts used to interpret the result.
+## Public entry points
 
-## Public boundaries
-
-| Entry | Responsibility |
+| Import | Responsibility |
 | --- | --- |
-| `/engine` | Pure projection of admitted object records; optional, explicitly injected host ports. |
-| `/reference` | Inspect a carrier against the host's accepted context and verify its content and authority. |
-| `/reference/native` | Export a signed carrier from a real admitted place and open it with an explicitly selected backend. |
-| `/wasm` | Load the optional WASM adapter for the published object projection. |
-| `/refusals` and `/standing-contract` | Read the machine-readable contracts bound into authenticated exports. |
+| `/engine` | Pure projection of already admitted records. |
+| `/reference` | Inspect an authenticated carrier against accepted host context. |
+| `/reference/native` | Export and open signed carriers from an admitted place. |
+| `/host` | Native host, view identities and text, probes, authority preflight. |
+| `/physical-lines` | Physical lines under declared selectors, with a reading witness. |
+| `/profiles` | Digest-pinned composition and exact release categories. |
+| `/package/native` | Content identity of a verified installed inventory. |
+| `/closure/native` | Verify and deliver a declared module closure. |
+| `/wasm` | Optional WASM adapter for object projection. |
+| `/refusals`, `/standing-contract` | Machine-readable interpretation contracts. |
+| `/conformance`, `/determinism`, `/parity` | Published acceptance contracts and neutral vectors. |
 
-Native opening selects **ESM or WASM explicitly**; an unsupported selection refuses rather than falling back. The WASM adapter covers the published object projection. Admission, effects and the whole CLI do not run inside WASM. Independent physical-machine verification remains pending.
+A view identity can be requested with its text without running a fold. Its cost
+includes checking current input bytes; it is not constant in place size. Probes
+persist no counter or marker; the consumer owns its count. Authority cards are
+preflight results, and an eventual act still checks current authority.
 
-The host supplies bounded [signer, content and persistence ports](docs/contracts/host-ports.md). Their identities and limits are explicit. Retaining bytes is an explicit operation: it grants no admission or permission to reuse a response. The existing authority path verifies signatures before returning an authenticated carrier.
+The optional WASM adapter covers object projection, not admission, native effects
+or the whole CLI. Independent physical-machine verification remains pending.
 
-[Complete standing](docs/contracts/standing.md) covers declared key classes and committed local acts, preserving attribution, exact withdrawals and conflicts. [Refusals](docs/contracts/refusals.md) have machine-readable codes, meanings and suggested next steps; human diagnostics are not parsed as authority.
+## Read further
 
-## Native consumer operations
+[Usage](docs/usage.md) · [Host ports](docs/contracts/host-ports.md) ·
+[Standing](docs/contracts/standing.md) · [Refusals](docs/contracts/refusals.md) ·
+[Authority preflight](docs/contracts/authority-preflight.md) ·
+[View identities](docs/contracts/native-view-batch.md) ·
+[Probes](docs/contracts/native-probes.md) ·
+[Physical lines](docs/contracts/physical-lines.md) ·
+[Profiles](docs/contracts/profile-composition.md) ·
+[Installed identity](docs/contracts/installed-package.md) ·
+[Neutral parity](docs/contracts/native-parity.md).
 
-Applications can query `prepareNativeViewIdentities` from `/host` for `lines` and `evidence` in one read-only observation. Each result includes its own identity and the text captured under that identity. The CLI uses the same implementation:
+Built on [Topos](https://github.com/Lapxo/topos) for wire and interpretation
+contracts, and [Obligations](https://github.com/Lapxo/obligations) for constraint
+algebra. Domain readers supply their own observations; Bound is not a source of truth.
 
-```sh
-bound fold --as reading-identities@lines+evidence
-bound fold --as probe@lines
-```
+The underlying object is described in Ochoa, N. (2026),
+[*Two-Sided Constraints on a Valued Lattice*](https://doi.org/10.5281/zenodo.21858428),
+DOI `10.5281/zenodo.21858428`.
 
-A probe is a bounded reading attempt. The consumer owns its counter; Bound does not persist probe markers. Admitted input and response limits still apply. See [native view identities](docs/contracts/native-view-batch.md) and [probes](docs/contracts/native-probes.md).
-
-`/physical-lines` counts physical UTF-8 lines under declared selectors and binds a reading witness to its exact inputs. It delegates threshold and widening decisions to Bound's existing judges. `/profiles` prepares digest-pinned composition and selects exact release categories; preparation does not admit a change. `/package/native` produces a content identity for a verified installed inventory and its reached modules. That identity is distinct from the compressed archive digest.
-
-See [physical lines](docs/contracts/physical-lines.md), [profile composition](docs/contracts/profile-composition.md), [installed package identity](docs/contracts/installed-package.md) and [materialized outputs](docs/contracts/materialized-leaf-sequence.md).
-
-`await prepareNativeAuthorityCard(context)` from `/host` returns `allow`, `ask` or `deny` for exact configuration actions using current native authority and admission checks. The caller supplies an explicit clock, epoch and bounded ports. `fold --as authority-card@<scope>` reads a bounded request selected by admitted lines; the request cannot supply a trust anchor or select an instrument. A card is a preflight, and each eventual act still checks its signatures and current authority. See the [authority card contract](docs/contracts/authority-preflight.md).
-
-## Contracts and foundations
-
-- [Native authenticated export](docs/contracts/reference-export.md) and [reference backends](docs/contracts/reference-backend.md).
-- [Pure engine](docs/contracts/engine.md), [host ports](docs/contracts/host-ports.md) and [CLI usage](docs/usage.md).
-- [Topos](https://github.com/Lapxo/topos): wire, interpretation and identity contracts.
-- [Obligations](https://github.com/Lapxo/obligations): the unchanged constraint algebra.
-
-The underlying object is described in [Two-Sided Constraints on a Valued Lattice](https://doi.org/10.5281/zenodo.21858428), DOI `10.5281/zenodo.21858428`.
+MIT.

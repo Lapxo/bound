@@ -1,0 +1,402 @@
+{
+  "format": "neutral-conformance-fixture/1",
+  "contract": "bounded-redirects",
+  "purpose": "acceptance data, not a wire form or another evaluator",
+  "domains": [
+    "archive-records",
+    "water-quality"
+  ],
+  "initial": {
+    "place": "logical-place",
+    "epoch": "1",
+    "authority": "receiver-declared"
+  },
+  "policy": {
+    "encoding": "UTF-8",
+    "lineEnding": "LF",
+    "scopeOrdering": "unsigned-UTF8-bytes",
+    "runtimeClock": "receiver-explicit",
+    "runtimePaths": "adapter-owned; not comparison data",
+    "schemes": [
+      "https"
+    ],
+    "maxRedirects": 3,
+    "privateDestinations": "deny-unless-receiver-explicit",
+    "credentials": "none",
+    "budget": "whole-chain",
+    "tlsTrust": "explicit-test-trust-only",
+    "expectedDigest": "sha256:d27a6eff782cae4f2b43a74ba4013690141ee6117303a2d62b5f614939308c42",
+    "fixtureContent": "declared fixture content\n",
+    "timeoutMs": 1000,
+    "responseBytes": 65536,
+    "headerBytes": 32768
+  },
+  "cases": [
+    {
+      "id": "direct",
+      "operation": "content-fetch",
+      "input": {
+        "chain": [
+          {
+            "status": 200,
+            "destination": "public-a",
+            "body": "expected"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ]
+      }
+    },
+    {
+      "id": "redirect",
+      "operation": "content-fetch",
+      "input": {
+        "chain": [
+          {
+            "status": 302,
+            "destination": "public-a",
+            "location": "public-b"
+          },
+          {
+            "status": 200,
+            "destination": "public-b",
+            "body": "expected"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ]
+      }
+    },
+    {
+      "id": "relative-location",
+      "operation": "content-fetch",
+      "input": {
+        "chain": [
+          {
+            "status": 302,
+            "destination": "public-a",
+            "location": "relative-path"
+          },
+          {
+            "status": 200,
+            "destination": "public-a",
+            "body": "expected"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ]
+      }
+    },
+    {
+      "id": "altered-bytes",
+      "operation": "content-fetch",
+      "input": {
+        "chain": [
+          {
+            "status": 302,
+            "destination": "public-a",
+            "location": "public-b"
+          },
+          {
+            "status": 200,
+            "destination": "public-b",
+            "body": "altered"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "integrity",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "no-digest",
+      "operation": "content-fetch",
+      "input": {
+        "expectedDigest": null,
+        "chain": [
+          {
+            "status": 302,
+            "destination": "public-a",
+            "location": "public-b"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "digest-required",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "forbidden-destination",
+      "operation": "content-fetch",
+      "input": {
+        "chain": [
+          {
+            "status": 302,
+            "destination": "public-a",
+            "location": "private"
+          }
+        ]
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "destination-policy",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "dns-rebinding",
+      "operation": "content-fetch",
+      "input": {
+        "dnsValidated": "public-address",
+        "connectedAddress": "private-address"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "destination-policy",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "downgrade",
+      "operation": "content-fetch",
+      "input": {
+        "schemeTransition": [
+          "https",
+          "http"
+        ]
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "scheme-policy",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "loop",
+      "operation": "content-fetch",
+      "input": {
+        "destinations": [
+          "public-a",
+          "public-b",
+          "public-a"
+        ]
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "redirect-loop",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "hop-budget",
+      "operation": "content-fetch",
+      "input": {
+        "redirects": 4
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "redirect-budget",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "total-budget",
+      "operation": "content-fetch",
+      "input": {
+        "perHopWithinBudget": true,
+        "wholeChainWithinBudget": false
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "total-budget",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "credential-url",
+      "operation": "content-fetch",
+      "input": {
+        "urlHasCredentials": true
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "url-credentials",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "header-projection",
+      "operation": "content-fetch",
+      "input": {
+        "offeredHeaderClasses": [
+          "authorization",
+          "proxy-authorization",
+          "cookie",
+          "consumer-secret"
+        ],
+        "redirects": 1
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ],
+        "forwardedSensitiveHeaders": []
+      }
+    },
+    {
+      "id": "public-trace",
+      "operation": "content-fetch",
+      "input": {
+        "inputHasQuerySecret": true,
+        "inputHasFragmentSecret": true,
+        "inputHasPathSecret": true
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ],
+        "publicSecrets": []
+      }
+    },
+    {
+      "id": "cancel",
+      "operation": "content-fetch",
+      "input": {
+        "cancelBeforeContentAcceptance": true
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "cancelled",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    }
+  ]
+}

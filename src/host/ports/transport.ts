@@ -13,7 +13,7 @@ export async function transportBytes(location:string,digest:string,lines:readonl
  if(selected===undefined)throw Error(`REFUSE·transport ${scheme} no admitted content-request/1 policy`);
  if(selected.name==='fetch'){
   if(!['http','https'].includes(scheme))throw Error(`REFUSE·transport ${scheme} is not supported by this host adapter`);
-  return fetchBytes(location,selected,options);
+  return fetchBytes(location,selected,options,digest);
  }
  const registryPath=process.env['BOUND_TRANSPORTS'];
  if(!registryPath)throw Error(`REFUSE·transport ${scheme} no host binding for ${selected.name}`);

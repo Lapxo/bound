@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {sha256} from '../src/host/hash.ts';
-import {dependencyDelivery} from '../tools/vendor-dependencies.ts';
+import {dependencyDelivery} from '../build/vendor-dependencies.ts';
 import {verifyModuleDelivery} from '../src/host/native/module-delivery.ts';
 
 const limits={members:200,bytes:1_000_000,responseBytes:3_000_000};

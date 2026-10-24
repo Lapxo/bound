@@ -25,8 +25,8 @@ import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signer
 import { lockLines, lockStanding } from '../fold/keys.ts';
 import { keepVerdict, keptVerdict, land, landBlob, ledgerLines, storeOf } from '../land/ledger.ts';
 import { signConsentLot, verifiesOwnerLine } from '../land/sign.ts';
-import { signerFor } from '../host/signing.ts';
-import { appliedIn, ownLockOf, withOwnPreview } from '../fold/signed.ts';
+import { signerFor, assertNativeSigner } from '../host/signing.ts';
+import { appliedIn, ownLockOf, ownRecordCovered, withOwnPreview } from '../fold/signed.ts';
 import { wordOf } from '../fold/wire.ts';
 import { hasVouchedTree, landCoordinates, locationsOf, vouchedCoordinates } from '../land/vouched.ts';
 import { entriesIn, observeFile, observeText } from '../observe/files.ts';
@@ -220,16 +220,22 @@ export async function signedBatch(root: string, args: readonly string[], files: 
   }
   const keyFile = host?undefined:valueOf(args, FLAGS.keyFile);
   const keyId = host?.keyId??valueOf(args, FLAGS.key)??ownerOf(store);
+  if(drafted.length)assertNativeSigner(keyId);
   const publicKey = drafted.length ? publicKeyOf(root, keyId) : undefined;
   if (drafted.length && !publicKey) {
     hostOutput('error',`${selfName()}: unknown key ${keyId} — name it in ${selfName()}.keys\n`);
     return { kind: 'exit', code: 2 };
   }
   let signed: string[] = proposed.filter((line) => fieldOf(line, 'sig'));
-  if(host&&drafted.length){
-    notCancelled(host.signal);
-    const selected=authorityFor(lockLines(store),rootSigner(root),signaturesOf(store).admitted).admitted.find(s=>s.id===keyId);
-    for(const line of drafted){const parsed=parse(line);if(parsed.kind!=='fact'||!selected||authorityAtEpoch({...parsed.value.fields,by:keyId,epoch:String(epoch)},selected,epoch,fieldOf(line,'scope'),'authority').kind!=='admitted')throw new BoundRefusal('host/receiver-authority','REFUSE·host/receiver-authority');}
+  if(drafted.length){
+    notCancelled(host?.signal);
+    const signers=authorityFor(lockLines(store),rootSigner(root),signaturesOf(store).admitted).admitted;
+    const selected=signers.find(s=>s.id===keyId);
+    const prospective=drafted.map(line=>{const p=parse(line);if(p.kind!=='fact')throw new BoundRefusal('host/context','REFUSE·invalid lot');return canonical({...p.value.fields,by:keyId,epoch:String(epoch)});});
+    const family=wordOf(lockStanding(store),'families','region');
+    const ownership=withOwnPreview(root,()=>ownedOf(root,prospective,line=>{const p=parse(line);return p.kind==='fact'&&selected!==undefined&&authorityAtEpoch(p.value.fields,selected,epoch,fieldOf(line,'scope'),'authority').kind==='admitted';},by=>signers.find(s=>s.id===by)?.coverage??[],named,line=>{const sources=drafted.filter((_,i)=>prospective[i]===line);const heads=byFile.flatMap(([heads,lines])=>sources.some(draft=>lines.includes(draft))?heads:[]);return heads.length?heads:undefined;},(place,line)=>ownRecordCovered(line,place,family,signers)));
+    const uncovered=[...ownership.nowhere].sort((a,b)=>Buffer.compare(Buffer.from(fieldOf(a,'scope')),Buffer.from(fieldOf(b,'scope'))));
+    if(uncovered.length)throw new BoundRefusal('authority/coverage',`REFUSE·authority/coverage keyId=${keyId} scope=${fieldOf(uncovered[0]!,'scope')}`);
   }
   if (drafted.length) {
     let invoke;

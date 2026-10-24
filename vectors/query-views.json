@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "tools/samples/check-publication.mjs",
+        "samples/readers/check-publication.mjs",
         "query-views",
         "samples/yes/query-views.json",
         "samples/no/query-views.json"
@@ -149,18 +149,18 @@
         "package.json",
         "samples/no/query-views.json",
         "samples/yes/query-views.json",
-        "tools/samples/check-publication.mjs",
-        "tools/samples/evidence-worker.mjs",
-        "tools/samples/module-closure.mjs",
-        "tools/samples/public-instrument.mjs",
-        "tools/samples/run-evidence.mjs",
-        "tools/samples/run-query-views.mjs",
-        "tools/samples/run-signing.mjs",
-        "tools/samples/run-typed-walk.mjs",
-        "tools/samples/run-typed.mjs",
-        "tools/samples/run-walk-refinement.mjs",
-        "tools/samples/run-walk.mjs",
-        "tools/samples/typed-provider.mjs"
+        "samples/readers/check-publication.mjs",
+        "samples/readers/evidence-worker.mjs",
+        "samples/readers/module-closure.mjs",
+        "samples/readers/public-instrument.mjs",
+        "samples/readers/run-evidence.mjs",
+        "samples/readers/run-query-views.mjs",
+        "samples/readers/run-signing.mjs",
+        "samples/readers/run-typed-walk.mjs",
+        "samples/readers/run-typed.mjs",
+        "samples/readers/run-walk-refinement.mjs",
+        "samples/readers/run-walk.mjs",
+        "samples/readers/typed-provider.mjs"
       ]
     }
   ],

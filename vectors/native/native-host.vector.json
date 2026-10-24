@@ -27,7 +27,7 @@
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "HOST seed-library \u00b7 admitted \u00b7 recovered \u00b7 held without signing \u00b7 altered coverage cancellation format refused"
+          "pattern": "HOST seed-library · admitted · recovered · held without signing · altered coverage cancellation format refused"
         }
       ]
     },
@@ -54,7 +54,7 @@
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "HOST coastal-survey \u00b7 admitted \u00b7 recovered \u00b7 held without signing \u00b7 altered coverage cancellation format refused"
+          "pattern": "HOST coastal-survey · admitted · recovered · held without signing · altered coverage cancellation format refused"
         }
       ]
     },
@@ -82,7 +82,7 @@
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "PERSISTENT-HOST catalog \u00b7 CLI identity text sign refusal act matched \u00b7 no retained request files \u00b7 closed"
+          "pattern": "PERSISTENT-HOST catalog · CLI identity text sign refusal act matched · no retained request files · closed"
         }
       ]
     },
@@ -110,7 +110,7 @@
       "matches": [
         {
           "stream": "stdout",
-          "pattern": "PERSISTENT-HOST weather \u00b7 CLI identity text sign refusal act matched \u00b7 no retained request files \u00b7 closed"
+          "pattern": "PERSISTENT-HOST weather · CLI identity text sign refusal act matched · no retained request files · closed"
         }
       ]
     },
@@ -269,6 +269,400 @@
         {
           "stream": "stdout",
           "pattern": "request accounting preserves a red"
+        }
+      ]
+    },
+    {
+      "name": "native-host/content-contract-archive-records",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "archive-records",
+        "test/bounded-redirects.test.ts",
+        "test/dns-lifetime.test.ts",
+        "test/persistent-http-policy.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/bounded-redirects.test.ts",
+        "test/dns-lifetime.test.ts",
+        "test/persistent-http-policy.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "test/support/https-content.ts",
+        "vectors/contracts/bounded-redirects.json",
+        "docs/contracts/bounded-redirects.md",
+        "samples/reference-port/yes/catalog/standing.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"contract\":\"bounded-redirects\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"deadlineMs\":50"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"receiverGrantedConnectionVerified\":true"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"defaultDenied\":true"
+        }
+      ]
+    },
+    {
+      "name": "native-host/document-and-coverage-archive-records",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "archive-records",
+        "test/host-reading-contracts.test.ts",
+        "test/host-signing-boundary.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-reading-contracts.test.ts",
+        "test/host-signing-boundary.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "vectors/contracts/host-document-targets.json",
+        "vectors/contracts/signer-coverage-diagnostics.json",
+        "docs/contracts/host-document-targets.md",
+        "docs/contracts/signer-coverage-diagnostics.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"missing-input\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"signerCalls\":0"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"packetKeyFileRefused\":true"
+        }
+      ]
+    },
+    {
+      "name": "native-host/receipt-selection-archive-records",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "archive-records",
+        "test/receipt-selection-contract.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/receipt-selection-contract.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "vectors/contracts/receipt-output-selection.json",
+        "docs/contracts/receipt-output-selection.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"nonmaterializing\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"failed-render\""
+        }
+      ]
+    },
+    {
+      "name": "native-host/content-contract-water-quality",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "water-quality",
+        "test/bounded-redirects.test.ts",
+        "test/dns-lifetime.test.ts",
+        "test/persistent-http-policy.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/bounded-redirects.test.ts",
+        "test/dns-lifetime.test.ts",
+        "test/persistent-http-policy.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "test/support/https-content.ts",
+        "vectors/contracts/bounded-redirects.json",
+        "docs/contracts/bounded-redirects.md",
+        "samples/reference-port/yes/catalog/standing.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"contract\":\"bounded-redirects\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"deadlineMs\":50"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"receiverGrantedConnectionVerified\":true"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"defaultDenied\":true"
+        }
+      ]
+    },
+    {
+      "name": "native-host/document-and-coverage-water-quality",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "water-quality",
+        "test/host-reading-contracts.test.ts",
+        "test/host-signing-boundary.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-reading-contracts.test.ts",
+        "test/host-signing-boundary.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "vectors/contracts/host-document-targets.json",
+        "vectors/contracts/signer-coverage-diagnostics.json",
+        "docs/contracts/host-document-targets.md",
+        "docs/contracts/signer-coverage-diagnostics.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"missing-input\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"signerCalls\":0"
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"packetKeyFileRefused\":true"
+        }
+      ]
+    },
+    {
+      "name": "native-host/receipt-selection-water-quality",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "water-quality",
+        "test/receipt-selection-contract.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/receipt-selection-contract.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts",
+        "vectors/contracts/receipt-output-selection.json",
+        "docs/contracts/receipt-output-selection.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"nonmaterializing\""
+        },
+        {
+          "stream": "stdout",
+          "pattern": "\"id\":\"failed-render\""
+        }
+      ]
+    },
+    {
+      "name": "host-lifetime/seed-vault",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "canonical host lifetime and scratch ownership: seed-vault",
+        "test/host-lifetime-contract.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-lifetime-contract.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST-LIFETIME seed-vault"
+        }
+      ]
+    },
+    {
+      "name": "memo-consumption/seed-vault",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "memo consumption classification: seed-vault",
+        "test/memo-consumption.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/memo-consumption.test.ts",
+        "test/support/acting-root.ts",
+        "vectors/contracts/memo-consumption.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "MEMO-CONSUMPTION seed-vault"
+        }
+      ]
+    },
+    {
+      "name": "host-lifetime/estuary-log",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "canonical host lifetime and scratch ownership: estuary-log",
+        "test/host-lifetime-contract.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/host-lifetime-contract.test.ts",
+        "test/support/acting-root.ts",
+        "test/support/pinned-host-instrument.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "HOST-LIFETIME estuary-log"
+        }
+      ]
+    },
+    {
+      "name": "memo-consumption/estuary-log",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "memo consumption classification: estuary-log",
+        "test/memo-consumption.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/memo-consumption.test.ts",
+        "test/support/acting-root.ts",
+        "vectors/contracts/memo-consumption.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "MEMO-CONSUMPTION estuary-log"
+        }
+      ]
+    },
+    {
+      "name": "neutral-parity/seed-records",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "neutral native parity: seed-records",
+        "test/native-parity.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-parity.test.ts",
+        "test/support/native-parity-adapter.ts",
+        "docs/contracts/native-parity.md",
+        "docs/contracts/native-parity.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "NATIVE-PARITY seed-records · six fixed byte cases · stub and mutations rejected"
+        }
+      ]
+    },
+    {
+      "name": "neutral-parity/water-observations",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "--test-name-pattern",
+        "neutral native parity: water-observations",
+        "test/native-parity.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/native-parity.test.ts",
+        "test/support/native-parity-adapter.ts",
+        "docs/contracts/native-parity.md",
+        "docs/contracts/native-parity.json"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "NATIVE-PARITY water-observations · six fixed byte cases · stub and mutations rejected"
         }
       ]
     }

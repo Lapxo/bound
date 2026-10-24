@@ -1,0 +1,20 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {runConformance} from '@lapxo/bound/engine';
+import {sha256} from '../dist/host/hash.js';
+import {nativeParity} from './support/native-parity-adapter.ts';
+const encode=(text:string)=>new TextEncoder().encode(text),suite=JSON.parse(readFileSync(new URL('../docs/contracts/native-parity.json',import.meta.url),'utf8')),contract=readFileSync(new URL('../docs/contracts/native-parity.md',import.meta.url),'utf8');
+const reports:unknown[]=[];
+for(const domain of ['seed-records','water-observations'])test('neutral native parity: '+domain,async()=>{
+ assert.equal(suite.contract,sha256(contract));const selected={...suite,cases:suite.cases.filter((c:any)=>c.id.startsWith(domain+'/'))},bytes=encode(JSON.stringify(selected)),receiver={suite:sha256(bytes),contract:suite.contract,implementation:sha256('native-functions-via-test-adapter'),rules:['fold','withdrawal','regions','inventory'],refusals:['host-port/failed']},limits={timeoutMs:5000,maxBytes:1048576,maxCases:32},ports={digest:async(bytes:Uint8Array)=>sha256(bytes),evaluate:async(bytes:Uint8Array)=>nativeParity(bytes)};
+ const got=await runConformance(bytes,receiver,ports,limits);assert.equal(got.met,true);assert.equal(got.cases.length,6);
+ const fold=JSON.parse(selected.cases.find((c:any)=>c.id.endsWith('/fold')).expected)[1];assert.equal(fold.standing.length,2,'duplicate records do not create another inscription');
+ const retired=JSON.parse(selected.cases.find((c:any)=>c.id.endsWith('/withdrawal')).expected)[1];assert.equal(retired.exact.length,1);assert.equal(retired.taken.length,1,'same value in another scope survives');
+ const inventory=JSON.parse(selected.cases.find((c:any)=>c.id.endsWith('/inventory')).expected)[1];assert.equal(inventory.modules.length,1);assert.equal(inventory.modules[0].unit,'module');assert.equal(inventory.modules[0].module,'entry.js');
+ const stub=await runConformance(bytes,receiver,{...ports,evaluate:async()=>encode('["fact",null]\n')},limits);assert.equal(stub.met,false);assert.ok(stub.cases.every(c=>!c.met));
+ const changedExpected=structuredClone(selected);changedExpected.cases[0].expected+=' ';const altered=encode(JSON.stringify(changedExpected));assert.equal((await runConformance(altered,{...receiver,suite:sha256(altered)},ports,limits)).met,false);
+ const changedInput=structuredClone(selected);changedInput.cases[0].request=changedInput.cases[0].request.replaceAll('present','changed');const input=encode(JSON.stringify(changedInput));assert.equal((await runConformance(input,{...receiver,suite:sha256(input)},ports,limits)).met,false);
+ await assert.rejects(runConformance(encode(JSON.stringify(selected)+' '),receiver,ports,limits),/conformance\/integrity/);
+ reports.push({domain,report:got,stubMet:stub.met,inputMutationRefused:true,expectedMutationRefused:true,pinMutationRefused:true});if(process.env.BOUND_TEST_CAPTURE)writeFileSync(process.env.BOUND_TEST_CAPTURE+'.parity.json',JSON.stringify(reports,null,2)+'\n');console.log('NATIVE-PARITY '+domain+' · six fixed byte cases · stub and mutations rejected');
+});

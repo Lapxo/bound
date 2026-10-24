@@ -1,6 +1,9 @@
 import {canonical} from '@lapxo/topos/wire';
-import {viewsOf,placesOf} from '../fold/views.ts';
-import {viewOf} from './view.ts';
+import {viewsOf,materializedViews} from '../fold/views.ts';
+import {standingOf} from '../cli/place.ts';
+import {worldAt} from '../fold/places.ts';
+import {wordsOf} from '../fold/wire.ts';
+import {viewOf,unrendered} from './view.ts';
 import {join} from '../host/io.ts';
 import {observeText} from '../observe/files.ts';
 import {selectedWireList} from '../host/selected-topos.ts';
@@ -42,13 +45,17 @@ export function receiptRegion(fold: PlaceFold, at: number, materializedOutputs?:
     // cannot manufacture a closure from these incomplete semantic receipts.
     const place=fold.under??'';
     const materialized=materializedOutputs===undefined?undefined:new Set(materializedOutputs);
-    for(const view of viewsOf(fold.standing).values()){
+    const captured=fold.materialization;
+    const tree=captured?undefined:standingOf(fold.root);
+    const own=captured?.own??(worldAt(fold.root,place.replace(/\/$/,''))?ownLockOf(fold.root,place.replace(/\/$/,'')):[]);
+    const rootViews=captured?new Map(captured.tree.map(view=>[view.name,view])):viewsOf(tree!.lock);
+    const selected=materializedViews(fold.standing,place,own,rootViews,captured?.worlds??wordsOf(tree!.standing,'views/world'),shape=>materialized?.has(join(place,shape))===true||observeText(join(fold.root,place,shape))!==undefined);
+    for(const view of selected){
       if(!view.shape||view.regions.some(region=>region.name==='receipts'))continue;
-      const places=placesOf(fold.standing,view);if(places.length&&!places.includes(place))continue;
       // Delivery selection is captured before copying an already closed source.
       // Missing selected outputs still fail; absence never selects a subset.
       if(materialized&&!materialized.has(join(place,view.shape)))continue;
-      if(observeText(join(fold.root,place,view.shape))!==viewOf(fold,view))return [];
+      if(unrendered(fold,view).length||observeText(join(fold.root,place,view.shape))!==viewOf(fold,view))return [];
     }
     const algorithm = hash('').split(':')[0]!;
     const current = readersBehind().length === 0;

@@ -35,7 +35,7 @@ for(const [label,region,entry,scheme] of [['summary','summary','run.mjs','alpha'
   writeFileSync(unauthorizedProposal,row(`transport/${scheme}`,'id','unauthorized')+'\n');
   const beforeUnauthorized=readFileSync(join(root,'TARGET.bound'));
   const unauthorized=run('uncovered transport declaration',['land',unauthorizedProposal,'--key','limited','--key-file',limitedKey],1);
-  assert.match(unauthorized.stderr,/REFUSE·signer the requested records are not covered at their selected destination/);assert.match(unauthorized.stderr,/nothing landed/);
+  assert.ok(unauthorized.stderr.includes(`REFUSE·authority/coverage keyId=limited scope=transport/${scheme}`));assert.equal(JSON.parse(unauthorized.stderr.trim().split('\n').at(-1)!).code,'authority/coverage');assert.deepEqual(readFileSync(join(root,'TARGET.bound')),beforeUnauthorized,'uncovered admission leaves the lock unchanged');
   const uncoveredFields={scope:`transport/${scheme}`,measure:'id',value:'unauthorized',form:'alphabet',role:'writes',at:'policy:fixture',by:'limited',epoch:'3'};
   const uncoveredSignature=sign(null,Buffer.from(signedBytes(uncoveredFields)),limited.privateKey).toString('base64');
   assert.equal(verify(null,Buffer.from(signedBytes(uncoveredFields)),limited.publicKey,Buffer.from(uncoveredSignature,'base64')),true);
