@@ -5,7 +5,7 @@ import{mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync,symlinkSync}from'
 const hash=(bytes:Uint8Array|string)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 /** Receiver-owned public API vectors. Values returned by the producer are never
  * replaced by the expected cause: successful operations remain successful. */
-export async function currentProducerFixture(host:any,candidateRoot:string,name='current'){
+export async function currentProducerFixture(host:any,candidateRoot:string,name='current',referenceAPI?:{native:any;reference:any}){
  const temp=mkdtempSync(join(tmpdir(),'bound-current-producers-')),ops=new Map<string,()=>unknown>(),cleanups=[()=>rmSync(temp,{recursive:true,force:true})];try{
  const add=(code:string,run:()=>unknown)=>{if(ops.has(code))throw Error('duplicate producer');ops.set(code,run)};
  const yes=JSON.parse(readFileSync(join(candidateRoot,'samples/installed-package/yes.json'),'utf8')),no=JSON.parse(readFileSync(join(candidateRoot,'samples/installed-package/no.json'),'utf8'));
@@ -71,7 +71,7 @@ export async function currentProducerFixture(host:any,candidateRoot:string,name=
  add('host/document-target',()=>withHost(h=>h.request({verb:'fold',args:['logical-document.bound']}).then(observed)));
  add('host/input',()=>withHost(h=>h.request({verb:'fold',args:['@input/missing-document']}).then(observed)));
  add('authority/coverage',()=>withHost(h=>h.request({...command,signer:'lane',args:['@input/lot','--key','lane']}).then(observed),{signers:new Map([['lane',{name:'file',sign:async()=>{throw Error('uncovered signer must not be acquired')}}]])}));
- const nativeReference=await import(pathToFileURL(join(candidateRoot,'dist/host/reference-native-api.js')).href),reference=await import(pathToFileURL(join(candidateRoot,'dist/host/reference-authenticated.js')).href);
+ const nativeReference=referenceAPI?.native??await import(pathToFileURL(join(candidateRoot,'dist/host/reference-native-api.js')).href),reference=referenceAPI?.reference??await import(pathToFileURL(join(candidateRoot,'dist/host/reference-authenticated.js')).href);
  const contentProbe=await httpsContent((_request,response)=>response.end('altered content'));cleanups.push(()=>{void contentProbe.close()});
  const transport=[common('wire/transport','id','content-request/1'),common('transport/https','id','fetch'),canonical({scope:'transport/timeout',role:'writes',form:'interval',measure:'milliseconds',value:'0..1000',by:'target',at:'policy:fixture'}),canonical({scope:'transport/response-bytes',role:'writes',form:'interval',measure:'bytes',value:'0..8192',by:'target',at:'policy:fixture'})];
  add('reference/integrity',()=>nativeReference.inspectReference(reference.encodeReference({class:'standing',algorithm:'sha256',digest:'a'.repeat(64),blob:hash('expected content'),source:contentProbe.origin+'/content'}),transport,contentProbe.options));

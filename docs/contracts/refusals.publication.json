@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/refusals.vector.json",
-      "digest": "sha256:41cb05610bfcfa3d2af8c5fabff34169769d3a2acb72442cff14aefa71afac61"
+      "digest": "sha256:a4a535b702dae18791220d498e072c90045186747403ad8682e1d4a375733ce1"
     },
     {
       "role": "no",
