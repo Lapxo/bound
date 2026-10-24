@@ -109,7 +109,8 @@
         "docs/contracts/conformance.json",
         "docs/contracts/determinism.bound",
         "test/support/conformance-catalog-current.ts",
-        "test/support/pinned-host-instrument.ts"
+        "test/support/pinned-host-instrument.ts",
+        "test/support/https-content.ts"
       ],
       "timeoutMs": 15000,
       "maxBytes": 262144,
@@ -139,7 +140,8 @@
         "docs/contracts/conformance.json",
         "docs/contracts/determinism.bound",
         "test/support/conformance-catalog-current.ts",
-        "test/support/pinned-host-instrument.ts"
+        "test/support/pinned-host-instrument.ts",
+        "test/support/https-content.ts"
       ],
       "timeoutMs": 15000,
       "maxBytes": 262144,
@@ -217,7 +219,8 @@
         "test/computation-cli.test.ts",
         "docs/contracts/refusals.bound",
         "docs/contracts/conformance.json",
-        "docs/contracts/determinism.bound"
+        "docs/contracts/determinism.bound",
+        "test/support/pinned-host-instrument.ts"
       ],
       "timeoutMs": 15000,
       "maxBytes": 262144,

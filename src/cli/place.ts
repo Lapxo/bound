@@ -1,3 +1,4 @@
+import {ownLockOf} from '../fold/signed.ts';
 import{traceWork}from'../host/work-trace.ts';
 import {hostOutput} from '../host/call-context.ts';
 import { refreshRetainedJudgment } from './retained-judgment.ts';
@@ -22,11 +23,11 @@ import type { OpenCell } from '../render/open.ts';
 import { answersElsewhere, foldCeilings, ceilingSummary } from '../fold/ceilings.ts';
 import type { CeilingFold } from '../fold/ceilings.ts';
 import { keyOf, keyFor, lockLines, lockStanding } from '../fold/keys.ts';
-import { wordFrom, wordOf, wordOn } from '../fold/wire.ts';
+import { wordFrom, wordOf, wordOn, wordsOf } from '../fold/wire.ts';
 import { bytesDigest, instrumentOf, signaturesOf } from '../fold/digests.ts';
 import { claimKey, fieldOf, fieldsOf, isWire } from '../fold/claims.ts';
 import { canonical, LOCK, parse } from '@lapxo/topos/wire';
-import { classDefaults, kindsOf, placesIn, spoken } from '../fold/places.ts';
+import { classDefaults, kindsOf, placesIn, spoken, worldAt } from '../fold/places.ts';
 import { isCeiling } from '../fold/configures.ts';
 import { observedClaims, placedReadings } from '../fold/observed.ts';
 import { capsuleReadingsOver, currentReceiptObservations, retiredReceiptHistory } from '../observe/regions.ts';
@@ -56,6 +57,8 @@ export interface PlaceFold {
   readonly under?: string;
   readonly epoch: number;
   readonly standing: readonly string[];
+  /** Captured selection context survives projection to a delivery directory without installing authority there. */
+  readonly materialization?: {readonly tree:readonly View[];readonly worlds:readonly string[];readonly own:readonly string[]};
   readonly claims: number;
   readonly forks: readonly Fork[];
   readonly grey: readonly string[];
@@ -304,6 +307,7 @@ function foldPlaceCurrent(root: string, entry: string, under?: string, look = tr
   const place: PlaceFold = {
     release: releasePolicy({ standing: policyStanding, demands, paid, ceilings, readings: folded, faults, verdicts:attestationObservations(policyStanding.map(line=>{const r=parseEvidenceFields(line);return r.kind==='fact'?r.value.fields:{};}),second), snapshot: { fold: taken, instrument: self } }),
     root, store, ...(under ? { under } : {}), epoch: epochOf(owned), standing, claims: rendered.standing,
+    materialization:{tree:[...viewsOf(attested).values()],worlds:wordsOf(standing,'views/world'),own:worldAt(root,(under??'').replace(/\/$/,''))?ownLockOf(root,(under??'').replace(/\/$/,'')).filter(line=>fieldOf(line,'scope').startsWith(wordFrom(standing,'families','view',lockStanding(store))+'/')):[]},
     forks: rendered.forks, grey: rendered.grey, refused: rendered.refused, vacuous: rendered.vacuous.length,
     demands, paid, missing,
     history: live.history.filter((line) => fieldOf(line, 'needs').split('|').filter(Boolean).some(inside)),

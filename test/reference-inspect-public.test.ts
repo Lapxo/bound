@@ -1,12 +1,13 @@
+import{httpsContent}from'./support/https-content.ts';
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {readFileSync} from 'node:fs';
 import {canonical} from '@lapxo/topos/wire';
 import {readSemanticStanding,semanticStandingBytes} from '@lapxo/topos/core';
-import {sha256} from '../src/host/hash.ts';
-import {encodeReference} from '../src/host/reference-profile.ts';
-import {inspectReference as implementation} from '../src/host/reference.ts';
-import {inspectReference} from '../src/host/reference-native-api.ts';
+import {sha256} from '../dist/host/hash.js';
+import {encodeReference} from '../dist/host/reference-profile.js';
+import {inspectReference as implementation} from '../dist/host/reference.js';
+import {inspectReference} from '../dist/host/reference-native-api.js';
 
 const policy=[
  canonical({scope:'wire/transport',role:'writes',form:'alphabet',measure:'id',value:'content-request/1'}),
@@ -20,14 +21,15 @@ test('public native inspection is the CLI implementation, not another reader',()
 for(const place of ['catalog','route-notes'])test('public inspection preserves the existing standing without authenticating it: '+place,async t=>{
  const bytes=readFileSync(new URL('../samples/reference-port/yes/'+place+'/standing.json',import.meta.url));
  const document=JSON.parse(bytes.toString()),standing=semanticStandingBytes(readSemanticStanding(document.standing));
- const reference=encodeReference({class:'standing',algorithm:'sha256',digest:sha256(standing).slice(7),blob:sha256(bytes),source:'https://example.invalid/'+place});
- const fetch=t.mock.method(globalThis,'fetch',async()=>new Response(bytes));
- const result=await inspectReference(reference,policy);
+ let received=0,altered=false;const server=await httpsContent((_req,res)=>{received++;res.end(altered?Buffer.concat([bytes,Buffer.from(' ')]):bytes)});try{
+ const reference=encodeReference({class:'standing',algorithm:'sha256',digest:sha256(standing).slice(7),blob:sha256(bytes),source:server.origin+'/'+place});
+ const result=await inspectReference(reference,policy,server.options);
  assert.equal(result.standing,standing);
  assert.equal(result.authentication,'not demonstrated; inspect only');
- assert.equal(fetch.mock.callCount(),1);
+ assert.equal(received,1);
  await assert.rejects(()=>inspectReference(reference,[]),/no admitted content-request\/1 policy/);
- assert.equal(fetch.mock.callCount(),1,'missing authority must not start transport');
- fetch.mock.mockImplementation(async()=>new Response(Buffer.concat([bytes,Buffer.from(' ')])));
- await assert.rejects(()=>inspectReference(reference,policy),/blob integrity/);
+ assert.equal(received,1,'missing authority must not start transport');
+ altered=true;
+ await assert.rejects(()=>inspectReference(reference,policy,server.options),/digest mismatch/);
+ }finally{await server.close()}
 });

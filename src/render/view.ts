@@ -206,8 +206,14 @@ export function viewOf(fold: PlaceFold, view: View, prepared?: ReadonlyMap<strin
   return text;
 }
 
-export function renderedOf(fold: PlaceFold, view: { readonly name: string; readonly shape: string; readonly regions: readonly { readonly name: string; readonly at: number }[] }): readonly string[] {
-  const answers = capsuleAnswers(fold, [{ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape }])[0];
+/** Text and provenance consume the same native answers in one bounded batch. */
+export function renderedViews(fold:PlaceFold,views:readonly View[]):ReadonlyMap<View,{readonly text:string;readonly said:readonly string[]}>{
+  const answers=capsuleAnswers(fold,views.map(view=>({asking:view.regions.filter(asked=>REGIONS[asked.name]===undefined),shape:view.shape})));
+  return new Map(views.map((view,i)=>{const answer=answers[i]!;const prepared=new Map([...answer].map(([name,value])=>[name,value.lines] as const));return[view,{text:viewOf(fold,view,prepared),said:renderedOf(fold,view,answer)}] as const}));
+}
+
+export function renderedOf(fold: PlaceFold, view: { readonly name: string; readonly shape: string; readonly regions: readonly { readonly name: string; readonly at: number }[] }, prepared?:ReadonlyMap<string,{readonly by:string}>): readonly string[] {
+  const answers = prepared??capsuleAnswers(fold, [{ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape }])[0];
   const cone = view.shape ? bytesDigest(fold.store, new TextEncoder().encode(fold.standing.filter((line) => fieldOf(line, 'shape') === view.shape || fieldOf(line, 'needs').split('|').includes(view.shape)).join('\n'))) : '';
   const head = cone ? [canonical({ scope: `rendered/${view.name}/cone`, role: 'writes', form: 'alphabet', measure: 'digest', value: cone, at: `place:${view.shape}`, by: 'target' })] : [];
   return [...head, ...view.regions.flatMap((asked) => {

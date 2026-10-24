@@ -13,13 +13,13 @@ Unchanged regions can retain valid receipts. A changed input reopens the regions
 ## Install and use
 
 ```sh
-npm install @lapxo/bound@0.2.6
+npm install @lapxo/bound@0.2.7
 ```
 
 In a place with admitted declarations and closed public receipts, check the existing evidence without running its readers again:
 
 ```sh
-npx @lapxo/bound@0.2.6 fold --check
+npx @lapxo/bound@0.2.7 fold --check
 ```
 
 For a change, prepare a proposal, sign with a key already covered by the place, admit the signed lot, then fold and inspect the result. Signing and admission do not by themselves pay a requirement. The [usage guide](docs/usage.md) covers keys, coverage, proposals, withdrawals and release policy.
@@ -90,3 +90,7 @@ See [physical lines](docs/contracts/physical-lines.md), [profile composition](do
 - [Obligations](https://github.com/Lapxo/obligations): the unchanged constraint algebra.
 
 The underlying object is described in [Two-Sided Constraints on a Valued Lattice](https://doi.org/10.5281/zenodo.21858428), DOI `10.5281/zenodo.21858428`.
+
+## Native parity vectors
+
+The [neutral byte vectors](docs/contracts/native-parity.json) cover standing folds, exact withdrawals, regional aggregation and module inventory. They use the existing receiver-pinned conformance verifier; a passing native baseline does not certify another implementation or independent construction. See the [parity contract](docs/contracts/native-parity.md).

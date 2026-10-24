@@ -1,0 +1,127 @@
+{
+  "format": "neutral-conformance-fixture/1",
+  "contract": "host-lifetime",
+  "purpose": "acceptance data; no evaluator or new wire form",
+  "domains": [
+    "seed-vault",
+    "estuary-log"
+  ],
+  "policy": {
+    "reservation": "canonical place per consumer process",
+    "crossProcess": "serialize; existing protocol",
+    "scratch": "receiver-selected parent; delete only created descendants",
+    "limits": "existing admitted finite budgets unchanged"
+  },
+  "cases": [
+    {
+      "id": "canonical-alias-busy",
+      "operations": [
+        {
+          "operation": "start",
+          "place": "P"
+        },
+        {
+          "operation": "start",
+          "place": "alias(P)"
+        }
+      ],
+      "expected": {
+        "second": "refuse",
+        "code": "host/busy",
+        "children": 1
+      }
+    },
+    {
+      "id": "scratch-failure-release",
+      "operations": [
+        {
+          "operation": "start",
+          "scratchParent": "missing-parent"
+        },
+        {
+          "operation": "start",
+          "scratchParent": "owned-parent"
+        }
+      ],
+      "expected": {
+        "first": "refuse",
+        "second": "fact",
+        "leakedReservations": 0
+      }
+    },
+    {
+      "id": "close-busy-until-child-close",
+      "operations": [
+        {
+          "operation": "close",
+          "await": false
+        },
+        {
+          "operation": "start",
+          "place": "P"
+        },
+        {
+          "operation": "await-close"
+        },
+        {
+          "operation": "start",
+          "place": "P"
+        }
+      ],
+      "expected": {
+        "duringClose": "host/busy",
+        "afterClose": "fact",
+        "ownedTemporaryFiles": 0
+      }
+    },
+    {
+      "id": "idempotent-close",
+      "operations": [
+        {
+          "operation": "close",
+          "calls": 2
+        }
+      ],
+      "expected": {
+        "both": "resolved",
+        "children": 0
+      }
+    },
+    {
+      "id": "consumer-files-preserved",
+      "operations": [
+        {
+          "operation": "write-consumer-sibling",
+          "bytes": "sentinel"
+        },
+        {
+          "operation": "request",
+          "outcome": "refuse"
+        },
+        {
+          "operation": "close"
+        }
+      ],
+      "expected": {
+        "consumerSibling": "same-bytes",
+        "deletedConsumerPaths": 0
+      }
+    },
+    {
+      "id": "existing-cancellation-and-disconnect",
+      "operations": [
+        {
+          "operation": "cancel-active-request"
+        },
+        {
+          "operation": "disconnect-consumer"
+        }
+      ],
+      "expected": {
+        "partialAdmission": false,
+        "orphanChild": false,
+        "ownedTemporaryFiles": 0
+      }
+    }
+  ]
+}

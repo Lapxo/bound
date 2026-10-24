@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/native-host.vector.json",
-      "digest": "sha256:13d0d8a9f1cda39e861a36d835f5af683579c9d3a0b60eefe7fee71e3094ddc4"
+      "digest": "sha256:e85b094a2359d8c80d91807f4acfd54b86f89bc749e34a1bb4534bb8c565ab47"
     },
     {
       "role": "no",

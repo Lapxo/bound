@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {canonical} from '@lapxo/topos/wire';
 const sha=(s:string)=>'sha256:'+createHash('sha256').update(s).digest('hex');
 const row=(scope:string,measure:string,value:string,about?:string)=>canonical({scope,measure,value,form:'alphabet',role:'writes',by:'target',at:'policy:fixture',...(about?{about}:{})});
-const cli=new URL('../../src/cli/verb.ts',import.meta.url).pathname;
+const cli=new URL('../../dist/cli/verb.js',import.meta.url).pathname;
 export interface ActingRootFixtureOptions {readonly places?:readonly string[];readonly entry?:string;readonly fields?:string;readonly families?:string;readonly signaturePrefix?:'wire'|'audit/wire';readonly sourceResources?:{bytes:number;lines:number;places:number;acts:number};readonly extraBootstrapRows?:readonly string[];readonly runLimits?:{timeoutMs:number;maxBytes:number}}
 export function actingRootFixture(dataset:string,captures:unknown[]=[],options:ActingRootFixtureOptions={}){
  const placeNames=options.places??['catalog','inventory'];

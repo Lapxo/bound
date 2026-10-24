@@ -1,0 +1,15 @@
+import{test}from'node:test';import assert from'node:assert/strict';import{readFileSync}from'node:fs';import{canonical}from'@lapxo/topos/wire';import{encodeLocatedReference}from'@lapxo/topos/contract';import{readSemanticStanding,semanticStandingBytes}from'@lapxo/topos/core';import{startNativeHost}from'@lapxo/bound/host';import{sha256}from'../dist/host/hash.js';import{actingRootFixture}from'./support/acting-root.ts';import{pinnedHostInstrument}from'./support/pinned-host-instrument.ts';import{httpsContent}from'./support/https-content.ts';
+const pinned=pinnedHostInstrument(new URL('../',import.meta.url).pathname);process.once('exit',pinned.close);
+const row=(scope:string,measure:string,value:string,form='alphabet')=>canonical({scope,measure,value,form,role:'writes',by:'target',at:'policy:fixture'});
+for(const domain of['archive-records','water-quality'])test(`receiver-selected HTTPS policy crosses the persistent host boundary: ${domain}`,async()=>{
+ const body=readFileSync(new URL('../samples/reference-port/yes/catalog/standing.json',import.meta.url)),standing=semanticStandingBytes(readSemanticStanding(JSON.parse(body.toString()).standing));
+ let requests=0;const server=await httpsContent((request,response)=>{requests++;if(request.url!.startsWith('/redirect')){response.writeHead(302,{location:'/direct'});response.end()}else response.end(body)});
+ const f=actingRootFixture(domain,[],{entry:pinned.entry,extraBootstrapRows:[row('wire/transport','id','content-request/1'),row('transport/https','id','fetch'),row('transport/timeout','milliseconds','0..1000','interval'),row('transport/response-bytes','bytes','0..65536','interval')]});
+ const before=readFileSync(f.root+'/TARGET.bound'),reference=encodeLocatedReference({class:'standing',algorithm:'sha256',digest:sha256(standing).slice(7),blob:sha256(body),location:server.origin+'/redirect','location-class':'holder'});
+ const base={place:f.root,instrument:pinned.instrument,expectedInstrument:pinned.instrument.digest,limits:{requestBytes:1048576,responseBytes:1048576,timeoutMs:15000,heapMiB:256,queuedRequests:4},environment:process.env};
+ let host;try{
+  host=await startNativeHost(base);const offered={verb:'fold' as const,args:[reference],http:server.policy};const denied=await host.request(offered);assert.notEqual(denied.status,0,JSON.stringify(denied));assert.equal(requests,0);await host.close();
+  host=await startNativeHost({...base,http:server.policy});const accepted=await host.request({verb:'fold',args:[reference]});assert.equal(accepted.status,0,accepted.stderr);assert.equal(requests,2);assert.match(accepted.stderr,/TRANSPORT https:\/\/localhost:\d+ 302 redirect/);assert.match(accepted.stderr,/TRANSPORT https:\/\/localhost:\d+ 200 content/);assert.match(accepted.stdout,/INSPECT.*unauthenticated/);assert.deepEqual(readFileSync(f.root+'/TARGET.bound'),before);
+  console.log(JSON.stringify({domain,node:process.version,defaultDenied:true,requests,trace:accepted.stderr}));
+ }finally{await host?.close();f.close();await server.close()}
+});

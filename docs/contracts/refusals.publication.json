@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/refusals.md",
-      "digest": "sha256:bf56e1d2fb5c30aa4effa6aa2326820d09019cbec6b032cc7d7a94abfcc600d9"
+      "digest": "sha256:b7a91ac6e665d17487734b2703a8f5ba569be745323a7410125675683aeb6bee"
     },
     {
       "role": "yes",
@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/refusals.vector.json",
-      "digest": "sha256:602b0d9aa6674cd0f63e3b93f4150df4b86247cb659758f051ce05b076f7157f"
+      "digest": "sha256:41cb05610bfcfa3d2af8c5fabff34169769d3a2acb72442cff14aefa71afac61"
     },
     {
       "role": "no",

@@ -1,0 +1,102 @@
+{
+  "profile": "bound-conformance@1",
+  "contract": "sha256:23181d401ee1992826100e91ea90dc93042ce14f658e21483f52008ecaeb5993",
+  "cases": [
+    {
+      "id": "seed-records/fold",
+      "covers": [
+        "rule/fold"
+      ],
+      "request": "{\"operation\":\"fold\",\"lines\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/b value=present\"]}",
+      "expected": "[\"fact\",{\"standing\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/b value=present\"],\"superseded\":[],\"retracted\":[],\"forks\":[],\"vacuous\":[]}]\n"
+    },
+    {
+      "id": "seed-records/withdrawal",
+      "covers": [
+        "rule/withdrawal"
+      ],
+      "request": "{\"operation\":\"withdrawal\",\"withdraws\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=withdraw\"],\"held\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/b value=present\"]}",
+      "expected": "[\"fact\",{\"taken\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\"],\"exact\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\"],\"inexact\":[],\"open\":[]}]\n"
+    },
+    {
+      "id": "seed-records/regions",
+      "covers": [
+        "rule/regions"
+      ],
+      "request": "{\"operation\":\"regions\",\"standing\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id res=1 role=writes scope=region/a value=seed-records/a\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id res=1 role=writes scope=region/b value=seed-records/b\"],\"ceilings\":[],\"cells\":[{\"question\":\"sample\",\"measure\":\"count\",\"value\":\"2..2\",\"place\":\"seed-records/a/x\"},{\"question\":\"sample\",\"measure\":\"count\",\"value\":\"3..3\",\"place\":\"seed-records/b/y\"}]}",
+      "expected": "[\"fact\",{\"named\":[\"\",\"seed-records/a\",\"seed-records/b\"],\"bounds\":[],\"summaries\":[[\"\",2,[[\"sample count\",5]],[[\"sample count\",[[\"2\",1],[\"3\",1]]]]],[\"seed-records/a\",1,[[\"sample count\",2]],[[\"sample count\",[[\"2\",1]]]]],[\"seed-records/b\",1,[[\"sample count\",3]],[[\"sample count\",[[\"3\",1]]]]]]}]\n"
+    },
+    {
+      "id": "seed-records/inventory",
+      "covers": [
+        "rule/inventory"
+      ],
+      "request": "{\"operation\":\"inventory\",\"needs\":[\"consumer/value\"],\"snapshots\":[{\"identity\":\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\",\"entry\":\"entry.js\",\"members\":[{\"coordinate\":\"entry.js\",\"source\":\"export const value=1;\\n\",\"digest\":\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\"},{\"coordinate\":\"unreached.js\",\"source\":\"export const unused=2;\",\"digest\":\"sha256:cdb92d681efe52b6bcd28dd07ab47a9dee55822117d7bf0bd7078943ec5731b1\"}]}],\"sources\":[{\"snapshot\":\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\",\"source\":\"example/seed-records\",\"version\":\"1.0.0\"}],\"context\":{\"scope\":\"consumer/modules\",\"by\":\"consumer\",\"at\":\"policy:module-inventory\"},\"limits\":{\"members\":20,\"bytes\":100000,\"responseBytes\":200000}}",
+      "expected": "[\"fact\",{\"format\":\"verified-module-inventory/1\",\"delivery\":\"sha256:51d39515085c3e6caf3ede193207948a2923f43afc57057a6ab33040734bc739\",\"closure\":\"sha256:cbd9987c8778348f7d5801776186fd9607df3916035fe246705e64a3cf5326ba\",\"modules\":[{\"unit\":\"module\",\"source\":\"example/seed-records\",\"version\":\"1.0.0\",\"snapshot\":\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\",\"module\":\"entry.js\",\"digest\":\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\",\"reachedFrom\":\"sha256:cbd9987c8778348f7d5801776186fd9607df3916035fe246705e64a3cf5326ba\"}],\"lines\":\"bound-lock/1 about=\\\"{\\\\\\\"format\\\\\\\":\\\\\\\"module-inventory-record/1\\\\\\\",\\\\\\\"unit\\\\\\\":\\\\\\\"module\\\\\\\",\\\\\\\"source\\\\\\\":\\\\\\\"example/seed-records\\\\\\\",\\\\\\\"version\\\\\\\":\\\\\\\"1.0.0\\\\\\\",\\\\\\\"snapshot\\\\\\\":\\\\\\\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\\\\\\\",\\\\\\\"module\\\\\\\":\\\\\\\"entry.js\\\\\\\",\\\\\\\"digest\\\\\\\":\\\\\\\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\\\\\\\",\\\\\\\"reachedFrom\\\\\\\":\\\\\\\"sha256:cbd9987c8778348f7d5801776186fd9607df3916035fe246705e64a3cf5326ba\\\\\\\"}\\\" at=policy:module-inventory by=consumer form=alphabet measure=digest role=writes scope=consumer/modules/a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374/entry.js value=sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\\n\"}]\n"
+    },
+    {
+      "id": "seed-records/fold-refusal",
+      "covers": [
+        "refusal/host-port/failed"
+      ],
+      "request": "{\"operation\":\"fold\",\"lines\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/seed-records/a value=different\"]}",
+      "expected": "[\"refuse\",\"host-port/failed\"]\n"
+    },
+    {
+      "id": "seed-records/inventory-refusal",
+      "covers": [
+        "refusal/host-port/failed"
+      ],
+      "request": "{\"operation\":\"inventory\",\"needs\":[\"consumer/value\"],\"snapshots\":[{\"identity\":\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\",\"entry\":\"entry.js\",\"members\":[{\"coordinate\":\"entry.js\",\"source\":\"export const value=1;\\n\",\"digest\":\"sha256:544b8b000ae83588b87ec7afc7e1b660dc5a6fab83ce0973138e8ee929df3ca1\"},{\"coordinate\":\"unreached.js\",\"source\":\"export const unused=2;\",\"digest\":\"sha256:cdb92d681efe52b6bcd28dd07ab47a9dee55822117d7bf0bd7078943ec5731b1\"}]}],\"sources\":[{\"snapshot\":\"sha256:a8355c0c85d48c8562acc0676f877b1adcae86590522003538259fbc347c8374\",\"source\":\"example/seed-records\",\"version\":\"1.0.0\"}],\"context\":{\"scope\":\"consumer/modules\",\"by\":\"consumer\",\"at\":\"policy:module-inventory\"},\"limits\":{\"members\":20,\"bytes\":100000,\"responseBytes\":200000}}",
+      "expected": "[\"refuse\",\"host-port/failed\"]\n"
+    },
+    {
+      "id": "water-observations/fold",
+      "covers": [
+        "rule/fold"
+      ],
+      "request": "{\"operation\":\"fold\",\"lines\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/b value=present\"]}",
+      "expected": "[\"fact\",{\"standing\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/b value=present\"],\"superseded\":[],\"retracted\":[],\"forks\":[],\"vacuous\":[]}]\n"
+    },
+    {
+      "id": "water-observations/withdrawal",
+      "covers": [
+        "rule/withdrawal"
+      ],
+      "request": "{\"operation\":\"withdrawal\",\"withdraws\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=withdraw\"],\"held\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/b value=present\"]}",
+      "expected": "[\"fact\",{\"taken\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\"],\"exact\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\"],\"inexact\":[],\"open\":[]}]\n"
+    },
+    {
+      "id": "water-observations/regions",
+      "covers": [
+        "rule/regions"
+      ],
+      "request": "{\"operation\":\"regions\",\"standing\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id res=1 role=writes scope=region/a value=water-observations/a\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id res=1 role=writes scope=region/b value=water-observations/b\"],\"ceilings\":[],\"cells\":[{\"question\":\"sample\",\"measure\":\"count\",\"value\":\"2..2\",\"place\":\"water-observations/a/x\"},{\"question\":\"sample\",\"measure\":\"count\",\"value\":\"3..3\",\"place\":\"water-observations/b/y\"}]}",
+      "expected": "[\"fact\",{\"named\":[\"\",\"water-observations/a\",\"water-observations/b\"],\"bounds\":[],\"summaries\":[[\"\",2,[[\"sample count\",5]],[[\"sample count\",[[\"2\",1],[\"3\",1]]]]],[\"water-observations/a\",1,[[\"sample count\",2]],[[\"sample count\",[[\"2\",1]]]]],[\"water-observations/b\",1,[[\"sample count\",3]],[[\"sample count\",[[\"3\",1]]]]]]}]\n"
+    },
+    {
+      "id": "water-observations/inventory",
+      "covers": [
+        "rule/inventory"
+      ],
+      "request": "{\"operation\":\"inventory\",\"needs\":[\"consumer/value\"],\"snapshots\":[{\"identity\":\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\",\"entry\":\"entry.js\",\"members\":[{\"coordinate\":\"entry.js\",\"source\":\"export const value=1;\\n\",\"digest\":\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\"},{\"coordinate\":\"unreached.js\",\"source\":\"export const unused=2;\",\"digest\":\"sha256:cdb92d681efe52b6bcd28dd07ab47a9dee55822117d7bf0bd7078943ec5731b1\"}]}],\"sources\":[{\"snapshot\":\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\",\"source\":\"example/water-observations\",\"version\":\"1.0.0\"}],\"context\":{\"scope\":\"consumer/modules\",\"by\":\"consumer\",\"at\":\"policy:module-inventory\"},\"limits\":{\"members\":20,\"bytes\":100000,\"responseBytes\":200000}}",
+      "expected": "[\"fact\",{\"format\":\"verified-module-inventory/1\",\"delivery\":\"sha256:86640ccc1d58b7bf63b1bd17dff7041815ca1691d2425b096a0419fafbe15e35\",\"closure\":\"sha256:9ecca8231e8d44d9801f837ef7798bf4f03bf051f10249b0b8112dd36f0f46c8\",\"modules\":[{\"unit\":\"module\",\"source\":\"example/water-observations\",\"version\":\"1.0.0\",\"snapshot\":\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\",\"module\":\"entry.js\",\"digest\":\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\",\"reachedFrom\":\"sha256:9ecca8231e8d44d9801f837ef7798bf4f03bf051f10249b0b8112dd36f0f46c8\"}],\"lines\":\"bound-lock/1 about=\\\"{\\\\\\\"format\\\\\\\":\\\\\\\"module-inventory-record/1\\\\\\\",\\\\\\\"unit\\\\\\\":\\\\\\\"module\\\\\\\",\\\\\\\"source\\\\\\\":\\\\\\\"example/water-observations\\\\\\\",\\\\\\\"version\\\\\\\":\\\\\\\"1.0.0\\\\\\\",\\\\\\\"snapshot\\\\\\\":\\\\\\\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\\\\\\\",\\\\\\\"module\\\\\\\":\\\\\\\"entry.js\\\\\\\",\\\\\\\"digest\\\\\\\":\\\\\\\"sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\\\\\\\",\\\\\\\"reachedFrom\\\\\\\":\\\\\\\"sha256:9ecca8231e8d44d9801f837ef7798bf4f03bf051f10249b0b8112dd36f0f46c8\\\\\\\"}\\\" at=policy:module-inventory by=consumer form=alphabet measure=digest role=writes scope=consumer/modules/728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e/entry.js value=sha256:ec5d1836662162b8995d8dc748b810fcba399efc7c6d9725886dd8bdd2059cef\\n\"}]\n"
+    },
+    {
+      "id": "water-observations/fold-refusal",
+      "covers": [
+        "refusal/host-port/failed"
+      ],
+      "request": "{\"operation\":\"fold\",\"lines\":[\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=present\",\"bound-lock/1 at=policy:fixture by=author-a form=alphabet measure=id role=writes scope=sample/water-observations/a value=different\"]}",
+      "expected": "[\"refuse\",\"host-port/failed\"]\n"
+    },
+    {
+      "id": "water-observations/inventory-refusal",
+      "covers": [
+        "refusal/host-port/failed"
+      ],
+      "request": "{\"operation\":\"inventory\",\"needs\":[\"consumer/value\"],\"snapshots\":[{\"identity\":\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\",\"entry\":\"entry.js\",\"members\":[{\"coordinate\":\"entry.js\",\"source\":\"export const value=1;\\n\",\"digest\":\"sha256:544b8b000ae83588b87ec7afc7e1b660dc5a6fab83ce0973138e8ee929df3ca1\"},{\"coordinate\":\"unreached.js\",\"source\":\"export const unused=2;\",\"digest\":\"sha256:cdb92d681efe52b6bcd28dd07ab47a9dee55822117d7bf0bd7078943ec5731b1\"}]}],\"sources\":[{\"snapshot\":\"sha256:728ff3c53d98db908a7ace22f637a07aa6818c2685daf8494062995e6abb394e\",\"source\":\"example/water-observations\",\"version\":\"1.0.0\"}],\"context\":{\"scope\":\"consumer/modules\",\"by\":\"consumer\",\"at\":\"policy:module-inventory\"},\"limits\":{\"members\":20,\"bytes\":100000,\"responseBytes\":200000}}",
+      "expected": "[\"refuse\",\"host-port/failed\"]\n"
+    }
+  ]
+}

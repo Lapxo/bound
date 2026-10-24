@@ -48,3 +48,8 @@ export function claimLinesIn(file: string): string[] {
   }
   return lines;
 }
+
+/** A document is an input to an explicitly selected form, never a place fold. */
+export function unsupportedFoldDocument(args:readonly string[]):boolean{
+ return valueOf(args,FLAGS.as)===undefined&&positionalsOf(args).some(one=>!/^#(?:bound|topos-reference)(?::|$)/.test(one));
+}

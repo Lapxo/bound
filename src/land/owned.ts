@@ -20,7 +20,7 @@ export type Owned = { readonly ledger: readonly string[]; readonly own: Readonly
  * that would leave a place's lock with two standing claims where it had one are refused whole, so a lot for many places
  * lands the same lines at each, and lines meant for one place go in a lot of their own.
  */
-export function ownedOf(root: string, signed: readonly string[], admits: (line: string) => boolean, coverage: (by: string) => readonly string[], named: readonly string[] = [], placedAt: (line: string) => readonly string[] | undefined = () => undefined): Owned {
+export function ownedOf(root: string, signed: readonly string[], admits: (line: string) => boolean, coverage: (by: string) => readonly string[], named: readonly string[] = [], placedAt: (line: string) => readonly string[] | undefined = () => undefined, admitsOwn: (place:string,line:string)=>boolean = (place,line)=>admittedIn(root,place,line)): Owned {
   const places = placesIn(root);
   const headed = (line: string): boolean => places.includes(fieldOf(line, 'scope').split('/')[0] ?? '');
   const ledger = named.length ? [] : signed.filter(admits);
@@ -34,7 +34,7 @@ export function ownedOf(root: string, signed: readonly string[], admits: (line: 
   const takers = new Map<string, string[]>();
   for (const place of asked) {
     tellOwn(place, rest);
-    for (const line of rest) if ((!namedOf(line).length || namedOf(line).includes(place)) && admittedIn(root, place, line)) takers.set(line, [...(takers.get(line) ?? []), place]);
+    for (const line of rest) if ((!namedOf(line).length || namedOf(line).includes(place)) && admitsOwn(place,line)) takers.set(line, [...(takers.get(line) ?? []), place]);
     tellOwn(place, []);
   }
   const lands = (line: string): boolean => (namedOf(line).length ? (takers.get(line)?.length ?? 0) > 0 : takers.get(line)?.length === 1);

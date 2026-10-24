@@ -1,0 +1,155 @@
+{
+  "format": "neutral-conformance-fixture/1",
+  "contract": "receipt-output-selection",
+  "purpose": "acceptance data, not a wire form or another evaluator",
+  "domains": [
+    "archive-records",
+    "water-quality"
+  ],
+  "initial": {
+    "place": "logical-place",
+    "epoch": "1",
+    "authority": "receiver-declared"
+  },
+  "policy": {
+    "encoding": "UTF-8",
+    "lineEnding": "LF",
+    "scopeOrdering": "unsigned-UTF8-bytes",
+    "runtimeClock": "receiver-explicit",
+    "runtimePaths": "adapter-owned; not comparison data"
+  },
+  "cases": [
+    {
+      "id": "nonmaterializing",
+      "operation": "receipt-check",
+      "input": {
+        "view": "abstract-view",
+        "materializes": false,
+        "otherObligationsPaid": true
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ],
+        "verdict": "PASS closed"
+      }
+    },
+    {
+      "id": "rendered",
+      "operation": "receipt-check",
+      "input": {
+        "view": "leaf-view",
+        "materializes": true,
+        "leaf": "current",
+        "otherObligationsPaid": true
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ]
+      }
+    },
+    {
+      "id": "missing",
+      "operation": "receipt-check",
+      "input": {
+        "view": "leaf-view",
+        "materializes": true,
+        "leaf": "missing"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "required-output",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "altered",
+      "operation": "receipt-check",
+      "input": {
+        "view": "leaf-view",
+        "materializes": true,
+        "leaf": "altered"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "required-output",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "stale",
+      "operation": "receipt-check",
+      "input": {
+        "view": "leaf-view",
+        "materializes": true,
+        "leaf": "stale"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "required-output",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    },
+    {
+      "id": "failed-render",
+      "operation": "receipt-check",
+      "input": {
+        "view": "leaf-view",
+        "materializes": true,
+        "rendererFailed": true
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "render-failed",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true
+      }
+    }
+  ]
+}

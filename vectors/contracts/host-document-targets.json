@@ -1,0 +1,114 @@
+{
+  "format": "neutral-conformance-fixture/1",
+  "contract": "host-document-targets",
+  "purpose": "acceptance data, not a wire form or another evaluator",
+  "domains": [
+    "archive-records",
+    "water-quality"
+  ],
+  "initial": {
+    "place": "logical-place",
+    "epoch": "1",
+    "authority": "receiver-declared"
+  },
+  "policy": {
+    "encoding": "UTF-8",
+    "lineEnding": "LF",
+    "scopeOrdering": "unsigned-UTF8-bytes",
+    "runtimeClock": "receiver-explicit",
+    "runtimePaths": "adapter-owned; not comparison data"
+  },
+  "cases": [
+    {
+      "id": "supported-form",
+      "operation": "host-command",
+      "input": {
+        "verb": "fold",
+        "view": "lines",
+        "carrier": "none"
+      },
+      "expected": {
+        "kind": "fact",
+        "status": "zero",
+        "reason": null,
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure"
+        ]
+      }
+    },
+    {
+      "id": "document",
+      "operation": "host-command",
+      "input": {
+        "verb": "fold",
+        "document": "logical-document",
+        "carrier": "path"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "unsupported-document",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true,
+        "next": "supported-form-reading"
+      }
+    },
+    {
+      "id": "input-document",
+      "operation": "host-command",
+      "input": {
+        "verb": "fold",
+        "document": "logical-document",
+        "carrier": "input"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "unsupported-document",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true,
+        "next": "supported-form-reading"
+      }
+    },
+    {
+      "id": "missing-input",
+      "operation": "host-command",
+      "input": {
+        "verb": "fold",
+        "document": "missing-document",
+        "carrier": "input"
+      },
+      "expected": {
+        "kind": "refuse",
+        "status": "nonzero",
+        "reason": "missing-input",
+        "forbiddenEffects": [
+          "authority-from-carrier",
+          "cross-place-write",
+          "secret-disclosure",
+          "signature-acquisition",
+          "act-admission",
+          "accepted-content"
+        ],
+        "publicCatalogRecord": true,
+        "next": "supported-form-reading"
+      }
+    }
+  ]
+}
