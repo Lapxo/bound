@@ -38,7 +38,7 @@
       "required": { "kind": "enumerated", "values": ["present"] },
       "needs": [
         "bound/src/scan/task-pack.ts",
-        "bound-mcp/src/tools/plan.ts"
+        "bound-mcp/src/build/plan.ts"
       ],
       "extra": {
         "shape": "alphabet",

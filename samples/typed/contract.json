@@ -1,7 +1,7 @@
 {
   "status": "publication candidate; member declarations admitted and installed prototype inclusion verified; release acceptance unpaid",
   "owner": "selected Topos provides interval decoding and explicit origin/witness grants; Bound admits; Obligations computes",
-  "run": "node tools/samples/run-typed.mjs",
+  "run": "node samples/readers/run-typed.mjs",
   "assets": [
     "wire.json",
     "yes.json",
@@ -10,7 +10,7 @@
     "range.vector.json",
     "artifacts.vector.json"
   ],
-  "provider": "tools/samples/typed-provider.mjs",
+  "provider": "samples/readers/typed-provider.mjs",
   "installation": "uses only published SDK modules and the selected installed Bound CLI; no source conditions, checkout ledger, owner key or pre-existing CAS",
   "checks": [
     "native PIN before cells",

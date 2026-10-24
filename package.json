@@ -56,9 +56,9 @@
   "scripts": {
     "test": "node --import ./test/setup.ts --test --test-concurrency=2 test/*.test.ts",
     "clean": "rm -rf dist .tsbuildinfo* tsconfig.tsbuildinfo",
-    "build": "node --experimental-strip-types tools/build.ts",
+    "build": "node --experimental-strip-types build/build.ts",
     "prepack": "npm run build",
-    "compact-archive": "node --experimental-strip-types tools/compact-archive.ts"
+    "compact-archive": "node --experimental-strip-types build/compact-archive.ts"
   },
   "files": [
     "LICENSE",

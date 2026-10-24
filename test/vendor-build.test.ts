@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {relocateImports} from '../tools/vendor-build.ts';
+import {relocateImports} from '../build/vendor-build.ts';
 
 test('vendor relocation changes executable import literals, never strings in program data',()=>{
  const source=`import {value} from 'fixed/module'; export * from 'fixed/module';

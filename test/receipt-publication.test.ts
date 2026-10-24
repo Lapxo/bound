@@ -4,7 +4,7 @@ import{mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync}from'node:fs';
 import{tmpdir}from'node:os';import{join,resolve}from'node:path';import{fileURLToPath}from'node:url';
 import{canonical,parse}from'@lapxo/topos/wire';import{readingIdentityBytes}from'@lapxo/topos/contract';
 import{sha256}from'../src/host/hash.ts';import{portableReadingReceipt}from'../src/host/reading-closures.ts';
-import{projectReceiptEvidence,verifyPublicationHistory}from'../tools/compact-archive.ts';
+import{projectReceiptEvidence,verifyPublicationHistory}from'../build/compact-archive.ts';
 const instrument=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const observation=(place:string,tag:string)=>{
  const closure=new TextDecoder().decode(readingIdentityBytes({instrument:sha256('instrument'),implementation:sha256('reader'),policy:sha256('policy'),inputs:[[place,sha256(tag)]],environment:[]})),input=sha256(closure),by='reader',claim=canonical({scope:place+'/count',role:'reads',form:'interval',measure:'count',value:'1..1',by,at:'place:'+input}),output=claim+'\n';

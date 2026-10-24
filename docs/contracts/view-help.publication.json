@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/native-views.json",
-      "digest": "sha256:d827c6590b310ce5bc02eac532b23f40d3ef82800dc5ca3ddf1aad69da1dfdef"
+      "digest": "sha256:9c163010baab43d9134d5a7eea6b20b600048da9be0653d50c9485bf2f9707ac"
     }
   ]
 }
