@@ -1,14 +1,21 @@
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {BoundRefusal} from './refusals.ts';
-import{invokeSigningPort,type SigningPort}from'../engine/ports.ts';
+import{invokeSigningPort,invokeFrameSigningPort,type SigningPort}from'../engine/ports.ts';
 import { readFileSync } from 'node:fs';
 import { parse, signerSelection, signerRequestBytes, signerResponseBytes, signerResponseOf } from '@lapxo/topos/wire';
 import { invokeSigner, SigningFailure } from './ports/signing.ts';
 import type { SigningLot, SigningMechanism } from './ports/signing.ts';
 
-export interface NativeSigningBinding {readonly keyId:string;readonly name:string;readonly sign:SigningPort;readonly signal?:AbortSignal;readonly bound?:boolean}
+export interface NativeSigningBinding {readonly keyId:string;readonly name:string;readonly sign:SigningPort;readonly frame?:SigningPort;readonly signal?:AbortSignal;readonly bound?:boolean}
 const nativeSigning=new AsyncLocalStorage<NativeSigningBinding|undefined>();
 export const withNativeSigning=<T>(binding:NativeSigningBinding|undefined,run:()=>T):T=>nativeSigning.run(binding,run);
+/** Validate a receiver binding before authority checks or signature acquisition. */
+export function assertNativeSigner(keyId:string):void{
+ const held=nativeSigning.getStore();
+ if(held?.bound===false)throw new BoundRefusal('host/unbound-signer','REFUSE·host/unbound-signer');
+ if(held&&held.keyId!==keyId)throw new BoundRefusal('host/signer-mismatch','REFUSE·host/signer-mismatch');
+}
+
 
 /** An explicitly supplied host registry; a repository cannot supply executable bindings. */
 function binding(name: string, keyFile?: string): SigningMechanism {
@@ -41,7 +48,7 @@ function declaredSigner(lines:readonly string[],keyId:string,selected?:string){
 /** Resolve data before acquisition; all mechanisms use one wire protocol and verification path. */
 export function signerFor(lines: readonly string[], keyId: string, selected?: string, keyFile?: string, injected?:{readonly name:string;readonly sign:SigningPort;readonly signal?:AbortSignal}) {
   const held=nativeSigning.getStore();
-  if(!injected&&held){if(held.bound===false)throw new BoundRefusal('host/unbound-signer','REFUSE·host/unbound-signer');if(held.keyId!==keyId)throw new BoundRefusal('host/signer-mismatch','REFUSE·host/signer-mismatch');injected=held;}
+  if(!injected&&held){assertNativeSigner(keyId);injected=held;}
   const declaration = declaredSigner(lines,keyId,selected);
   if(injected){
     if(injected.name!==declaration.name||keyFile)throw new SigningFailure('REFUSE·signer injected host binding conflicts with declaration or key file');
@@ -54,6 +61,13 @@ export function signerFor(lines: readonly string[], keyId: string, selected?: st
 
 /** A host-prepared computation frame is not a wire inscription or admission. */
 export function frameSignerFor(lines:readonly string[],keyId:string,selected?:string,keyFile?:string){
+ const held=nativeSigning.getStore();
+ if(held){
+  assertNativeSigner(keyId);
+  const declaration=declaredSigner(lines,keyId,selected);
+  if(held.name!==declaration.name||keyFile||!held.frame)throw new BoundRefusal('host/context','REFUSE·frame signer binding conflicts with declaration');
+  return(lot:SigningLot)=>invokeFrameSigningPort(lot,held.frame!,{timeoutMs:declaration.timeoutMs,maxBytes:declaration.responseBytes},held.signal);
+ }
  const declaration=declaredSigner(lines,keyId,selected),mechanism=binding(declaration.name,keyFile);
  const protocol={request:(lot:SigningLot)=>JSON.stringify(lot)+'\n',response:signerResponseBytes,reply:signerResponseOf};
  return(lot:SigningLot)=>invokeSigner(lot,mechanism,protocol,declaration);

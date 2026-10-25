@@ -125,3 +125,8 @@ Producer is read from the existing `by` field in each catalog code record: `boun
 | host/instrument-pin | host | The selected installed instrument bytes do not match the receiver pin. | inspect-artifact-pin | bound |
 
 Each `next` record declares its named action in machine-readable `about` data (`bound-refusal-action@1`), inside these same catalog lines. Equal action names have equal descriptions. Actions are advisory: none supplies a key, changes authority or retries an act automatically.
+| host/document-target | input | A document cannot be folded as a place by the native host. | supported-form-reading | bound |
+| host/input | input | The native host document input is absent. | supported-form-reading | bound |
+| authority/coverage | authority | The selected key has no admitted destination for a requested scope; the diagnostic names the key and first uncovered scope in byte order. | inspect-authority | bound |
+| reference/integrity | integrity | Received content differs from the expected digest. | check-content-digest | bound |
+| receipts/open | integrity | Current inputs or required materialized outputs are not closed by the available receipts. | refresh-declared-outputs | bound |

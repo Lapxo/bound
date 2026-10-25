@@ -1,7 +1,8 @@
 import {preparingView} from '../host/reading-context.ts';
 import {BoundRefusal} from '../host/refusals.ts';
 import {signatureEraOf} from '../host/signature-era.ts';
-import {ledgerLines,ledgerWriters} from '../land/ledger.ts';
+import {hostInstrumentRuntime} from '../host/call-context.ts';
+import {ledgerLines,ledgerWriters,storeOf} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
 import { appendFileSync, dirname, join, mkdirSync, readdirSync, realpathSync, relative, resolve } from '../host/io.ts';
 import { bytesDigest as bytesWith, fullDigest as fullWith } from '../host/digest.ts';
@@ -98,6 +99,9 @@ export function eraOf(standing:readonly string[]){
 export const bytesDigest = (store: string, bytes: Uint8Array): string => bytesWith(bytes, algorithmOf(store));
 export const fullDigest = (store: string, input: string | readonly string[]): string => fullWith(input, algorithmOf(store));
 
+/** Receiver-selected instrument bytes stay immutable. Derived stamp caching
+ * belongs to the consumer's store, never inside a pinned installed package. */
+const memoReadOnly=(store:string):boolean=>{const runtime=hostInstrumentRuntime();return readOnly()||(runtime!==undefined&&resolve(store)===resolve(storeOf(runtime.root)))};
 const stamped = new Map<string, Map<string, string>>();
 const memoOf = (store: string): Map<string, string> => stamped.get(store) ?? stamped.set(store, new Map((observeText(join(store, 'cas', `stamps${EXTENSION}`)) ?? '')
   .split('\n').flatMap((row) => (row.indexOf('\t') > 0 ? [[row.slice(0, row.indexOf('\t')), row.slice(row.indexOf('\t') + 1)] as const] : [])))).get(store)!;
@@ -105,14 +109,14 @@ const memoOf = (store: string): Map<string, string> => stamped.get(store) ?? sta
 export function coordinateDigest(store: string, at: string): string | undefined {
   const stamp = stampOf(at);
   if (stamp?.kind !== 'file') return stamp === undefined ? undefined : bytesDigest(store, observeFile(at) ?? new Uint8Array());
-  if (readOnly()) return bytesDigest(store, observeFile(at) ?? new Uint8Array());
+  if (memoReadOnly(store)) return bytesDigest(store, observeFile(at) ?? new Uint8Array());
   const key = `${at} ${stamp.stamp}`;
   const memo = memoOf(store);
   const held = memo.get(key);
   if (held !== undefined) return held;
   const digest = bytesDigest(store, observeFile(at) ?? new Uint8Array());
   memo.set(key, digest);
-  if (readOnly()) return digest;
+  if (memoReadOnly(store)) return digest;
   mkdirSync(join(store, 'cas'), { recursive: true });
   appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${digest}\n`);
   return digest;
@@ -125,7 +129,7 @@ export function memoized(store: string, key: string, compute: () => string): str
   if (held !== undefined) return held;
   const value = compute();
   memo.set(key, value);
-  if (readOnly()) return value;
+  if (memoReadOnly(store)) return value;
   mkdirSync(join(store, 'cas'), { recursive: true });
   appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${value}\n`);
   return value;
@@ -147,12 +151,12 @@ const importsOf = (store: string, at: string, digest: string): readonly string[]
   }
   const key = `imports ${fullDigest(store,importsOf.toString())} ${digest}`;
   const memo = memoOf(store);
-  const held = imported.get(digest) ?? (readOnly() ? undefined : memo.get(key)?.split('|').filter(Boolean));
+  const held = imported.get(digest) ?? (memoReadOnly(store) ? undefined : memo.get(key)?.split('|').filter(Boolean));
   if (held !== undefined) return held;
   const found = moduleImports(new TextDecoder().decode(observeFile(at) ?? new Uint8Array()),at);
   imported.set(digest, found);
   memo.set(key, found.join('|'));
-  if (!readOnly()) appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);
+  if (!memoReadOnly(store)) appendFileSync(join(store, 'cas', `stamps${EXTENSION}`), `${key}\t${found.join('|')}\n`);
   return found;
 };
 

@@ -3,7 +3,7 @@ import{test}from'node:test';
 import{readFileSync}from'node:fs';
 import{pathToFileURL,fileURLToPath}from'node:url';
 import{join}from'node:path';
-import{observe as sourceObserve}from'../tools/samples/engine-reader.ts';
+import{observe as sourceObserve}from'../samples/readers/engine-reader.ts';
 
 const root=fileURLToPath(new URL('../',import.meta.url)),bytes=(v:unknown)=>new TextEncoder().encode(JSON.stringify(v));
 for(const place of['engine-alphabet','engine-interval'])test('formed engine reader retains captured projection at '+place,async()=>{

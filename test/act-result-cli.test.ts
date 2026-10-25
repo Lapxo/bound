@@ -126,7 +126,7 @@ for (const place of ['observations', 'inventory']) test(`committed CLI results s
       if(retiring?.exitCode===null&&retiring.signalCode===null){retiring.kill('SIGTERM');await retirement}
     }
     const historical=run(['fold','--as','act',identity]);assert.equal(historical.status,0,historical.stdout+historical.stderr);assert.equal(historical.stdout,query.stdout,'historical result survives retirement and changed profile');
-    const refused=run(['sign',next,'--key','device','--key-file',deviceKey]);assert.notEqual(refused.status,0,'retired evidence never authorizes a new act');assert.match(refused.stderr,/REFUSE·signer the requested records are not covered at their selected destination/);assert.match(refused.stderr,/nothing landed/);
+    const retiredLedger=readFileSync(join(root,'.bound','ledger','owner.bound'));const refused=run(['sign',next,'--key','device','--key-file',deviceKey]);assert.notEqual(refused.status,0,'retired evidence never authorizes a new act');assert.match(refused.stderr,/REFUSE·authority\/coverage keyId=device scope=sample\/next/);assert.equal(JSON.parse(refused.stderr.trim().split('\n').at(-1)!).code,'authority/coverage');assert.deepEqual(readFileSync(join(root,'.bound','ledger','owner.bound')),retiredLedger,'refused signing leaves the owner ledger unchanged');
     console.log('HISTORY '+place+' · original result retained · retired key cannot sign new delivery');
     const missing=run(['fold','--as','act','sha256:'+'0'.repeat(64)]);assert.equal(missing.status,1);assert.match(missing.stderr,/REFUSE·act no committed result/);
     console.log(query.stdout.trim());console.log(`ONCE ${place} · same identity and epoch · public result unchanged`);

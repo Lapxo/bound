@@ -1,0 +1,131 @@
+{
+  "format": "neutral-conformance-fixture/1",
+  "contract": "memo-consumption",
+  "purpose": "acceptance data; no evaluator or new wire form",
+  "domains": [
+    "seed-vault",
+    "estuary-log"
+  ],
+  "policy": {
+    "paths": "adapter-owned; comparison uses logical coordinates",
+    "clock": "no clock determines classification",
+    "scope": "native lines and evidence",
+    "repetitions": 8,
+    "unreferencedBlobBytes": 67108864
+  },
+  "cases": [
+    {
+      "id": "actual-input-membership",
+      "operations": [
+        {
+          "operation": "capture",
+          "views": [
+            "lines",
+            "evidence"
+          ]
+        }
+      ],
+      "expected": {
+        "membership": "native input capture",
+        "physicalByteCounts": "separate from semantic references",
+        "scope": "selected views only"
+      }
+    },
+    {
+      "id": "unknown-is-not-deletable",
+      "operations": [
+        {
+          "operation": "add-unreferenced-content",
+          "digest": "digest(bytes)"
+        }
+      ],
+      "expected": {
+        "classification": "unclassified",
+        "evictionPermission": false
+      }
+    },
+    {
+      "id": "unchanged-zero-growth",
+      "operations": [
+        {
+          "operation": "query",
+          "views": [
+            "lines",
+            "evidence"
+          ],
+          "repetitions": 8
+        }
+      ],
+      "expected": {
+        "identity": "same",
+        "text": "same",
+        "persistentByteDelta": 0,
+        "persistentFileDelta": 0
+      }
+    },
+    {
+      "id": "derived-removal-preserves-two-views",
+      "operations": [
+        {
+          "operation": "remove",
+          "content": "explicit-reconstructible-fixture"
+        },
+        {
+          "operation": "query",
+          "views": [
+            "lines",
+            "evidence"
+          ]
+        }
+      ],
+      "expected": {
+        "identity": "same",
+        "text": "same",
+        "generalStoreEvictionProved": false
+      }
+    },
+    {
+      "id": "consumed-input-missing-refuses",
+      "operations": [
+        {
+          "operation": "remove",
+          "content": "observed-authentication-anchor"
+        },
+        {
+          "operation": "query",
+          "views": [
+            "lines",
+            "evidence"
+          ]
+        }
+      ],
+      "expected": {
+        "kind": "refuse",
+        "retainedSuccessReturned": false
+      }
+    },
+    {
+      "id": "large-unreferenced-content-not-semantic",
+      "operations": [
+        {
+          "operation": "add-content",
+          "bytes": 67108864,
+          "reference": "none"
+        },
+        {
+          "operation": "query",
+          "views": [
+            "lines",
+            "evidence"
+          ]
+        }
+      ],
+      "expected": {
+        "identity": "same",
+        "text": "same",
+        "unreferencedContent": "unclassified",
+        "fullIncidentReproduction": false
+      }
+    }
+  ]
+}

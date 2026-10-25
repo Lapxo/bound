@@ -37,7 +37,7 @@ for(const place of caseYes.places as string[])test('actual '+place+' version/pro
  const rejectClosed=(result:{status:number|null;stdout:string;stderr:string})=>{assert.notEqual(result.status,0,result.stderr+result.stdout);assert.doesNotMatch(result.stdout,/PASS\s+closed/);};
  try{
   const cas=join(fixture.root,'.bound/cas/blobs');mkdirSync(cas,{recursive:true});writeFileSync(join(cas,pin.slice(7)),standing);writeFileSync(join(cas,blob.slice(7)),archive);
-  ok(['fold']);ok(['fold','--check']);const oldReadme=readFileSync(leaf('README.md'),'utf8'),oldManifest=readFileSync(leaf('manifest.json'),'utf8');
+  const initial=ok(['fold']);const calls=initial.stderr.split('\n').filter(line=>line.startsWith('CAPSULE  '+blob.slice(7,19)));assert.ok(calls.some(line=>/2 asked/.test(line)),'ordinary text and provenance share their actual two-view batch');assert.equal(calls.some(line=>/1 asked · 1 run/.test(line)),false,'witnesses do not launch one interpreter per leaf');ok(['fold','--check']);const oldReadme=readFileSync(leaf('README.md'),'utf8'),oldManifest=readFileSync(leaf('manifest.json'),'utf8');
   assert.match(oldReadme,/Original prose/);assert.equal(JSON.parse(oldManifest).version,caseYes.originalVersion);
   const proposal=join(fixture.temp,'edition.bound');writeFileSync(proposal,[row('sample/version','id',caseYes.revisedVersion),row('sample/prose','text',caseYes.revisedProsePrefix+place)].join('\n')+'\n');
   ok(['land',proposal,'--key','owner','--key-file',fixture.key]);
@@ -62,8 +62,9 @@ for(const place of caseYes.places as string[])test('actual '+place+' version/pro
   const runtime={root:instrument.root,entry:instrument.entry,directory:join(instrument.root,'dist','cli'),extension:'.js',lock:readFileSync(instrumentLock,'utf8').split('\n').filter(Boolean)};
   await withHostCall({instrumentName:'bound',runtime},()=>withoutEffects(()=>withContentStore(join(fixture.root,'.bound'),()=>{
    const actual=foldPlace(fixture.root,instrument.entry),projected={...actual,root:stage};
+   assert.equal(existsSync(join(stage,'TARGET.bound')),false,'delivery contains leaves, not authority');
    assert.equal(receiptRegion(projected,1).length,0,'default complete guard refuses absent manifest');
-   const selected=receiptRegion(projected,1,['README.md']);assert.ok(selected.length,'explicit selected delivery does not require the unselected manifest');
+   const selected=receiptRegion(projected,1,['README.md']);assert.ok(selected.length,'explicit selected delivery does not require the unselected manifest');assert.equal(existsSync(join(stage,'TARGET.bound')),false,'receipt validation does not install authority in the delivery');
    rmSync(join(stage,'README.md'));assert.equal(receiptRegion(projected,1,['README.md']).length,0,'a missing selected README cannot become an implicit subset');
    captures.push({binding:'materialized-output-selection',defaultMissingManifest:'refused',explicitReadmeOnly:'sealed',missingSelectedReadme:'refused',selection:['README.md'],sealRows:selected.length});
   })));

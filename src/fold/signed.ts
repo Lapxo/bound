@@ -95,8 +95,16 @@ export function ownRecordAdmitted(line:string,place:string,family:string,signers
     if (got.kind !== 'fact' || got.value.fields['sig'] === undefined) return false;
     const fields = got.value.fields;
     const signer = signers.find((one) => one.id === fields['by']);
-    const epoch = Number(fields['epoch']) || 0;
     if (signer === undefined || !verifiesFields(fields, signer.publicKey, algorithms)) return false;
+    return ownRecordCovered(line,place,family,signers);
+}
+
+/** Coverage and validity window only; this is a pre-sign check, never admission. */
+export function ownRecordCovered(line:string,place:string,family:string,signers:ReturnType<typeof authorityFor>['admitted']):boolean{
+    const signer=signers.find(one=>one.id===fieldOf(line,'by'));
+    if(!signer)return false;
+    const epoch=Number(fieldOf(line,'epoch'))||0;
+    const fields={scope:fieldOf(line,'scope')};
     const window = windowAt(signer, epoch);
     return epoch >= window.start && (window.close === null || epoch <= window.close)
       && signer.coverage.some((prefix) => prefix === '*' || within(region(`${family}/${place}/${fields['scope'] ?? ''}`, './'), region(prefix, './')));

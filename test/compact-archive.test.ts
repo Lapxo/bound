@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import {gzipSync,gunzipSync,constants} from 'node:zlib';
-import {compactArchive} from '../tools/compact-archive.ts';
+import {compactArchive} from '../build/compact-archive.ts';
 
 test('archive compression preserves every byte and is deterministic',async()=>{
  const tar=Buffer.from('public evidence\n'.repeat(200)),input=gzipSync(tar);

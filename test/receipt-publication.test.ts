@@ -4,7 +4,7 @@ import{mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync}from'node:fs';
 import{tmpdir}from'node:os';import{join,resolve}from'node:path';import{fileURLToPath}from'node:url';
 import{canonical,parse}from'@lapxo/topos/wire';import{readingIdentityBytes}from'@lapxo/topos/contract';
 import{sha256}from'../src/host/hash.ts';import{portableReadingReceipt}from'../src/host/reading-closures.ts';
-import{projectReceiptEvidence,verifyPublicationHistory}from'../tools/compact-archive.ts';
+import{projectReceiptEvidence,verifyPublicationHistory}from'../build/compact-archive.ts';
 const instrument=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const observation=(place:string,tag:string)=>{
  const closure=new TextDecoder().decode(readingIdentityBytes({instrument:sha256('instrument'),implementation:sha256('reader'),policy:sha256('policy'),inputs:[[place,sha256(tag)]],environment:[]})),input=sha256(closure),by='reader',claim=canonical({scope:place+'/count',role:'reads',form:'interval',measure:'count',value:'1..1',by,at:'place:'+input}),output=claim+'\n';
@@ -15,7 +15,7 @@ for(const place of['field-notes','water-level'])test('current receipt publicatio
   const source=join(base,'source'),stage=join(base,'stage');mkdirSync(source);mkdirSync(stage);mkdirSync(join(source,'.bound','ledger'),{recursive:true});
   const historyScope=place+'/old-plan';const standing=[canonical({scope:historyScope,role:'demands',form:'alphabet',measure:'status',value:'present',about:'Retire Acorn through the original declared proof',by:'target',at:'policy:history'}),canonical({scope:'publish/standing/history',role:'writes',form:'alphabet',measure:'id',value:historyScope,by:'target',at:'policy:history'}),canonical({scope:'wire/digest-algorithms',role:'writes',form:'alphabet',measure:'id',value:'sha256',by:'target',at:'policy:receipt'}),canonical({scope:'wire/receipt-fields',role:'writes',form:'alphabet',measure:'id',value:'scope|role|form|measure|value|by|at|shape|about',by:'target',at:'policy:receipt'})],lock=standing.join('\n')+'\n';writeFileSync(join(source,'TARGET.bound'),lock);writeFileSync(join(stage,'TARGET.bound'),lock);
   const current=observation(place,'current'),history=observation(place+'/Acorn','superseded-parser'),original=[...current,...history].join('\n')+'\n';writeFileSync(join(source,'receipts.bound'),original);
-  const fold={root:source,store:join(source,'.bound'),standing,epoch:1,observed:current,paid:[],receiptHistory:history};
+  const fold={root:source,store:join(source,'.bound'),standing,epoch:1,observed:current,paid:[],receiptHistory:history,materialization:{tree:[],worlds:[],own:standing}};
   const result=await projectReceiptEvidence(instrument,source,stage,base,fold,'https://holder.invalid/evidence/',100000);
   const bytes=readFileSync(join(base,result.file)),read=await verifyPublicationHistory(instrument,bytes,result.digest,100000);
   assert.equal(read.kind,'history');assert.equal(read.records.receipts,original);assert.equal(read.readings,2);assert.equal(read.records.target,lock);assert.equal(readFileSync(join(source,'receipts.bound'),'utf8'),original);

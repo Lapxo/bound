@@ -1,10 +1,11 @@
+import{httpsContent}from'./https-content.ts';
 import{pinnedHostInstrument}from'./pinned-host-instrument.ts';import{pathToFileURL}from'node:url';
 import{configurationValues}from'@lapxo/topos/forms';
 import{mkdtempSync,mkdirSync,readFileSync,writeFileSync,rmSync,symlinkSync}from'node:fs';import{join}from'node:path';import{tmpdir}from'node:os';import{createHash,sign}from'node:crypto';import{canonical,parse,signedBytes,formatSignature}from'@lapxo/topos/wire';import{actingRootFixture}from'./acting-root.ts';import{encodeReadingWitness,encodeProfileComposition}from'@lapxo/topos/contract';
 const hash=(bytes:Uint8Array|string)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 /** Receiver-owned public API vectors. Values returned by the producer are never
  * replaced by the expected cause: successful operations remain successful. */
-export async function currentProducerFixture(host:any,candidateRoot:string,name='current'){
+export async function currentProducerFixture(host:any,candidateRoot:string,name='current',referenceAPI?:{native:any;reference:any}){
  const temp=mkdtempSync(join(tmpdir(),'bound-current-producers-')),ops=new Map<string,()=>unknown>(),cleanups=[()=>rmSync(temp,{recursive:true,force:true})];try{
  const add=(code:string,run:()=>unknown)=>{if(ops.has(code))throw Error('duplicate producer');ops.set(code,run)};
  const yes=JSON.parse(readFileSync(join(candidateRoot,'samples/installed-package/yes.json'),'utf8')),no=JSON.parse(readFileSync(join(candidateRoot,'samples/installed-package/no.json'),'utf8'));
@@ -67,6 +68,14 @@ export async function currentProducerFixture(host:any,candidateRoot:string,name=
  add('host/instrument-pin',()=>host.startNativeHost({...hostOptions,expectedInstrument:hash('different installed pin')}));
  add('host/signer-mismatch',()=>withHost(h=>h.request({...command,signer:'different'}).then(observed),{signers:new Map([['owner',binding],['different',binding]])}));
  add('host/unbound-signer',()=>withHost(h=>h.request(command).then(observed),{signers:new Map()}));
+ add('host/document-target',()=>withHost(h=>h.request({verb:'fold',args:['logical-document.bound']}).then(observed)));
+ add('host/input',()=>withHost(h=>h.request({verb:'fold',args:['@input/missing-document']}).then(observed)));
+ add('authority/coverage',()=>withHost(h=>h.request({...command,signer:'lane',args:['@input/lot','--key','lane']}).then(observed),{signers:new Map([['lane',{name:'file',sign:async()=>{throw Error('uncovered signer must not be acquired')}}]])}));
+ const nativeReference=referenceAPI?.native??await import(pathToFileURL(join(candidateRoot,'dist/host/reference-native-api.js')).href),reference=referenceAPI?.reference??await import(pathToFileURL(join(candidateRoot,'dist/host/reference-authenticated.js')).href);
+ const contentProbe=await httpsContent((_request,response)=>response.end('altered content'));cleanups.push(()=>{void contentProbe.close()});
+ const transport=[common('wire/transport','id','content-request/1'),common('transport/https','id','fetch'),canonical({scope:'transport/timeout',role:'writes',form:'interval',measure:'milliseconds',value:'0..1000',by:'target',at:'policy:fixture'}),canonical({scope:'transport/response-bytes',role:'writes',form:'interval',measure:'bytes',value:'0..8192',by:'target',at:'policy:fixture'})];
+ add('reference/integrity',()=>nativeReference.inspectReference(reference.encodeReference({class:'standing',algorithm:'sha256',digest:'a'.repeat(64),blob:hash('expected content'),source:contentProbe.origin+'/content'}),transport,contentProbe.options));
+
  const birth=join(temp,'birth'),invalid=join(temp,'invalid');for(const root of[birth,invalid]){mkdirSync(root);writeFileSync(join(root,'TARGET.bound'),readFileSync(join(f.root,'TARGET.bound')))}mkdirSync(join(invalid,'.bound'));
  add('host/foundation-state',()=>host.startNativeHost({...hostOptions,place:invalid}));add('host/foundation-required',()=>withHost(h=>h.request({verb:'fold',args:[]}).then(observed),{place:birth}));
  const load=(path:string)=>import(pathToFileURL(join(candidateRoot,'dist',path+'.js')).href),[{withHostCall},{underRootAuthority},{storeOf},{admissionHistoryAt,admissionAnchor},{projectAuthenticatedStanding},{admissionEvidenceResult},{readingWitnessAdmission}]=await Promise.all(['host/call-context','land/act','land/ledger','fold/admission-history','host/standing-projection','cli/accept','host/native/reading-witness-admission'].map(load));
@@ -81,6 +90,7 @@ export async function currentProducerFixture(host:any,candidateRoot:string,name=
  cleanups.push(withdrawFixture.close);mkdirSync(join(withdrawFixture.root,'src'));writeFileSync(join(withdrawFixture.root,'src/held.txt'),'held');writeFileSync(join(withdrawFixture.root,'src/input.txt'),'held');writeFileSync(join(withdrawFixture.root,'memo.mjs'),'export const observe=()=>'+JSON.stringify([{name:'vector-memo/fixture.test.ts/held',role:'reads',measure:'memo',bound:{kind:'alphabet',values:['in:src/held.txt:'+hash('held').slice(7,19)]}}])+';\n');
  for(const args of[['fold'],['fold','--check']]){const result=withdrawFixture.run(args);if(result.status!==0)throw Error('withdraw vector preparation: '+result.stderr+result.stdout)}
  const withdrawStanding=projectAuthenticatedStanding(admissionHistoryAt(withdrawFixture.root,Number.MAX_SAFE_INTEGER),admissionAnchor(withdrawFixture.root)),withdraw=common('write/current/src/held.txt','digest','withdraw');
+ add('receipts/open',()=>{const file=join(withdrawFixture.root,'src/held.txt'),original=readFileSync(file);try{writeFileSync(file,'changed consumed bytes');return observed(withdrawFixture.run(['fold','--check']))}finally{writeFileSync(file,original)}});
  add('admission/withdraw',()=>withHostCall({instrumentName:instrument.name,runtime:instrument.runtime,output:()=>{}},()=>underRootAuthority(storeOf(withdrawFixture.root),'native withdrawal refusal vector',()=>admissionEvidenceResult(withdrawFixture.root,[withdraw],withdrawStanding,10))));
  return{operations:ops,close:()=>{for(const close of cleanups.reverse())close()}};
  }catch(error){for(const close of cleanups.reverse())close();throw error}

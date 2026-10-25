@@ -626,7 +626,7 @@ function main(argv: readonly string[]): number | Promise<number> {
     const root = resolve(selected === undefined ? '.' : rest[selected]!);
     const normalized = selected === undefined ? rest : rest.filter((_, index) => index !== selected);
     return withContentStore(storeOf(root), () =>
-      verb === 'fold' && selected !== undefined && !positionalsOf(normalized).some(one => /^#bound(?::|$)/.test(one))
+      verb === 'fold' && selected !== undefined && !positionalsOf(normalized).some(one => /^#(?:bound|topos-reference)(?::|$)/.test(one))
         ? foldAt(root, undefined, normalized)
         : run(root, normalized, [verb, ...normalized]), () => standingOf(root).standing);
   }

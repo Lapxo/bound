@@ -1,5 +1,6 @@
+import{pinnedHostInstrument}from'./support/pinned-host-instrument.ts';import{startNativeHost,installedPackageIdentity}from'@lapxo/bound/host';import{signBytes}from'../dist/host/adapters/keys/ed25519.js';
 import{test}from'node:test';import assert from'node:assert/strict';import{createHash}from'node:crypto';import{readFileSync}from'node:fs';
-import{canonical}from'@lapxo/topos/wire';import{referenceRootFixture}from'./support/reference-root.ts';import{verifyComputation}from'../src/engine/index.ts';import{verifyBytes}from'../src/host/adapters/keys/ed25519.ts';
+import{canonical}from'@lapxo/topos/wire';import{referenceRootFixture}from'./support/reference-root.ts';import{verifyComputation}from'../dist/engine/index.js';import{verifyBytes}from'../dist/host/adapters/keys/ed25519.js';
 const digest=(b:Uint8Array|string)=>'sha256:'+createHash('sha256').update(b).digest('hex'),row=(scope:string,value:string,form='alphabet',measure='id',role='writes')=>canonical({scope,value,form,measure,role,by:'target',at:'policy:fixture'});
 for(const place of ['tide-log','library-index'])test('native computation signs a real admitted place with its selected signer: '+place,async()=>{
  const config=[row('view/computation','computation@1','alphabet','id','demands'),row('computation/contract',digest('fixture computation contract')),row('computation/numeric-policy',digest('selected interval numeric policy')),row('computation/bytes','0..262144','interval','bytes'),row('computation/milliseconds','0..5000','interval','milliseconds')];
@@ -9,5 +10,13 @@ for(const place of ['tide-log','library-index'])test('native computation signs a
  const checked=await verifyComputation(result.context,new TextEncoder().encode(result.input),new TextEncoder().encode(result.output),result.statement,{digest,verify:async(bytes,sig,algorithm)=>sig.keyId==='owner'&&verifyBytes(bytes,pub,sig.signature,[algorithm])},{timeoutMs:5000,maxBytes:262144});assert.equal(checked.origin,result.context.reading.implementation);
  const replay=f.run(args);assert.equal(replay.status,0,replay.stderr);assert.equal(replay.stdout,run.stdout,'redelivery retains its identity and deterministic signature');
  const noKey=f.run(['fold','--as','computation']);assert.equal(noKey.status,1);assert.match(noKey.stderr,/computation\/authority/);assert.deepEqual(ledger(),before);
+ const pinned=pinnedHostInstrument(new URL('../',import.meta.url).pathname),options={place:f.root,instrument:pinned.instrument,expectedInstrument:pinned.instrument.digest,limits:{requestBytes:1048576,responseBytes:1048576,timeoutMs:15000,heapMiB:256,queuedRequests:4},environment:process.env};let hosted;
+ try{
+  hosted=await startNativeHost(options);const denied=await hosted.request({verb:'fold',args:args.slice(1)});assert.notEqual(denied.status,0);assert.equal(JSON.parse(denied.stderr.trim().split('\n').at(-1)!).code,'host/unbound-signer');await hosted.close();
+  assert.equal(installedPackageIdentity(pinned.instrument.installed!.request).digest,pinned.instrument.digest,'refusal must not add maintenance inside the pinned package');
+  let calls=0;hosted=await startNativeHost({...options,signers:new Map([['owner',{name:'file',sign:async(lot:any)=>{calls++;return lot.bytes.map((bytes:string)=>({keyId:lot.keyId,signature:signBytes(bytes,f.ownerPem,lot.algorithm)}))}}]])});
+  const answer=await hosted.request({verb:'fold',signer:'owner',args:['--as','computation','--key','owner']});assert.equal(answer.status,0,answer.stderr);assert.equal(calls,1);const value=JSON.parse(answer.stdout);const verified=await verifyComputation(value.context,new TextEncoder().encode(value.input),new TextEncoder().encode(value.output),value.statement,{digest,verify:async(bytes,sig,algorithm)=>sig.keyId==='owner'&&verifyBytes(bytes,pub,sig.signature,[algorithm])},{timeoutMs:5000,maxBytes:262144});assert.equal(verified.origin,value.context.reading.implementation);assert.deepEqual(ledger(),before);assert.equal(installedPackageIdentity(pinned.instrument.installed!.request).digest,pinned.instrument.digest,'computation must preserve the complete installed instrument');
+ }finally{await hosted?.close();pinned.close()}
+
  }finally{f.close()}
 });
