@@ -9,7 +9,7 @@ import {canonical} from '@lapxo/topos/wire';
 import {referenceRootFixture} from './support/reference-root.ts';
 import {pathToFileURL} from 'node:url';
 import {createRequire} from 'node:module';
-import {runEvidenceSample} from '../samples/readers/run-evidence.js';
+import {runEvidenceSample} from '../samples/readers/run-evidence.mjs';
 
 const digest=(bytes:Uint8Array)=>'sha256:'+createHash('sha256').update(bytes).digest('hex');
 const archive=process.env.BOUND_PORTABILITY_ARCHIVE;

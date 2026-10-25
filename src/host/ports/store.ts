@@ -1,7 +1,7 @@
 /** The store root is the tree that holds a TARGET.bound beside its .bound store. */
 import { existsSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { topos_wire_EXTENSION as EXTENSION, topos_wire_LOCK as LOCK } from "../../../vendor/library.js";
+import { EXTENSION, LOCK } from '@lapxo/topos/wire';
 
 export function storeRoot(from: string): string {
   const abs = resolve(from || '.');

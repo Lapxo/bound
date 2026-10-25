@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { topos_contract_respond as respond } from "../../vendor/library.js";
+import { respond } from '@lapxo/topos/contract';
 import { provide } from '../host/provide.ts';
 
 /**

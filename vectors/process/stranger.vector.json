@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/product-closure-case.js",
+        "vectors/process/product-closure-case.mjs",
         "dist/cli/verb.js",
         "stranger"
       ],
@@ -37,7 +37,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/product-closure-case.js",
+        "vectors/process/product-closure-case.mjs",
         "dist/cli/verb.js"
       ]
     }

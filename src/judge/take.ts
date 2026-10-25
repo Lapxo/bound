@@ -1,7 +1,7 @@
 import { createHash, existsSync, join } from '../host/io.ts';
 import { fullDigest } from '../fold/digests.ts';
-import { obligations_field_answers as answers, obligations_field_point as point, obligations_field_region as region } from "../../vendor/library.js";
-import { topos_wire_parse as parse, topos_wire_PROTOCOL as PROTOCOL } from "../../vendor/library.js";
+import { answers, point, region } from '@lapxo/obligations/field';
+import { parse, PROTOCOL } from '@lapxo/topos/wire';
 import { observeText } from '../observe/files.ts';
 import { storeOf } from '../land/ledger.ts';
 import { holdsCases } from '../fold/paid.ts';

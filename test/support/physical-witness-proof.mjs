@@ -3,7 +3,7 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {sign} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {hash} from './installed-consumer.js';
+import {hash} from './installed-consumer.mjs';
 export async function nativePhysicalProof(candidate,f,policy,api){
  const {canonical,parse,signedBytes,formatSignature}=candidate.wire,{encodeReadingWitness,readingWitnessStatementBytes}=candidate.contract;
  const {canonicalJson}=await import(pathToFileURL(join(candidate.root,'dist/host/native/reading.js')).href);

@@ -1,10 +1,10 @@
 /** Host composition. Location supplies bytes, never identity or authority. No store writes. */
 import {createHash} from 'node:crypto';
-import {topos_core_readSemanticStanding as readSemanticStanding,topos_core_semanticStandingBytes as semanticStandingBytes} from "../../vendor/library.js";
-import {topos_wire_parse as parse,topos_wire_transportSelection as transportSelection} from "../../vendor/library.js";
-import {topos_contract_decodeLocatedReference as decodeLocatedReference,topos_contract_locatedReferenceIdentity as locatedReferenceIdentity,topos_contract_inspectLocatedReference as inspectLocatedReference} from "../../vendor/library.js";
+import {readSemanticStanding,semanticStandingBytes} from '@lapxo/topos/core';
+import {parse,transportSelection} from '@lapxo/topos/wire';
+import {decodeLocatedReference,locatedReferenceIdentity,inspectLocatedReference} from '@lapxo/topos/contract';
 import {ContentUnavailable,type HTTPOptions} from './adapters/transport/http.ts';
-import {topos_contract_decodeReferenceProjection as decodeReferenceProjection,topos_contract_inspectReferenceProjection as inspectReferenceProjection,type topos_contract_RecordBudget as RecordBudget} from "../../vendor/library.js";
+import {decodeReferenceProjection,inspectReferenceProjection,type RecordBudget} from '@lapxo/topos/contract';
 import {BoundRefusal} from './refusals.ts';
 import {transportBytes} from './ports/transport.ts';
 import {decodeReference,inspectReferenceBytes} from './reference-profile.ts';

@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "test/owned-history.test.ts"
       ],
       "cwd": ".",
@@ -24,7 +24,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "src/cli/verb.ts",
         "TARGET.bound",
         "package.json",

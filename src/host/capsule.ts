@@ -1,21 +1,21 @@
 import {hostOutput} from './call-context.ts';
-import type {topos_wire_ReaderReference as ReaderReference} from "../../vendor/library.js";
-import {topos_wire_readerLifetime as readerLifetime} from "../../vendor/library.js";
+import type {ReaderReference} from '@lapxo/topos/wire';
+import {readerLifetime,parse} from '@lapxo/topos/wire';
 import {contentStore,verifiedContent,contentPolicy} from './content-store.ts';
 import {readOnly} from './read-only.ts';
 import {readingBoundary} from './reading-context.ts';
 import {nativeReaderRoute} from './native-reader-context.ts';
 import {assertNativeRouteCurrent,invokeNativeRoute,materializeNativeRoute} from './native/route.ts';
 import { sha } from './hash.ts';
-import { wireLinesOf as linesOf, parsedLine as parse } from '../fold/claims.ts';
+import { wireLinesOf as linesOf } from '../fold/claims.ts';
 import { createHash } from 'node:crypto';
 import { mkdtempSync, rmSync, statSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve, relative, isAbsolute, sep } from 'node:path';
-import { topos_wire_CAPSULE as CAPSULE } from "../../vendor/library.js";
-import { topos_capsule_declarationOf as declarationOf } from "../../vendor/library.js";
-import type { topos_capsule_Declaration as Declaration } from "../../vendor/library.js";
-import type { topos_contract_Request as Request, topos_contract_Response as Response } from "../../vendor/library.js";
+import { CAPSULE } from '@lapxo/topos/wire';
+import { declarationOf } from '@lapxo/topos/capsule';
+import type { Declaration } from '@lapxo/topos/capsule';
+import type { Request, Response } from '@lapxo/topos/contract';
 import { unpack } from './archive.ts';
 import { executeCapsule, validResponse } from './capsule-process.ts';
 import { holdStore, replaceWhole, storeAt } from '../land/ledger.ts';
@@ -25,7 +25,7 @@ import { ownLock, ownRoot, ownStore, processOf } from '../observe/runner.ts';
 import { said } from '../fold/wire.ts';
 
 export interface Capsule {
-  readonly selectedWorld?: {readonly standing: import("../../vendor/library.js").topos_standing_StandingTopos; readonly offer:string};
+  readonly selectedWorld?: {readonly standing: import("@lapxo/topos/standing").StandingTopos; readonly offer:string};
   readonly selection?: string;
   readonly digest: string;
   readonly declaration: Declaration;

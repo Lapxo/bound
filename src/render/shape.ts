@@ -1,5 +1,5 @@
 import { join } from '../host/io.ts';
-import { obligations_views_field_coherence as coherence } from "../../vendor/library.js";
+import { coherence } from '@lapxo/obligations/views/field';
 import { fieldOf } from '../fold/claims.ts';
 import { ledgerLines } from '../land/ledger.ts';
 import { coordinatesUnder } from '../observe/files.ts';

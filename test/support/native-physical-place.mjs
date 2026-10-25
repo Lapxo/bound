@@ -2,7 +2,7 @@ import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {gzipSync} from 'node:zlib';
 import {pathToFileURL} from 'node:url';
-import {consumerPlace,hash} from './installed-consumer.js';
+import {consumerPlace,hash} from './installed-consumer.mjs';
 function member(name,text){const body=Buffer.from(text),h=Buffer.alloc(512);h.write(name);h.write('0000644\0',100);h.write('0000000\0',108);h.write('0000000\0',116);h.write(body.length.toString(8).padStart(11,'0')+'\0',124);h.write('00000000000\0',136);h.fill(32,148,156);h.write('0',156);h.write('ustar\0',257);h.write(h.reduce((a,b)=>a+b,0).toString(8).padStart(6,'0')+'\0 ',148);return Buffer.concat([h,body,Buffer.alloc(Math.ceil(body.length/512)*512-body.length)])}
 /** Actual native archive, runtime, bounded image and currently signed port. No evaluator or admission shortcut. */
 export async function nativePhysicalPlace(candidate,name,extra=[],sourceText='// comment\n\nactual input\n'){
@@ -10,7 +10,7 @@ export async function nativePhysicalPlace(candidate,name,extra=[],sourceText='//
  const {canonicalJson}=await import(pathToFileURL(join(candidate.root,'dist/host/native/reading.js')).href);
  const {nodePlatformIdentity}=await import(pathToFileURL(join(candidate.root,'dist/host/native/image.js')).href);
  const row=(scope,measure,value,extra={})=>canonical({scope,measure,value,form:'alphabet',role:'writes',by:'target',at:'policy:consumer',...extra});
- const code=readFileSync(new URL('../../samples/native/physical-line-reader.js',import.meta.url),'utf8');
+ const code=readFileSync(new URL('../../samples/native/physical-line-reader.mjs',import.meta.url),'utf8');
  const capsule=[row('region/physical','reads','**@0'),row('region/physical','writes','physical-results'),row('region/physical','input-projection','physical-inputs'),row('region/physical-inputs','reads','**@0',{role:'render'})].join('\n')+'\n';
  const imageRows=[{coordinate:'dist/index.js',bytes:Buffer.from(code)},{coordinate:'package.json',bytes:Buffer.from('{"type":"module"}\n')},{coordinate:'capsule.bound',bytes:Buffer.from(capsule)}];
  const archive=gzipSync(Buffer.concat([...imageRows.map(m=>member(m.coordinate,m.bytes.toString())),Buffer.alloc(1024)])),archiveDigest=hash(archive),runtime=readFileSync(process.execPath),platform=nodePlatformIdentity();

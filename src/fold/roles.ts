@@ -1,6 +1,6 @@
 import { createHash, dirname, join } from '../host/io.ts';
-import { topos_wire_parse as parse, topos_wire_roleClaimsOf as roleClaimsOf } from "../../vendor/library.js";
-import type { topos_wire_RoleClaim as RoleClaim } from "../../vendor/library.js";
+import { parse, roleClaimsOf } from '@lapxo/topos/wire';
+import type { RoleClaim } from '@lapxo/topos/wire';
 import { namesAt, roleAt } from './wire.ts';
 import type { CoordinateRole } from './wire.ts';
 import { lockStanding } from './keys.ts';

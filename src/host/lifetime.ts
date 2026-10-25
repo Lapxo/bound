@@ -1,5 +1,5 @@
 import {spawn} from 'node:child_process';
-import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../vendor/library.js";
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 import type {ProcessResult} from './process-lifetime.ts';
 
 // Host-selected limits apply before input can arrive; provider output cannot choose them.

@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "--test-name-pattern=declared source closure is verified once",
         "test/source-content.test.ts"
       ],
@@ -25,7 +25,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "src/cli/verb.ts",
         "TARGET.bound",
         "package.json",

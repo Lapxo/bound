@@ -1,6 +1,6 @@
 import {hostOutput} from '../host/call-context.ts';
 import { dirname, existsSync, mkdirSync, renameSync, writeFileSync } from '../host/io.ts';
-import { topos_wire_canonical as canonical } from "../../vendor/library.js";
+import { canonical } from '@lapxo/topos/wire';
 import { bytesDigest } from './digests.ts';
 import { blobAt, landShard, ledgerLines, shardFile, shardLines, storeAt, writerFile } from '../land/ledger.ts';
 import { fieldOf, isWire } from './claims.ts';

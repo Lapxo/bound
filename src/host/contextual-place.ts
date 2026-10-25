@@ -1,5 +1,5 @@
 import {openSync,fstatSync,readSync,closeSync} from 'node:fs';
-import {topos_core_readPlaceActContext as readPlaceActContext,topos_core_PLACE_ACT_CONTEXT as PLACE_ACT_CONTEXT,type topos_core_PlaceReceipt as PlaceReceipt} from "../../vendor/library.js";
+import {readPlaceActContext,PLACE_ACT_CONTEXT,type PlaceReceipt} from '@lapxo/topos/core';
 import {declaredRootClockSource,hasRootClockSource} from './root-clock-source.ts';
 import {commitPlaceAct,placeActResult,committedPlaceActResults} from './ports/place-act.ts';
 import {placesIn} from '../fold/places.ts';

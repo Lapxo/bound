@@ -1,5 +1,5 @@
-import {topos_wire_canonical as canonical,topos_wire_parse as parse,topos_wire_objectHistory as objectHistory,topos_wire_validateObjectContext as validateObjectContext} from "../../vendor/library.js";
-import {objectProvider as objectProvider} from "../../vendor/object-provider.js";
+import {canonical,parse,objectHistory,validateObjectContext} from '@lapxo/topos/wire';
+import {objectProvider} from '@lapxo/topos/object-provider';
 import {authorityFor,rootSigner} from '../fold/signers.ts';
 import {signaturesOf} from '../fold/digests.ts';
 import {storeOf} from '../land/ledger.ts';

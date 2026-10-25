@@ -1,5 +1,5 @@
-import {topos_contract_readingIdentityBytes as readingIdentityBytes,topos_contract_readingReceiptBytes as readingReceiptBytes} from "../../vendor/library.js";
-import type {topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../vendor/library.js";
+import {readingIdentityBytes,readingReceiptBytes} from '@lapxo/topos/contract';
+import type {ReadingIdentityContext} from '@lapxo/topos/contract';
 import {encodeUTF8} from './encoding.ts';
 import {invokeByteComputationPort,invokeFrameSigningPort,invokeSignatureVerificationPort} from './ports.ts';
 import type {ByteComputationPort,DigestPort,SigningPort,SignatureVerificationPort,PortLimits} from './ports.ts';

@@ -9,7 +9,7 @@ import {viewsOf} from '../fold/views.ts';
 import {standingOf} from '../cli/place.ts';
 import {evidenceLines} from '../render/view.ts';
 import {resolve,join} from 'node:path';
-import {topos_wire_LOCK as LOCK} from "../../vendor/library.js";
+import {LOCK} from '@lapxo/topos/wire';
 import {fieldOf,isWire} from '../fold/claims.ts';
 import {storeOf} from '../land/ledger.ts';
 import {underRootAuthority} from '../land/act.ts';

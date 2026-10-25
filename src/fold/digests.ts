@@ -10,7 +10,7 @@ import { coordinatesUnder, observeFile, observeText, stampOf } from '../observe/
 import { releaseOf, signedLockLines } from './keys.ts';
 import { EXTENSION, fieldOf, foldClaims, selfName } from './claims.ts';
 import { wireLine } from './wire.ts';
-import { topos_wire_publicLock as publicLock, topos_wire_LOCK as LOCK } from "../../vendor/library.js";
+import { publicLock, LOCK } from '@lapxo/topos/wire';
 import {builtinModules,createRequire} from 'node:module';
 import {moduleImports} from '../host/adapters/modules/javascript.ts';
 

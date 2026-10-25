@@ -1,4 +1,4 @@
-import { topos_wire_ENVELOPE as ENVELOPE } from "../../vendor/library.js";
+import { ENVELOPE } from '@lapxo/topos/wire';
 import { fieldOf, fieldsOf } from '../fold/claims.ts';
 import { lockStanding } from '../fold/keys.ts';
 import { worldsIn } from '../fold/places.ts';

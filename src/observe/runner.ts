@@ -8,7 +8,7 @@ import { fieldOf } from '../fold/claims.ts';
 import { observeFile, observeText } from './files.ts';
 import { ownLockOf } from '../fold/signed.ts';
 import { landBlob } from '../land/ledger.ts';
-import { topos_wire_EXTENSION as EXTENSION, topos_wire_LOCK as LOCK, topos_wire_publicLock as publicLock } from "../../vendor/library.js";
+import { EXTENSION, LOCK, publicLock } from '@lapxo/topos/wire';
 import {foldClaims,isWire} from '../fold/claims.ts';
 
 const self = (): string => process.argv[1] ?? '';

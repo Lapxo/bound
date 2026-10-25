@@ -1,6 +1,6 @@
 import {spawnSync} from 'node:child_process';
 import {processOf} from '../observe/runner.ts';
-import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../vendor/library.js";
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 
 export interface ProcessResult {readonly stdout:string;readonly stdoutBytes?:string;readonly stderr:string;readonly status:number|null;readonly signal:NodeJS.Signals|null;readonly failure?:string}
 /** A synchronous fold waits on a supervising host process; the supervisor owns cancellation of its child group. */

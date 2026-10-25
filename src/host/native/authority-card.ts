@@ -1,8 +1,8 @@
 import {readFileSync,realpathSync} from 'node:fs';
 import {join} from 'node:path';
-import {topos_wire_authorityAtEpoch as authorityAtEpoch,topos_wire_parse as parse,topos_wire_LOCK as LOCK} from "../../../vendor/library.js";
-import {topos_contract_encodeAuthorityCard as encodeAuthorityCard,topos_contract_authorityCardStatement as authorityCardStatement,topos_contract_authorityCardAnswer as authorityCardAnswer} from "../../../vendor/library.js";
-import type {topos_contract_AuthorityCard as AuthorityCard,topos_contract_RecordBudget as RecordBudget,topos_contract_RegistryHorizon as RegistryHorizon} from "../../../vendor/library.js";
+import {authorityAtEpoch,parse,LOCK} from '@lapxo/topos/wire';
+import {encodeAuthorityCard,authorityCardStatement,authorityCardAnswer} from '@lapxo/topos/contract';
+import type {AuthorityCard,RecordBudget,RegistryHorizon} from '@lapxo/topos/contract';
 import {admissionHistoryAt,admissionAnchor} from '../../fold/admission-history.ts';
 import {projectAuthenticatedStanding} from '../standing-projection.ts';
 import {authorityFor} from '../../fold/signers.ts';

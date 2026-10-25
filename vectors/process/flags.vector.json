@@ -10,7 +10,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/cli-case.js",
+        "vectors/process/cli-case.mjs",
         "dist/cli/verb.js",
         "usage"
       ],
@@ -25,7 +25,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/cli-case.js",
+        "vectors/process/cli-case.mjs",
         "dist/cli/verb.js"
       ]
     }

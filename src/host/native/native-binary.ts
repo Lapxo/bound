@@ -4,7 +4,7 @@ import{fieldNames}from'./reading.ts';
 import {sha256} from '../hash.ts';
 /** Host-only native binary selection. No PATH lookup, Node impersonation,
  * transitive OS-library seal or arbitrary-process sandbox is claimed. */
-import{createHash}from'node:crypto';import{isAbsolute}from'node:path';import{realpathSync}from'node:fs';import{fileURLToPath}from'node:url';import{topos_wire_authorityAtEpoch as authorityAtEpoch}from"../../../vendor/library.js";import{parsedLine as parse}from'../../fold/claims.ts';import{authorityFor}from'../../fold/signers.ts';
+import{createHash}from'node:crypto';import{isAbsolute}from'node:path';import{realpathSync}from'node:fs';import{fileURLToPath}from'node:url';import{authorityAtEpoch}from'@lapxo/topos/wire';import{parsedLine as parse}from'../../fold/claims.ts';import{authorityFor}from'../../fold/signers.ts';
 import{authenticateSignedPort,nativeParentInputBytes,canonicalJson,type RootStanding}from'./reading.ts';
 import{readBounded,type ParentExecution}from'./generated.ts';
 const sha = sha256,keys=fieldNames,validDigest=isSha256,fail=(why:string):never=>{throw Error('REFUSE·native binary '+why)};

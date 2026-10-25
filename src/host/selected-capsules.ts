@@ -1,12 +1,12 @@
 import { capsuleAt } from './capsule.ts';
 import type { Capsule } from './capsule.ts';
-import {topos_standing_capsuleOffers as capsuleOffers,topos_standing_providerInputs as providerInputs,topos_standing_providerInputRegions as providerInputRegions,topos_standing_capsuleDescriptor as capsuleDescriptor,topos_standing_assertCapsuleDescriptor as assertCapsuleDescriptor} from "../../vendor/library.js";
+import {capsuleOffers,providerInputs,providerInputRegions,capsuleDescriptor,assertCapsuleDescriptor} from '@lapxo/topos/standing';
 import {fullDigest} from './digest.ts';
-import {topos_wire_wireAt as wireAt} from "../../vendor/library.js";
+import {wireAt,parse} from '@lapxo/topos/wire';
 import {selectedTopoi,toposAt} from './selected-topos.ts';
 import type {ToposResolver} from './selected-topos.ts';
-import {topos_wire_canonical as canonical} from "../../vendor/library.js";
-import {fieldOf, parsedLine as parse} from '../fold/claims.ts';
+import {canonical} from '@lapxo/topos/wire';
+import {fieldOf} from '../fold/claims.ts';
 import {ownLock} from '../observe/runner.ts';
 import {archiveCoordinate} from './archive.ts';
 

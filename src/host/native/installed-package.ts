@@ -1,7 +1,7 @@
 import {lstatSync,readdirSync,realpathSync} from 'node:fs';
 import {join,posix,relative,sep,isAbsolute} from 'node:path';
-import {topos_wire_canonical as canonical} from "../../../vendor/library.js";
-import {topos_contract_moduleInventory as exportInventory,topos_contract_inventoryBytes as inventoryBytes} from "../../../vendor/library.js";
+import {canonical} from '@lapxo/topos/wire';
+import {moduleInventory as exportInventory,inventoryBytes} from '@lapxo/topos/contract';
 import {archiveCoordinate} from '../archive.ts';
 import {sha256,isSha256} from '../hash.ts';
 import {compareStrings} from '../order.ts';

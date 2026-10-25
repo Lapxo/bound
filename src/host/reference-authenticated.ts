@@ -1,5 +1,5 @@
 import {BoundRefusal} from './refusals.ts';
-import{topos_wire_parse as parse,topos_wire_canonical as canonical,topos_wire_authorityOf as authorityOf,topos_wire_authorityAtEpoch as authorityAtEpoch,topos_wire_signedBytes as signedBytes,topos_wire_objectHistory as objectHistory,topos_wire_validateObjectContext as validateObjectContext}from"../../vendor/library.js";
+import{parse,canonical,authorityOf,authorityAtEpoch,signedBytes,objectHistory,validateObjectContext}from'@lapxo/topos/wire';
 import{decodeReference}from'./reference-profile.ts';
 import{referenceStanding,referenceContracts,referenceContextBytes}from'./reference-standing.ts';
 type ObjectContext=Parameters<typeof validateObjectContext>[1];type Signer=Parameters<typeof authorityOf>[1][number];

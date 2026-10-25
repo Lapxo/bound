@@ -5,7 +5,7 @@ import{createServer,createConnection,type Socket}from'node:net';
 import{chmodSync,rmSync,realpathSync,writeFileSync,renameSync,existsSync}from'node:fs';import{join}from'node:path';import{randomBytes}from'node:crypto';
 import{canonicalJson}from'./reading.ts';
 import{verifyNativeBinary,nativeBinaryProjection,type NativeBinaryProjection}from'./native-binary.ts';
-import{topos_contract_commandRequest as commandRequest,topos_contract_commandResponse as commandResponse}from"../../../vendor/library.js";
+import{commandRequest,commandResponse}from'@lapxo/topos/contract';
 import{assertProducerInterpretation,chargeProducerRequest,createGeneratedProducer,readBounded,validateDescendantInvocation,sealGeneratedFile,sealNativeEval,sealInterpretation,recordProducerEmission,recordProducerEmissions,registerProducerCandidates,gateDerived,producerTransport,producerUsage,type GeneratedProducer,type LiteralSnapshot,type DescendantInvocation,type ProducerLimits,type ProducerCandidates}from'./generated.ts';
 import{retainedNativeEvalMatches,type NativeEvalActual}from'./node-launch.ts';
 import{verifyNativeProgram,nativeProgramProjection}from'./native-program.ts';

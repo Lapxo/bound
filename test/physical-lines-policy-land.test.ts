@@ -4,9 +4,9 @@ import {writeFileSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {sign} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
-import {installedConsumer,hash} from './support/installed-consumer.js';
-import {nativePhysicalProof} from './support/physical-witness-proof.js';
-import {nativePhysicalPlace} from './support/native-physical-place.js';
+import {installedConsumer,hash} from './support/installed-consumer.mjs';
+import {nativePhysicalProof} from './support/physical-witness-proof.mjs';
+import {nativePhysicalPlace} from './support/native-physical-place.mjs';
 const yes=JSON.parse(readFileSync(new URL('../samples/physical-lines/yes.json',import.meta.url),'utf8')),no=JSON.parse(readFileSync(new URL('../samples/physical-lines/no.json',import.meta.url),'utf8'));
 for(const name of yes.places)test('installed actual physical reading authenticates current producer before native widening: '+name,{timeout:90000},async()=>{
  const candidate=await installedConsumer(),api=await import(candidate.require.resolve('@lapxo/bound/physical-lines'));

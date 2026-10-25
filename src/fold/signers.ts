@@ -1,6 +1,6 @@
 import{bootstrapAnchor}from'./bootstrap-anchor.ts';
-import { topos_wire_authorityOf as authorityOf, topos_wire_isKeyClaim as isKeyClaim, topos_wire_signersOf as signersOf } from "../../vendor/library.js";
-import type { topos_wire_Published as Published, topos_wire_Signer as Signer, topos_wire_SignerVerdict as SignerVerdict } from "../../vendor/library.js";
+import { authorityOf, isKeyClaim, signersOf } from '@lapxo/topos/wire';
+import type { Published, Signer, SignerVerdict } from '@lapxo/topos/wire';
 import { verifiesFields } from '../land/sign.ts';
 import { fieldOf, parsedLine as parse } from './claims.ts';
 import { keyFor, lockStanding } from './keys.ts';

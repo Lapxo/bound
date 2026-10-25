@@ -1,12 +1,12 @@
 import {mkdirSync,readFileSync,existsSync} from 'node:fs';
 import {join,dirname} from 'node:path';
-import {topos_wire_canonical as canonical,topos_wire_parse as parse,topos_wire_PROTOCOL as PROTOCOL,topos_wire_byBytes as byBytes} from "../../vendor/library.js";
-import type {topos_wire_ReaderLifetime as ReaderLifetime,topos_wire_ReaderReference as ReaderReference} from "../../vendor/library.js";
+import {canonical,parse,PROTOCOL,byBytes} from '@lapxo/topos/wire';
+import type {ReaderLifetime,ReaderReference} from '@lapxo/topos/wire';
 import type {Capsule} from './capsule.ts';
 import {replaceWhole,shardLines} from '../land/ledger.ts';
 import {fieldOf} from '../fold/claims.ts';
-import {topos_contract_readingIdentityBytes as readingIdentityBytes,topos_contract_readingReceiptIdentity as readingReceiptIdentity,topos_contract_responseIdentity as responseIdentity,topos_contract_snapshotAccess as snapshotAccess,topos_contract_placeInputs as placeInputs,topos_contract_withPlaceInputs as withPlaceInputs} from "../../vendor/library.js";
-import type {topos_contract_ReadingIdentityContext as ReadingIdentityContext,topos_contract_Snapshot as Snapshot,topos_contract_ResponseContext as ResponseContext} from "../../vendor/library.js";
+import {readingIdentityBytes,readingReceiptIdentity,responseIdentity,snapshotAccess,placeInputs,withPlaceInputs} from '@lapxo/topos/contract';
+import type {ReadingIdentityContext,Snapshot,ResponseContext} from '@lapxo/topos/contract';
 import {withReadingBoundary} from './reading-context.ts';
 import type {ReadingExecution,ReadingReference} from './reading-context.ts';
 import {BoundRefusal} from './refusals.ts';

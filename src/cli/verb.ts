@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import{evidenceLines}from'../render/view.ts';
-import{isPublicationRegion,preservedPublication,isPreservedSource}from'../render/receipts.ts';
-import{renderPublication}from'../render/view.ts';
 import {hostOutput,hostArguments} from '../host/call-context.ts';
 import {serveNativeCommands} from '../host/command-server.ts';
 import {authenticatedStanding} from '../host/admitted-place.ts';
@@ -24,19 +21,19 @@ import {readOnly, withoutEffects} from '../host/read-only.ts';
 import {layReleases} from '../host/release.ts';
 import {resolveSources,resolveRequested} from '../host/source-content.ts';
 import {cellsWithReceipts} from '../host/cell-receipts.ts';
-import {topos_cells_view_renderCells as renderCells} from "../../vendor/library.js";
+import {renderCells} from '@lapxo/topos/cells-view';
 import {releasePolicyLines} from '../fold/release-policy.ts';
 import {admittedObjects} from '../host/objects.ts';
 import {objectFold,executeComputation} from '../engine/index.ts';
 import {readingEnvironment} from '../host/reading-context.ts';
 import {verifyBytes} from '../host/adapters/keys/ed25519.ts';
 import {instrumentDigest} from '../fold/digests.ts';
-import {topos_wire_authorityAtEpoch as authorityAtEpoch} from "../../vendor/library.js";
+import {authorityAtEpoch} from '@lapxo/topos/wire';
 import {toposAt,contentAt} from '../host/selected-topos.ts';
 import {foldObjectsWithWasm,usesWasmObject} from '../wasm/object.ts';
-import {topos_wire_OBJECT_VIEW as OBJECT_VIEW} from "../../vendor/library.js";
-import {topos_standing_toposStanding as toposStanding} from "../../vendor/library.js";
-import {topos_wire_wireAt as wireAt,topos_wire_parse as parseWire} from "../../vendor/library.js";
+import {OBJECT_VIEW} from '@lapxo/topos/wire';
+import {toposStanding} from '@lapxo/topos/standing';
+import {wireAt,parse as parseWire} from '@lapxo/topos/wire';
 import {lockStanding} from '../fold/keys.ts';
 import {ownStore,ownLock} from '../observe/runner.ts';
 import {signedOwnerLines} from './owner.ts';
@@ -44,7 +41,7 @@ import { existsSync, lstatSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 import { eraOf, signaturesOf } from '../fold/digests.ts';
 import { fullDigest as bootstrapDigest } from '../host/digest.ts';
-import { topos_wire_canonical as canonical } from "../../vendor/library.js";
+import { canonical } from '@lapxo/topos/wire';
 import { EXTENSION, LOCK, fieldOf, foldClaims, isWire, selfName } from '../fold/claims.ts';
 import { observedClaims, readerRefusals } from '../fold/observed.ts';
 import { rolesOf } from '../fold/roles.ts';
@@ -73,7 +70,7 @@ import { EXIT, FLAGS, NAMED_VIEWS, helpLines } from './names.ts';
 import type { VerbName } from './names.ts';
 import { accept, signedBatch } from './accept.ts';
 import {renderWalk,landWalk,foreignWalkLines} from '../host/walk.ts';
-import {topos_walk_isWalkHeader as isWalkHeader} from "../../vendor/library.js";
+import {isWalkHeader} from '@lapxo/topos/walk';
 import {ingressBundles,ingressReceipts} from '../host/ports/ingress.ts';
 
 /** The first land of a lock: TARGET.bound into an empty owner ledger, then the sources that lock names. */
@@ -235,16 +232,6 @@ async function view(root: string, under: string | undefined, asked: string, told
     if(result.kind==='refuse')throw new BoundRefusal(result.code,result.diagnostic);
     hostOutput('out',JSON.stringify(result)+'\n');return EXIT.closed;
   }
-  const publication=viewsOf(lockStanding(storeOf(root))).get(name);
-  if(!under&&!told.length&&name==='evidence'&&isPreservedSource(root,storeOf(root))&&publication&&!publication.shape&&publication.regions.length&&publication.regions.every(region=>region.name==='evidence')){
-   const text=withoutEffects(()=>evidenceLines(root,storeOf(root)).join('\n'));
-   if(text)hostOutput('out',text+'\n');return EXIT.closed;
-  }
-  if(!under&&!told.length&&publication?.regions.length&&publication.regions.every(region=>isPublicationRegion(region.name))){
-   const text=withoutEffects(()=>{const held=preservedPublication(root);return held?renderPublication(held,publication.regions):undefined});
-   if(text!==undefined){hostOutput('out',text);return EXIT.closed;}
-  }
-  if(!readOnly()&&!told.length&&publication?.regions.some(region=>isPublicationRegion(region.name)))return withoutEffects(()=>view(root,under,asked,told,coord,key,includePolicy,authorityHeld));
   // A declared executable reader holds the acting Root's authority throughout
   // observation and publication. This predicate acquires exclusion only; the
   // native route authenticates the actual declaration before use.
@@ -293,9 +280,8 @@ async function view(root: string, under: string | undefined, asked: string, told
   // Executed views use the place's declared mounts before observation, as pass
   // does. Prospective folds and public standing queries do not lay releases.
   if (!told.length && !readOnly()) layReleases(storeOf(root), root, standingOf(root, under).standing, storeOf(root));
-  const publicationView=readOnly()&&viewsOf(lockStanding(storeOf(root))).get(name)?.regions.some(region=>isPublicationRegion(region.name));
-  const fold = told.length||publicationView
-    ? foldPlace(root, entryOf(root), under, false, { standing: standingOf(root, under, ledger), observed: observedClaims(root, storeOf(root), { wait: false }), free: told.length>0 })
+  const fold = told.length
+    ? foldPlace(root, entryOf(root), under, false, { standing: standingOf(root, under, ledger), observed: observedClaims(root, storeOf(root), { wait: false }), free: true })
     : foldPlace(root, entryOf(root), under, true);
   if (!told.length && readerRefusals().length) {
     for (const why of readerRefusals()) hostOutput('error',`${selfName()}: ${why}\n`);
@@ -313,7 +299,7 @@ async function view(root: string, under: string | undefined, asked: string, told
   const cellsView = [...views.entries()].find(([, one]) => !one.shape && one.regions.some((region) => region.name === 'cells'));
   if (cellsView && name === cellsView[0]) {
     const history=signedOwnerLines(storeOf(root));
-    const {topos_wire_objectHistory:objectHistory}=await import("../../vendor/library.js");
+    const {objectHistory}=await import('@lapxo/topos/wire');
     const parsed=objectHistory(history);
     if(parsed.kind!=='fact')throw Error(`REFUSE·wire ${parsed.why}`);
     if(parsed.value.objects.length){
@@ -330,7 +316,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     if (cards.length) hostOutput('out',`${cards.join('\n')}\n`);
     return EXIT.closed;
   }
-  if (!told.length&&!views.get(name)?.regions.some(region=>isPublicationRegion(region.name))) beat(root, fold, Date.now() - at);
+  if (!told.length) beat(root, fold, Date.now() - at);
   if (name === 'rank') {
     const asked = place ? [place] : placesIn(root);
     const reds = asked.flatMap((one) => sharedShapes(ownLockOf(root, one)).map((said) => `${one} ${said}`));
@@ -355,7 +341,7 @@ async function view(root: string, under: string | undefined, asked: string, told
     return EXIT.usage;
   }
   const folder = writerFor(fold.standing, 'fold');
-  if (folder !== undefined && !told.length && !readOnly()) {
+  if (folder !== undefined && !told.length) {
     const spent = Date.now() - at;
     land(storeOf(root), folder, [canonical({
       scope: `beat/${under ?? '.'}`, role: 'writes', form: 'interval', measure: 'ms',
@@ -580,7 +566,7 @@ async function foldResolved(root: string, under: string | undefined, argv: reado
     if (receiptCheck) return exit;
     if(exit!==0)return exit;
     const history=signedOwnerLines(storeOf(root));
-    const {topos_wire_objectHistory:objectHistory}=await import("../../vendor/library.js");
+    const {objectHistory}=await import('@lapxo/topos/wire');
     const parsed=objectHistory(history);
     if(parsed.kind!=='fact')throw Error(`REFUSE·wire ${parsed.why}`);
     if(parsed.value.objects.length){

@@ -1,6 +1,6 @@
 import { claimKey, foldClaims } from '../fold/claims.ts';
 import type { Fork } from '../fold/claims.ts';
-import { topos_wire_PROTOCOL as PROTOCOL } from "../../vendor/library.js";
+import { PROTOCOL } from '@lapxo/topos/wire';
 
 const scopeOf = (line: string): string => /(?:^|\s)scope=([^\s]+)/.exec(line)?.[1] ?? '';
 

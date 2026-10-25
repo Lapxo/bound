@@ -4,8 +4,8 @@ import {AsyncLocalStorage} from 'node:async_hooks';
 import {createHash} from 'node:crypto';
 import {readFileSync,realpathSync} from 'node:fs';
 import {release} from 'node:os';
-import {topos_contract_readingIdentityBytes as readingIdentityBytes} from "../../vendor/library.js";
-import type {topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../vendor/library.js";
+import {readingIdentityBytes} from '@lapxo/topos/contract';
+import type {ReadingIdentityContext} from '@lapxo/topos/contract';
 
 export type ReadingReference = readonly [string,string];
 export interface ReadingExecution {

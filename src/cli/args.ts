@@ -1,7 +1,7 @@
 import { relative, sep } from 'node:path';
 import { observeText } from '../observe/files.ts';
 import { sourceOf } from '../observe/runner.ts';
-import { topos_wire_PROTOCOL as PROTOCOL, topos_wire_parse as parse } from "../../vendor/library.js";
+import { PROTOCOL, parse } from '@lapxo/topos/wire';
 import { FLAGS, VALUED } from './names.ts';
 
 export { VALUED };

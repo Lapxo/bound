@@ -13,7 +13,6 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "outDir": "dist",
-    "removeComments": true,
     "rewriteRelativeImportExtensions": true,
     "rootDir": "src",
     "skipLibCheck": true,

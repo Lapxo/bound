@@ -2,7 +2,7 @@ import type{SigningPort}from'../engine/ports.ts';
 import {installedReferenceContracts} from './reference-contracts.ts';
 import {BoundRefusal,describeRefusal,readRefusalCatalog} from './refusals.ts';
 import {readFileSync} from 'node:fs';
-import {topos_wire_authorityAtEpoch as authorityAtEpoch,topos_wire_canonical as canonical,topos_wire_parse as parse} from "../../vendor/library.js";
+import {authorityAtEpoch,canonical,parse} from '@lapxo/topos/wire';
 import {sha256 as hash} from './hash.ts';
 import {signerFor} from './signing.ts';
 import {signConsentLot} from '../land/sign.ts';

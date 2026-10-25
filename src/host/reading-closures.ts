@@ -1,12 +1,12 @@
 import {actCosts} from './act-cost.ts';
 import {readFileSync,existsSync} from 'node:fs';
 import {join} from 'node:path';
-import {topos_wire_canonical as canonical,topos_wire_parse as parse,topos_wire_PROTOCOL as PROTOCOL,topos_wire_byBytes as byBytes} from "../../vendor/library.js";
+import {canonical,parse,PROTOCOL,byBytes} from '@lapxo/topos/wire';
 import {landShard,shardLines} from '../land/ledger.ts';
 import {fieldOf} from '../fold/claims.ts';
 import {readOnly} from './read-only.ts';
-import {topos_contract_readingIdentityBytes as readingIdentityBytes,topos_contract_readingReceiptIdentity as readingReceiptIdentity} from "../../vendor/library.js";
-import type {topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../vendor/library.js";
+import {readingIdentityBytes,readingReceiptIdentity} from '@lapxo/topos/contract';
+import type {ReadingIdentityContext} from '@lapxo/topos/contract';
 import type {ReadingReference} from './reading-context.ts';
 
 export type {CurrentReading} from './reading-preparation.ts';

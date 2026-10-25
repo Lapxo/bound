@@ -1,6 +1,6 @@
 import { selectedCapsules } from '../host/selected-capsules.ts';
 import { basename } from '../host/io.ts';
-import { topos_wire_canonical as canonical, topos_wire_matches as matches, topos_wire_parse as parse } from "../../vendor/library.js";
+import { canonical, matches, parse } from '@lapxo/topos/wire';
 import { fieldOf } from './claims.ts';
 import { spoken, worldsIn } from './places.ts';
 import { wordOf, wordsOf } from './wire.ts';

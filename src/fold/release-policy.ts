@@ -1,6 +1,6 @@
-import {topos_authority_verdictDemand as verdictDemand} from "../../vendor/library.js";
-import type {topos_authority_VerdictDemand as VerdictDemand,topos_authority_VerdictObservation as VerdictObservation} from "../../vendor/library.js";
-import { topos_wire_matches as matches, topos_wire_parse as parse } from "../../vendor/library.js";
+import {verdictDemand} from '@lapxo/topos/authority';
+import type {VerdictDemand,VerdictObservation} from '@lapxo/topos/authority';
+import { matches, parse } from '@lapxo/topos/wire';
 
 type CeilingReading = {
   readonly read: readonly string[];

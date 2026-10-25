@@ -8,7 +8,7 @@
  */
 export {objectFold} from './object.ts';
 export type {ObjectReading} from './object.ts';
-export type {topos_wire_ObjectRecord as ObjectRecord,topos_wire_ObjectContext as ObjectContext} from "../../vendor/library.js";
+export type {ObjectRecord,ObjectContext} from '@lapxo/topos/wire';
 // Optional host operations are explicit and injected; objectFold itself never invokes them.
 export{readContent,retainContent,invokeSigningPort}from'./ports.ts';
 export type{PortLimits,ContentReadPort,PersistencePort,DigestPort,SigningPort,SigningLot,SignatureRecord}from'./ports.ts';
@@ -19,8 +19,8 @@ export {runConformance} from './conformance.ts';
 export type {ConformanceReceiver,ConformanceCase,ConformanceSuite,ConformanceReport} from './conformance.ts';
 export {readRefusalCatalog} from '../host/refusals.ts';
 export type {RefusalEntry} from '../host/refusals.ts';
-import {topos_wire_validateObjectContext as validateObjectContext} from "../../vendor/library.js";
-import type {topos_wire_ObjectContext as ObjectContext,topos_wire_ObjectRecord as ObjectRecord} from "../../vendor/library.js";
+import {validateObjectContext} from '@lapxo/topos/wire';
+import type {ObjectContext,ObjectRecord} from '@lapxo/topos/wire';
 import {objectFold as project} from './object.ts';
 import {BoundRefusal} from '../host/refusals.ts';
 import {encodeUTF8,decodeUTF8} from './encoding.ts';

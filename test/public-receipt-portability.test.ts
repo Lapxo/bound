@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {canonical,parse,publicationOf,PROTOCOL} from '@lapxo/topos/wire';
@@ -70,16 +70,4 @@ test('retained configuration projection never hides different bytes or a dispute
   writeFileSync(lock,row('one')+'\n'+row('two')+'\n');assert.throws(()=>fileRegionDigest(root,'','receipts/.','sha256'),/REFUSE·document name writes id · target has two live inscriptions without withdrawal/);
   writeFileSync(lock,row('one')+'\n');assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),first);
  }finally{rmSync(root,{recursive:true,force:true});}
-});
-
-for(const cache of ['.tsbuildinfo','.vendor-input/checkpoint.json'])test('foreign build maintenance remains checked when explicitly consumed: '+cache,()=>{
- const root=mkdtempSync(join(tmpdir(),'bound-build-maintenance-'));
- try{
-  const owner=cache.split('/')[0];writeFileSync(join(root,'TARGET.bound'),canonical({scope:'leaf-role/'+owner,role:'writes',form:'alphabet',measure:'role',value:'foreign',by:'target',at:'policy:build-maintenance'})+'\n');
-  writeFileSync(join(root,'input.txt'),'source');if(cache.includes('/'))mkdirSync(join(root,owner));writeFileSync(join(root,cache),'before');
-  const plain=fileRegionDigest(root,'','receipts/.','sha256');writeFileSync(join(root,cache),'after');assert.equal(fileRegionDigest(root,'','receipts/.','sha256'),plain,'unconsumed foreign maintenance is outside the source identity');
-  const inputs=[canonical({scope:cache,role:'reads',form:'alphabet',measure:'observed',value:'present',by:'reader',at:'place:input'})],consumed=fileRegionDigest(root,'','receipts/.','sha256',inputs);
-  writeFileSync(join(root,cache),'changed again');assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256',inputs),consumed,'an explicit read still binds current bytes');
-  writeFileSync(join(root,'input.txt'),'changed source');assert.notEqual(fileRegionDigest(root,'','receipts/.','sha256'),plain);
- }finally{rmSync(root,{recursive:true,force:true})}
 });

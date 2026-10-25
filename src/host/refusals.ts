@@ -1,4 +1,4 @@
-import {topos_wire_parse as parse,topos_wire_canonical as canonical} from "../../vendor/library.js";
+import {parse,canonical} from '@lapxo/topos/wire';
 
 export interface RefusalEntry {readonly code:string;readonly category:string;readonly meaning:string;readonly next:string}
 /** Stable code assigned at the cause. Details are diagnostic, never parsed as policy. */

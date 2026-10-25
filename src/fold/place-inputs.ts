@@ -1,4 +1,4 @@
-import { topos_wire_canonical as canonical, topos_wire_matches as matches } from "../../vendor/library.js";
+import { canonical, matches } from '@lapxo/topos/wire';
 import { fieldOf, fieldsOf } from '../fold/claims.ts';
 import { lockStanding } from '../fold/keys.ts';
 import { worldAt } from '../fold/places.ts';

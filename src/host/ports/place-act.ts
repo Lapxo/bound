@@ -1,6 +1,6 @@
 import {existsSync,readdirSync,statSync,openSync,fstatSync,readSync,closeSync} from 'node:fs';
 import {join} from 'node:path';
-import {topos_core_readPlaceActContext as readPlaceActContext,topos_core_placeActReceiptsOf as placeActReceiptsOf,type topos_core_TrustedClockContract as TrustedClockContract,type topos_core_PlaceReceipt as PlaceReceipt,type topos_core_RootContext as RootContext} from "../../../vendor/library.js";
+import {readPlaceActContext,placeActReceiptsOf,type TrustedClockContract,type PlaceReceipt,type RootContext} from '@lapxo/topos/core';
 import {transactPlaceAct,type PlaceActPersistence} from '../place-act-transaction.ts';
 import {canonicalActStore,underAuthorityRegions,underTheRegions,underRootProjection} from '../../land/act.ts';
 import {requireEffects} from '../read-only.ts';

@@ -2,7 +2,7 @@ import {hostOutput} from '../host/call-context.ts';
 import{hashText}from'../host/hash.ts';
 import {hasContextualPlace,contextualAct} from '../host/contextual-place.ts';
 import {createHash} from 'node:crypto';
-import {topos_wire_actResultOf as actResultOf,topos_wire_actResultProfile as actResultProfile,type topos_wire_ActResult as ActResult} from "../../vendor/library.js";
+import {actResultOf,actResultProfile,type ActResult} from '@lapxo/topos/wire';
 import {actLines,intactLocalAct,localActResult,type LocalActBundle} from '../host/ports/local-act.ts';
 import {storeOf} from '../land/ledger.ts';
 import {lockStanding} from '../fold/keys.ts';

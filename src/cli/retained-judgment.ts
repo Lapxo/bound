@@ -5,8 +5,8 @@ import {placedReadings} from '../fold/observed.ts';
 import {placesIn} from '../fold/places.ts';
 import {releasePolicy, releaseFaults} from '../fold/release-policy.ts';
 import {attestationObservations} from '../fold/evidence.ts';
-import {topos_wire_parse as parse} from "../../vendor/library.js";
-import {obligations_field_point as point, obligations_field_region as region, obligations_field_within as within} from "../../vendor/library.js";
+import {parse} from '@lapxo/topos/wire';
+import {point, region, within} from '@lapxo/obligations/field';
 
 /** A verified semantic fold can be reused. Its previous act's measurements cannot.
  * Keep history intact and judge current measurements with the ordinary interpreters.

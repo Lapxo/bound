@@ -1,8 +1,8 @@
-import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../vendor/library.js";
+import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
-import { topos_wire_canonical as canonical } from "../../vendor/library.js";
+import { canonical } from '@lapxo/topos/wire';
 import { bytesDigest } from '../fold/digests.ts';
 import { fieldOf, selfName } from '../fold/claims.ts';
 import { observeText } from './files.ts';

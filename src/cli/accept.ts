@@ -1,7 +1,7 @@
 import {readingWitnessAdmission} from '../host/native/reading-witness-admission.ts';
 import {BoundRefusal} from '../host/refusals.ts';
 import {assertHostNotCancelled as notCancelled} from '../host/host-controls.ts';
-import {topos_wire_authorityAtEpoch as authorityAtEpoch} from "../../vendor/library.js";
+import {authorityAtEpoch} from '@lapxo/topos/wire';
 import type {SigningPort} from '../engine/ports.ts';
 import type {LocalActBundle} from '../host/ports/local-act.ts';
 import type {PublicationStorage} from '../host/ports/publication.ts';
@@ -18,7 +18,7 @@ import { existsSync, rmdirSync, rmSync } from 'node:fs';
 import { dirname, join, basename } from 'node:path';
 import { closeReceipts, instrumentKeep, instrumentKept } from '../fold/closed.ts';
 import { bytesDigest, fullDigest, instrumentOf, signaturesOf } from '../fold/digests.ts';
-import { topos_wire_canonical as canonical, topos_wire_LOCK as LOCK, topos_wire_parse as parse, topos_wire_actIdentity as actIdentity, topos_wire_actResultProfile as actResultProfile } from "../../vendor/library.js";
+import { canonical, LOCK, parse, actIdentity, actResultProfile } from '@lapxo/topos/wire';
 import { fieldOf, isConfig, foldClaims, sayingOf, selfName } from '../fold/claims.ts';
 import { isReaderLock } from '../fold/observed.ts';
 import { authorityFor, publicKeyOf, rootSigner, writerFor } from '../fold/signers.ts';

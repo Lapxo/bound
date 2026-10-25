@@ -1,7 +1,7 @@
 import {sha256 as digest} from '../hash.ts';
 /** Host-only controlled Node adapter; pure planning remains in planner.ts. */
 import{realpathSync}from'node:fs';import{isAbsolute}from'node:path';import{readBoundedFile}from'./bounded-file.ts';
-import type{topos_contract_CommandPort as CommandPort}from"../../../vendor/library.js";
+import type{CommandPort}from'@lapxo/topos/contract';
 import type{Declaration}from'./loader.ts';
 import{executeLot,type Invocation}from'./command.ts';
 import{moduleClosure,type ModuleClosureSnapshot}from'./module-closure.ts';

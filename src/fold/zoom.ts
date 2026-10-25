@@ -1,5 +1,5 @@
 import { join } from '../host/io.ts';
-import { topos_wire_canonical as canonical, topos_wire_LOCK as LOCK, topos_wire_parse as parse, topos_wire_RECEIPTS as RECEIPTS } from "../../vendor/library.js";
+import { canonical, LOCK, parse, RECEIPTS } from '@lapxo/topos/wire';
 import { fieldOf, foldClaims, isWire } from './claims.ts';
 import { observeText } from '../observe/files.ts';
 import { placesIn } from './places.ts';

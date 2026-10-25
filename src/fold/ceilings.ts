@@ -1,12 +1,12 @@
-import { obligations_field_point as point, obligations_field_region as region, obligations_field_within as within } from "../../vendor/library.js";
-import type { obligations_field_Point as Point } from "../../vendor/library.js";
+import { point, region, within } from '@lapxo/obligations/field';
+import type { Point } from '@lapxo/obligations/field';
 import { fieldOf } from './claims.ts';
 import { wordOf, wordsOf } from './wire.ts';
 import { lockStanding } from './keys.ts';
 import { ownLock, ownStore } from '../observe/runner.ts';
-import { topos_forms_ALPHABETS as ALPHABETS, topos_forms_idsOf as idsOf, topos_forms_INTERVALS as INTERVALS, topos_forms_spanOf as spanOf } from "../../vendor/library.js";
+import { ALPHABETS, idsOf, INTERVALS, spanOf } from '@lapxo/topos/forms';
 import { placedReadings } from './observed.ts';
-import { topos_wire_combine as combine, topos_wire_matches as matches } from "../../vendor/library.js";
+import { combine, matches } from '@lapxo/topos/wire';
 
 /** What one reader answered for one question at one place, with both read as points once. */
 interface Reading {

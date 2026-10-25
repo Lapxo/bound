@@ -1,7 +1,7 @@
 {
   "contract": "whole-region@1 typed foreign evidence",
   "places": ["interval measurements", "repository artifact membership"],
-  "runner": "samples/readers/run-typed-walk.js",
+  "runner": "samples/readers/run-typed-walk.mjs",
   "required": [
     "Origin context declares its complete semantic history fields, public authority resolution and the selected object provider",
     "The native CLI admits authenticated cell/claim/mark histories as foreign evidence",

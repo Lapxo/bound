@@ -1,6 +1,6 @@
 import {hostOutput} from '../host/call-context.ts';
 import { existsSync, join, readdirSync } from '../host/io.ts';
-import { topos_wire_LOCK as LOCK } from "../../vendor/library.js";
+import { LOCK } from '@lapxo/topos/wire';
 import { fieldOf, isWire } from './claims.ts';
 import { observeText } from '../observe/files.ts';
 

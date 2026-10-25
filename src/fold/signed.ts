@@ -1,8 +1,8 @@
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {realpathSync} from 'node:fs';
 import { join } from '../host/io.ts';
-import { obligations_field_region as region, obligations_field_within as within } from "../../vendor/library.js";
-import { topos_wire_LOCK as LOCK, topos_wire_parse as parse, topos_wire_windowAt as windowAt } from "../../vendor/library.js";
+import { region, within } from '@lapxo/obligations/field';
+import { LOCK, parse, windowAt } from '@lapxo/topos/wire';
 import { fieldOf, foldClaims, isWire, sayingOf } from './claims.ts';
 import { signaturesOf } from './digests.ts';
 import { lockLines, lockStanding } from './keys.ts';

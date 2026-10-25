@@ -1,6 +1,6 @@
-import { topos_wire_ENVELOPE as ENVELOPE } from "../../vendor/library.js";
+import { ENVELOPE } from '@lapxo/topos/wire';
 import { fieldsOf } from '../fold/claims.ts';
-import { topos_forms_declaredConfig as declared } from "../../vendor/library.js";
+import { declaredConfig as declared } from '@lapxo/topos/forms';
 
 /** A withdrawal takes every held line that states each field it states, its value and envelope aside. The signer's name is the envelope: a key whose coverage holds the scope takes a standing line of it, whoever signed that line. */
 function takes(withdraw: string, line: string): boolean {

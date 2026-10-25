@@ -13,7 +13,7 @@ test('compiled public APIs run with npm resolution denied and the same fixed loa
   cpSync(new URL('../dist/',import.meta.url),join(root,'dist'),{recursive:true});
   cpSync(new URL('../assets/',import.meta.url),join(root,'assets'),{recursive:true});
   mkdirSync(join(root,'vendor'),{recursive:true});
-  cpSync(new URL('../vendor/',import.meta.url),join(root,'vendor'),{recursive:true});
+  cpSync(new URL('../vendor/syntax/',import.meta.url),join(root,'vendor/syntax'),{recursive:true});
   const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));
   assert.equal(pkg.dependencies,undefined,'the installed package must not request runtime npm dependencies');
   delete pkg.devDependencies;writeFileSync(join(root,'package.json'),JSON.stringify(pkg));

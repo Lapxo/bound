@@ -6,7 +6,7 @@ import {tmpdir} from 'node:os';
 import {join,extname} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {createHash} from 'node:crypto';
-import {topos_wire_parse as parse} from "../../../vendor/library.js";
+import {parse} from '@lapxo/topos/wire';
 import {processOf,ownRoot} from '../../observe/runner.ts';
 import{selectedHostControl}from'./control-selection.ts';
 import {readBoundedFile} from './bounded-file.ts';

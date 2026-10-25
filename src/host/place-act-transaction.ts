@@ -1,4 +1,4 @@
-import {topos_core_readPlaceActContext as readPlaceActContext,topos_core_verifyPlaceActContext as verifyPlaceActContext,topos_core_placeActReceiptsOf as placeActReceiptsOf,type topos_core_PlaceReceipt as PlaceReceipt,type topos_core_RootContext as RootContext} from "../../vendor/library.js";
+import {readPlaceActContext,verifyPlaceActContext,placeActReceiptsOf,type PlaceReceipt,type RootContext} from '@lapxo/topos/core';
 import type {PlaceActTrust,PlaceActBudget,PlaceActBundle,PlaceActHead} from './ports/place-act.ts';
 import {requireEffects} from './read-only.ts';
 import {BoundRefusal} from './refusals.ts';

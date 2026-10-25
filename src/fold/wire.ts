@@ -1,10 +1,10 @@
-import {topos_wire_namesAt as nativeNamesAt,topos_wire_roleAt as nativeRoleAt} from "../../vendor/library.js";
-import type { topos_wire_RoleClaim as RoleClaim } from "../../vendor/library.js";
+import * as topos from '@lapxo/topos/wire';
+import type { RoleClaim } from '@lapxo/topos/wire';
 import { fieldOf, selfName } from './claims.ts';
 import { selectedWireList } from '../host/selected-topos.ts';
 
 export type CoordinateRole = 'source' | 'derived' | 'observed' | 'foreign';
-const spoken = {namesAt:nativeNamesAt,roleAt:nativeRoleAt} as unknown as Readonly<Record<string, unknown>>;
+const spoken = topos as unknown as Readonly<Record<string, unknown>>;
 export const namesAt = (spoken['namesAt'] ?? spoken['namesLeaf']) as (at: string, name: string) => boolean;
 export const roleAt = (spoken['roleAt'] ?? spoken['leafRoleOf']) as (at: string, claims: readonly RoleClaim[]) => CoordinateRole;
 

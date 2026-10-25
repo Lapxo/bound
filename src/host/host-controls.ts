@@ -1,4 +1,4 @@
-import {topos_wire_LOCK as LOCK} from "../../vendor/library.js";
+import {LOCK} from '@lapxo/topos/wire';
 import {BoundRefusal} from './refusals.ts';
 
 /** Shared host refusals preserve the public code and diagnostic at every port. */

@@ -5,7 +5,7 @@ import {readdirSync} from 'node:fs';
 import {requireEffects} from '../host/read-only.ts';
 import { appendFileSync, closeSync, dirname, existsSync, join, linkSync, mkdirSync, openSync, readFileSync, readSync, renameSync, rmSync, statSync, writeFileSync } from '../host/io.ts';
 import { storeRoot } from '../host/ports/store.ts';
-import { topos_wire_canonical as canonical, topos_wire_EXTENSION as EXTENSION, topos_wire_PROTOCOL as PROTOCOL } from "../../vendor/library.js";
+import { canonical, EXTENSION, PROTOCOL } from '@lapxo/topos/wire';
 import { fieldOf } from '../fold/claims.ts';
 import { observeText } from '../observe/files.ts';
 

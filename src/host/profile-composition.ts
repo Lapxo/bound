@@ -1,6 +1,6 @@
 import {sha256} from './hash.ts';
-import {topos_contract_decodeProfileComposition as decodeProfileComposition,topos_contract_encodeProfileComposition as encodeProfileComposition,topos_contract_inspectProfileComposition as inspectProfileComposition} from "../../vendor/library.js";
-import type {topos_contract_ProfileComposition as ProfileComposition,topos_contract_PolicyField as PolicyField,topos_contract_RecordBudget as RecordBudget,topos_contract_CategoryPin as CategoryPin} from "../../vendor/library.js";
+import {decodeProfileComposition,encodeProfileComposition,inspectProfileComposition} from '@lapxo/topos/contract';
+import type {ProfileComposition,PolicyField,RecordBudget,CategoryPin} from '@lapxo/topos/contract';
 import {fieldOf} from '../fold/claims.ts';
 import {lockLines,lockStanding} from '../fold/keys.ts';
 import {authorityFor,rootSigner} from '../fold/signers.ts';

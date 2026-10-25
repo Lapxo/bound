@@ -1,5 +1,5 @@
-import {topos_wire_parse as parse,type topos_wire_Signer as Signer} from "../../vendor/library.js";
-import {topos_contract_readingIdentity as readingIdentity,topos_contract_readingReceiptIdentity as readingReceiptIdentity} from "../../vendor/library.js";
+import {parse,type Signer} from '@lapxo/topos/wire';
+import {readingIdentity,readingReceiptIdentity} from '@lapxo/topos/contract';
 import {readContent} from '../engine/ports.ts';
 import type {ContentReadPort} from '../engine/ports.ts';
 import {sha256} from './hash.ts';

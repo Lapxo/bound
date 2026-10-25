@@ -1,6 +1,6 @@
 import{objectFold}from'../../dist/engine/object.js';
-import{topos_wire_objectHistory as objectHistory,topos_wire_validateObjectContext as validateObjectContext}from'../../vendor/library.js';
-import{topos_forms_intervalForm as intervalForm,topos_forms_alphabetOfForm as alphabetOfForm}from'../../vendor/library.js';
+import{objectHistory,validateObjectContext}from'@lapxo/topos/wire';
+import{intervalForm,alphabetOfForm}from'@lapxo/topos/forms';
 
 /** Adapter for the declared formed-place samples; all parsing and projection
  * belong to the same Topos and Bound implementations used by the engine. */

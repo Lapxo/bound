@@ -1,6 +1,6 @@
 import {readFileSync,realpathSync} from 'node:fs';
 import {basename,dirname,extname,isAbsolute,join,relative} from 'node:path';
-import {topos_wire_publicLock as publicLock} from "../../vendor/library.js";
+import {publicLock} from '@lapxo/topos/wire';
 import {foldClaims,wireLinesOf} from '../fold/claims.ts';
 import {declaredRootClockSource} from './root-clock-source.ts';
 import {withHostCall,type HostInstrumentRuntime} from './call-context.ts';

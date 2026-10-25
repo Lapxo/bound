@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "samples/readers/check-publication.js",
+        "samples/readers/check-publication.mjs",
         "typed-object",
         "samples/yes/typed-object.json",
         "samples/no/typed-object.json"
@@ -156,15 +156,15 @@
         "samples/typed/wire.json",
         "samples/typed/yes.json",
         "samples/yes/typed-object.json",
-        "samples/readers/check-publication.js",
-        "samples/readers/module-closure.js",
-        "samples/readers/public-instrument.js",
-        "samples/readers/run-evidence.js",
-        "samples/readers/run-typed-walk.js",
-        "samples/readers/run-typed.js",
-        "samples/readers/run-walk-refinement.js",
-        "samples/readers/run-walk.js",
-        "samples/readers/typed-provider.js"
+        "samples/readers/check-publication.mjs",
+        "samples/readers/module-closure.mjs",
+        "samples/readers/public-instrument.mjs",
+        "samples/readers/run-evidence.mjs",
+        "samples/readers/run-typed-walk.mjs",
+        "samples/readers/run-typed.mjs",
+        "samples/readers/run-walk-refinement.mjs",
+        "samples/readers/run-walk.mjs",
+        "samples/readers/typed-provider.mjs"
       ]
     }
   ],

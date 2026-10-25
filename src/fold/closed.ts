@@ -1,4 +1,3 @@
-import{receiptSelection}from'./receipt-selection.ts';
 import {hostOutput} from '../host/call-context.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {verifiedReadingReceipts} from '../host/reading-closures.ts';
@@ -6,7 +5,7 @@ import {readingProfile} from '../host/reading-context.ts';
 import {currentReadingEnvironment} from '../host/native/receipt-environment.ts';
 import {childFlags} from '../host/capsule.ts';
 import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writeFileSync } from '../host/io.ts';
-import { topos_wire_byBytes as byBytes, topos_wire_canonical as canonical, topos_wire_LOCK as LOCK, topos_wire_parse as parse, topos_wire_publicationOf as publicationOf, topos_wire_roleAt as roleAt, topos_wire_roleClaimsOf as roleClaimsOf } from "../../vendor/library.js";
+import { byBytes, canonical, LOCK, parse, publicationOf, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, foldClaims, isConfig, isWire } from './claims.ts';
 import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest.ts';
 import { mountedCoordinatesIn, worldAt } from './places.ts';
@@ -89,32 +88,27 @@ function publicConfiguration(lines: readonly string[]): readonly string[] {
   return output;
 }
 
-function rootLines(root: string, place: string, configuration?: readonly string[]): readonly string[] {
+function rootLines(root: string, place: string): readonly string[] {
   const name = place.replace(/\/$/, '');
   if (!name) return [];
   const key = `${root}\0${name}\0${lockStamp(root, '')}`;
-  const held = configuration === undefined ? rooted.get(key) : undefined;
+  const held = rooted.get(key);
   if (held !== undefined) return held;
-  const standing = configuration ?? publicConfiguration((observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire));
+  const standing = publicConfiguration((observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire));
   // Authority validates admission separately; it is not a rendered file input.
   const lines = standing.filter((line) => fieldOf(line, 'value') !== 'withdraw' && !fieldOf(line, 'scope').startsWith('keys/'));
   const take = takenFor(lines, `${name}/`, worldAt(root, name) ? { own: ownLockOf(root, name), tree: viewsOf(standing) } : undefined);
   const got = lines.filter(take).map((line) => `root ${line}`);
-  if(configuration === undefined)rooted.set(key, got);
+  rooted.set(key, got);
   return got;
 }
 
 /** File-fold identity uses public inputs; admission history stays in its separate ledger guard. */
-export function fileRegionDigest(root: string, place: string, region: string, algorithm: string, inputs: readonly string[] = [], delivery?: {readonly files:ReadonlySet<string>;readonly configuration:readonly string[]}): string {
-  const step=region.replace(/^receipts\//,'').replace(/\/$/,'');
-  const selected=delivery===undefined?filesOf(root,place,region,inputs):[...delivery.files].filter(file=>{
-    const local=relative(join(root,place),join(root,file));
-    return local!==RECEIPTS&&(local===LOCK||step==='.'||step===''||local===step||local.startsWith(step+'/'));
-  });
-  const files=[...selected].sort(byBytes);
+export function fileRegionDigest(root: string, place: string, region: string, algorithm: string, inputs: readonly string[] = []): string {
+  const files = [...filesOf(root, place, region, inputs)].sort(byBytes);
   const own = join(root, place, LOCK);
   const bytesOf = (rel: string): Uint8Array => {
-    const at = join(root, rel), bytes = delivery && resolve(at)===resolve(join(root,LOCK)) ? new TextEncoder().encode(delivery.configuration.join('\n')+'\n') : observeFile(at) ?? new Uint8Array();
+    const at = join(root, rel), bytes = observeFile(at) ?? new Uint8Array();
     if (resolve(at) !== resolve(own)) return bytes;
     const lines = new TextDecoder().decode(bytes).split('\n').filter(isWire);
     // Object history keeps its own contract. Configuration's public identity is
@@ -122,7 +116,7 @@ export function fileRegionDigest(root: string, place: string, region: string, al
     if (!lines.length || !lines.every(isConfig)) return bytes;
     return new TextEncoder().encode(publicConfiguration(lines).join('\n') + '\n');
   };
-  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...rootLines(root, place, delivery?.configuration)], algorithm);
+  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...rootLines(root, place)], algorithm);
 }
 
 function namedReceipts(root: string, store: string): ReadonlyMap<string, string> {
@@ -151,21 +145,7 @@ function bytesMeet(root: string, place: string): boolean {
   const inputs = carriedFrom(storeOf(root), shipped) ?? [];
   const lines = shipped.filter(fileSeal);
   const algorithm = algorithmIn(lines.join('\n'));
-  const selections=new Map<string,ReturnType<typeof receiptSelection>>();
-  const configuration=publicConfiguration((observeText(join(root,place,LOCK))??'').split('\n').filter(isWire));
-  const actual=lines.map(line=>{
-    const profile=fieldOf(line,'needs');if(!profile)return fileRegionDigest(root,place,fieldOf(line,'scope'),algorithm,inputs);
-    let selected=selections.get(profile);if(!selected){
-      if(place)throw Error('REFUSE·receipt publication profile requires an independent root');
-      selected=receiptSelection(root,configuration,profile,bytes=>hashBytes(bytes,algorithm));
-      const missing=filesOf(root,place,'receipts/.',[]).filter(file=>!selected!.files.has(file));
-      if(missing.length)throw Error('REFUSE·receipt publication unselected owned member '+missing[0]);
-      selections.set(profile,selected);
-    }
-    if(fieldOf(line,'shape')!==selected.coordinate)throw Error('REFUSE·receipt publication seal profile differs');
-    return fileRegionDigest(root,place,fieldOf(line,'scope'),algorithm,inputs,{files:selected.files,configuration});
-  });
-  return lines.length>0&&algorithm!==''&&lines.map(line=>fieldOf(line,'value')).join('\n')===actual.join('\n');
+  return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === lines.map((line) => fileRegionDigest(root, place, fieldOf(line, 'scope'), algorithm, inputs)).join('\n');
 }
 
 const stampAt = (store: string): string => storeAt(store, 'cas', 'instrument');

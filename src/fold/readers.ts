@@ -1,6 +1,6 @@
 import type {Capsule} from '../host/capsule.ts';
 import { resolve } from '../host/io.ts';
-import { topos_wire_canonical as canonical, topos_wire_fields as fields, topos_wire_matches as matches, topos_wire_byBytes as byBytes } from "../../vendor/library.js";
+import { canonical, fields, matches, byBytes } from '@lapxo/topos/wire';
 import { namesAt, wordOn, wordsOf, wireLine } from './wire.ts';
 import { fits } from '../observe/match.ts';
 import type { CoordinateRole } from './wire.ts';

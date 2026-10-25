@@ -1,5 +1,5 @@
 import { fieldOf } from '../fold/claims.ts';
-import { topos_forms_spanOf as spanOf } from "../../vendor/library.js";
+import { spanOf } from '@lapxo/topos/forms';
 import { blobAt, ledgerLines, storeAt } from './ledger.ts';
 
 const STORE = 'store';

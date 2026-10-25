@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "--test-name-pattern=first land admits a valid ephemeral root",
         "test/bootstrap.test.ts"
       ],
@@ -25,7 +25,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/source-tests.js",
+        "vectors/process/source-tests.mjs",
         "src/cli/verb.ts",
         "TARGET.bound",
         "package.json",

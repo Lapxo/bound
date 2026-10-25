@@ -25,7 +25,7 @@
       "responseBytes": 3000000
     },
     "kind": "verified fixed-module build input",
-    "runtimeIntegration": "standard-esm-exports@1",
+    "runtimeIntegration": "build-relocation@1",
     "content": "digest covers UTF-8 JSON.stringify({manifest,files}) without trailing newline; manifest stored here; source bytes retained once in package-sources.json"
   },
   "openNeeds": [],
