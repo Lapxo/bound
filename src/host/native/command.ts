@@ -1,8 +1,8 @@
 import {spawn} from 'node:child_process';
 import {channel} from 'node:diagnostics_channel';
 import {isAbsolute} from 'node:path';
-import {checkCommandPort,commandRequest,commandResponse} from '@lapxo/topos/contract';
-import type {CommandPort,CommandLot} from '@lapxo/topos/contract';
+import {topos_contract_checkCommandPort as checkCommandPort,topos_contract_commandRequest as commandRequest,topos_contract_commandResponse as commandResponse} from "../../../vendor/library.js";
+import type {topos_contract_CommandPort as CommandPort,topos_contract_CommandLot as CommandLot} from "../../../vendor/library.js";
 import {requireEffects} from '../read-only.ts';
 import {assertNativeRuntime} from './runtime.ts';
 import {scheduleDeadline} from './deadline.ts';

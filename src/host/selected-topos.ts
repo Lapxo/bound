@@ -1,17 +1,21 @@
+import{AsyncLocalStorage}from'node:async_hooks';
 import {verifiedContent} from './content-store.ts';
-import {readStanding} from '@lapxo/topos/standing';
-import type {StandingTopos} from '@lapxo/topos/standing';
-import {parse,wireAt,fromLine} from '@lapxo/topos/wire';
-import {fieldOf} from '../fold/claims.ts';
+import {topos_standing_readStanding as readStanding} from "../../vendor/library.js";
+import type {topos_standing_StandingTopos as StandingTopos} from "../../vendor/library.js";
+import {topos_wire_wireAt as wireAt,topos_wire_fromLine as fromLine} from "../../vendor/library.js";
+import {fieldOf, parsedLine as parse} from '../fold/claims.ts';
 import {moduleClosure} from './native/module-closure.ts';
 import {sha256,isSha256} from './hash.ts';
 
 export interface SelectedTopos {readonly digest:string; readonly topos:StandingTopos}
 export type ToposResolver=(digest:string)=>StandingTopos;
+const selectedResolution=new AsyncLocalStorage<ToposResolver>();
+/** A synchronous projection supplies its verified contract bytes to the same wire readers. */
+export const withSelectedToposResolver=<T>(resolve:ToposResolver,run:()=>T):T=>selectedResolution.run(resolve,run);
 
 /** Local grammar is sufficient for locally declared records. Resolve selected
  * contracts only when a reader is missing; a local refusal remains a refusal. */
-export function admittedLine(line:string,local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=toposAt):ReturnType<typeof fromLine> {
+export function admittedLine(line:string,local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=selectedResolution.getStore()??toposAt):ReturnType<typeof fromLine> {
   const own=wireAt(local,epoch);
   // A signature era alone is not a configuration grammar. An absent list
   // must be supplied by the selected contract; an explicit local list remains
@@ -67,14 +71,14 @@ export function contextProviderServices(store:string){
 }
 
 /** Selection verifies standing identity. Requested capabilities verify their artifact bytes separately. */
-export function selectedTopoi(pins:readonly string[],resolve:ToposResolver=toposAt):readonly SelectedTopos[] {
+export function selectedTopoi(pins:readonly string[],resolve:ToposResolver=selectedResolution.getStore()??toposAt):readonly SelectedTopos[] {
   return [...new Set(pins.map(pin=>fieldOf(pin,'value')))].map(digest=>({digest,topos:resolve(digest)}));
 }
 
 /** Read a declared wire list without copying a world's claims or executing its offers.
  * Independent declarations must agree; selection order cannot choose a contract.
  */
-export function selectedWireList(local:readonly string[],epoch:number,pins:readonly string[],list:string,resolve:ToposResolver=toposAt):readonly string[] {
+export function selectedWireList(local:readonly string[],epoch:number,pins:readonly string[],list:string,resolve:ToposResolver=selectedResolution.getStore()??toposAt):readonly string[] {
   const records=local.flatMap(line=>{const got=parse(line);return got.kind==='fact'?[got.value.fields]:[];});
   const contracts=[{name:'place',wire:wireAt(records,epoch)},...selectedTopoi(pins,resolve).map(({digest,topos})=>({name:digest,wire:wireAt(topos.parts,Number.MAX_SAFE_INTEGER)}))]
     .flatMap(({name,wire})=>{const words=wire?.lists.get(list);return words===undefined?[]:[{name,words:[...words]}];});
@@ -87,7 +91,7 @@ export function selectedWireList(local:readonly string[],epoch:number,pins:reado
 
 /** Complete an admission snapshot from the selected standing. Local declarations
  * govern their own lists; independent selected contracts cannot choose by order. */
-export function selectedWireAt(local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=toposAt):ReturnType<typeof wireAt> {
+export function selectedWireAt(local:readonly Readonly<Record<string,string>>[],epoch:number,pins:readonly string[],resolve:ToposResolver=selectedResolution.getStore()??toposAt):ReturnType<typeof wireAt> {
   const own=wireAt(local,epoch);
   const worlds=selectedTopoi(pins,resolve).map(({digest,topos})=>({digest,parts:topos.parts,wire:wireAt(topos.parts,Number.MAX_SAFE_INTEGER)}));
   const key=(scope:string):string|undefined=>scope.startsWith('wire/')?scope.slice(5):scope.startsWith('audit/wire/')?scope.slice(11):undefined;

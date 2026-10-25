@@ -1,5 +1,5 @@
-import {canonical,parse} from '@lapxo/topos/wire';
-import {readingIdentity,readingReceiptIdentity,type ReadingIdentityContext} from '@lapxo/topos/contract';
+import {topos_wire_canonical as canonical,topos_wire_parse as parse} from "../../vendor/library.js";
+import {topos_contract_readingIdentity as readingIdentity,topos_contract_readingReceiptIdentity as readingReceiptIdentity,type topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../vendor/library.js";
 import {readContent,type ContentReadPort,type SigningPort,type PortLimits} from '../engine/ports.ts';
 import {acceptRootRecords} from '../cli/accept.ts';
 import {verifiedLegacyActResult} from '../cli/act-result.ts';

@@ -1,4 +1,4 @@
-import { isWireClaim, parse } from '@lapxo/topos/wire';
+import { topos_wire_isWireClaim as isWireClaim, topos_wire_parse as parse } from "../../vendor/library.js";
 import { fieldOf, isConfig } from './claims.ts';
 import { isReaderLock } from './observed.ts';
 import { isRoleLock } from './roles.ts';

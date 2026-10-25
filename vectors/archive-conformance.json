@@ -7,7 +7,7 @@
     {
       "program": "runtime",
       "args": [
-        "samples/readers/run-archive.mjs",
+        "samples/readers/run-archive.js",
         "samples/yes/archive-conformance.json",
         "samples/no/archive-conformance.json"
       ],
@@ -151,7 +151,7 @@
         "dist/render/view.js",
         "samples/no/archive-conformance.json",
         "samples/yes/archive-conformance.json",
-        "samples/readers/run-archive.mjs"
+        "samples/readers/run-archive.js"
       ]
     }
   ]

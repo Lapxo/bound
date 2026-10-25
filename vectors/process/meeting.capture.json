@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/meeting-case.mjs"
+        "vectors/process/meeting-case.js"
       ],
       "cwd": ".",
       "timeoutMs": 10000,
@@ -27,7 +27,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/meeting-case.mjs",
+        "vectors/process/meeting-case.js",
         "package.json"
       ]
     }

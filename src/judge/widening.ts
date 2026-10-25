@@ -1,5 +1,5 @@
 import { fieldOf } from '../fold/claims.ts';
-import { ALPHABETS, idsOf, INTERVALS, spanOf } from '@lapxo/topos/forms';
+import { topos_forms_ALPHABETS as ALPHABETS, topos_forms_idsOf as idsOf, topos_forms_INTERVALS as INTERVALS, topos_forms_spanOf as spanOf } from "../../vendor/library.js";
 
 /**
  * A ceiling that admits more than it did is not a revision of the same kind as one that admits less: narrowing costs

@@ -1,5 +1,5 @@
 import {readFileSync} from 'node:fs';
-import {contentRequest,transportSelection,parse} from '@lapxo/topos/wire';
+import {topos_wire_contentRequest as contentRequest,topos_wire_transportSelection as transportSelection,topos_wire_parse as parse} from "../../../vendor/library.js";
 import {boundedProcess} from '../process-lifetime.ts';
 import {BoundRefusal} from '../refusals.ts';
 import {fetchBytes,type HTTPOptions} from '../adapters/transport/http.ts';

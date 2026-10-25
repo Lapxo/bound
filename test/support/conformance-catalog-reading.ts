@@ -21,7 +21,7 @@ export function catalogProjectedFixture(name:string,modern:boolean){
 }
 
 export function catalogReadingInstrument(temp:string){
- const root=join(temp,'instrument');mkdirSync(root);cpSync(new URL('../../dist/',import.meta.url),join(root,'dist'),{recursive:true});mkdirSync(join(root,'vendor'));cpSync(new URL('../../vendor/syntax/',import.meta.url),join(root,'vendor/syntax'),{recursive:true});writeFileSync(join(root,'package.json'),' {"type":"module"}\n');
+ const root=join(temp,'instrument');mkdirSync(root);cpSync(new URL('../../dist/',import.meta.url),join(root,'dist'),{recursive:true});mkdirSync(join(root,'vendor'));cpSync(new URL('../../vendor/',import.meta.url),join(root,'vendor'),{recursive:true});writeFileSync(join(root,'package.json'),' {"type":"module"}\n');
  const grammar=readFileSync(new URL('../../TARGET.bound',import.meta.url),'utf8').split('\n').filter(line=>{const p=parse(line);return p.kind==='fact'&&(p.value.fields.scope.startsWith('wire/')||p.value.fields.scope.startsWith('audit/wire/'))&&p.value.fields.measure==='id'});
  writeFileSync(join(root,'TARGET.bound'),[...grammar,row('wire/region-leaf','id','leaves'),row('store/vouches','id','tree'),row('store/source','id','write|leaf')].join('\n')+'\n');
  return {root,entry:join(root,'dist/cli/verb.js')};

@@ -1,4 +1,4 @@
-import {readStanding} from '@lapxo/topos/standing';
+import {topos_standing_readStanding as readStanding} from "../../vendor/library.js";
 import {fieldOf} from '../fold/claims.ts';
 import {contentAt} from '../host/selected-topos.ts';
 import {storeOf} from './ledger.ts';

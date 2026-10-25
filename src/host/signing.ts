@@ -2,7 +2,7 @@ import {AsyncLocalStorage} from 'node:async_hooks';
 import {BoundRefusal} from './refusals.ts';
 import{invokeSigningPort,invokeFrameSigningPort,type SigningPort}from'../engine/ports.ts';
 import { readFileSync } from 'node:fs';
-import { parse, signerSelection, signerRequestBytes, signerResponseBytes, signerResponseOf } from '@lapxo/topos/wire';
+import { topos_wire_parse as parse, topos_wire_signerSelection as signerSelection, topos_wire_signerRequestBytes as signerRequestBytes, topos_wire_signerResponseBytes as signerResponseBytes, topos_wire_signerResponseOf as signerResponseOf } from "../../vendor/library.js";
 import { invokeSigner, SigningFailure } from './ports/signing.ts';
 import type { SigningLot, SigningMechanism } from './ports/signing.ts';
 

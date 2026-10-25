@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/reading-identity.vector.json",
-      "digest": "sha256:e9a5f2b0318c1495e951edf05c99c7403f438e8b0bce66cc55749237fc2b4865"
+      "digest": "sha256:617e60c0745c602bab4667a4f20124c20a80888629392514f65413dad2d44d07"
     },
     {
       "role": "no",

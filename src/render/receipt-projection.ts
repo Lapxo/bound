@@ -1,5 +1,5 @@
 import{createHash}from'node:crypto';
-import{receiptProjection}from'@lapxo/topos/receipts';
+import{topos_receipts_receiptProjection as receiptProjection}from"../../vendor/library.js";
 
 // Only pure projection results live here. Callers still acquire current receipt
 // bytes and perform all materialized-output and file-seal checks on every call.

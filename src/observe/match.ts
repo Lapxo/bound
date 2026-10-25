@@ -1,6 +1,6 @@
-import * as wire from '@lapxo/topos/wire';
+import {topos_wire_matches as matches} from "../../vendor/library.js";
 
-const { matches } = wire;
+
 
 export const fits = (read: string, coordinate: string): boolean => {
   const glob = read.includes('@') ? read.slice(0, read.indexOf('@')) : read;

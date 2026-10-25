@@ -1,4 +1,4 @@
-import {PLACE_ACT_CONTEXT,type PlaceAct,type PlaceReceipt} from '@lapxo/topos/core';
+import {topos_core_PLACE_ACT_CONTEXT as PLACE_ACT_CONTEXT,type topos_core_PlaceAct as PlaceAct,type topos_core_PlaceReceipt as PlaceReceipt} from "../../vendor/library.js";
 import {foldClaims,fieldOf} from '../fold/claims.ts';
 import type {PortablePlaceContext} from './root-clock-source.ts';
 

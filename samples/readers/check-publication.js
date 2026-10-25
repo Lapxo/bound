@@ -1,11 +1,11 @@
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
-import {runTypedSample} from './run-typed.mjs';
-import {runSigningSample} from './run-signing.mjs';
+import {runTypedSample} from './run-typed.js';
+import {runSigningSample} from './run-signing.js';
 import {Worker} from 'node:worker_threads';
 const [profile, yes, no, requestedReader=new URL('../../dist/cli/verb.js',import.meta.url).pathname]=process.argv.slice(2);
-const {publicInstrument}=await import('./public-instrument.mjs');
+const {publicInstrument}=await import('./public-instrument.js');
 const instrument=await publicInstrument(requestedReader),reader=instrument.reader;
 process.once('exit',()=>instrument.close());
 if(profile==='typed-object') {
@@ -17,7 +17,7 @@ if(profile==='typed-object') {
  assert.deepEqual(positive.keyClasses,['authorize','read','access','attest']);
  assert.equal(typeof negative.uncovered?.scope,'string');assert.equal(typeof negative.tamperedValue,'string');
  const results=await Promise.all(positive.keyClasses.map(keyClass=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./evidence-worker.mjs',import.meta.url),{workerData:{reader,keyClass,negative,options:profile==='native-views'?{lines:positive.lines,views:true}:undefined}});
+  const worker=new Worker(new URL('./evidence-worker.js',import.meta.url),{workerData:{reader,keyClass,negative,options:profile==='native-views'?{lines:positive.lines,views:true}:undefined}});
   let completed=false;worker.once('message',events=>{completed=true;resolve({keyClass,events});});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!completed)reject(Error('Evidence worker did not complete: '+keyClass+' '+code));});
  })));
  for(const {keyClass,events}of results){console.log('KEY-CLASS '+keyClass);for(const event of events)console.log(event.stdout+event.stderr);}
@@ -26,7 +26,7 @@ if(profile==='typed-object') {
  for(const event of result.runs)console.log(event.label+'\n'+event.stdout+event.stderr);
  console.log('SIGNING file-command-equivalent; one invocation per lot; atomic refusals');
 } else if(profile==='query-views') {
- const {runQueryViews}=await import('./run-query-views.mjs');
+ const {runQueryViews}=await import('./run-query-views.js');
  const events=runQueryViews(reader,JSON.parse(readFileSync(yes,'utf8')),JSON.parse(readFileSync(no,'utf8')));
  for(const event of events)console.log(event.stdout+event.stderr);
  console.log('QUERY why: two places; exact coordinate; absent OPEN; missing view refused');
@@ -34,7 +34,7 @@ if(profile==='typed-object') {
  const positive=JSON.parse(readFileSync(yes,'utf8')),negative=JSON.parse(readFileSync(no,'utf8'));
  assert.equal(positive.places.length,2);
  const results=await Promise.all(positive.places.map(place=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./prose-worker.mjs',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
+  const worker=new Worker(new URL('./prose-worker.js',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
   let received=false;worker.once('message',events=>{received=true;resolve(events);});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!received)reject(Error('Prose sample worker did not complete: '+place.name+' '+code));});
  })));
  for(const events of results)for(const event of events)console.log(event.stdout+event.stderr);
@@ -43,7 +43,7 @@ if(profile==='typed-object') {
  const positive=JSON.parse(readFileSync(yes,'utf8')),negative=JSON.parse(readFileSync(no,'utf8'));
  assert.equal(positive.places.length,2);
  const results=await Promise.all(positive.places.map(place=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./historical-presentation-worker.mjs',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
+  const worker=new Worker(new URL('./historical-presentation-worker.js',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
   let received=false;worker.once('message',events=>{received=true;resolve(events);});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!received)reject(Error('Historical presentation worker did not complete: '+place.name+' '+code));});
  })));
  for(const events of results)for(const event of events)console.log(event.stdout+event.stderr);
@@ -52,7 +52,7 @@ if(profile==='typed-object') {
  const positive=JSON.parse(readFileSync(yes,'utf8')),negative=JSON.parse(readFileSync(no,'utf8'));
  assert.equal(positive.places.length,2);
  const results=await Promise.all(positive.places.map(place=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./historical-document-worker.mjs',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
+  const worker=new Worker(new URL('./historical-document-worker.js',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
   let received=false;worker.once('message',events=>{received=true;resolve(events);});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!received)reject(Error('Historical document sample worker did not complete: '+place.name+' '+code));});
  })));
  for(const events of results)for(const event of events)console.log(event.stdout+event.stderr);
@@ -60,7 +60,7 @@ if(profile==='typed-object') {
 } else if(profile==='historical-build') {
  const positive=JSON.parse(readFileSync(yes,'utf8')),negative=JSON.parse(readFileSync(no,'utf8'));
  const results=await Promise.all(positive.places.map(place=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./historical-build-worker.mjs',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
+  const worker=new Worker(new URL('./historical-build-worker.js',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
   let received=false;worker.once('message',events=>{received=true;resolve(events);});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!received)reject(Error('Build sample worker did not complete: '+place.name+' '+code));});
  })));
  for(const events of results)for(const event of events)console.log(event.stdout+event.stderr);
@@ -69,7 +69,7 @@ if(profile==='typed-object') {
  const positive=JSON.parse(readFileSync(yes,'utf8')),negative=JSON.parse(readFileSync(no,'utf8'));
  assert.equal(positive.places.length,2);
  const results=await Promise.all(positive.places.map(place=>new Promise((resolve,reject)=>{
-  const worker=new Worker(new URL('./program-worker.mjs',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
+  const worker=new Worker(new URL('./program-worker.js',import.meta.url),{workerData:{reader,positive,negative,place:place.name}});
   let received=false;worker.once('message',events=>{received=true;resolve(events);});worker.once('error',reject);worker.once('exit',code=>{if(code!==0||!received)reject(Error('Program sample worker did not complete: '+place.name+' '+code));});
  })));
  for(const events of results)for(const event of events)console.log(event.stdout+event.stderr);

@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/historical-document-views.json",
-      "digest": "sha256:e27db02f4f846097bb91b86f82e2f97136ef94ca7075028e7d660de9e6b00ae4"
+      "digest": "sha256:c9f3c5e65e057bbf49ef661f0f49958f2817ffb35a6d82505bad7bb09bb8410e"
     }
   ]
 }

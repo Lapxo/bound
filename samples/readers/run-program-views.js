@@ -7,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {spawnSync,execFileSync} from 'node:child_process';
 import {canonical} from '@lapxo/topos/wire';
 import {standingBytes} from '@lapxo/topos/standing';
-import {moduleClosure} from './module-closure.mjs';
+import {moduleClosure} from './module-closure.js';
 
 /** The selected SDK projects declared demands; this sample implements no program algebra. */
 export function runProgramViews(reader,positive,negative,selectedPlace) {

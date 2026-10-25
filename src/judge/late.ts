@@ -1,4 +1,4 @@
-import { canonical } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical } from "../../vendor/library.js";
 import { fieldOf } from '../fold/claims.ts';
 import { fullDigest } from '../fold/digests.ts';
 import { inside, locationsOf, vouchedCoordinates } from '../land/vouched.ts';

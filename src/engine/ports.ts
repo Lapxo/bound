@@ -1,4 +1,4 @@
-import{signerRequestBytes,signerResponseBytes,signerResponseOf}from'@lapxo/topos/wire';
+import{topos_wire_signerRequestBytes as signerRequestBytes,topos_wire_signerResponseBytes as signerResponseBytes,topos_wire_signerResponseOf as signerResponseOf}from"../../vendor/library.js";
 import{BoundRefusal}from'../host/refusals.ts';
 import{encodeUTF8 as encoded}from'./encoding.ts';
 export interface PortLimits{readonly timeoutMs:number;readonly maxBytes:number}

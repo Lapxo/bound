@@ -1,7 +1,7 @@
-import {cell,sign,join,require as requireFloor,observe,mark,parts,state,live,restOf} from '@lapxo/obligations/views/field';
-import type {World,Mark,Cell} from '@lapxo/obligations/views/field';
-import type {ObjectRecord,ObjectContext} from '@lapxo/topos/wire';
-import {restCoordinates} from '@lapxo/topos/wire';
+import {obligations_views_field_cell as cell,obligations_views_field_sign as sign,obligations_views_field_join as join,obligations_views_field_require as requireFloor,obligations_views_field_observe as observe,obligations_views_field_mark as mark,obligations_views_field_parts as parts,obligations_views_field_state as state,obligations_views_field_live as live,obligations_views_field_restOf as restOf} from "../../vendor/library.js";
+import type {obligations_views_field_World as World,obligations_views_field_Mark as Mark,obligations_views_field_Cell as Cell} from "../../vendor/library.js";
+import type {topos_wire_ObjectRecord as ObjectRecord,topos_wire_ObjectContext as ObjectContext} from "../../vendor/library.js";
+import {topos_wire_restCoordinates as restCoordinates} from "../../vendor/library.js";
 /** Projection dispatches admitted acts into Obligatory; it defines no meet or propagation. */
 export interface ObjectReading{cell:string;state:string;parts:Cell<unknown>;rest:readonly string[];ownMarks:readonly (string|undefined)[];ownClaims:readonly {id:string|undefined;origin:string}[];marks:readonly Mark<unknown>[];claims:readonly unknown[]}
 export function objectFold(records:readonly ObjectRecord[],context:ObjectContext):readonly ObjectReading[]{

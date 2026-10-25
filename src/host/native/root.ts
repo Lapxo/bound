@@ -4,7 +4,7 @@ import {declaredRootClockSource} from '../root-clock-source.ts';
 import {foldClaims,fieldOf} from '../../fold/claims.ts';
 import {assertRootAuthorityProtection,type RootAuthorityProtection} from '../../land/act.ts';
 import type {RootStanding,RootAuthorityGuard} from './reading.ts';
-import type {RootContext} from '@lapxo/topos/core';
+import type {topos_core_RootContext as RootContext} from "../../../vendor/library.js";
 import {withCommittedLocalActObservation} from '../ports/local-act.ts';
 /** Values come from the fixed parent argv chain while it retains actual Root
  * protection. No world packet supplies the store, parent, cursor or verifier.

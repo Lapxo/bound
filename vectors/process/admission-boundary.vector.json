@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "vectors/process/source-tests.mjs",
+        "vectors/process/source-tests.js",
         "test/admission-boundary.test.ts"
       ],
       "cwd": ".",
@@ -24,7 +24,7 @@
         }
       ],
       "inputs": [
-        "vectors/process/source-tests.mjs",
+        "vectors/process/source-tests.js",
         "src/cli/verb.ts",
         "src/cli/accept.ts",
         "src/host/selected-topos.ts",

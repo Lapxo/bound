@@ -2,7 +2,7 @@ import {ContentNeeded} from './content-needed.ts';
 import { createHash } from 'node:crypto';
 import { existsSync, lstatSync, mkdirSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, sep } from 'node:path';
-import { canonical } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical } from "../../vendor/library.js";
 import { fieldOf, isWire, isConfig } from '../fold/claims.ts';
 import { archiveCoordinate, archiveDestination, members } from './archive.ts';
 import { blobAt, holdStore, landBlob, replaceWhole, storeAt } from '../land/ledger.ts';

@@ -1,5 +1,5 @@
 import {compareStrings} from '../order.ts';
-import {canonical} from '@lapxo/topos/wire';
+import {topos_wire_canonical as canonical} from "../../../vendor/library.js";
 import {verifyModuleDelivery,type ClosureDeliveryLimits} from './module-delivery.ts';
 
 /** Source names and versions are declarations supplied by the receiving host.

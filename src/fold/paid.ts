@@ -1,7 +1,7 @@
-import { answers, point, region, within } from '@lapxo/obligations/field';
-import { alphabetForm } from '@lapxo/obligations/forms';
-import { cell, mark, observe, state } from '@lapxo/obligations/views/field';
-import type { Obligatory } from '@lapxo/obligations/views/field';
+import { obligations_field_answers as answers, obligations_field_point as point, obligations_field_region as region, obligations_field_within as within } from "../../vendor/library.js";
+import { obligations_forms_alphabetForm as alphabetForm } from "../../vendor/library.js";
+import { obligations_views_field_cell as cell, obligations_views_field_mark as mark, obligations_views_field_observe as observe, obligations_views_field_state as state } from "../../vendor/library.js";
+import type { obligations_views_field_Obligatory as Obligatory } from "../../vendor/library.js";
 import { fieldOf } from './claims.ts';
 import { boundOf, regionsNamed } from './region.ts';
 import type { SecondHead } from './second.ts';

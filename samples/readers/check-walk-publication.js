@@ -8,7 +8,7 @@ const families=['measurement','artifact'];
 // Separate event loops keep a sample's synchronous CLI calls from delaying
 // another sample's real interruption. Each worker owns its instrument and places.
 const results=await Promise.allSettled(families.map(family=>new Promise((resolve,reject)=>{
- const worker=new Worker(new URL('./walk-sample-worker.mjs',import.meta.url),{workerData:{family,reader,positive}});
+ const worker=new Worker(new URL('./walk-sample-worker.js',import.meta.url),{workerData:{family,reader,positive}});
  let answered=false;
  worker.once('message',events=>{answered=true;resolve(events);});
  worker.once('error',reject);

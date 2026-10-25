@@ -1,8 +1,8 @@
-import {walkProjection,walkAt,walkSnapshot,walkHeaders,readWalkHeaders,readForeignWalk,walkAuthority,walkOrigin,walkInventory,walkSelection,isWalkHeader} from '@lapxo/topos/walk';
-import type {WalkSnapshot,WalkRegion} from '@lapxo/topos/walk';
-import {canonical,parse,fromLine,wireAt,matches,objectHistory,validateObjectContext} from '@lapxo/topos/wire';
-import {objectProvider} from '@lapxo/topos/object-provider';
-import {standingBytes} from '@lapxo/topos/standing';
+import {topos_walk_walkProjection as walkProjection,topos_walk_walkAt as walkAt,topos_walk_walkSnapshot as walkSnapshot,topos_walk_walkHeaders as walkHeaders,topos_walk_readWalkHeaders as readWalkHeaders,topos_walk_readForeignWalk as readForeignWalk,topos_walk_walkAuthority as walkAuthority,topos_walk_walkOrigin as walkOrigin,topos_walk_walkInventory as walkInventory,topos_walk_walkSelection as walkSelection,topos_walk_isWalkHeader as isWalkHeader} from "../../vendor/library.js";
+import type {topos_walk_WalkSnapshot as WalkSnapshot,topos_walk_WalkRegion as WalkRegion} from "../../vendor/library.js";
+import {topos_wire_canonical as canonical,topos_wire_parse as parse,topos_wire_fromLine as fromLine,topos_wire_wireAt as wireAt,topos_wire_matches as matches,topos_wire_objectHistory as objectHistory,topos_wire_validateObjectContext as validateObjectContext} from "../../vendor/library.js";
+import {objectProvider as objectProvider} from "../../vendor/object-provider.js";
+import {topos_standing_standingBytes as standingBytes} from "../../vendor/library.js";
 import {fieldOf} from '../fold/claims.ts';
 import {lockStanding,lockLines} from '../fold/keys.ts';
 import {authorityFor,rootSigner} from '../fold/signers.ts';

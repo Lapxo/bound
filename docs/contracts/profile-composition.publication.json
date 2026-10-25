@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/profile-composition.vector.json",
-      "digest": "sha256:ce43584069b3957fd6c2967975367cf398aa77e54b137c7ccb312fa5a5625252"
+      "digest": "sha256:f74f41dba23d6887644a5168de3d88114c6d1f8f9f8d268d166b74e824fb7cfd"
     },
     {
       "role": "no",

@@ -5,7 +5,7 @@ import {hostOutput} from '../host/call-context.ts';
 import { mkdirSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { Worker } from 'node:worker_threads';
-import { ENVELOPE, canonical, parse } from '@lapxo/topos/wire';
+import { topos_wire_ENVELOPE as ENVELOPE, topos_wire_canonical as canonical, topos_wire_parse as parse } from "../../vendor/library.js";
 import { foldPlace, standingOf, currentJudgment } from './place.ts';
 import type { PlaceFold } from './place.ts';
 import { fieldOf, selfName } from '../fold/claims.ts';

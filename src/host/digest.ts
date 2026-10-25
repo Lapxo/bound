@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { byBytes } from '@lapxo/topos/wire';
+import { topos_wire_byBytes as byBytes } from "../../vendor/library.js";
 import { selfName } from '../fold/claims.ts';
 
 /** Sorted by UTF-8 bytes; the algorithm is a field (`sha256:…`), never bare hex. */

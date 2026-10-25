@@ -1,11 +1,11 @@
 import {createHash} from 'node:crypto';
 import { basename } from '../host/io.ts';
-import { contracts, exclusive, point, region } from '@lapxo/obligations/field';
-import { ENVELOPE, PROTOCOL, recordKind, signedBytes, parse } from '@lapxo/topos/wire';
-export { CAPSULE, EXTENSION, LOCK, RECEIPTS } from '@lapxo/topos/wire';
+import { obligations_field_contracts as contracts, obligations_field_exclusive as exclusive, obligations_field_point as point, obligations_field_region as region } from "../../vendor/library.js";
+import { topos_wire_ENVELOPE as ENVELOPE, topos_wire_PROTOCOL as PROTOCOL, topos_wire_recordKind as recordKind, topos_wire_signedBytes as signedBytes, topos_wire_parse as parse } from "../../vendor/library.js";
+export { topos_wire_CAPSULE as CAPSULE, topos_wire_EXTENSION as EXTENSION, topos_wire_LOCK as LOCK, topos_wire_RECEIPTS as RECEIPTS } from "../../vendor/library.js";
 import { ownRoot } from '../observe/runner.ts';
 import {hostInstrumentName} from '../host/call-context.ts';
-import type { Region } from '@lapxo/obligations/field';
+import type { obligations_field_Region as Region } from "../../vendor/library.js";
 
 const decoded = new Map<string, Readonly<Record<string, string>>>();
 const parsed = new Map<string, ReturnType<typeof parse>>();

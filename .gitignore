@@ -9,3 +9,14 @@ dist/
 .env
 .env.*
 .DS_Store
+
+/.vendor-input/
+/vendor/library.js
+/vendor/library.d.ts
+/vendor/library.inputs.json
+/vendor/object-provider.js
+/vendor/object-provider.d.ts
+/vendor/object-provider.inputs.json
+/vendor/topos.LICENSE
+/vendor/obligations.LICENSE
+/vendor/inputs.json

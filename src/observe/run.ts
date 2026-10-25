@@ -1,9 +1,9 @@
 import {executeCapsule} from '../host/capsule-process.ts';
 import {BoundRefusal} from '../host/refusals.ts';
-import type {ReaderLifetime} from '@lapxo/topos/wire';
+import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../vendor/library.js";
 import { existsSync } from 'node:fs';
-import { PROTOCOL } from '@lapxo/topos/wire';
-import type { Request } from '@lapxo/topos/contract';
+import { topos_wire_PROTOCOL as PROTOCOL } from "../../vendor/library.js";
+import type { topos_contract_Request as Request } from "../../vendor/library.js";
 import { processOf, readerOf } from './runner.ts';
 
 export type Kind = 'js' | 'process';

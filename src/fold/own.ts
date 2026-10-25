@@ -1,7 +1,7 @@
 import {hostOutput} from '../host/call-context.ts';
 import { timing } from '../host/timing.ts';
 import { basename, existsSync, relative, resolve } from '../host/io.ts';
-import { EXTENSION, matches } from '@lapxo/topos/wire';
+import { topos_wire_EXTENSION as EXTENSION, topos_wire_matches as matches } from "../../vendor/library.js";
 import { fieldOf, isWire } from './claims.ts';
 import { wordsOf } from './wire.ts';
 import type { CoordinateRole } from './wire.ts';

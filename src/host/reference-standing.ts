@@ -1,7 +1,7 @@
-import {parse} from '@lapxo/topos/wire';
-import type {ObjectRecord} from '@lapxo/topos/wire';
-import {cellInputs} from '@lapxo/topos/cell-inputs';
-import {semanticStandingBytes} from '@lapxo/topos/standing';
+import {topos_wire_parse as parse} from "../../vendor/library.js";
+import type {topos_wire_ObjectRecord as ObjectRecord} from "../../vendor/library.js";
+import {topos_cell_inputs_cellInputs as cellInputs} from "../../vendor/library.js";
+import {topos_standing_semanticStandingBytes as semanticStandingBytes} from "../../vendor/library.js";
 
 /** Shared projection after admission; transport order never replaces effective order. */
 export function referenceStanding(originals:readonly string[],records:readonly ObjectRecord[]):string {

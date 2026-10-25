@@ -1,5 +1,5 @@
 import { createHash, gzipSync, join } from '../host/io.ts';
-import { canonical, LOCK } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical, topos_wire_LOCK as LOCK } from "../../vendor/library.js";
 import { fieldOf, isWire } from './claims.ts';
 import { memoized } from './digests.ts';
 import { rolesOf } from './roles.ts';

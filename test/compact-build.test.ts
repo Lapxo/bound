@@ -13,10 +13,17 @@ test('compacted public declarations retain the exact export set of every source 
  const names=(file:string)=>{const source=program.getSourceFile(join(root,file))!;const symbol=checker.getSymbolAtLocation(source);return symbol?checker.getExportsOfModule(symbol).map(s=>s.name).sort():[]};
  for(const[i,file]of files.entries())assert.deepEqual(names(file),names(sources[i]!),file);
  assert.equal(roots.size,10,'the admitted public API declares ten type roots');
- // The delivered bundle retains every relocation; the identical sidecar is build-only.
- const provenance=JSON.parse(readFileSync(join(root,'dist/vendor/bundle.json'),'utf8'));
- assert.deepEqual(provenance.sources,JSON.parse(readFileSync(join(root,'dist/vendor/sources.json'),'utf8')));
- assert.ok(pkg.files.includes('!dist/vendor/sources.json'));
+ // The compiler's input graph and delivered licenses preserve provenance.
+ const graph=JSON.parse(readFileSync(join(root,'vendor/inputs.json'),'utf8'));
+ assert.ok(Object.keys(graph.inputs).length>1);
+ for(const name of ['topos','obligations']){
+  const original=readFileSync(join(root,'node_modules/@lapxo',name,'LICENSE'));
+  assert.deepEqual(readFileSync(join(root,'vendor',name+'.LICENSE')),original);
+  assert.ok(pkg.files.includes('vendor/'+name+'.LICENSE'));
+ }
+ assert.ok(pkg.files.includes('vendor/inputs.json'));
+ assert.ok(!Object.keys(graph.inputs).some(p=>p.startsWith('/')||p.startsWith('../')));
+
 
 });
 

@@ -1,5 +1,5 @@
 import {viewInput} from '../host/reading-context.ts';
-import {receiptRegion} from './receipts.ts';
+import {receiptRegion,publicationLines,publicationReceipts,publicationSelection,isPublicationRegion} from './receipts.ts';
 import { releasePolicyLines } from '../fold/release-policy.ts';
 import { join } from '../host/io.ts';
 import { observeText } from '../observe/files.ts';
@@ -8,7 +8,7 @@ import { capsuleAnswers, capsuleRegions, capsuleViews } from './capsule.ts';
 import { declaredBy } from '../observe/regions.ts';
 import type { RegionName } from './names.ts';
 import { readersBehind } from '../fold/observed.ts';
-import { LOCK, canonical, matches } from '@lapxo/topos/wire';
+import { topos_wire_LOCK as LOCK, topos_wire_canonical as canonical, topos_wire_matches as matches } from "../../vendor/library.js";
 import type { PlaceFold } from '../cli/place.ts';
 import type { View } from '../fold/views.ts';
 import { fieldOf, foldClaims, selfName } from '../fold/claims.ts';
@@ -154,6 +154,8 @@ const history: Region = (fold) => {
 
 const REGIONS: Readonly<Record<string, Region>> = {
   receipts: (fold) => receiptRegion(fold, 1),
+  'publication-lines':publicationLines,
+  'publication-receipts':publicationReceipts,
   help: () => helpLines(),
   lines: (fold) => fold.standing,
   evidence,
@@ -161,21 +163,23 @@ const REGIONS: Readonly<Record<string, Region>> = {
   field: (fold) => field(fold, 3),
 } satisfies Record<RegionName, Region>;
 
+const nativeRegion=(name:string):Region|undefined=>{const direct=REGIONS[name];if(direct)return direct;const selection=publicationSelection(name);return selection===undefined?undefined:fold=>publicationReceipts(fold,selection)};
+
 const AT: Readonly<Record<string, (fold: PlaceFold, at: number) => readonly string[]>> = {field, receipts: receiptRegion};
 
 export const unrendered = (fold: PlaceFold, view: { readonly regions: readonly { readonly name: string }[] }): readonly string[] =>
-  ((declared) => view.regions.map((asked) => asked.name).filter((name) => REGIONS[name] === undefined && !declared.some((glob) => matches(glob, name))))(declaredBy(fold));
+  ((declared) => view.regions.map((asked) => asked.name).filter((name) => nativeRegion(name) === undefined && !declared.some((glob) => matches(glob, name))))(declaredBy(fold));
 
 export function render(fold: PlaceFold, regions: readonly { readonly name: string; readonly at: number }[], shape = '', prepared?: ReadonlyMap<string, readonly string[]>): string {
   const out: string[] = [];
-  const capsules = prepared ?? capsuleRegions(fold, regions.filter((asked) => REGIONS[asked.name] === undefined), shape);
+  const capsules = prepared ?? capsuleRegions(fold, regions.filter((asked) => nativeRegion(asked.name) === undefined), shape);
   for (const asked of regions) {
-    const region: Region | undefined = REGIONS[asked.name];
+    const region: Region | undefined = nativeRegion(asked.name);
     const resolving = AT[asked.name];
     const body = resolving !== undefined ? resolving(fold, asked.at) : region !== undefined ? read(region(fold), asked.at) : capsules.get(asked.name) ?? [];
     if (body.length) out.push(...body, '');
   }
-  return `${out.join('\n').replace(/\n+$/, '')}\n`;
+  return renderedText(out);
 }
 
 function read(body: readonly string[], at: number): readonly string[] {
@@ -190,7 +194,7 @@ function read(body: readonly string[], at: number): readonly string[] {
 /** Prepare and consume one batch within this fold; no cross-call cache or byte-check bypass. */
 export function prerender(fold: PlaceFold, views: readonly View[]): ReadonlyMap<View, string> {
   const due = views.filter((view) => 'regions' in view && !(fold.key && keptRender(fold.store, fold.key, view.name) !== undefined));
-  const answers = capsuleViews(fold, due.map((view) => ({ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape })));
+  const answers = capsuleViews(fold, due.map((view) => ({ asking: view.regions.filter((asked) => nativeRegion(asked.name) === undefined), shape: view.shape })));
   const prepared = new Map(due.map((view, i) => [view, answers[i]!]));
   return new Map(views.map(view => [view, viewOf(fold, view, prepared.get(view))]));
 }
@@ -208,19 +212,27 @@ export function viewOf(fold: PlaceFold, view: View, prepared?: ReadonlyMap<strin
 
 /** Text and provenance consume the same native answers in one bounded batch. */
 export function renderedViews(fold:PlaceFold,views:readonly View[]):ReadonlyMap<View,{readonly text:string;readonly said:readonly string[]}>{
-  const answers=capsuleAnswers(fold,views.map(view=>({asking:view.regions.filter(asked=>REGIONS[asked.name]===undefined),shape:view.shape})));
+  const answers=capsuleAnswers(fold,views.map(view=>({asking:view.regions.filter(asked=>nativeRegion(asked.name)===undefined),shape:view.shape})));
   return new Map(views.map((view,i)=>{const answer=answers[i]!;const prepared=new Map([...answer].map(([name,value])=>[name,value.lines] as const));return[view,{text:viewOf(fold,view,prepared),said:renderedOf(fold,view,answer)}] as const}));
 }
 
 export function renderedOf(fold: PlaceFold, view: { readonly name: string; readonly shape: string; readonly regions: readonly { readonly name: string; readonly at: number }[] }, prepared?:ReadonlyMap<string,{readonly by:string}>): readonly string[] {
-  const answers = prepared??capsuleAnswers(fold, [{ asking: view.regions.filter((asked) => REGIONS[asked.name] === undefined), shape: view.shape }])[0];
+  const answers = prepared??capsuleAnswers(fold, [{ asking: view.regions.filter((asked) => nativeRegion(asked.name) === undefined), shape: view.shape }])[0];
   const cone = view.shape ? bytesDigest(fold.store, new TextEncoder().encode(fold.standing.filter((line) => fieldOf(line, 'shape') === view.shape || fieldOf(line, 'needs').split('|').includes(view.shape)).join('\n'))) : '';
   const head = cone ? [canonical({ scope: `rendered/${view.name}/cone`, role: 'writes', form: 'alphabet', measure: 'digest', value: cone, at: `place:${view.shape}`, by: 'target' })] : [];
   return [...head, ...view.regions.flatMap((asked) => {
     const answer = answers?.get(asked.name);
-    const by = REGIONS[asked.name] !== undefined ? fold.instrument : answer?.by;
+    const by = nativeRegion(asked.name) !== undefined ? fold.instrument : answer?.by;
     if (!by) return [];
     const line = (measure: string, value: string): string => canonical({ scope: `rendered/${view.name}/${asked.name}`, role: 'writes', form: 'alphabet', measure, value, at: `place:${by}`, by: 'target' });
     return [line('digest', by), ...(answer ? [line('pin', `uses/${by}`)] : [])];
   })];
+}
+
+function renderedText(lines:readonly string[]):string{return `${lines.join('\n').replace(/\n+$/,'')}\n`}
+export function renderPublication(source:import('./receipts.ts').PreservedPublication,regions:readonly {readonly name:string;readonly at:number}[]):string{
+ const out:string[]=[];for(const asked of regions){if(!isPublicationRegion(asked.name))throw Error('REFUSE·receipt publication mixed native projection');
+  const selection=publicationSelection(asked.name),body=asked.name==='publication-lines'?publicationLines(source):publicationReceipts(source,selection);
+  const shown=read(body,asked.at);if(shown.length)out.push(...shown,'');
+ }return renderedText(out);
 }

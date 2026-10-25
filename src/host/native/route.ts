@@ -5,7 +5,7 @@ import {sha256 as hash} from '../hash.ts';
  */
 import {dirname} from 'node:path';import{realpathSync}from'node:fs';import{nativeBinaryOrigin,type NativeBinaryOrigin}from'./native-binary.ts';
 import{selectedHostControl,type HostControlSelection}from'./control-selection.ts';
-import {authorityAtEpoch} from '@lapxo/topos/wire';
+import {topos_wire_authorityAtEpoch as authorityAtEpoch} from "../../../vendor/library.js";
 import {parsedLine as parse} from '../../fold/claims.ts';
 import {authorityFor} from '../../fold/signers.ts';
 import {authenticatedRootStanding} from '../admitted-place.ts';
@@ -20,9 +20,9 @@ import {boundedProcess} from '../process-lifetime.ts';
 import {validResponse,CapsuleProcessError} from '../capsule-process.ts';
 import {processOf} from '../../observe/runner.ts';
 import type {ReadingExecution,ReadingReference} from '../reading-context.ts';
-import type {Request,Response} from '@lapxo/topos/contract';
-import type {ReaderLifetime} from '@lapxo/topos/wire';
-import type {RootContext} from '@lapxo/topos/core';
+import type {topos_contract_Request as Request,topos_contract_Response as Response} from "../../../vendor/library.js";
+import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../../vendor/library.js";
+import type {topos_core_RootContext as RootContext} from "../../../vendor/library.js";
 const fail=(why:string):never=>{throw Error('REFUSE·native route '+why)};
 export interface NativeBinaryBinding {readonly line:string;readonly coordinate:string;readonly profile:import('./native-binary.ts').NativeBinaryProfile;readonly origin?:NativeBinaryOrigin}
 export interface NativeRoute {readonly identity:string;readonly profile:PortProfile;readonly binaries:readonly NativeBinaryBinding[];readonly control?:HostControlSelection;readonly inputs:readonly ReadingReference[]}

@@ -3,7 +3,7 @@ import {sha256 as hash} from '../host/hash.ts';
  * inherited supervisor argv; request JSON supplies neither verifier nor grant.
  */
 import {realpathSync} from 'node:fs';
-import {readingIdentityBytes} from '@lapxo/topos/contract';
+import {topos_contract_readingIdentityBytes as readingIdentityBytes} from "../../vendor/library.js";
 import {readBoundedBatch} from '../host/native/bounded-file.ts';
 import {inheritedNativeGuard,inheritedNativeRoot,type NativeRootInheritance} from '../host/native/root.ts';
 import {authenticateNativeProfile,loadSignedNativeReading,answerNativeReading} from '../host/native/reading.ts';

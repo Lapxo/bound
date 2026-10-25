@@ -4,7 +4,7 @@ import {mkdtempSync,mkdirSync,writeFileSync,readFileSync,cpSync,rmSync} from 'no
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {pathToFileURL} from 'node:url';
-import {installedConsumer,hash} from './support/installed-consumer.mjs';
+import {installedConsumer,hash} from './support/installed-consumer.js';
 test('installed physical line public producers refuse invalid evidence and declared resources',async()=>{
  const candidate=await installedConsumer(),api=await import(candidate.require.resolve('@lapxo/bound/physical-lines')),{canonical}=candidate.wire,{encodeReadingWitness}=candidate.contract;
  const root=mkdtempSync(join(tmpdir(),'bound-public-physical-')),d=hash('public producer fixture');mkdirSync(join(root,'src'));writeFileSync(join(root,'src','one.txt'),'line\n');
@@ -34,7 +34,7 @@ test('compiled package self-reference resolves the declared public host without 
 });
 test('missing compiled dist refuses even when a source host exists',async()=>{
  const temp=mkdtempSync(join(tmpdir(),'bound-no-compiled-dist-'));try{
-  mkdirSync(join(temp,'test/support'),{recursive:true});mkdirSync(join(temp,'src/host'),{recursive:true});const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));writeFileSync(join(temp,'package.json'),JSON.stringify(pkg));writeFileSync(join(temp,'src/host/index.ts'),'export const sourceFallback=true;\n');cpSync(new URL('./support/installed-consumer.mjs',import.meta.url),join(temp,'test/support/installed-consumer.mjs'));
-  const copied=await import(pathToFileURL(join(temp,'test/support/installed-consumer.mjs')).href);await assert.rejects(copied.installedConsumer(''),error=>error?.code==='MODULE_NOT_FOUND'||error?.code==='ERR_MODULE_NOT_FOUND');
+  mkdirSync(join(temp,'test/support'),{recursive:true});mkdirSync(join(temp,'src/host'),{recursive:true});const pkg=JSON.parse(readFileSync(new URL('../package.json',import.meta.url),'utf8'));writeFileSync(join(temp,'package.json'),JSON.stringify(pkg));writeFileSync(join(temp,'src/host/index.ts'),'export const sourceFallback=true;\n');cpSync(new URL('./support/installed-consumer.js',import.meta.url),join(temp,'test/support/installed-consumer.js'));
+  const copied=await import(pathToFileURL(join(temp,'test/support/installed-consumer.js')).href);await assert.rejects(copied.installedConsumer(''),error=>error?.code==='MODULE_NOT_FOUND'||error?.code==='ERR_MODULE_NOT_FOUND');
  }finally{rmSync(temp,{recursive:true,force:true})}
 });

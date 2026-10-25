@@ -8,7 +8,7 @@ import {requireEffects} from '../read-only.ts';
 import {underTheRegions} from '../../land/act.ts';
 import {publishBundle,nativePublicationStorage} from './publication.ts';
 import type {PublicationStorage} from './publication.ts';
-import {actIdentity,parse,canonical} from '@lapxo/topos/wire';
+import {topos_wire_actIdentity as actIdentity,topos_wire_parse as parse,topos_wire_canonical as canonical} from "../../../vendor/library.js";
 import {fullDigest} from '../digest.ts';
 
 /** Prepared and verified by the selected Topos admission/result contract. */

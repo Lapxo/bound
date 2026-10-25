@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {sign} from 'node:crypto';
 import {writeFileSync,readFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {installedConsumer,consumerPlace,hash} from './support/installed-consumer.mjs';
+import {installedConsumer,consumerPlace,hash} from './support/installed-consumer.js';
 const yes=JSON.parse(readFileSync(new URL('../samples/profile-composition/yes.json',import.meta.url),'utf8')),no=JSON.parse(readFileSync(new URL('../samples/profile-composition/no.json',import.meta.url),'utf8'));
 for(const name of yes.places)test('installed profile preparation preserves exact meet and distinguishes native land: '+name,async()=>{
  const candidate=await installedConsumer(),api=await import(candidate.require.resolve('@lapxo/bound/profiles'));

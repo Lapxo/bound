@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/signing-port.json",
-      "digest": "sha256:e2bf5ae9a86270ac7513a685ed580f243ed8be3af605ffc9e1d45554b28c14c8"
+      "digest": "sha256:4470d799d122dc21638b4c22dbf9ae43e7fc1bb4f87181fe298920996831014a"
     }
   ]
 }

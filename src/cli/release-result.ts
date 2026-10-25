@@ -1,11 +1,11 @@
 import {hostOutput} from '../host/call-context.ts';
-import {parse} from '@lapxo/topos/wire';
+import {topos_wire_parse as parse} from "../../vendor/library.js";
 import {authorityFor,writerFor,releaseSigner} from '../fold/signers.ts';
 import {eraOf} from '../fold/digests.ts';
 import {fieldOf,foldClaims} from '../fold/claims.ts';
 import {observeText} from '../observe/files.ts';
 import {claimLinesIn} from './args.ts';
-import {LOCK} from '@lapxo/topos/wire';
+import {topos_wire_LOCK as LOCK} from "../../vendor/library.js";
 import {join} from 'node:path';
 
 /** Judge an external signed approval without landing it, fetching its source,

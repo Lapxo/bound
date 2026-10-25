@@ -1,6 +1,6 @@
 import { fieldOf } from '../fold/claims.ts';
-import { alphabet } from '@lapxo/topos/wire';
-import { declaredConfig as declared } from '@lapxo/topos/forms';
+import { topos_wire_alphabet as alphabet } from "../../vendor/library.js";
+import { topos_forms_declaredConfig as declared } from "../../vendor/library.js";
 import { bytesDigest } from '../fold/digests.ts';
 
 export interface OpenCell {

@@ -14,7 +14,7 @@ import {placesIn} from '../fold/places.ts';
 import {appliedHistoryIn} from '../fold/signed.ts';
 import {storeOf} from '../land/ledger.ts';
 import {hostClockSelection,type HostClockInput} from './place-clock-selection.ts';
-import {readPlaceActContext,placeActReceiptsOf,type PlaceReceipt,type ClockBudget,type TrustedClockContract} from '@lapxo/topos/core';
+import {topos_core_readPlaceActContext as readPlaceActContext,topos_core_placeActReceiptsOf as placeActReceiptsOf,type topos_core_PlaceReceipt as PlaceReceipt,type topos_core_ClockBudget as ClockBudget,type topos_core_TrustedClockContract as TrustedClockContract} from "../../vendor/library.js";
 import {placeActResult,placeActHeads} from './ports/place-act.ts';
 import {rootAuthorityProtection} from '../land/act.ts';
 import {readOnly} from './read-only.ts';
@@ -79,14 +79,14 @@ export function rootClockSource(root:string,selected:RootClockSourceSelection){
  const resolved=hostClockSelection(input);
  // Host-only bytes from this exact authenticated constructor observation. This
  // is not a retained authority cache: every constructor calls current() again.
- const observedAnchor:import('@lapxo/topos/wire').Signer=Object.freeze({...state.anchor,coverage:Object.freeze([...state.anchor.coverage]),depth:Object.freeze({...state.anchor.depth}),admittedBy:Object.freeze([...state.anchor.admittedBy])});
+ const observedAnchor:import("../../vendor/library.js").topos_wire_Signer=Object.freeze({...state.anchor,coverage:Object.freeze([...state.anchor.coverage]),depth:Object.freeze({...state.anchor.depth}),admittedBy:Object.freeze([...state.anchor.admittedBy])});
  const observation=Object.freeze({history:Object.freeze([...state.history]),anchor:observedAnchor,algorithms:Object.freeze([...state.algorithms])});
  return {...resolved,observation,resources:Object.freeze({...selected.resources}),authority:(encoded:string)=>{const context=readPlaceActContext(encoded,selected.inherited.clock),saved=admissionHistoryAt(root,Number(context.root.epoch));const rows=saved.filter(l=>isConfig(l)&&fieldOf(l,'epoch')===context.root.epoch);if(!rows.length)fail('public historical checkpoint absent');return{anchor:state.anchor,history:saved,checkpoint:rows[0]!}}};
 }
 
 /** Source mapping is an explicit Root declaration; absence never means a zero
  * clock or an inferred cursor. Existing legacy callers do not request it. */
-export function rootClockSelectionOf(live:readonly string[],anchor:import('@lapxo/topos/wire').Signer):RootClockSourceSelection {
+export function rootClockSelectionOf(live:readonly string[],anchor:import("../../vendor/library.js").topos_wire_Signer):RootClockSourceSelection {
  const rows=live.filter(l=>fieldOf(l,'scope')==='wire/place-act-context-source'&&fieldOf(l,'measure')==='text'&&fieldOf(l,'value')!=='withdraw');
  if(rows.length!==1)fail('requires one admitted source mapping');
  const line=rows[0]!,algorithms=eraOf(live).admitted;
@@ -99,11 +99,11 @@ export function declaredRootClockSource(root:string){return rootClockSource(root
 
 export function hasRootClockSource(root:string):boolean{return authenticatedRootStanding(root).some(l=>fieldOf(l,'scope')==='wire/place-act-context-source'&&fieldOf(l,'measure')==='text'&&fieldOf(l,'value')!=='withdraw')}
 
-export interface PortablePlaceContext {readonly identity:string;readonly context:string;readonly receipts:readonly PlaceReceipt[];readonly authority:{anchor:import('@lapxo/topos/wire').Signer;history:readonly string[];checkpoint:string}}
+export interface PortablePlaceContext {readonly identity:string;readonly context:string;readonly receipts:readonly PlaceReceipt[];readonly authority:{anchor:import("../../vendor/library.js").topos_wire_Signer;history:readonly string[];checkpoint:string}}
 /** Historical inspection ONLY. The expected acting Root anchor and resource
  * selection come from the consumer's selected place, never from this packet.
  * This function returns data and cannot construct a current command permit. */
-export function inspectPortablePlaceContexts(encoded:string,expectedAnchor:import('@lapxo/topos/wire').Signer,selected:RootClockSourceSelection){
+export function inspectPortablePlaceContexts(encoded:string,expectedAnchor:import("../../vendor/library.js").topos_wire_Signer,selected:RootClockSourceSelection){
  sourceSelection(selected);
  if(typeof encoded!=='string'||Buffer.byteLength(encoded)>selected.resources.bytes)fail('portable byte budget');let rows:PortablePlaceContext[];try{rows=JSON.parse(encoded)}catch{return fail('portable JSON')}
  if(!Array.isArray(rows)||rows.length>selected.resources.acts)fail('portable context inventory budget');

@@ -1,5 +1,5 @@
-import {compareEvidence} from '@lapxo/topos/authority';
-import type {VerdictObservation} from '@lapxo/topos/authority';
+import {topos_authority_compareEvidence as compareEvidence} from "../../vendor/library.js";
+import type {topos_authority_VerdictObservation as VerdictObservation} from "../../vendor/library.js";
 /** The instrument maps an abstract relation to its declared snapshot vocabulary. Topos has no actor or origin policy. */
 export interface SnapshotInput {
   readonly declared: boolean;

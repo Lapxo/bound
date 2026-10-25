@@ -56,7 +56,7 @@ for(const [missing,renamed,escaped] of [[false,false,false],[true,false,false],[
   const instrument=join(temp,'instrument'),library=join(temp,'library');mkdirSync(instrument);mkdirSync(library);
   cpSync(new URL('../src/',import.meta.url),join(instrument,'src'),{recursive:true});
   mkdirSync(join(instrument,'node_modules/@lapxo'),{recursive:true});
-  cpSync(new URL('../vendor/syntax/',import.meta.url),join(instrument,'vendor/syntax'),{recursive:true});
+  cpSync(new URL('../vendor/',import.meta.url),join(instrument,'vendor'),{recursive:true});
   for(const pkg of ['@lapxo/topos','@lapxo/obligations'])symlinkSync(new URL('../node_modules/'+pkg,import.meta.url).pathname,join(instrument,'node_modules',pkg),'dir');
   writeFileSync(join(instrument,'package.json'),'{"type":"module"}');
   writeFileSync(join(library,'package.json'),JSON.stringify({name:'fixture-selected-library',type:'module',exports:{'.':'./index.js'}}));

@@ -1,10 +1,10 @@
 import {viewsOf} from '../fold/views.ts';
 import {BoundRefusal} from './refusals.ts';
-import type {Signer} from '@lapxo/topos/wire';
+import type {topos_wire_Signer as Signer} from "../../vendor/library.js";
 import {authorityFor} from '../fold/signers.ts';
 import {signatureEraOf as eraOf} from './signature-era.ts';
 import {fieldOf,foldClaims,isConfig} from '../fold/claims.ts';
-import {foldedEvidence} from '@lapxo/topos/contract';
+import {topos_contract_foldedEvidence as foldedEvidence} from "../../vendor/library.js";
 
 /** Project the supplied signed history against the host's original trust anchor.
  * No current-root selection, storage access, effects or retained authority.

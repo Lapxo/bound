@@ -1,5 +1,5 @@
 import{bootstrapAnchor}from'./bootstrap-anchor.ts';
-import type {Signer} from '@lapxo/topos/wire';
+import type {topos_wire_Signer as Signer} from "../../vendor/library.js";
 import {rootLedgerLines,storeOf} from '../land/ledger.ts';
 import {fieldOf,isConfig} from './claims.ts';
 

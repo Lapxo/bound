@@ -39,7 +39,7 @@
       "cwd": ".",
       "inputs": [
         "test/profile-composition-meaning.test.ts",
-        "test/support/installed-consumer.mjs",
+        "test/support/installed-consumer.js",
         "samples/profile-composition/yes.json",
         "samples/profile-composition/no.json",
         "docs/contracts/profile-preparation-native-meaning.md"

@@ -134,6 +134,28 @@
           "pattern": "materialized delivery preserves required-output refusals"
         }
       ]
+    },
+    {
+      "name": "reading-identity/current-content-and-policy",
+      "program": "runtime",
+      "args": [
+        "--experimental-strip-types",
+        "--test",
+        "test/retained-wire-syntax.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/retained-wire-syntax.test.ts"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 262144,
+      "exit": 0,
+      "matches": [
+        {
+          "stream": "stdout",
+          "pattern": "content verification reuses syntax while checking current bytes and the current digest policy"
+        }
+      ]
     }
   ]
 }

@@ -1,6 +1,6 @@
 import {join} from 'node:path';
-import {canonical,authorityAtEpoch} from '@lapxo/topos/wire';
-import {decodeReadingWitness,readingWitnessStatementBytes,readingIdentityBytes} from '@lapxo/topos/contract';
+import {topos_wire_canonical as canonical,topos_wire_authorityAtEpoch as authorityAtEpoch} from "../../../vendor/library.js";
+import {topos_contract_decodeReadingWitness as decodeReadingWitness,topos_contract_readingWitnessStatementBytes as readingWitnessStatementBytes,topos_contract_readingIdentityBytes as readingIdentityBytes} from "../../../vendor/library.js";
 import {fieldOf,fieldsOf} from '../../fold/claims.ts';
 import {isCeiling} from '../../fold/configures.ts';
 import {lockLines} from '../../fold/keys.ts';

@@ -3,7 +3,7 @@
  * inspection does not call this resolver and does not authorize a current act.
  */
 import {join} from 'node:path';
-import type {ReadingIdentityContext} from '@lapxo/topos/contract';
+import type {topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../../vendor/library.js";
 import {readingEnvironment,type ReadingReference} from '../reading-context.ts';
 import {currentNativeReaderSelections,nativeMountIdentity} from './route.ts';
 

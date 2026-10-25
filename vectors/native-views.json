@@ -6,7 +6,7 @@
     {
       "program": "runtime",
       "args": [
-        "samples/readers/check-publication.mjs",
+        "samples/readers/check-publication.js",
         "native-views",
         "samples/yes/native-views.json",
         "samples/no/native-views.json"
@@ -149,17 +149,17 @@
         "package.json",
         "samples/no/native-views.json",
         "samples/yes/native-views.json",
-        "samples/readers/check-publication.mjs",
-        "samples/readers/evidence-worker.mjs",
-        "samples/readers/module-closure.mjs",
-        "samples/readers/public-instrument.mjs",
-        "samples/readers/run-evidence.mjs",
-        "samples/readers/run-signing.mjs",
-        "samples/readers/run-typed-walk.mjs",
-        "samples/readers/run-typed.mjs",
-        "samples/readers/run-walk-refinement.mjs",
-        "samples/readers/run-walk.mjs",
-        "samples/readers/typed-provider.mjs"
+        "samples/readers/check-publication.js",
+        "samples/readers/evidence-worker.js",
+        "samples/readers/module-closure.js",
+        "samples/readers/public-instrument.js",
+        "samples/readers/run-evidence.js",
+        "samples/readers/run-signing.js",
+        "samples/readers/run-typed-walk.js",
+        "samples/readers/run-typed.js",
+        "samples/readers/run-walk-refinement.js",
+        "samples/readers/run-walk.js",
+        "samples/readers/typed-provider.js"
       ]
     }
   ],

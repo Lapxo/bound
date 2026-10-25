@@ -4,7 +4,7 @@ import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {canonical,parse} from '@lapxo/topos/wire';
-import {runTypedSample} from './run-typed.mjs';
+import {runTypedSample} from './run-typed.js';
 
 /** Authenticated typed history stays origin-qualified evidence; it grants no receiver authority. */
 export function runTypedWalkSample(reader,capture,sample='yes.json') {

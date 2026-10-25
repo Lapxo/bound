@@ -1,8 +1,8 @@
 /** Fixed HOST construction for the opt-in SDK clock profile. No CLI activation,
  * inferred genesis, new wire fields, or packet-supplied signature verifier. */
 import {createHash} from 'node:crypto';
-import {PLACE_ACT_CONTEXT,readPlaceActContext,type ClockBudget,type RootContext,type TrustedClockContract} from '@lapxo/topos/core';
-import {canonical,signedBytes,wireAt,type Signer} from '@lapxo/topos/wire';
+import {topos_core_PLACE_ACT_CONTEXT as PLACE_ACT_CONTEXT,topos_core_readPlaceActContext as readPlaceActContext,type topos_core_ClockBudget as ClockBudget,type topos_core_RootContext as RootContext,type topos_core_TrustedClockContract as TrustedClockContract} from "../../vendor/library.js";
+import {topos_wire_canonical as canonical,topos_wire_signedBytes as signedBytes,topos_wire_wireAt as wireAt,type topos_wire_Signer as Signer} from "../../vendor/library.js";
 import {foldClaims,isConfig,fieldOf,parsedLine as parse} from '../fold/claims.ts';
 import {signatureEraOf as eraOf} from './signature-era.ts';
 import {authorityFor} from '../fold/signers.ts';

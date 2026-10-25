@@ -26,6 +26,52 @@
       "maxBytes": 16777216,
       "exit": 0,
       "matches": []
+    },
+    {
+      "name": "materialized-leaf-sequence/native-publication-receipts-editorial-register",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern=editorial-register",
+        "test/publication-receipts.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/publication-receipts.test.ts",
+        "test/support/acting-root.ts",
+        "test/setup.ts",
+        "docs/contracts/materialized-leaf-sequence.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
+    },
+    {
+      "name": "materialized-leaf-sequence/native-publication-receipts-water-level",
+      "program": "runtime",
+      "args": [
+        "--import",
+        "./test/setup.ts",
+        "--test",
+        "--test-concurrency=1",
+        "--test-name-pattern=water-level",
+        "test/publication-receipts.test.ts"
+      ],
+      "cwd": ".",
+      "inputs": [
+        "test/publication-receipts.test.ts",
+        "test/support/acting-root.ts",
+        "test/setup.ts",
+        "docs/contracts/materialized-leaf-sequence.md"
+      ],
+      "timeoutMs": 15000,
+      "maxBytes": 1048576,
+      "exit": 0,
+      "matches": []
     }
   ]
 }

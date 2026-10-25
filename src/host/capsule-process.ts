@@ -2,11 +2,11 @@ import {hostOutput} from './call-context.ts';
 import {actCosts} from './act-cost.ts';
 import {fileURLToPath} from 'node:url';
 import {boundedProcess} from './process-lifetime.ts';
-import type {ReaderLifetime} from '@lapxo/topos/wire';
+import type {topos_wire_ReaderLifetime as ReaderLifetime} from "../../vendor/library.js";
 import { spawnSync } from 'node:child_process';
 import type { SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
-import { PROTOCOL } from '@lapxo/topos/wire';
-import type { Request, Response } from '@lapxo/topos/contract';
+import { topos_wire_PROTOCOL as PROTOCOL } from "../../vendor/library.js";
+import type { topos_contract_Request as Request, topos_contract_Response as Response } from "../../vendor/library.js";
 
 /** Operational process failure, distinct from a valid contract refusal or abstention. */
 export class CapsuleProcessError extends Error {

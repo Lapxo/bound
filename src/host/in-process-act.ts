@@ -1,6 +1,6 @@
-import {authorityAtEpoch} from '@lapxo/topos/wire';
-import {placeReceiptBytes,readPlaceActContext} from '@lapxo/topos/core';
-import {readingIdentity,readingReceiptIdentity,type ReadingIdentityContext} from '@lapxo/topos/contract';
+import {topos_wire_authorityAtEpoch as authorityAtEpoch} from "../../vendor/library.js";
+import {topos_core_placeReceiptBytes as placeReceiptBytes,topos_core_readPlaceActContext as readPlaceActContext} from "../../vendor/library.js";
+import {topos_contract_readingIdentity as readingIdentity,topos_contract_readingReceiptIdentity as readingReceiptIdentity,type topos_contract_ReadingIdentityContext as ReadingIdentityContext} from "../../vendor/library.js";
 import {readContent,invokeFrameSigningPort,type ContentReadPort,type SigningPort,type PortLimits} from '../engine/ports.ts';
 import {transactPlaceAct,PlaceActCommitUnknown,type PlaceActPersistence} from './place-act-transaction.ts';
 import type {PlaceActTrust,PlaceActBudget} from './ports/place-act.ts';

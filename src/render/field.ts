@@ -3,7 +3,7 @@ import { fieldOf } from '../fold/claims.ts';
 import { placesIn } from '../fold/places.ts';
 import { placedAt } from '../fold/reach.ts';
 import { polesOf, rankOf, unpackRegions } from '../fold/region.ts';
-import { INTERVALS } from '@lapxo/topos/forms';
+import { topos_forms_INTERVALS as INTERVALS } from "../../vendor/library.js";
 
 type Status = 'disagreement' | 'outside' | 'unanswered' | 'met';
 const WORST: readonly Status[] = ['disagreement', 'outside', 'unanswered', 'met'];

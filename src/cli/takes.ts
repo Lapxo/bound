@@ -2,7 +2,7 @@ import {hostOutput} from '../host/call-context.ts';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { fullDigest } from '../fold/digests.ts';
-import { canonical } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical } from "../../vendor/library.js";
 import { fieldOf, foldClaims } from '../fold/claims.ts';
 import { paidOf } from '../fold/paid.ts';
 import { rolesOf } from '../fold/roles.ts';

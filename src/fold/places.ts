@@ -1,5 +1,5 @@
 import { join } from '../host/io.ts';
-import { CAPSULE, canonical, EXTENSION, LOCK, matches, parse } from '@lapxo/topos/wire';
+import { topos_wire_CAPSULE as CAPSULE, topos_wire_canonical as canonical, topos_wire_EXTENSION as EXTENSION, topos_wire_LOCK as LOCK, topos_wire_matches as matches, topos_wire_parse as parse } from "../../vendor/library.js";
 import {lockLines} from './keys.ts';
 import {releasesOf} from '../host/release.ts';
 import {archiveCoordinate} from '../host/archive.ts';

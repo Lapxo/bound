@@ -4,8 +4,8 @@ import {BoundRefusal} from './refusals.ts';
 import {foldObjectsWithWasm} from '../wasm/object.ts';
 /** Native ports for authenticated #bound opening; trusted policy belongs to the selected local place. */
 import{sha256 as hash,isSha256}from'./hash.ts';
-import{canonical,parse,transportSelection}from'@lapxo/topos/wire';
-import{semanticStandingBytes}from'@lapxo/topos/standing';
+import{topos_wire_canonical as canonical,topos_wire_parse as parse,topos_wire_transportSelection as transportSelection}from"../../vendor/library.js";
+import{topos_standing_semanticStandingBytes as semanticStandingBytes}from"../../vendor/library.js";
 import{authorityFor,rootSigner}from'../fold/signers.ts';
 import{eraOf}from'../fold/digests.ts';
 import{lockStanding,lockLines}from'../fold/keys.ts';

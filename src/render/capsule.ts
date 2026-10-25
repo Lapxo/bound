@@ -1,4 +1,4 @@
-import { matches } from '@lapxo/topos/wire';
+import { topos_wire_matches as matches } from "../../vendor/library.js";
 import type { PlaceFold } from '../cli/place.ts';
 import { askingOf, capsulesOf } from '../observe/regions.ts';
 

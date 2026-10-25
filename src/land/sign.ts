@@ -1,4 +1,4 @@
-import { canonical, parse, parseForSigning, signedBytes, signedFieldsOf } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical, topos_wire_parse as parse, topos_wire_parseForSigning as parseForSigning, topos_wire_signedBytes as signedBytes, topos_wire_signedFieldsOf as signedFieldsOf } from "../../vendor/library.js";
 import { verifyBytes } from '../host/adapters/keys/ed25519.ts';
 import { SigningFailure } from '../host/ports/signing.ts';
 import type { SigningLot, SignatureRecord } from '../host/ports/signing.ts';

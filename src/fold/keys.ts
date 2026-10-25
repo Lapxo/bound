@@ -4,7 +4,7 @@ import { dirname, existsSync, join } from '../host/io.ts';
 import { ledgerLines, ledgerWriters, signedLines } from '../land/ledger.ts';
 import { EXTENSION, fieldOf, foldClaims, isWire, LOCK, selfName } from './claims.ts';
 import { entriesIn, observeText } from '../observe/files.ts';
-import {publicLock} from '@lapxo/topos/wire';
+import {topos_wire_publicLock as publicLock} from "../../vendor/library.js";
 
 type Keys = { readonly classes: ReadonlyMap<string, readonly string[]>; readonly signers: readonly string[] };
 

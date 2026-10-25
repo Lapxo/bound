@@ -1,5 +1,5 @@
 import {test} from 'node:test';
-import {runTypedSample} from '../samples/readers/run-typed.mjs';
+import {runTypedSample} from '../samples/readers/run-typed.js';
 
 test('typed sample lands from a new standing closure and prints object states through the installed-compatible CLI',()=>{
   runTypedSample(process.env.BOUND_TEST_READER ?? new URL('../dist/cli/verb.js',import.meta.url).pathname,process.env.BOUND_TEST_CAPTURE);

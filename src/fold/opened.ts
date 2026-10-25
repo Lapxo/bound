@@ -1,4 +1,4 @@
-import { matches } from '@lapxo/topos/wire';
+import { topos_wire_matches as matches } from "../../vendor/library.js";
 import { fieldOf } from './claims.ts';
 import { viewsOf } from './views.ts';
 

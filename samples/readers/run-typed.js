@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
 import {canonical, signedBytes, formatSignature} from '@lapxo/topos/wire';
 import {standingBytes} from '@lapxo/topos/standing';
-import {moduleClosure} from './module-closure.mjs';
+import {moduleClosure} from './module-closure.js';
 import {intervalForm, alphabetOfForm} from '@lapxo/topos/forms';
 import {cell, parts, state, live, sign as ceiling, join as opening, require as floor, observe} from '@lapxo/obligations/views/field';
 
@@ -28,7 +28,7 @@ export function runTypedSample(reader, capture, sample='yes.json', continuation,
   const ok = p => assert.equal(p.status, 0, p.stderr || p.stdout);
   const row = (scope, measure, value, more={}) => canonical({scope, measure, value, role:'writes', form:'alphabet', at:'policy:sample', by:'target', ...more});
   const yes=JSON.parse(readFileSync(inputs.yes ?? new URL('../../samples/typed/'+sample,import.meta.url),'utf8'));
-  const closure = moduleClosure(new URL('./typed-provider.mjs', import.meta.url));
+  const closure = moduleClosure(new URL('./typed-provider.js', import.meta.url));
   const toposLines = [
     row('region/context', 'reads', 'offers/**|wire/**'),
     row('wire/forms','id',yes.form),

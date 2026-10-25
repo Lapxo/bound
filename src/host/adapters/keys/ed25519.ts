@@ -1,5 +1,5 @@
 import { createPrivateKey, createPublicKey, sign, verify } from 'node:crypto';
-import { formatSignature, parseSignature } from '@lapxo/topos/wire';
+import { topos_wire_formatSignature as formatSignature, topos_wire_parseSignature as parseSignature } from "../../../../vendor/library.js";
 
 /**
  * The act of signing: canonical bytes, a private key and the algorithm the wire names for this era in; a signature

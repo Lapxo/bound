@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {Worker} from 'node:worker_threads';
 import {sha256} from '../host/hash.ts';
-import type {ObjectRecord,ObjectContext} from '@lapxo/topos/wire';
+import type {topos_wire_ObjectRecord as ObjectRecord,topos_wire_ObjectContext as ObjectContext} from "../../vendor/library.js";
 import type {ObjectReading} from '../engine/index.ts';
 import {toposAt} from '../host/selected-topos.ts';
 import {storeOf} from '../land/ledger.ts';

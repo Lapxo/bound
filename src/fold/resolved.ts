@@ -1,6 +1,6 @@
 import {readOnly} from '../host/read-only.ts';
 import { createHash, dirname, existsSync, join, linkSync, mkdirSync, readdirSync, renameSync, writeFileSync } from '../host/io.ts';
-import { canonical, parse } from '@lapxo/topos/wire';
+import { topos_wire_canonical as canonical, topos_wire_parse as parse } from "../../vendor/library.js";
 import { RECEIPTS, fieldOf, isWire } from './claims.ts';
 import { bytesDigest } from './digests.ts';
 import { carriesOnly } from './observed.ts';

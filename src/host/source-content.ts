@@ -3,7 +3,7 @@ import {transportBytes} from './ports/transport.ts';
 import {contentStore,verifiedContent} from './content-store.ts';
 import {ContentNeeded} from './content-needed.ts';
 import {createHash} from 'node:crypto';
-import {parse,wireAt} from '@lapxo/topos/wire';
+import {topos_wire_parse as parse,topos_wire_wireAt as wireAt} from "../../vendor/library.js";
 import {landBlob} from '../land/ledger.ts';
 import {ownLock} from '../observe/runner.ts';
 export interface ContentPort {

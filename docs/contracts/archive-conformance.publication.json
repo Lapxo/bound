@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/archive-conformance.json",
-      "digest": "sha256:ea36eaa4b4e4dc71503e4790da0ad88c9c0970a2e6abbd74afc46dbb8c3a5927"
+      "digest": "sha256:58e1abff80534b9b3e2dbc024719b2f3b415f2f7ec4a69bafefd0b33b66701a5"
     },
     {
       "role": "no",

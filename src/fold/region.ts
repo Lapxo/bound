@@ -1,13 +1,13 @@
 import { createHash } from '../host/io.ts';
-import { alphabetForm } from '@lapxo/obligations/forms';
-import type { Interval } from '@lapxo/obligations/forms';
-import type { Lattice } from '@lapxo/obligations/lattice';
-import { cell, parts, sign } from '@lapxo/obligations/views/field';
-import type { World } from '@lapxo/obligations/views/field';
-import { point, region as coordinates, within } from '@lapxo/obligations/field';
-import { matches, parse, roleClaimsOf } from '@lapxo/topos/wire';
+import { obligations_forms_alphabetForm as alphabetForm } from "../../vendor/library.js";
+import type { obligations_forms_Interval as Interval } from "../../vendor/library.js";
+import type { obligations_lattice_Lattice as Lattice } from "../../vendor/library.js";
+import { obligations_views_field_cell as cell, obligations_views_field_parts as parts, obligations_views_field_sign as sign } from "../../vendor/library.js";
+import type { obligations_views_field_World as World } from "../../vendor/library.js";
+import { obligations_field_point as point, obligations_field_region as coordinates, obligations_field_within as within } from "../../vendor/library.js";
+import { topos_wire_matches as matches, topos_wire_parse as parse, topos_wire_roleClaimsOf as roleClaimsOf } from "../../vendor/library.js";
 import { fieldOf } from './claims.ts';
-import { INTERVALS, spanOf } from '@lapxo/topos/forms';
+import { topos_forms_INTERVALS as INTERVALS, topos_forms_spanOf as spanOf } from "../../vendor/library.js";
 
 /**
  * A region is a prefix of the place, read at a resolution: the prefixes a lock already names — the steps a role, a

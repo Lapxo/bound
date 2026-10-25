@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/materialized-leaf-sequence.md",
-      "digest": "sha256:02cc03bb02c3f8d4f9ffabc1d18109fb1f05a65fecc613f75211a5a396f1d1fa"
+      "digest": "sha256:2f78abfc2af6f4b34b9dd7cb538fb92f49183fd29d6b0eac306dff6ef5436ab4"
     },
     {
       "role": "yes",
@@ -14,7 +14,7 @@
     {
       "role": "vector",
       "path": "vectors/native/materialized-leaf-sequence.vector.json",
-      "digest": "sha256:64f8e08343b68d926d340058d41350a4d39396e5fb30ea1742655fa1911ca5c2"
+      "digest": "sha256:da7e0aff8dcc1c40ff6caed8bfe6ce7641f2335ba2842b77b85e602806ea42cc"
     },
     {
       "role": "no",

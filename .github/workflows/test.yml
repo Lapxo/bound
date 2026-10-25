@@ -26,16 +26,38 @@ jobs:
         run: |
           set -euo pipefail
           node --import ./test/setup.ts --test --test-concurrency=1 test/*.test.ts 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - name: Check public source closure
+        run: node dist/cli/verb.js fold --check
       - name: Form exact archive once
         if: matrix.node == 24
         run: |
-          mkdir "$RUNNER_TEMP/exact"
-          npm run compact-archive -- --from-place . "$RUNNER_TEMP/exact/lapxo-bound-0.2.7.tgz"
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/exact/history" "$RUNNER_TEMP/package-stage"
+          npm pack --dry-run --json --ignore-scripts | jq -r '.[0].files[].path' | LC_ALL=C sort > "$RUNNER_TEMP/npm-members"
+          jq -r '.[]' .publication-members.json | LC_ALL=C sort > "$RUNNER_TEMP/admitted-members"
+          cmp "$RUNNER_TEMP/npm-members" "$RUNNER_TEMP/admitted-members"
+          jq -j '.[] + "\u0000"' .publication-members.json > "$RUNNER_TEMP/package-members"
+          rsync -a --from0 --files-from="$RUNNER_TEMP/package-members" ./ "$RUNNER_TEMP/package-stage/"
+          node dist/cli/verb.js fold --as evidence > "$RUNNER_TEMP/exact/evidence.bound"
+          for record in TARGET.bound receipts.bound "$RUNNER_TEMP/exact/evidence.bound"; do
+            digest="$(sha256sum "$record" | cut -d ' ' -f1)"
+            cp "$record" "$RUNNER_TEMP/exact/history/$digest.bound"
+          done
+          node dist/cli/verb.js fold --as publication-lines > "$RUNNER_TEMP/package-stage/TARGET.bound"
+          node dist/cli/verb.js fold --as publication-receipts > "$RUNNER_TEMP/package-stage/receipts.bound"
+          (cd "$RUNNER_TEMP/package-stage" && node "$GITHUB_WORKSPACE/dist/cli/verb.js" fold --check)
+          (cd "$RUNNER_TEMP/package-stage" && npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/exact")
       - uses: actions/upload-artifact@v4
         if: matrix.node == 24
         with:
           name: bound-exact-archive
           path: ${{ runner.temp }}/exact/lapxo-bound-0.2.7.tgz
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 24
+        with:
+          name: bound-publication-history
+          path: ${{ runner.temp }}/exact/history/*.bound
           if-no-files-found: error
       - name: Preserve test logs
         if: always()
