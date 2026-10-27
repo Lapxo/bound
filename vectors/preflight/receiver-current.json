@@ -1,0 +1,17 @@
+{
+  "profile": "native-preflight-acceptance/1",
+  "domains": ["archive-catalog", "manufacturing-tolerances"],
+  "clock": {"name": "unix", "unit": "milliseconds", "now": 1792800000000},
+  "limits": {"bytes": 16777216, "items": 65536},
+  "cases": [
+    {"id":"V1","case":"current-equals-explicit","initial":{"receiverEpoch":3},"expected":"same-native-card-and-judgments"},
+    {"id":"V2","case":"foreign-is-not-receiver","initial":{"receiverEpoch":3,"senderEpoch":6,"importReceiptEpoch":4},"expected":"local-current-unchanged-and-explicit-6-refused"},
+    {"id":"V3","case":"unavailable-or-altered-authority","expected":"refuse-no-allow"},
+    {"id":"V4","case":"explicit-clock-required","expected":"missing-invalid-and-expired-clock-refused"},
+    {"id":"V5","case":"cross-receiver-card","expected":"no-transplanted-allow"},
+    {"id":"V6","case":"grant-withdrawn-before-answer","expected":"card-stale-and-fresh-deny"},
+    {"id":"V7","case":"mutation-during-preparation","expected":"context-changed"},
+    {"id":"V8","case":"explicit-context-and-wire-preserved","expected":"stale-expectation-and-forged-card-refused-wire-epoch-still-required"}
+  ],
+  "boundary": "JSON is an acceptance specification, not a paid receipt, authority, current clock or portable context. CLI/host parity additionally reuses the existing native authority-card view vectors."
+}

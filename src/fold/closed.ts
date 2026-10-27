@@ -46,8 +46,7 @@ const lockStamp = (root: string, place: string): string => {
 const publishedMounts = (root: string): readonly string[] => mountedCoordinatesIn(root,
   (observeText(join(root, LOCK)) ?? '').split('\n').filter(isWire));
 
-function filesOf(root: string, place: string, region: string, inputs: readonly string[]): readonly string[] {
-  const step = region.replace(/^receipts\//, '').replace(/\/$/, '');
+function fileSelection(root: string, place: string, inputs: readonly string[]) {
   const here = join(root, place);
   const name = place.replace(/\/$/, '');
   const own = existsSync(join(here, LOCK)) ? [name ? `${name}/${LOCK}` : LOCK] : [];
@@ -58,17 +57,24 @@ function filesOf(root: string, place: string, region: string, inputs: readonly s
   }));
   const localMounts = [...mountedCoordinatesIn(here), ...publishedMounts(here)];
   const mounts = [...new Set([...mountedCoordinatesIn(root), ...publishedMounts(root), ...localMounts.map(coordinate => relative(root, join(here, coordinate)))])];
+  // Input records retain their own evidence. File membership is a set, so
+  // normalize each distinct coordinate once for this synchronous batch only.
+  const observed = [...new Set(inputs.filter(line => fieldOf(line, 'measure') === 'observed')
+    .map(line => fieldOf(line, 'scope')))].flatMap(coordinate => {
+    const at = resolve(here, coordinate), local = relative(here, at);
+    if (local === '..' || local.startsWith('../') || resolve(at) === resolve(here)) return [];
+    return existsSync(at) && statSync(at).isFile() ? [{local, rel: relative(root, at)}] : [];
+  });
+  return {here, own, receipt, claims, mounts, observed};
+}
+
+function filesOf(root: string, place: string, region: string, selection: ReturnType<typeof fileSelection>): readonly string[] {
+  const step = region.replace(/^receipts\//, '').replace(/\/$/, '');
+  const {here, own, receipt, claims, mounts} = selection;
   const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relative(here, join(root, rel)), claims) !== 'foreign'
     && !mounts.some(mount => rel === mount || rel.startsWith(`${mount}/`)));
-  // Foreign worlds are not the place's tree. Retain the external files actually handed to its readers.
-  const observed = inputs.filter(line => fieldOf(line, 'measure') === 'observed').flatMap(line => {
-    const coordinate = fieldOf(line, 'scope');
-    const at = resolve(here, coordinate);
-    const local = relative(here, at);
-    if (local === '..' || local.startsWith('../') || resolve(at) === resolve(here)) return [];
-    if (step !== '.' && step !== '' && local !== step && !local.startsWith(`${step}/`)) return [];
-    return existsSync(at) && statSync(at).isFile() ? [relative(root, at)] : [];
-  });
+  // Foreign worlds remain external; only handed coordinates join their scope.
+  const observed = selection.observed.filter(({local}) => step === '.' || step === '' || local === step || local.startsWith(`${step}/`)).map(({rel}) => rel);
   return [...new Set([...owned, ...observed, ...own])].filter(rel => rel !== receipt && !rel.split('/').some(part => part === '.bound' || part === '.cache' || part === '.git'));
 }
 
@@ -105,7 +111,13 @@ function rootLines(root: string, place: string): readonly string[] {
 
 /** File-fold identity uses public inputs; admission history stays in its separate ledger guard. */
 export function fileRegionDigest(root: string, place: string, region: string, algorithm: string, inputs: readonly string[] = []): string {
-  const files = [...filesOf(root, place, region, inputs)].sort(byBytes);
+  return fileRegionDigests(root, place, [region], algorithm, inputs)[0]!;
+}
+
+/** Prepare selection once per synchronous batch; reacquire current files on each call. */
+export function fileRegionDigests(root: string, place: string, regions: readonly string[], algorithm: string, inputs: readonly string[] = []): readonly string[] {
+  if (!regions.length) return [];
+  const selection = fileSelection(root, place, inputs);
   const own = join(root, place, LOCK);
   const bytesOf = (rel: string): Uint8Array => {
     const at = join(root, rel), bytes = observeFile(at) ?? new Uint8Array();
@@ -116,7 +128,11 @@ export function fileRegionDigest(root: string, place: string, region: string, al
     if (!lines.length || !lines.every(isConfig)) return bytes;
     return new TextEncoder().encode(publicConfiguration(lines).join('\n') + '\n');
   };
-  return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...rootLines(root, place)], algorithm);
+  const inherited=rootLines(root,place);
+  return regions.map(region => {
+    const files=[...filesOf(root,place,region,selection)].sort(byBytes);
+    return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...inherited], algorithm);
+  });
 }
 
 function namedReceipts(root: string, store: string): ReadonlyMap<string, string> {
@@ -145,7 +161,7 @@ function bytesMeet(root: string, place: string): boolean {
   const inputs = carriedFrom(storeOf(root), shipped) ?? [];
   const lines = shipped.filter(fileSeal);
   const algorithm = algorithmIn(lines.join('\n'));
-  return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === lines.map((line) => fileRegionDigest(root, place, fieldOf(line, 'scope'), algorithm, inputs)).join('\n');
+  return lines.length > 0 && algorithm !== '' && lines.map((line) => fieldOf(line, 'value')).join('\n') === fileRegionDigests(root, place, lines.map(line => fieldOf(line, 'scope')), algorithm, inputs).join('\n');
 }
 
 const stampAt = (store: string): string => storeAt(store, 'cas', 'instrument');
@@ -169,10 +185,11 @@ function rewritePlace(root: string, place: string): void {
   if (algorithm === '') return;
   const kept = text.split('\n').filter((line) => line === '' || !fileSeal(line));
   const regions = kept.filter((line) => isWire(line) && fieldOf(line, 'measure') === 'count' && fieldOf(line,'by') === 'bound' && fieldOf(line, 'scope').startsWith('receipts/'));
-  const bytes = regions.map((line) => {
+  const inputs = carriedFrom(storeOf(root), kept.filter(isWire)) ?? [];
+  const digests = fileRegionDigests(root, place, regions.map(line => fieldOf(line, 'scope')), algorithm, inputs);
+  const bytes = regions.map((line, index) => {
     const scope = fieldOf(line, 'scope');
-    const inputs = carriedFrom(storeOf(root), kept.filter(isWire)) ?? [];
-    const now = fileRegionDigest(root, place, scope, algorithm, inputs);
+    const now = digests[index]!;
     return canonical({ scope, role: 'writes', form: 'alphabet', measure: 'bytes', value: now, at: `place:${now}`, by: fieldOf(line, 'by') || 'bound' });
   });
   writeFileSync(at, `${[...kept.filter((line) => line !== ''), ...bytes].join('\n')}\n`);

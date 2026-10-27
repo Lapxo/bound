@@ -14,7 +14,8 @@
         "--test",
         "test/native-authority-card.test.ts",
         "test/authority-dependency-withdrawal.test.ts",
-        "test/native-authority-card-view.test.ts"
+        "test/native-authority-card-view.test.ts",
+        "test/native-preflight-current.test.ts"
       ],
       "cwd": ".",
       "inputs": [
@@ -35,7 +36,9 @@
         "src/host/native/reading-witness-admission.ts",
         "src/host/physical-lines.ts",
         "test/native-authority-card-view.test.ts",
-        "src/host/native/authority-card-view.ts"
+        "src/host/native/authority-card-view.ts",
+        "test/native-preflight-current.test.ts",
+        "vectors/preflight/receiver-current.json"
       ],
       "timeoutMs": 30000,
       "maxBytes": 16777216,

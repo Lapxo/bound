@@ -61,7 +61,7 @@ export async function verifyPublicationHistory(instrument:string,bytes:Uint8Arra
  * original public files and signed admission messages by their exact bytes. */
 export async function projectReceiptEvidence(instrument:string,source:string,stage:string,outputDirectory:string,fold:any,sourceBase:string,limit:number,materializedOutputs?:readonly string[]){
  const load=(name:string)=>import(pathToFileURL(join(instrument,'dist',name+'.js')).href);
- const [{receiptRegion},{sha256},{admissionHistoryAt},{withHostCall},{withoutEffects},{withContentStore},{selfName}]=await Promise.all([load('render/receipts'),load('host/hash'),load('fold/admission-history'),load('host/call-context'),load('host/read-only'),load('host/content-store'),load('fold/claims')]);
+ const [{receiptRegion,receiptDelivery},{sha256},{admissionHistoryAt},{withHostCall},{withoutEffects},{withContentStore},{selfName}]=await Promise.all([load('render/receipts'),load('host/hash'),load('fold/admission-history'),load('host/call-context'),load('host/read-only'),load('host/content-store'),load('fold/claims')]);
  if(!Number.isSafeInteger(limit)||limit<1||['TARGET.bound','receipts.bound'].reduce((n,p)=>n+statSync(join(source,p)).size,0)>limit)throw Error('REFUSE·receipt publication budget');
  const records={target:readFileSync(join(source,'TARGET.bound'),'utf8'),receipts:readFileSync(join(source,'receipts.bound'),'utf8'),admitted:admissionHistoryAt(source,Number.MAX_SAFE_INTEGER).join('\n')+'\n'};
  const document=JSON.stringify({profile:'publication-history@1',records,digests:Object.fromEntries(Object.entries(records).map(([name,text])=>[name,sha256(text)]))})+'\n';
@@ -79,7 +79,8 @@ export async function projectReceiptEvidence(instrument:string,source:string,sta
  const published=publicationOf(fold.standing.filter((line:string)=>!historical.includes(line)));
  writeFileSync(join(stage,'TARGET.bound'),published.join('\n')+'\n');
  const reference=canonical({scope:'receipts/history/'+digest.slice(7),role:'writes',form:'alphabet',measure:'digest',value:digest,at:'place:'+digest,by:'bound',shape:'publication-history@1',about:sourceBase+file});
- const current={...fold,root:stage,receiptHistory:[reference]},lock=readFileSync(join(instrument,'TARGET.bound'),'utf8').split('\n').filter(Boolean),runtime={root:instrument,entry:join(instrument,'dist/cli/verb.js'),directory:join(instrument,'dist'),extension:'.js' as const,lock};
+ const lock=readFileSync(join(instrument,'TARGET.bound'),'utf8').split('\n').filter(Boolean),runtime={root:instrument,entry:join(instrument,'dist/cli/verb.js'),directory:join(instrument,'dist'),extension:'.js' as const,lock};
+ const current=withHostCall({instrumentName:selfName(),runtime},()=>withoutEffects(()=>withContentStore(fold.store,()=>receiptDelivery({...fold,receiptHistory:[reference]},stage,materializedOutputs),()=>fold.standing)));
  const lines=withHostCall({instrumentName:selfName(),runtime},()=>withoutEffects(()=>withContentStore(fold.store,()=>[...receiptRegion(current,8),...receiptRegion(current,0),...receiptRegion(current,1,materializedOutputs)],()=>fold.standing)));
  writeFileSync(join(stage,'receipts.bound'),lines.join('\n')+'\n');
  return {digest,file,source:sourceBase+file,bytes:Buffer.byteLength(document),sourceReceipts:sha256(records.receipts),admittedHistory:sha256(records.admitted)};

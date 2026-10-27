@@ -1,3 +1,4 @@
+import{fileRegionDigest,fileRegionDigests}from'../src/fold/closed.ts';import{withHostCall}from'../src/host/call-context.ts';
 import{test}from'node:test';import assert from'node:assert/strict';import{createHash}from'node:crypto';import{mkdtempSync,mkdirSync,writeFileSync,rmSync,statSync,utimesSync}from'node:fs';import{tmpdir}from'node:os';import{join}from'node:path';
 import{canonical}from'@lapxo/topos/wire';import{receiptProjection}from'@lapxo/topos/receipts';import{projectedReceipts}from'../src/render/receipt-projection.ts';import{portableReadingReceipt,verifiedReadingReceipts}from'../src/host/reading-closures.ts';import{readingIdentityBytes}from'@lapxo/topos/contract';import{traceWork,withWorkTrace}from'../src/host/work-trace.ts';import{ActCosts}from'../src/host/act-cost.ts';
 const hash=(s:string)=>'sha256:'+createHash('sha256').update(s).digest('hex');
@@ -38,3 +39,24 @@ test('full native pass accounts its elapsed phases without adding output to read
   }finally{f.close()}
  }
 });
+
+for (const domain of ['catalogue', 'rainfall']) test('batched file seals retain current selection and bytes in '+domain,()=>{const root=mkdtempSync(join(tmpdir(),'seal-batch-'));try{
+  const rows=(scope:string,measure:string,value:string,extra:Record<string,string>={})=>canonical({scope,measure,value,role:'writes',form:'alphabet',by:'target',at:'policy:seal',...extra});
+  const lock=join(root,'TARGET.bound'),foreign=rows('leaf-role/vendor','role','foreign');
+  writeFileSync(lock,foreign+'\n');mkdirSync(join(root,'vendor'));mkdirSync(join(root,'src'));
+  writeFileSync(join(root,'src','note.txt'),domain+' original\n');writeFileSync(join(root,'vendor','used.txt'),'external input\n');writeFileSync(join(root,'vendor','unused.txt'),'not consumed\n');
+  const inputs=['vendor/used.txt','src/note.txt'].flatMap(scope=>Array.from({length:32},(_,i)=>rows(scope,'observed','read',{by:'reader:'+i})));
+  const scopes=['receipts/.','receipts/src','receipts/vendor','receipts/absent'];
+  withHostCall({instrumentName:'bound',freshBytes:true},()=>{
+    const read=()=>fileRegionDigests(root,'',scopes,'sha256',inputs),before=read();
+    assert.deepEqual(before,scopes.map(scope=>fileRegionDigest(root,'',scope,'sha256',inputs)));
+    assert.deepEqual(read(),before);assert.deepEqual(fileRegionDigests(root,'',scopes,'sha256',[...inputs].reverse()),before);
+    const used=join(root,'vendor','used.txt'),stamp=statSync(used);writeFileSync(used,'external Input\n');utimesSync(used,stamp.atime,stamp.mtime);
+    const changed=read();assert.notEqual(changed[0],before[0]);assert.notEqual(changed[2],before[2]);assert.equal(changed[1],before[1]);
+    writeFileSync(join(root,'vendor','unused.txt'),'unrelated mutation\n');assert.deepEqual(read(),changed);
+    writeFileSync(join(root,'src','added.txt'),'new owned bytes\n');const added=read();assert.notEqual(added[1],changed[1]);assert.equal(added[2],changed[2]);
+    rmSync(used);assert.notEqual(read()[2],added[2]);
+    writeFileSync(lock,rows('leaf-role/vendor','role','source')+'\n');assert.notEqual(read()[2],added[2]);
+    assert.deepEqual(fileRegionDigests(root,'',[],'sha256',inputs),[]);
+  });
+}finally{rmSync(root,{recursive:true,force:true})}});
