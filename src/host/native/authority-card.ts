@@ -27,7 +27,7 @@ import type {NativeHostInstrument} from '../native-receiver.ts';
 export interface NativeAuthorityAction {readonly kind:'record-coverage'|'admission';readonly records:readonly string[]}
 export interface NativeAuthorityCardContext {
  readonly root:string;readonly place:string;readonly key:string;readonly instrument:NativeHostInstrument;
- readonly authorityEpoch:number;readonly clock:{readonly name:string;readonly unit:string;readonly now:number};
+ readonly authorityEpoch?:number;readonly clock:{readonly name:string;readonly unit:string;readonly now:number};
  readonly horizon:RegistryHorizon;readonly limits:RecordBudget;readonly actions:readonly NativeAuthorityAction[];
 }
 export interface NativeAuthorityJudgment {readonly request:string;readonly decision:'allow'|'ask'|'deny'|'open';readonly evidence:readonly unknown[];readonly needs:readonly string[]}
@@ -35,17 +35,20 @@ export interface NativeAuthorityCardValue {readonly card:AuthorityCard;readonly 
 const hash=(value:unknown)=>sha256(JSON.stringify(value));
 const fail=(why:string):never=>{throw new BoundRefusal('authority-preflight/'+why,'REFUSE·authority-preflight/'+why)};
 export const nativeAuthorityRequestIdentity=(action:NativeAuthorityAction):string=>hash(['native-authority-request/1',action.kind,action.records]);
-/** Read-only, freshly authenticated native preflight. This does not grant an act. */
+/** Fresh native receiver selection when no expected epoch is supplied. Explicit
+ * epochs remain stale-state conditions; wire requests still require their epoch.
+ * Read-only preflight never grants a later act. */
 export async function prepareNativeAuthorityCard(context:NativeAuthorityCardContext,issuedAt?:number):Promise<{kind:'fact';value:NativeAuthorityCardValue}|{kind:'refuse';code:string;diagnostic:string}>{
  try{const selectedRoot=realpathSync(context.root);return await withHostCall({instrumentName:context.instrument.name,runtime:context.instrument.runtime,output:()=>{}},()=>withContentStore(storeOf(selectedRoot),()=>underRootAuthority(storeOf(selectedRoot),'authority card preflight',()=>withoutEffects(()=>{
   const {place,key,clock,limits}=context,root=realpathSync(context.root);
   if(place!=='.'&&(!place||place.startsWith('/')||place.includes('\\')||place.split('/').some(p=>!p||p==='.'||p==='..')))fail('place');
   if(place!=='.'&&!placesIn(root).includes(place))fail('place');
-  if(!Number.isSafeInteger(clock.now)||!Number.isSafeInteger(context.authorityEpoch)||!Number.isSafeInteger(limits.bytes)||limits.bytes<1||!Number.isSafeInteger(limits.items)||limits.items<1)fail('context');
+  if(!Number.isSafeInteger(clock.now)||(context.authorityEpoch!==undefined&&!Number.isSafeInteger(context.authorityEpoch))||!Number.isSafeInteger(limits.bytes)||limits.bytes<1||!Number.isSafeInteger(limits.items)||limits.items<1)fail('context');
   if(context.actions.length>limits.items)fail('budget');
   const history=admissionHistoryAt(root,Number.MAX_SAFE_INTEGER),anchor=admissionAnchor(root);
   if(history.length+context.actions.reduce((n,a)=>n+a.records.length,0)>limits.items||Buffer.byteLength(JSON.stringify([history,context.actions]))>limits.bytes)fail('budget');
-  if(epochOf(history)!==context.authorityEpoch)fail('stale-epoch');
+  const authorityEpoch=epochOf(history);
+  if(context.authorityEpoch!==undefined&&authorityEpoch!==context.authorityEpoch)fail('stale-epoch');
   const standing=projectAuthenticatedStanding(history,anchor),algorithms=signatureEraOf(standing).admitted;
   const authority=authorityFor(history,anchor,algorithms),signer=authority.admitted.find(s=>s.id===key);
   const snapshot=sha256(readFileSync(join(root,place==='.'?'':place,LOCK)));
@@ -57,7 +60,7 @@ export async function prepareNativeAuthorityCard(context:NativeAuthorityCardCont
    for(const line of action.records){
     const got=parse(line);if(got.kind!=='fact'){denied=true;evidence.push({check:'wire-parse',line,result:got});continue;}
     const scope=place==='.'?got.value.fields.scope??'':`${wordOf(standing,'families','region')}/${place}/${got.value.fields.scope??''}`;
-    const current=signer?authorityAtEpoch({...got.value.fields,by:key},signer,context.authorityEpoch,scope,'authority'):{kind:'refuse',why:'requested key is not admitted'};
+    const current=signer?authorityAtEpoch({...got.value.fields,by:key},signer,authorityEpoch,scope,'authority'):{kind:'refuse',why:'requested key is not admitted'};
     evidence.push({check:'authorityAtEpoch',line,scope,result:current});if(current.kind!=='admitted')denied=true;
     if(got.value.fields.sig){const admitted=place==='.'?authority.of(line).kind==='admitted':ownRecordAdmitted(line,place,wordOf(standing,'families','region'),authority.admitted,algorithms);evidence.push({check:'authenticated-record',line,admitted});if(!admitted||got.value.fields.by!==key)denied=true;}
    }
@@ -118,7 +121,7 @@ export async function answerNativeAuthorityCard(card:AuthorityCard,request:strin
  return authorityCardAnswer(card,request,{place:c.place,snapshot:c.snapshot,key:c.key,authority:c.authority,coverage:c.coverage,policy:c.policy,budget:c.budget,catalog:c.catalog,standingContract:c.standingContract,clock:context.clock,verifiesJudgment:(statement,evidence)=>statement===authorityCardStatement(c,context.limits)&&evidence===c.evidence},context.limits);
 }
 
-export type NativeAuthorityCardRequest=Omit<NativeAuthorityCardContext,'root'|'instrument'> & {readonly profile:'native-authority-card-request/1'};
+export type NativeAuthorityCardRequest=Omit<NativeAuthorityCardContext,'root'|'instrument'> & {readonly profile:'native-authority-card-request/1';readonly authorityEpoch:number};
 export function parseNativeAuthorityCardRequest(text:string,expectedDigest:string,limits:RecordBudget):NativeAuthorityCardRequest {
  if(!Number.isSafeInteger(limits.bytes)||limits.bytes<1||Buffer.byteLength(text)>limits.bytes||sha256(text)!==expectedDigest)fail('request-integrity');
  const value=JSON.parse(text) as NativeAuthorityCardRequest;

@@ -5,7 +5,7 @@
 <p align="center"><b>Keep who said what. Name what is still missing.</b></p>
 
 <p align="center">
-<a href="https://www.npmjs.com/package/@lapxo/bound"><img src="https://img.shields.io/badge/version-0.2.7-475569" alt="Version 0.2.7"></a>
+<a href="https://www.npmjs.com/package/@lapxo/bound"><img src="https://img.shields.io/badge/version-0.2.8-475569" alt="Version 0.2.8"></a>
 <img src="https://img.shields.io/badge/runtime_dependencies-0-15803d" alt="Zero runtime dependencies">
 <img src="https://img.shields.io/badge/Node-%3E%3D22.15-475569" alt="Node 22.15 or later">
 <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-475569" alt="MIT license"></a>
@@ -21,7 +21,7 @@ visible; missing evidence stays missing. Rendering a page does not pay a require
 In an existing place with admitted declarations and valid public receipts:
 
 ```sh
-npx @lapxo/bound@0.2.7 fold --check
+npx @lapxo/bound@0.2.8 fold --check
 ```
 
 Captured from the verified checkout:
@@ -45,7 +45,7 @@ README editorial · REQUIRED · altered carrier refused
 ## Quick start
 
 ```sh
-npm install @lapxo/bound@0.2.7
+npm install @lapxo/bound@0.2.8
 ```
 
 A **place** is a folder with `TARGET.bound`: its declarations, selected readers

@@ -12,7 +12,7 @@ import {withHostCall} from '../src/host/call-context.ts';
 import {withoutEffects} from '../src/host/read-only.ts';
 import {withContentStore} from '../src/host/content-store.ts';
 import {foldPlace} from '../src/cli/place.ts';
-import {receiptRegion} from '../src/render/receipts.ts';
+import {receiptRegion,receiptDelivery} from '../src/render/receipts.ts';
 import {actingRootFixture} from './support/acting-root.ts';
 import {catalogReadingInstrument} from './support/conformance-catalog-reading.ts';
 
@@ -39,7 +39,7 @@ for(const place of caseYes.places as string[])test('actual '+place+' version/pro
   const cas=join(fixture.root,'.bound/cas/blobs');mkdirSync(cas,{recursive:true});writeFileSync(join(cas,pin.slice(7)),standing);writeFileSync(join(cas,blob.slice(7)),archive);
   const initial=ok(['fold']);const calls=initial.stderr.split('\n').filter(line=>line.startsWith('CAPSULE  '+blob.slice(7,19)));assert.ok(calls.some(line=>/2 asked/.test(line)),'ordinary text and provenance share their actual two-view batch');assert.equal(calls.some(line=>/1 asked · 1 run/.test(line)),false,'witnesses do not launch one interpreter per leaf');ok(['fold','--check']);const oldReadme=readFileSync(leaf('README.md'),'utf8'),oldManifest=readFileSync(leaf('manifest.json'),'utf8');
   assert.match(oldReadme,/Original prose/);assert.equal(JSON.parse(oldManifest).version,caseYes.originalVersion);
-  const proposal=join(fixture.temp,'edition.bound');writeFileSync(proposal,[row('sample/version','id',caseYes.revisedVersion),row('sample/prose','text',caseYes.revisedProsePrefix+place)].join('\n')+'\n');
+  const proposal=join(fixture.temp,'edition.bound');writeFileSync(proposal,[row('sample/version','id',caseYes.revisedVersion),row('sample/prose','text',caseYes.revisedProsePrefix+place+'\uFFFD')].join('\n')+'\n');
   ok(['land',proposal,'--key','owner','--key-file',fixture.key]);
   // Exact consumer trigger: no normal fold or fresh renderer between the admitted edit and receipt-only fold/check.
   const receiptsOnly=fixture.run(['fold','--as','receipts']);const checked=fixture.run(['fold','--check']);
@@ -64,8 +64,9 @@ for(const place of caseYes.places as string[])test('actual '+place+' version/pro
    const actual=foldPlace(fixture.root,instrument.entry),projected={...actual,root:stage};
    assert.equal(existsSync(join(stage,'TARGET.bound')),false,'delivery contains leaves, not authority');
    assert.equal(receiptRegion(projected,1).length,0,'default complete guard refuses absent manifest');
-   const selected=receiptRegion(projected,1,['README.md']);assert.ok(selected.length,'explicit selected delivery does not require the unselected manifest');assert.equal(existsSync(join(stage,'TARGET.bound')),false,'receipt validation does not install authority in the delivery');
-   rmSync(join(stage,'README.md'));assert.equal(receiptRegion(projected,1,['README.md']).length,0,'a missing selected README cannot become an implicit subset');
+   const portable=receiptDelivery(actual,stage,['README.md']);const selected=receiptRegion(portable,1,['README.md']);const validBytes=readFileSync(join(stage,'README.md')),replacement=validBytes.indexOf(Buffer.from('\uFFFD'));assert.ok(replacement>=0);const invalidBytes=Buffer.concat([validBytes.subarray(0,replacement),Buffer.from([255]),validBytes.subarray(replacement+3)]);assert.equal(invalidBytes.toString('utf8'),validBytes.toString('utf8'),'the byte-negative is invisible to text-only comparison');writeFileSync(join(stage,'README.md'),invalidBytes);assert.equal(receiptRegion(portable,1,['README.md']).length,0,'invalid UTF-8 cannot be sealed as identical bytes');writeFileSync(join(stage,'README.md'),validBytes);const sourceBytes=readFileSync(leaf('README.md'));writeFileSync(leaf('README.md'),invalidBytes);assert.equal(receiptRegion(actual,1,['README.md']).length,0,'ordinary source receipts also compare the actual UTF-8 bytes');assert.throws(()=>receiptDelivery(actual,stage,['README.md']),/source outputs/);writeFileSync(leaf('README.md'),sourceBytes);assert.ok(selected.length,'explicit selected delivery does not require the unselected manifest');assert.equal(existsSync(join(stage,'TARGET.bound')),false,'receipt validation does not install authority in the delivery');
+   writeFileSync(join(stage,'README.md'),'changed after capture');assert.equal(receiptRegion(portable,1,['README.md']).length,0,'changed selected output is refused');writeFileSync(join(stage,'README.md'),readFileSync(leaf('README.md')));assert.equal(receiptRegion(portable,1,['README.md','manifest.json']).length,0,'changed selection is refused');
+   rmSync(join(stage,'README.md'));assert.equal(receiptRegion(portable,1,['README.md']).length,0,'a missing selected README cannot become an implicit subset');
    captures.push({binding:'materialized-output-selection',defaultMissingManifest:'refused',explicitReadmeOnly:'sealed',missingSelectedReadme:'refused',selection:['README.md'],sealRows:selected.length});
   })));
   assert.ok(existsSync(leaf('receipts.bound')));

@@ -4,7 +4,7 @@
     {
       "role": "contract",
       "path": "docs/contracts/authority-preflight.md",
-      "digest": "sha256:5befc60061e202b1db514a1d591fd193276e3d158b26860ebe534d5d7eef4d64"
+      "digest": "sha256:3992189181e4274f66f370d680b5cd69521b7517244d6eee99e60b229a171f72"
     },
     {
       "role": "yes",
@@ -19,7 +19,7 @@
     {
       "role": "vector",
       "path": "vectors/native/authority-preflight.vector.json",
-      "digest": "sha256:87c018d8997e83ef7cf618c7b239552fdb8ef392f9ef9d0678914752fd6a28d4"
+      "digest": "sha256:5084a598aa2d63f361e1d917c354e90e24f3f60cc73d8f403008d607187c525c"
     }
   ]
 }

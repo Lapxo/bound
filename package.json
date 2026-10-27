@@ -1,6 +1,6 @@
 {
   "name": "@lapxo/bound",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "type": "module",
   "description": "Read the bounds you already wrote, fold them, and name the contradictions.",
   "main": "dist/cli/verb.js",
