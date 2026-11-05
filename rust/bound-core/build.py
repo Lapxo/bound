@@ -1,0 +1,12 @@
+from pathlib import Path
+import argparse,hashlib,json,os,shutil,subprocess
+base=Path(__file__).resolve().parent;p=argparse.ArgumentParser();p.add_argument('--output',required=True,type=Path);p.add_argument('--object-port',action='store_true');p.add_argument('--admission-port',action='store_true');p.add_argument('--persistence-port',action='store_true');args=p.parse_args();out=args.output.resolve();out.mkdir(parents=True,exist_ok=False);cargo=shutil.which('cargo')or str(Path.home()/'.cargo/bin/cargo');version=subprocess.check_output([str(Path(cargo).parent/'rustc'),'--version'],text=True).strip()
+if not version.startswith('rustc 1.95.0 '):raise SystemExit('Use the preserved Rust1.95.0 toolchain; do not download or update pins')
+env=os.environ.copy();env['RUSTFLAGS']=f'--remap-path-prefix={base}=/bound-core --remap-path-prefix={Path.home()}/.cargo=/cargo -C link-arg=--max-memory=16777216 -C link-arg=-zstack-size=262144 -C link-arg=--initial-memory=1048576';modules=[]
+for name in ['build-a','build-b']:
+ env['CARGO_TARGET_DIR']=str(out/name);r=subprocess.run([cargo,'build','--offline','--locked','--release','--target','wasm32-unknown-unknown',*(['--features',','.join(name for name,enabled in [('object-port',args.object_port),('admission-port',args.admission_port),('persistence-port',args.persistence_port)]if enabled)]if args.object_port or args.admission_port or args.persistence_port else[])],cwd=base,env=env,capture_output=True);(out/(name+'.log')).write_bytes(r.stdout+r.stderr)
+ if r.returncode:raise SystemExit(r.stderr.decode())
+ modules.append((out/name/'wasm32-unknown-unknown/release/bound_fold_core.wasm').read_bytes())
+assert modules[0]==modules[1],'Non-reproducible build; retain evidence';(out/'bound_fold_core.wasm').write_bytes(modules[0]);env.pop('RUSTFLAGS');env['CARGO_TARGET_DIR']=str(out/'unit-tests');r=subprocess.run([cargo,'test','--offline','--locked'],cwd=base,env=env,capture_output=True);(out/'rust-tests.log').write_bytes(r.stdout+r.stderr)
+if r.returncode:raise SystemExit(r.stderr.decode())
+report={'rust':version,'moduleSha256':hashlib.sha256(modules[0]).hexdigest(),'bytes':len(modules[0]),'reproducible':True,'memoryMaximumBytes':16777216,'unitTestsPassed':True,'objectPort':args.object_port,'admissionPort':args.admission_port,'persistencePort':args.persistence_port,'ownerUsed':False,'signedAnything':False};(out/'build.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
