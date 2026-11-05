@@ -5,7 +5,8 @@ import {storeOf} from './ledger.ts';
 import {ContentNeeded} from '../host/content-needed.ts';
 import {observeFile} from '../observe/files.ts';
 import {createHash} from 'node:crypto';
-import {resolve,relative} from 'node:path';
+import {resolve} from 'node:path';
+import {insideDirectory} from '../host/paths.ts';
 
 /** A declared local file is already held content. Check its bytes before
  * admission; neither fetch it nor write a CAS entry during this inspection. */
@@ -15,8 +16,8 @@ function heldStanding(root:string,line:string):Uint8Array {
   catch(error){if(!(error instanceof ContentNeeded))throw error;}
   const name=fieldOf(line,'needs');
   if(!name || name.includes('|') || name.includes('*'))throw new ContentNeeded(digest);
-  const path=resolve(root,name),local=relative(resolve(root),path);
-  if(!local || local==='..' || local.startsWith('../'))throw Error('standing coordinate is outside the place');
+  const path=resolve(root,name);
+  if(!insideDirectory(resolve(root),path))throw Error('standing coordinate is outside the place');
   const bytes=observeFile(path);
   if(bytes===undefined)throw new ContentNeeded(digest);
   const split=digest.indexOf(':'),algorithm=digest.slice(0,split),hex=digest.slice(split+1);

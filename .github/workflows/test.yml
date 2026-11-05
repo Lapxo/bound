@@ -30,12 +30,12 @@ jobs:
         if: matrix.node == 24
         run: |
           mkdir "$RUNNER_TEMP/exact"
-          npm run compact-archive -- --from-place . "$RUNNER_TEMP/exact/lapxo-bound-0.2.8.tgz"
+          npm run compact-archive -- --from-place . "$RUNNER_TEMP/exact/lapxo-bound-0.2.9.tgz"
       - uses: actions/upload-artifact@v4
         if: matrix.node == 24
         with:
           name: bound-exact-archive
-          path: ${{ runner.temp }}/exact/lapxo-bound-0.2.8.tgz
+          path: ${{ runner.temp }}/exact/lapxo-bound-0.2.9.tgz
           if-no-files-found: error
       - name: Preserve test logs
         if: always()
@@ -43,6 +43,28 @@ jobs:
         with:
           name: bound-node-${{ matrix.node }}
           path: ${{ runner.temp }}/bound-tests.log
+          if-no-files-found: ignore
+  worker-package:
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: node experiments/topos-rust/check_worker_package.mjs "$RUNNER_TEMP/worker-package"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bound-worker-package-validation-node-${{ matrix.node }}
+          path: "${{ runner.temp }}/worker-package/*.json"
           if-no-files-found: ignore
   exact_archive:
     needs: test
@@ -55,7 +77,7 @@ jobs:
           name: bound-exact-archive
           path: .exact-input
       - id: identity
-        run: printf 'archive_digest=sha256:%s\n' "$(sha256sum .exact-input/lapxo-bound-0.2.8.tgz | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: printf 'archive_digest=sha256:%s\n' "$(sha256sum .exact-input/lapxo-bound-0.2.9.tgz | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
   portability-ci:
     needs: exact_archive
     permissions:
@@ -83,7 +105,7 @@ jobs:
       - name: Check installed archive and native attestation
         run: node --experimental-strip-types --test test/portability-installed.test.ts
         env:
-          BOUND_PORTABILITY_ARCHIVE: .portability-input/lapxo-bound-0.2.8.tgz
+          BOUND_PORTABILITY_ARCHIVE: .portability-input/lapxo-bound-0.2.9.tgz
           BOUND_PORTABILITY_DIGEST: ${{ needs.exact_archive.outputs.archive_digest }}
           BOUND_PORTABILITY_CAPTURE: ${{ runner.temp }}/portability-evidence.json
       - uses: actions/upload-artifact@v4

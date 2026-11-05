@@ -1,10 +1,11 @@
+import {insideDirectory,relativeCoordinate} from '../host/paths.ts';
 import {hostOutput} from '../host/call-context.ts';
 import {actCosts} from '../host/act-cost.ts';
 import {verifiedReadingReceipts} from '../host/reading-closures.ts';
 import {readingProfile} from '../host/reading-context.ts';
 import {currentReadingEnvironment} from '../host/native/receipt-environment.ts';
 import {childFlags} from '../host/capsule.ts';
-import { dirname, existsSync, join, mkdirSync, relative, resolve, statSync, writeFileSync } from '../host/io.ts';
+import { dirname, existsSync, join, mkdirSync, resolve, statSync, writeFileSync } from '../host/io.ts';
 import { byBytes, canonical, LOCK, parse, publicationOf, roleAt, roleClaimsOf } from '@lapxo/topos/wire';
 import { RECEIPTS, fieldOf, foldClaims, isConfig, isWire } from './claims.ts';
 import { bytesDigest as hashBytes, fullDigest as hashFull } from '../host/digest.ts';
@@ -56,14 +57,14 @@ function fileSelection(root: string, place: string, inputs: readonly string[]) {
     return record.kind === 'fact' ? [record.value.fields] : [];
   }));
   const localMounts = [...mountedCoordinatesIn(here), ...publishedMounts(here)];
-  const mounts = [...new Set([...mountedCoordinatesIn(root), ...publishedMounts(root), ...localMounts.map(coordinate => relative(root, join(here, coordinate)))])];
+  const mounts = [...new Set([...mountedCoordinatesIn(root), ...publishedMounts(root), ...localMounts.map(coordinate => relativeCoordinate(root,join(here,coordinate)))])];
   // Input records retain their own evidence. File membership is a set, so
   // normalize each distinct coordinate once for this synchronous batch only.
   const observed = [...new Set(inputs.filter(line => fieldOf(line, 'measure') === 'observed')
     .map(line => fieldOf(line, 'scope')))].flatMap(coordinate => {
-    const at = resolve(here, coordinate), local = relative(here, at);
-    if (local === '..' || local.startsWith('../') || resolve(at) === resolve(here)) return [];
-    return existsSync(at) && statSync(at).isFile() ? [{local, rel: relative(root, at)}] : [];
+    const at = resolve(here, coordinate), local = relativeCoordinate(here,at);
+    if (!insideDirectory(here,at)) return [];
+    return existsSync(at) && statSync(at).isFile() ? [{local, rel: relativeCoordinate(root,at)}] : [];
   });
   return {here, own, receipt, claims, mounts, observed};
 }
@@ -71,7 +72,7 @@ function fileSelection(root: string, place: string, inputs: readonly string[]) {
 function filesOf(root: string, place: string, region: string, selection: ReturnType<typeof fileSelection>): readonly string[] {
   const step = region.replace(/^receipts\//, '').replace(/\/$/, '');
   const {here, own, receipt, claims, mounts} = selection;
-  const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relative(here, join(root, rel)), claims) !== 'foreign'
+  const owned = coordinatesUnder(join(here, step), root).filter(rel => roleAt(relativeCoordinate(here,join(root,rel)),claims) !== 'foreign'
     && !mounts.some(mount => rel === mount || rel.startsWith(`${mount}/`)));
   // Foreign worlds remain external; only handed coordinates join their scope.
   const observed = selection.observed.filter(({local}) => step === '.' || step === '' || local === step || local.startsWith(`${step}/`)).map(({rel}) => rel);
@@ -131,7 +132,7 @@ export function fileRegionDigests(root: string, place: string, regions: readonly
   const inherited=rootLines(root,place);
   return regions.map(region => {
     const files=[...filesOf(root,place,region,selection)].sort(byBytes);
-    return hashFull([...files.map((rel) => `${relative(join(root, place), join(root, rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...inherited], algorithm);
+    return hashFull([...files.map((rel) => `${relativeCoordinate(join(root,place),join(root,rel))} ${hashBytes(bytesOf(rel), algorithm)}`), ...inherited], algorithm);
   });
 }
 

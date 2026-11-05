@@ -1,0 +1,11 @@
+// Optional native destination selected by the embedding. No Root formation.
+import fs from'node:fs';import path from'node:path';
+import{createRecoveryStorage}from'../persistence-host/recovery-storage-v2.mjs';
+const names=['binding.json','input.json','output.json','receipt.json'],fail=code=>{throw Object.assign(Error(code),{code})};
+export function createNativeReceiptStorage({directory,maxBytes,platform=process.platform,syncDirectory}){
+ if(typeof directory!=='string'||!path.isAbsolute(directory)||!Number.isSafeInteger(maxBytes)||maxBytes<1||maxBytes>65536)fail('persistence/selection');
+ const target=identity=>{if(typeof identity!=='string'||!/^sha256:[a-f0-9]{64}$/.test(identity))fail('persistence/identity');return path.join(directory,identity.slice(7))};
+ return Object.freeze({read(identity){const at=target(identity);let before;try{before=fs.lstatSync(at)}catch(e){if(e.code==='ENOENT')return undefined;fail('persistence/read')};if(!before.isDirectory()||before.isSymbolicLink()||fs.readdirSync(at).sort().join(',')!==names.join(','))fail('persistence/conflict');const files={};let size=0;
+  for(const name of names){const p=path.join(at,name),prior=fs.lstatSync(p);if(!prior.isFile()||prior.isSymbolicLink()||prior.size>maxBytes-size)fail('persistence/conflict');const fd=fs.openSync(p,fs.constants.O_RDONLY|(fs.constants.O_NOFOLLOW??0));try{const stat=fs.fstatSync(fd);if(stat.ino!==prior.ino||stat.dev!==prior.dev||stat.size!==prior.size)fail('persistence/conflict');const bytes=Buffer.alloc(prior.size+1);let used=0,count;while(used<bytes.length&&(count=fs.readSync(fd,bytes,used,bytes.length-used,null))>0)used+=count;if(used!==prior.size)fail('persistence/conflict');try{files[name]=new TextDecoder('utf8',{fatal:true,ignoreBOM:true}).decode(bytes.subarray(0,used))}catch{fail('persistence/encoding')};size+=bytes.length;const after=fs.fstatSync(fd);if(after.size!==stat.size||after.mtimeMs!==stat.mtimeMs)fail('persistence/conflict')}finally{fs.closeSync(fd)}}
+  const after=fs.lstatSync(at);if(after.ino!==before.ino||after.dev!==before.dev||fs.readdirSync(at).sort().join(',')!==names.join(','))fail('persistence/conflict');return files},open(identity){return createRecoveryStorage(target(identity),{platform,...syncDirectory?{syncDirectory}:{}})}});
+}

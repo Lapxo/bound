@@ -1,10 +1,11 @@
+import {relativeCoordinate} from '../host/paths.ts';
 import {preparingView} from '../host/reading-context.ts';
 import {BoundRefusal} from '../host/refusals.ts';
 import {signatureEraOf} from '../host/signature-era.ts';
 import {hostInstrumentRuntime} from '../host/call-context.ts';
 import {ledgerLines,ledgerWriters,storeOf} from '../land/ledger.ts';
 import {readOnly} from '../host/read-only.ts';
-import { appendFileSync, dirname, join, mkdirSync, readdirSync, realpathSync, relative, resolve } from '../host/io.ts';
+import { appendFileSync, dirname, join, mkdirSync, readdirSync, realpathSync, resolve } from '../host/io.ts';
 import { bytesDigest as bytesWith, fullDigest as fullWith } from '../host/digest.ts';
 import { coordinatesUnder, observeFile, observeText, stampOf } from '../observe/files.ts';
 import { releaseOf, signedLockLines } from './keys.ts';
@@ -215,8 +216,9 @@ export function instrumentCoordinates(store: string, entry: string, standing: re
       }
     }
   };
-  follow(deps.find((dep) => relative(root, resolve(entry)).startsWith(dep.region))?.region);
-  const home = relative(root, resolve(entry)).split('/')[0] ?? '';
+  const entryCoordinate=relativeCoordinate(root,resolve(entry));
+  follow(deps.find((dep) => entryCoordinate.startsWith(dep.region))?.region);
+  const home = entryCoordinate.split('/')[0] ?? '';
   for (const line of standing.filter((one) => fieldOf(one, 'scope').startsWith(`${home}/process/`) && fieldOf(one, 'kind') === 'process' && fieldOf(one, 'value') !== 'withdraw')) {
     for (const need of fieldOf(line, 'needs').split('|').filter(Boolean)) walk(resolve(root, need));
   }

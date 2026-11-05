@@ -1,4 +1,5 @@
-import { readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, rmSync, writeFileSync, mkdirSync, mkdtempSync, copyFileSync, appendFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -40,6 +41,28 @@ for(const file of samples.outputs){const at=new URL('../'+file,import.meta.url);
 const delivered = new Set(compactBuild(root));
 if(!pkg.files.includes('dist/vendor/'))throw Error('Vendored code, types and licenses are not delivered');
 
+// Project the Worker after compaction so it shares the shipped native lease
+// and read-only state. The declaration fragment uses the existing type roots.
+if (!pkg.files.includes('dist/**/*.js') || !pkg.files.includes('dist/host/index.d.ts')) {
+  throw Error('Worker host outputs are outside the package manifest');
+}
+const workerBuild = mkdtempSync(join(tmpdir(), 'bound-worker-build-'));
+try {
+  execFileSync(process.execPath, ['experiments/topos-rust/build_worker_api.mjs', workerBuild], {
+    cwd: root, stdio: 'inherit',
+  });
+  const host = join(root, 'dist/host');
+  copyFileSync(join(workerBuild, 'runtime.mjs'), join(host, 'worker-api.js'));
+  copyFileSync(join(workerBuild, 'native-public.mjs'), join(host, 'worker-native.js'));
+  appendFileSync(join(host, 'index.js'),
+    "\nexport {createRustReceiptPersistence,createMemoryReadingCache,createCapsuleWorkerPort} from './worker-api.js';\n" +
+    "export {createBoundWorkerHost,createNativeReceiptStorage,createNativeReadingLease} from './worker-native.js';\n");
+  appendFileSync(join(host, 'index.d.ts'),
+    '\n' + readFileSync(join(root, 'experiments/topos-rust/worker-host-public.d.ts'), 'utf8'));
+} finally {
+  rmSync(workerBuild, {recursive: true, force: true});
+}
+
 const roots = new Set<string>([pkg.types]);
 function typeRoots(value:unknown):void {
   if(!value||typeof value!=='object')return;
@@ -60,4 +83,3 @@ for(const file of new Set([...roots,...delivered] as string[])){
     if(!delivered.has(dependency))throw Error('Public declaration dependency is not delivered: '+file+' -> '+dependency);
   }
 }
-

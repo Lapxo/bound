@@ -1,6 +1,7 @@
+import {relativeCoordinate} from '../host/paths.ts';
 import {hostOutput} from '../host/call-context.ts';
 import { timing } from '../host/timing.ts';
-import { basename, existsSync, relative, resolve } from '../host/io.ts';
+import { basename, existsSync, resolve } from '../host/io.ts';
 import { EXTENSION, matches } from '@lapxo/topos/wire';
 import { fieldOf, isWire } from './claims.ts';
 import { wordsOf } from './wire.ts';
@@ -193,7 +194,7 @@ export function ownReadings(input: {
   const instrument = under === undefined || under === `${basename(ownRoot())}/`;
   const tree = <T>(fn: () => T): T | undefined => (under ? undefined : fn());
   const imported = tree(() => took('imports', () => [...instrumentCoordinates(store, resolve(root, entry), standing, root, ownLock()).keys()]
-    .filter((coordinate) => capsuleAt(root, relative(root, coordinate).split('/')[0] ?? '')).length));
+    .filter((coordinate) => capsuleAt(root, relativeCoordinate(root,coordinate).split('/')[0] ?? '')).length));
   const twice = tree(() => took('bodies', () => twiceWritten(observed)));
   const local = {
     'orphan-samples': input.orphans,
