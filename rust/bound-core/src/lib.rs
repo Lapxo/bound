@@ -11,6 +11,8 @@ mod byte_port;
 #[cfg_attr(not(target_arch="wasm32"),allow(dead_code))]
 mod abi;
 pub mod views;
+#[cfg(target_arch="wasm32")]
+mod history_transport;
 
 pub const INPUT_BYTES: usize = 65536;
 pub const RECORDS: usize = 64;
@@ -195,16 +197,19 @@ pub fn fold(records: &[Record], receipts: Option<&[Receipt]>) -> Result<Fold,Str
 
 fn refusal(code: &str)->Vec<u8>{let mut out=serde_json::to_vec(&("refuse",code)).unwrap();out.push(b'\n');out}
 pub fn evaluate(bytes: &[u8]) -> Vec<u8> {
-    if bytes.len()>INPUT_BYTES{return refusal("fold/input-budget");}
+    evaluate_fold(bytes, RESPONSE_BYTES, Some(RECORDS))
+}
+fn evaluate_fold(bytes: &[u8], output_limit:usize, record_limit:Option<usize>) -> Vec<u8> {
+    if record_limit.is_some() && bytes.len()>INPUT_BYTES{return refusal("fold/input-budget");}
     let Ok(request)=serde_json::from_slice::<Request>(bytes)else{return refusal("fold/prepared-input");};
     if request.profile!="bound-fold-prepared@1"{return refusal("fold/profile");}
-    if request.records.len()>RECORDS{return refusal("fold/record-budget");}
+    if record_limit.is_some_and(|limit|request.records.len()>limit){return refusal("fold/record-budget");}
     let _=request.placed; // Native foldClaims deliberately ignores this parameter.
     let mut out=match fold(&request.records,request.receipts.as_deref()){
         Ok(result)=>serde_json::to_vec(&("fact",result)).unwrap(),
         Err(_)=>return refusal("host-port/failed"),
     };
-    out.push(b'\n');if out.len()>RESPONSE_BYTES{return refusal("fold/response-budget");}out
+    out.push(b'\n');if out.len()>output_limit{return refusal("fold/response-budget");}out
 }
 #[cfg(target_arch="wasm32")]#[no_mangle]
 pub extern "C" fn fold_abi_version()->u32{2}

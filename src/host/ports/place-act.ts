@@ -5,6 +5,7 @@ import {transactPlaceAct,type PlaceActPersistence} from '../place-act-transactio
 import {canonicalActStore,underAuthorityRegions,underTheRegions,underRootProjection} from '../../land/act.ts';
 import {requireEffects} from '../read-only.ts';
 import {receiverClock} from '../host-controls.ts';
+import {publishBundleInWorker,reconfirmBundleInWorker} from '../act-worker-port.ts';
 import {publishBundle,nativePublicationStorage,type PublicationStorage} from './publication.ts';
 
 export interface PlaceActBudget {readonly acts:number;readonly bytes:number}
@@ -71,6 +72,16 @@ export function nativePlaceActPersistence(store:string,storage:PublicationStorag
   heads:(trust,limits)=>placeActHeads(store,trust.initialHeads,trust,limits),
   publish:(identity,files)=>publishBundle(at(store,identity),files,storage),
  };
+}
+/** Uses the same guards and historical verification as the native port. */
+export function nativePlaceActWorkerPersistence(store:string,lifetimeMs:number):PlaceActPersistence&{reconfirm:(identity:string,bundle:PlaceActBundle,signal?:AbortSignal)=>Promise<void>}{
+ const root=canonicalActStore(store),native=nativePlaceActPersistence(root);
+ return {...native,reconfirm:(identity,bundle,signal)=>reconfirmBundleInWorker(at(root,identity),{
+  'context.json':bundle.context,'receipts.json':JSON.stringify(bundle.receipts)+'\n','originals.json':JSON.stringify(bundle.originals)+'\n',
+ },{lifetimeMs,signal}),publish:(identity,files)=>{
+  requireEffects('atomic publication');
+  return publishBundleInWorker(at(root,identity),files,lifetimeMs);
+ }};
 }
 export async function commitPlaceAct(store:string,encoded:string,receipts:readonly PlaceReceipt[],trust:PlaceActTrust,limits:PlaceActBudget,storage:PublicationStorage=nativePublicationStorage){
  requireEffects('place act commitment');

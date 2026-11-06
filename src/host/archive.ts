@@ -37,8 +37,8 @@ function pax(bytes: Uint8Array): Record<string, string> {
 }
 
 /** The gzip/POSIX tar adapter reads regular files, directories and PAX attributes, or rejects the whole archive. */
-export function members(archive: Uint8Array): readonly Member[] {
-  const bytes = gunzipSync(archive);
+export function members(archive: Uint8Array, maxOutputLength?:number): readonly Member[] {
+  const bytes = gunzipSync(archive, {maxOutputLength});
   const text = (at: number, length: number): string => bytes.subarray(at, at + length).toString('utf8').replace(/\0[\s\S]*$/, '');
   const octal = (at: number, length: number): number => {
     const raw = text(at, length).trim();

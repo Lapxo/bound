@@ -9,9 +9,9 @@ import {foldedEvidence} from '@lapxo/topos/contract';
 /** Project the supplied signed history against the host's original trust anchor.
  * No current-root selection, storage access, effects or retained authority.
  * The file host and the in-process host use this same admission-snapshot fold. */
-export function projectAuthenticatedStanding(history:readonly string[],anchor:Signer):readonly string[]{
+export function authenticatedStandingRecords(history:readonly string[],anchor:Signer):readonly string[]{
   const snapshots=new Map<number,ReturnType<typeof authorityFor>>();
-  const admitted=history.filter(line=>{
+  return history.filter(line=>{
     const epoch=Number(fieldOf(line,'epoch'))||0;
     let authority=snapshots.get(epoch);
     if(!authority){
@@ -30,6 +30,10 @@ export function projectAuthenticatedStanding(history:readonly string[],anchor:Si
     }
     return authority.of(line).kind==='admitted';
   });
+}
+
+export function projectAuthenticatedStanding(history:readonly string[],anchor:Signer):readonly string[]{
+  const admitted=authenticatedStandingRecords(history,anchor);
   // The host authenticates against historical authority; Topos projects the
   // authenticated history using the instrument's existing fold.
   const {standing}=foldedEvidence(admitted,{

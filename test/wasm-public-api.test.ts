@@ -9,3 +9,24 @@ async function withoutTransport(run:()=>Promise<void>){let calls=0;const previou
 test('public WASM adapter matches the Node projection bytes of four declared cells',async()=>withoutTransport(async()=>{assert.equal((await runWasmRequest(request)).output,expected)}));
 test('public WASM adapter refuses insufficient initialized memory before guest work',async()=>withoutTransport(async()=>{const low=structuredClone(request);low.limits.memoryBytes=1;low.trusted.limits.memoryBytes=1;await assert.rejects(()=>runWasmRequest(low),/REFUSE·wasm initialized memory [0-9]+ exceeds declared memory 1/)}));
 test('public WASM worker cancellation terminates its worker without a partial result',async()=>withoutTransport(async()=>{const controller=new AbortController(),workers:Promise<unknown>[]=[];const factory=()=>{const worker=new Worker(pathToFileURL(join(bound,'dist/wasm/node-worker.js')));workers.push(new Promise(resolve=>worker.once('exit',resolve)));controller.abort();return worker};await assert.rejects(()=>evaluateWasm(request,{workerFactory:factory,lifetimeMs:5000,signal:controller.signal}),/REFUSE·wasm cancelled/);await Promise.all(workers);assert.equal(workers.length,1)}));
+
+test('Bound-owned capsule worker returns the four projection cells',async()=>{
+  const {evaluateBoundCapsuleInWorker}=await load('@lapxo/bound/host');
+  assert.equal((await evaluateBoundCapsuleInWorker(request,{lifetimeMs:5000})).output,expected);
+});
+
+test('Bound-owned Rust worker refuses altered module bytes and cancellation',async()=>{
+  const {evaluateBoundCoreInWorker}=await load('@lapxo/bound/host');
+  const wasm=Uint8Array.of(0,97,115,109,1,0,0,0);
+  const rustRequest={operation:'fold',prepared:Uint8Array.of(123,125),wasm,
+    trusted:{digest:sha(wasm),byteLength:wasm.byteLength}};
+  const options={lifetimeMs:5000};
+  const altered=structuredClone(rustRequest);
+  altered.wasm[0]^=1;
+  await assert.rejects(evaluateBoundCoreInWorker(altered,options),/fold\/module-integrity/);
+  await assert.rejects(evaluateBoundCoreInWorker(rustRequest,options),/fold\/module-abi/);
+  const controller=new AbortController();
+  const pending=evaluateBoundCoreInWorker(rustRequest,{...options,signal:controller.signal});
+  controller.abort();
+  await assert.rejects(pending,/fold\/cancelled/);
+});

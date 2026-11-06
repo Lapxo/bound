@@ -66,6 +66,8 @@ export interface RootAdmissionHost {
  readonly storage?:PublicationStorage;
  readonly prepared?:(identity:string)=>void;
  readonly committed?:(identity:string,bundle:LocalActBundle,kind:'landed'|'once')=>void;
+ readonly workerAdmission?:(context:import('../host/act-rust-ports.ts').WorkerAdmissionContext)=>Promise<unknown>;
+ readonly workerPublication?:(path:string,files:Readonly<Record<string,string>>)=>Promise<void>;
 }
 export type Batch = { readonly kind: 'signed'; readonly signed: readonly string[]; readonly records?:readonly string[]; readonly epoch: number; readonly base: { readonly digest: string; readonly places: readonly string[] }; readonly keyId?: string } | { readonly kind: 'once'; readonly proposed: readonly string[] } | { readonly kind: 'exit'; readonly code: number };
 
@@ -348,9 +350,17 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
   if(checkedEvidence.kind==='refuse'){hostOutput('error',`${selfName()}: ${checkedEvidence.diagnostic} · nothing landed\n`);return 1;}
   evidence=checkedEvidence.evidence;
   const fold = evidence.fold;
-  const authority = took('authority', () => authorityFor([...lockLines(store), ...signed], rootSigner(root), signaturesOf(store).admitted));
-  for (const line of signed) {
-    const verdict = authority.of(line);
+  const history=[...lockLines(store),...signed],anchor=rootSigner(root),algorithms=signaturesOf(store).admitted;
+  const authority = took('authority', () => authorityFor(history,anchor,algorithms));
+  const verdicts=host?.workerAdmission?signed.map(line=>authority.of(line)):undefined;
+  if(host?.workerAdmission&&signed.length){
+    const result=await host.workerAdmission({history,anchor,algorithms,queries:signed});
+    if(!Array.isArray(result)||result[0]!=='fact'||JSON.stringify(result[1]?.verdicts)!==JSON.stringify(verdicts))
+      throw new BoundRefusal('host/worker-admission','REFUSE·host/worker-admission');
+    notCancelled(host.signal);
+  }
+  for (const [index,line] of signed.entries()) {
+    const verdict=verdicts?.[index]??authority.of(line);
     if (verdict.kind !== 'admitted') {
       hostOutput('error',`${selfName()}: ${verdict.kind === 'refuse' ? verdict.why : `REFUSE·authority grey: ${verdict.why}`}\n`);
       return 1;
@@ -388,7 +398,7 @@ async function acceptNow(root: string, batch: Extract<Batch, { readonly kind: 's
     const receipt=canonical({scope:resultProfile.scope,at:resultProfile.context,role:'writes',form:'alphabet',measure:'digest',value:identity,by:folder,epoch:String(epoch)});
     const bundle={records:records.join('\n')+'\n',receipt:receipt+'\n',placements:placements.map(p=>({place:p.place,records:p.records.join('\n')+'\n'}))};
     notCancelled((host?.signal??currentActSignal()));host?.prepared?.(identity);notCancelled((host?.signal??currentActSignal()));
-    const committed=await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct,host?.storage,(host?.signal??currentActSignal()));
+    const committed=await commitLocalAct(store,identity,descent,async()=>bundle,intactLocalAct,host?.storage,(host?.signal??currentActSignal()),host?.workerPublication);
     host?.committed?.(identity,committed,committed.kind);
     // Commitment precedes projections and conformance work. If either fails,
     // this public identity still names the admitted act; it is never rollback.

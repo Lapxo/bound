@@ -5,7 +5,8 @@ import {boundedProcess} from './process-lifetime.ts';
 import type {ReaderLifetime} from '@lapxo/topos/wire';
 import { spawnSync } from 'node:child_process';
 import type { SpawnSyncOptionsWithStringEncoding } from 'node:child_process';
-import { PROTOCOL } from '@lapxo/topos/wire';
+import { validResponse } from './capsule-response.ts';
+export { validResponse } from './capsule-response.ts';
 import type { Request, Response } from '@lapxo/topos/contract';
 
 /** Operational process failure, distinct from a valid contract refusal or abstention. */
@@ -27,17 +28,6 @@ export class CapsuleProcessError extends Error {
     this.signal = result.signal;
     this.cause = result.error;
   }
-}
-
-export function validResponse(value: unknown, request: Request): value is Response {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
-  const one = value as Record<string, unknown>;
-  if (one['protocol'] !== PROTOCOL) return false;
-  if (one['kind'] === 'refuse' || one['kind'] === 'abstain') return typeof one['why'] === 'string';
-  if (one['kind'] !== 'fact') return false;
-  if (request.verb === 'render') return Array.isArray(one['lines']) && one['lines'].every((line) => typeof line === 'string');
-  if (request.verb === 'read') return Array.isArray(one['claims']);
-  return true;
 }
 
 /** Last-line JSON is the wire framing. No partial batch, failed exit or synthetic missing response is accepted. */

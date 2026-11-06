@@ -1,3 +1,5 @@
+import {dispatchCapsuleSynchronously,synchronousCapsuleWorkers} from './capsule-sync-worker.ts';
+import {actCosts} from './act-cost.ts';
 import {hostOutput} from './call-context.ts';
 import type {ReaderReference} from '@lapxo/topos/wire';
 import {readerLifetime,parse} from '@lapxo/topos/wire';
@@ -102,12 +104,16 @@ export const childFlags = (argv: readonly string[] = process.execArgv): readonly
   argv.filter((flag, i) => !/^(-e|-p|--eval|--print)$/.test(argv[i - 1] ?? '') && !/^(-e|-p|--eval|--print|--input-type)(=|$)/.test(flag));
 
 function answered(digest: string, bytes: Uint8Array, requests: readonly Request[], names: readonly string[], tree?: string, cacheStore: string = ownStore(), entry?: string, reader?: ReaderReference): readonly (Response | undefined)[] {
+  if(!requests.length)return [];
   const boundary=readingBoundary();
   const native=nativeReaderRoute();
   if(native){
     if(!boundary?.execution||digest!==native.profile.selection.archive)throw Error('REFUSE·native reader lacks its complete implementation identity');
     assertNativeRouteCurrent(native);
   }
+  const workers=synchronousCapsuleWorkers();
+  const limits=workers&&Object.prototype.hasOwnProperty.call(workers,digest)?workers[digest]:undefined;
+  if(workers&&(!limits||native||!entry||!tree||!bytes.length))throw Error('REFUSE·capsule-worker/selection');
   const child = entry === undefined ? spawnOf(tree ?? unpacked(digest, bytes), names) : [entry];
   if (!child.length) {
     hostOutput('error',`LOAD     regions · none of ${names.length} under the directories release/layout names\n`);
@@ -115,7 +121,10 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   }
   const loader = entry !== undefined ? `${createHash('sha256').update(`${relative(tree!, entry)}\n`).digest('hex')}\n` : child.length > 1 ? `${createHash('sha256').update(observeFile(child[0]!) ?? new Uint8Array()).digest('hex')}\n` : '';
   const lifetime = readerLifetime(contentPolicy().flatMap(line=>{const p=parse(line);return p.kind==='fact'?[p.value.fields]:[];}), reader ?? digest);
-  const policy = lifetime === undefined ? '' : JSON.stringify(lifetime)+'\n';
+  const workerLimits=limits&&lifetime?{...limits,lifetimeMs:Math.min(limits.lifetimeMs,lifetime.timeoutMs),
+   outputBytes:Math.min(limits.outputBytes,lifetime.responseBytes)}:limits;
+  const policy = (lifetime === undefined ? '' : JSON.stringify(lifetime)+'\n')+
+   (workerLimits?JSON.stringify(['bound-capsule-worker@1',workerLimits])+'\n':'');
   const hitOf = (request: Request): string => sha(`${digest}\n${loader}${policy}${boundary===undefined?'':boundary.identity+'\n'}${JSON.stringify(request)}`);
   const hits = requests.map(hitOf);
   const kept = hits.map(hit => storeAt(cacheStore, 'cas', 'answers', hit));
@@ -134,7 +143,9 @@ function answered(digest: string, bytes: Uint8Array, requests: readonly Request[
   if (missing.length) hostOutput('error',`CAPSULE  ${digest.slice(7, 19)} · ${requests.length} asked · ${missing.length} run · ${missing.map((one) => `${one.rootScope}${one.region}`).join(' ')}\n`);
   // Execute and validate the entire batch before committing any answer to the cache.
   if(native&&!lifetime)throw Error('REFUSE·native reader missing declared lifetime');
-  const ran = !missing.length ? [] : native
+  const ran = !missing.length ? [] : workerLimits
+    ? actCosts.measure(()=>dispatchCapsuleSynchronously({digest,entry:relative(tree!,entry!).split(sep).join('/'),limits:workerLimits},bytes,missing))
+    : native
     ? invokeNativeRoute(native,{...materializeNativeRoute(native),requests:missing,execution:boundary!.execution!,limits:lifetime!})
     : executeCapsule(process.execPath, [...childFlags(boundary?.execution?.flags), hostOf(), ...child], missing, boundary?.execution?{env:boundary.execution.env,cwd:boundary.execution.cwd}:{}, lifetime);
   return requests.map((request, i) => {

@@ -1,3 +1,5 @@
+import {reconfirmBundleInWorker} from '../act-worker-port.ts';
+import type {BoundWorkerOptions} from '../worker-host.ts';
 import{hashText}from'../hash.ts';
 import {ActCommitUnknown} from '../commit-result.ts';
 import {assertHostNotCancelled} from '../host-controls.ts';
@@ -125,7 +127,8 @@ export function localActResult(store: string,identity: string,verify: LocalActVe
  */
 export async function commitLocalAct(store: string,identity: string,regions: readonly string[],
   prepare: ()=>Promise<LocalActBundle>,verify: LocalActVerification,
-  storage: PublicationStorage=nativePublicationStorage,signal?:AbortSignal): Promise<LocalActBundle & {readonly kind:'landed'|'once'}> {
+  storage: PublicationStorage=nativePublicationStorage,signal?:AbortSignal,
+  workerPublication?:(path:string,files:Readonly<Record<string,string>>)=>Promise<void>): Promise<LocalActBundle & {readonly kind:'landed'|'once'}> {
   requireEffects('local act commitment');
   assertHostNotCancelled(signal);
   return underTheRegions(store,regions,'land',async()=>{
@@ -135,10 +138,21 @@ export async function commitLocalAct(store: string,identity: string,regions: rea
     const bundle=await prepare();
     assertHostNotCancelled(signal);
     if(!bundle.records || !bundle.receipt || verify(identity,bundle)!==true)throw Error('REFUSE·act prepared result does not verify');
-    const files:Record<string,string>={'records.bound':bundle.records,'receipt.bound':bundle.receipt};
-    for(const p of bundle.placements??[])files['place-'+encodeURIComponent(p.place)+'.bound']=p.records;
+    const files=localActMembers(bundle);
     assertHostNotCancelled(signal);
-    try{publishBundle(atOf(store,identity),files,storage)}catch(error){throw new ActCommitUnknown(identity,error)}
+    try{const path=atOf(store,identity);if(workerPublication)await workerPublication(path,files);else publishBundle(path,files,storage)}catch(error){throw new ActCommitUnknown(identity,error)}
     return {kind:'landed',...bundle};
   });
+}
+
+
+function localActMembers(bundle:LocalActBundle):Readonly<Record<string,string>>{
+ const files:Record<string,string>={'records.bound':bundle.records,'receipt.bound':bundle.receipt};
+ for(const p of bundle.placements??[])files['place-'+encodeURIComponent(p.place)+'.bound']=p.records;
+ return files;
+}
+
+/** The caller must first verify the historical bundle through its receiver. */
+export function reconfirmLocalActInWorker(store:string,identity:string,bundle:LocalActBundle,options:BoundWorkerOptions):Promise<void>{
+ return reconfirmBundleInWorker(atOf(store,identity),localActMembers(bundle),options);
 }

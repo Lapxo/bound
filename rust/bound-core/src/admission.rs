@@ -27,11 +27,11 @@ fn covered(r:&Request,index:usize,signer:&Value,port:&mut impl AdmissionPort)->R
   if prefix=="*"||boolean(port,json!({"op":"within","scope":scope,"prefix":prefix}))?{return Ok(true);}
  }Ok(false)
 }
-fn project(r:&Request,port:&mut impl AdmissionPort)->Result<String,PortError>{
+fn project(r:&Request,port:&mut impl AdmissionPort,long:bool)->Result<String,PortError>{
  if r.operation=="verify"{let mut values=vec![];for index in &r.queries{values.push(boolean(port,json!({"op":"verify-root","index":index}))?);}return Ok(format!("[\"fact\",{}]\n",serde_json::to_string(&values).unwrap()));}
  // The selected Topos implementation performs its own fixed-point/quorum rules.
  // Its signature predicate uses only fresh exact-byte verification results.
- let selected=port.call(json!({"op":"select","history":r.history}))?;
+ let selected=port.call(if long {json!({"op":"select-held"})} else {json!({"op":"select","history":r.history})})?;
  let raw=selected.as_str().ok_or_else(PortError::context)?;
  let lock:Value=serde_json::from_str(raw).map_err(|_|PortError::context())?;
  let admitted=lock["admitted"].as_array().ok_or_else(PortError::context)?;
@@ -58,12 +58,15 @@ fn project(r:&Request,port:&mut impl AdmissionPort)->Result<String,PortError>{
  Ok(format!("[\"fact\",{}]\n",serde_json::to_string(&answers).unwrap()))
 }
 pub fn evaluate_admission(input:&[u8],port:&mut impl AdmissionPort)->Vec<u8>{
- if input.len()>super::INPUT_BYTES{return super::refusal("fold/input-budget");}
+ evaluate_bounded(input,port,false,super::INPUT_BYTES,super::RESPONSE_BYTES)
+}
+fn evaluate_bounded(input:&[u8],port:&mut impl AdmissionPort,long:bool,input_limit:usize,output_limit:usize)->Vec<u8>{
+ if input.len()>input_limit{return super::refusal("fold/input-budget");}
  let r:Request=match serde_json::from_slice(input){Ok(r)=>r,Err(_)=>return super::refusal("admission/prepared-input")};
  if r.profile!="bound-admission-prepared@1"{return super::refusal("admission/profile");}
- if r.records.len()>super::RECORDS||r.history.len()>super::RECORDS||r.queries.len()>super::RECORDS{return super::refusal("fold/record-budget");}
+ if (!long&&(r.records.len()>super::RECORDS||r.history.len()>super::RECORDS))||r.queries.len()>super::RECORDS{return super::refusal("fold/record-budget");}
  if r.records.iter().any(|record|!record.epoch.is_finite())||r.history.iter().chain(&r.queries).any(|i|*i>=r.records.len()){return super::refusal("admission/prepared-input");}
- match project(&r,port){Ok(out)if out.len()<=super::RESPONSE_BYTES=>out.into_bytes(),Ok(_)=>super::refusal("fold/response-budget"),Err(e)=>super::refusal(&e.code)}
+ match project(&r,port,long){Ok(out)if out.len()<=output_limit=>out.into_bytes(),Ok(_)=>super::refusal("fold/response-budget"),Err(e)=>super::refusal(&e.code)}
 }
 #[cfg(all(target_arch="wasm32",feature="admission-port"))]
 mod wasm_port{
@@ -73,6 +76,10 @@ mod wasm_port{
  impl AdmissionPort for ReceiverPort{fn call(&mut self,request:Value)->Result<Value,PortError>{super::super::byte_port::invoke(request,call)}}
  #[no_mangle]pub extern "C" fn admission_eval(handle:u32,length:u32)->u64{super::super::abi::evaluate(handle,length,|input|evaluate_admission(input,&mut ReceiverPort))}
 
+ #[no_mangle]pub extern "C" fn admission_history_finish()->u32{
+  use super::super::history_transport::{finish,MAX_BYTES};
+  finish(|input|evaluate_bounded(input,&mut ReceiverPort,true,MAX_BYTES,MAX_BYTES))
+ }
 }
 #[cfg(test)]mod tests{
  use super::*;struct NoPort;impl AdmissionPort for NoPort{fn call(&mut self,_:Value)->Result<Value,PortError>{panic!("unexpected host call")}}
