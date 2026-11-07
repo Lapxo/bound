@@ -1,0 +1,20 @@
+[package]
+name = "bound-fold-core"
+version = "0.0.0"
+edition = "2021"
+publish = false
+[features]
+object-port = []
+admission-port = []
+persistence-port = []
+[lib]
+crate-type = ["cdylib", "rlib"]
+[dependencies]
+serde = { version = "=1.0.228", features = ["derive"] }
+serde_json = "=1.0.150"
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = "symbols"

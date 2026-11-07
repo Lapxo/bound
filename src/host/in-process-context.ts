@@ -15,12 +15,17 @@ import {wordsOf} from '../fold/wire.ts';
 import {fieldOf,isConfig} from '../fold/claims.ts';
 import {signatureEraOf} from './signature-era.ts';
 
-function authenticatedCarrier(snapshot:ContextualStandingSnapshot,anchor:Signer,records:number){
+type ContextualProjection={
+ readonly root:(lines:readonly string[],anchor:Signer)=>readonly string[]|Promise<readonly string[]>;
+ readonly places:(...args:Parameters<typeof projectContextualStanding>)=>ReturnType<typeof projectContextualStanding>|Promise<ReturnType<typeof projectContextualStanding>>;
+};
+
+async function authenticatedCarrier(snapshot:ContextualStandingSnapshot,anchor:Signer,records:number,projection:ContextualProjection){
  if(!snapshot||Object.keys(snapshot).sort().join(',')!=='contexts,legacyPlaces,rootHistory'||!Array.isArray(snapshot.rootHistory)||!Array.isArray(snapshot.legacyPlaces)||!Array.isArray(snapshot.contexts))fail('snapshot-format');
  let count=snapshot.rootHistory.length;if(count>records)fail('budget');
  const validLine=(line:string)=>typeof line==='string'&&parse(line).kind==='fact';
  if(!snapshot.rootHistory.length||snapshot.rootHistory.some(l=>!validLine(l)))fail('snapshot-format');
- const root=publicStandingProjection(snapshot.rootHistory,anchor),families=wordsOf(root,'families');
+ const root=await projection.root(snapshot.rootHistory,anchor),families=wordsOf(root,'families');
  // Unsupported vocabulary resolution must not discover a provider in the CLI host.
  if(families.length&&!families.includes('view'))fail('vocabulary-unavailable');
  assertStandingView(root);
@@ -45,21 +50,32 @@ function authenticatedCarrier(snapshot:ContextualStandingSnapshot,anchor:Signer,
   if(JSON.stringify(expected)!==JSON.stringify(row.authority.history))fail('historical-snapshot');
  }
  const decoded=inspectPortablePlaceContexts(JSON.stringify(snapshot.contexts),anchor,selection);
- return projectContextualStanding(root,snapshot.legacyPlaces,snapshot.contexts,decoded);
+ return projection.places(root,snapshot.legacyPlaces,snapshot.contexts,decoded);
 }
 
 /** Full contextual carrier, authenticated against receiver inputs only. It is a
  * data projection, not a current admission permit or a signed receipt. */
-export async function readContextualStandingInProcess(context:RootStandingHostContext,ports:{readonly read:ContentReadPort}){
+export function readContextualStandingInProcess(context:RootStandingHostContext,ports:{readonly read:ContentReadPort}){
+ return readContextualStandingWithProjection(context,ports,()=>({root:publicStandingProjection,places:projectContextualStanding}));
+}
+
+export async function readContextualStandingWithProjection(
+ context:RootStandingHostContext,
+ ports:{readonly read:ContentReadPort},
+ projection:(timeoutMs:number,signal?:AbortSignal)=>ContextualProjection,
+ implementation?:string,
+){
  try{
   const {place,source,snapshot,signal}=context,anchor=structuredClone(context.anchor),reading=structuredClone(context.reading),limits={...context.limits};
   if(!place||typeof place!=='string'||!source||typeof source!=='string'||!Number.isSafeInteger(limits.records)||limits.records<1)fail('context');
-  const identity=readingIdentity({...reading,inputs:[...reading.inputs,['host/place',sha256(place)],['host/anchor',sha256(JSON.stringify(anchor))],['host/snapshot',snapshot]]},sha256);
+  const identity=readingIdentity({...reading,inputs:[...reading.inputs,['host/place',sha256(place)],['host/anchor',sha256(JSON.stringify(anchor))],['host/snapshot',snapshot],...(implementation?[['bound/worker-core',implementation] as const]:[])]},sha256);
   const bytes=await readContent(source,snapshot,{read:ports.read,digestBytes:sha256},limits,signal);
   let text:string,value:ContextualStandingSnapshot;try{text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);value=JSON.parse(text)}catch{return fail('snapshot-format')}
   if(JSON.stringify(value)+'\n'!==text)fail('snapshot-format');
   if(signal?.aborted)fail('cancelled');
-  const standing=authenticatedCarrier(value,anchor,limits.records),result=sha256(JSON.stringify(standing)+'\n');
+  const standing=await authenticatedCarrier(value,anchor,limits.records,projection(limits.timeoutMs,signal));
+  if(signal?.aborted)fail('cancelled');
+  const result=sha256(JSON.stringify(standing)+'\n');
   return {kind:'fact' as const,value:{place,standing,reading:identity,result,commitment:readingReceiptIdentity(identity,result,sha256)}};
  }catch(error){return {kind:'refuse' as const,code:error instanceof BoundRefusal?error.code:'host/failed',diagnostic:error instanceof Error?error.message:'REFUSE·host/failed'}};
 }

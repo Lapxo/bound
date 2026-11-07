@@ -4,7 +4,7 @@ import {dirname,join} from 'node:path';
 import {requireEffects} from '../read-only.ts';
 
 export interface PublicationStorage {publish(staged: string, committed: string): void}
-const syncDirectory = (path: string): void => {
+export const syncDirectory = (path: string): void => {
   const fd=openSync(path,'r');try{fsyncSync(fd)}finally{closeSync(fd)}
 };
 export const nativePublicationStorage: PublicationStorage = {
@@ -23,6 +23,18 @@ export function publishBundle(committed: string, files: Readonly<Record<string,s
   if(!entries.length || entries.some(([name])=>!name || name==='.' || name==='..' || /[\\/\0]/.test(name))) {
     throw Error('REFUSE·commit invalid publication members');
   }
+  const staged=preparePublicationStage(committed);
+  try {
+    for(const [name,bytes] of entries){
+      writePublicationMember(staged,name,bytes);
+    }
+    syncDirectory(staged);
+    storage.publish(staged,committed);
+  } finally {rmSync(staged,{recursive:true,force:true})}
+}
+
+
+export function preparePublicationStage(committed:string):string{
   const root=dirname(committed);
   const created=mkdirSync(root,{recursive:true});
   // Persist newly created directory entries up to their existing parent too.
@@ -31,12 +43,9 @@ export function publishBundle(committed: string, files: Readonly<Record<string,s
   }
   const staged=join(root,'.stage-'+randomUUID());
   mkdirSync(staged,{mode:0o700});
-  try {
-    for(const [name,bytes] of entries){
-      const fd=openSync(join(staged,name),'wx',0o600);
-      try{writeFileSync(fd,bytes);fsyncSync(fd)}finally{closeSync(fd)}
-    }
-    syncDirectory(staged);
-    storage.publish(staged,committed);
-  } finally {rmSync(staged,{recursive:true,force:true})}
+  return staged;
+}
+export function writePublicationMember(staged:string,name:string,bytes:string):void{
+  const fd=openSync(join(staged,name),'wx',0o600);
+  try{writeFileSync(fd,bytes);fsyncSync(fd)}finally{closeSync(fd)}
 }

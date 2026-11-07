@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,writeFileSync,rmSync,symlinkSync,unlinkSync,utimesSync,readFileSync,statSync} from 'node:fs';
 import {join} from 'node:path';
+import {canonical} from '@lapxo/topos/wire';
 import {tmpdir} from 'node:os';
 import {captureViewInputs,withViewInputObservation,sharedViewInputs,viewInput} from '../src/host/reading-context.ts';
 import {observeFile,observeText} from '../src/observe/files.ts';
@@ -23,12 +24,16 @@ test('an edit or removal inside one observation cannot escape through retained e
 
 test('public instrument parse reuse rereads current bytes and never exposes retained configuration',async()=>{
  const {nativeHostInstrument}=await import('@lapxo/bound/host');
- const entry=new URL('../dist/cli/verb.js',import.meta.url).pathname,root=new URL('../',import.meta.url).pathname;
- const first=nativeHostInstrument(root,entry),count=first.runtime.lock.length;
- (first.runtime.lock as string[]).length=0;assert.equal(nativeHostInstrument(root,entry).runtime.lock.length,count);
- const file=new URL('../TARGET.bound',import.meta.url),original=readFileSync(file),time=statSync(file).mtime;
- try{writeFileSync(file,Buffer.alloc(original.length,32));utimesSync(file,time,time);assert.throws(()=>nativeHostInstrument(root,entry),/public instrument lock/)}finally{writeFileSync(file,original);utimesSync(file,time,time)}
- assert.equal(nativeHostInstrument(root,entry).runtime.lock.length,count);
+ const root=mkdtempSync(join(tmpdir(),'public-instrument-')),entry=join(root,'entry.js'),file=join(root,'TARGET.bound');
+ try{
+  writeFileSync(entry,'export const fixture=true;\n');
+  writeFileSync(file,canonical({scope:'wire/families',role:'writes',form:'alphabet',measure:'id',value:'view',by:'target'})+'\n');
+  const first=nativeHostInstrument(root,entry),count=first.runtime.lock.length;
+  (first.runtime.lock as string[]).length=0;assert.equal(nativeHostInstrument(root,entry).runtime.lock.length,count);
+  const original=readFileSync(file),time=statSync(file).mtime;
+  try{writeFileSync(file,Buffer.alloc(original.length,32));utimesSync(file,time,time);assert.throws(()=>nativeHostInstrument(root,entry),/public instrument lock/)}finally{writeFileSync(file,original);utimesSync(file,time,time)}
+  assert.equal(nativeHostInstrument(root,entry).runtime.lock.length,count);
+ }finally{rmSync(root,{recursive:true,force:true})}
 });
 
 test('shared computation preserves each view input identity, budget and fresh verification',()=>{

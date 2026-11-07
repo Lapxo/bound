@@ -4,7 +4,8 @@ import {sha256 as sha} from '../hash.ts';
 /** A program alias is a Root selection, never PATH.
  * This verifies a finite implementation before entry; it executes nothing.
  * The runtime hook must still verify each reached member before loading it. */
-import {isAbsolute, resolve, relative} from 'node:path';
+import {isAbsolute, resolve} from 'node:path';
+import {insideDirectory} from '../paths.ts';
 import {realpathSync} from 'node:fs';
 import {authenticateSignedPort, nativeParentInputBytes, canonicalJson, type RootStanding} from './reading.ts';
 import {readBounded, type ParentExecution} from './generated.ts';
@@ -37,7 +38,7 @@ export function verifyNativeProgram(root:RootStanding,coordinate:string,parent:P
  const physical=(path:string)=>{try{return realpathSync(path)}catch{return fail('selected member absent '+path)}};
  const entryMount=runtimeBinding.members.find(m=>m.coordinate===p.root+'/'+p.entry);if(!entryMount)return fail('entry mount absent from host image');const levels=p.entry.split('/').length;let physicalRoot=physical(entryMount.path);for(let i=0;i<levels;i++)physicalRoot=resolve(physicalRoot,'..');const interpreter=physical(runtimeBinding.path);
  const interpreterBytes=readBounded(interpreter,p.interpreter.bytes);if(interpreterBytes.length!==p.interpreter.bytes||sha(interpreterBytes)!==p.interpreter.digest)fail('interpreter bytes differ');
- const members=p.members.map(m=>{const mounted=runtimeBinding.members.find(one=>one.coordinate===p.root+'/'+m.coordinate);if(!mounted)return fail('member absent from actual host image '+m.coordinate);const path=physical(mounted.path),r=relative(physicalRoot,path);if(r==='..'||r.startsWith('../')||isAbsolute(r))fail('member outside selected implementation');const b=readBounded(path,m.bytes);if(b.length!==m.bytes||sha(b)!==m.digest)fail('member bytes differ '+m.coordinate);return{path,digest:m.digest}});
+ const members=p.members.map(m=>{const mounted=runtimeBinding.members.find(one=>one.coordinate===p.root+'/'+m.coordinate);if(!mounted)return fail('member absent from actual host image '+m.coordinate);const path=physical(mounted.path);if(!insideDirectory(physicalRoot,path))fail('member outside selected implementation');const b=readBounded(path,m.bytes);if(b.length!==m.bytes||sha(b)!==m.digest)fail('member bytes differ '+m.coordinate);return{path,digest:m.digest}});
  const handle=Object.freeze({identity:sha(canonicalJson([authenticated.line,parent.identity]))});
  verified.set(handle,{alias:p.alias,interpreter,interpreterDigest:p.interpreter.digest,entry:physical(resolve(physicalRoot,p.entry)),root:physicalRoot,members,condition:p.condition});return handle;
 }

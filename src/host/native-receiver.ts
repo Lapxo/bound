@@ -1,5 +1,6 @@
 import {readFileSync,realpathSync} from 'node:fs';
-import {basename,dirname,extname,isAbsolute,join,relative} from 'node:path';
+import {basename,dirname,extname,isAbsolute,join} from 'node:path';
+import {insideDirectory} from './paths.ts';
 import {publicLock} from '@lapxo/topos/wire';
 import {foldClaims,wireLinesOf} from '../fold/claims.ts';
 import {declaredRootClockSource} from './root-clock-source.ts';
@@ -14,8 +15,8 @@ let publicInstrument:{readonly root:string;readonly file:string;readonly text:st
 /** Explicit installed/source ESM selection, never consumer argv or packet data.
  * Identity and public configuration do not certify implementation correctness. */
 export function nativeHostInstrument(root:string,entry:string):NativeHostInstrument {
- const at=realpathSync(root),file=realpathSync(entry),inside=relative(at,file),extension=extname(file);
- if(!isAbsolute(root)||!isAbsolute(entry)||inside.startsWith('..')||isAbsolute(inside)||!['.ts','.js'].includes(extension))throw new BoundRefusal('host/context','REFUSE·host/context');
+ const at=realpathSync(root),file=realpathSync(entry),extension=extname(file);
+ if(!isAbsolute(root)||!isAbsolute(entry)||!insideDirectory(at,file)||!['.ts','.js'].includes(extension))throw new BoundRefusal('host/context','REFUSE·host/context');
  const text=readFileSync(join(at,'TARGET.bound'),'utf8'),held=publicInstrument;
  if(held?.root===at&&held.file===file&&held.text===text)return structuredClone(held.value);
  const published=publicLock(wireLinesOf(text));

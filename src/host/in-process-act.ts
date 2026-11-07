@@ -83,3 +83,24 @@ export function recoverPlaceActInProcess(context:Pick<PlaceActHostContext,'place
   }catch(error){return {kind:'refuse' as const,code:error instanceof BoundRefusal?error.code:'host/failed',diagnostic:error instanceof Error?error.message:'REFUSE·host/failed'}};
  }));
 }
+
+
+/** Existing historical verification and exact file reconfirmation share one guard. */
+export async function recoverPlaceActInWorker(
+ context:Parameters<typeof recoverPlaceActInProcess>[0],
+ ports:Parameters<typeof recoverPlaceActInProcess>[1]&{
+  readonly persistence:ReturnType<typeof import('./ports/place-act.ts').nativePlaceActWorkerPersistence>;
+ },
+){
+ try{
+  if(context.signal?.aborted)fail('cancelled');
+  return await ports.persistence.exclusive([''],async()=>{
+   const recovered=recoverPlaceActInProcess(context,ports);
+   if(recovered.kind==='refuse')return recovered;
+   await ports.persistence.reconfirm(context.identity,recovered.value.act,context.signal);
+   return recovered;
+  });
+ }catch(error){
+  return {kind:'refuse' as const,code:error instanceof BoundRefusal?error.code:'host/recovery',diagnostic:error instanceof Error?error.message:'REFUSE·host/recovery'};
+ }
+}

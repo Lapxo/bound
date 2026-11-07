@@ -8,6 +8,7 @@ export interface ModuleClosureMember { readonly digest: string; readonly source:
 export interface ModuleClosureSnapshot {
  readonly identity: string;
  readonly entry: string;
+ readonly capsule?: Uint8Array;
  readonly members: ReadonlyMap<string,ModuleClosureMember>;
 }
 export interface ModuleClosureReading { readonly snapshot: string; readonly coordinate: string; readonly digest: string }
@@ -15,6 +16,7 @@ export interface ModuleClosureLimits {
  readonly members: number;
  readonly bytes: number;
  readonly portableESM?: boolean;
+ readonly portableBuiltins?: ReadonlySet<string>;
  readonly signal?: AbortSignal;
 }
 
@@ -22,21 +24,23 @@ export interface ModuleClosureLimits {
  * This proves content identity only; standing admission and runtime capabilities
  * are separate prerequisites. Binary resources are not executable text members.
  */
-export function moduleSnapshot(archive:Uint8Array,expected:string,entry:string):ModuleClosureSnapshot{
+export function moduleSnapshot(archive:Uint8Array,expected:string,entry:string,maxOutputLength?:number):ModuleClosureSnapshot{
  const identity='sha256:'+createHash('sha256').update(archive).digest('hex');
  if(!/^sha256:[0-9a-f]{64}$/.test(expected)||identity!==expected)throw Error('REFUSE·module closure archive bytes differ');
+ let capsule:Uint8Array|undefined;
  const textMembers=new Map<string,ModuleClosureMember>();
- for(const member of members(archive)){
+ for(const member of members(archive,maxOutputLength)){
   // Platform archive metadata remains covered by the archive digest. Its
   // binary header, rather than a filename convention, identifies data.
   if(member.bytes.length>=4&&new DataView(member.bytes.buffer,member.bytes.byteOffset,4).getUint32(0)===0x00051607)continue;
+  if(maxOutputLength!==undefined&&member.name==='capsule.bound')capsule=member.bytes;
   if(!['.js','.mjs','.cjs','.ts','.json'].includes(posix.extname(member.name)))continue;
   let source:string;
   try{source=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(member.bytes);}
   catch{throw Error('REFUSE·module closure invalid UTF-8 bytes '+member.name);}
   textMembers.set(member.name,{source,digest:'sha256:'+createHash('sha256').update(member.bytes).digest('hex')});
  }
- return {identity,entry,members:textMembers};
+ return {identity,entry,members:textMembers,...(capsule?{capsule}:{})};
 }
 
 /** The host supplies authenticated snapshot identities and its library resolver.
@@ -96,7 +100,7 @@ export function moduleClosures(snapshots: readonly ModuleClosureSnapshot[],
    // createRequire/registerHooks can select executable edges not present in this graph.
    // Their runtime closure needs its own host contract; an arbitrary alias is not a literal edge.
    if(specifier==='node:module'||specifier==='module')throw Error('REFUSE·module closure runtime loader requires declared closure '+specifier+' from '+at);
-   if(limits?.portableESM&&(specifier.startsWith('node:')||builtinModules.includes(specifier)))throw Error('REFUSE·module closure host builtin in portable delivery '+specifier+' from '+at);
+   if(limits?.portableESM&&(specifier.startsWith('node:')||builtinModules.includes(specifier))&&!limits.portableBuiltins?.has(specifier))throw Error('REFUSE·module closure host builtin in portable delivery '+specifier+' from '+at);
    if(specifier.startsWith('node:')){
     if(!builtinModules.includes(specifier)&&!builtinModules.includes(specifier.slice(5)))throw Error('REFUSE·module closure unknown builtin '+specifier+' from '+at);
     continue;

@@ -7,14 +7,13 @@ import {assertHostNotCancelled as cancelled,receiverClock,placeRegionOf} from '.
 export {ActCommitUnknown as PlaceActCommitUnknown} from './commit-result.ts';
 
 /** Host-selected persistence, never supplied by offered content. exclusive must
- * share the CLI's region/authority/projection protocol. publish is synchronous
- * with exactly one atomic visibility point; a thrown reply may follow commit. */
+ * share the CLI's region/authority/projection protocol. publish has exactly one atomic visibility point; a thrown reply may follow commit. */
 export interface PlaceActPersistence {
  readonly exclusive:<T>(regions:readonly string[],run:()=>Promise<T>)=>Promise<T>;
  readonly result:(identity:string,trust:PlaceActTrust,limits:PlaceActBudget)=>PlaceActBundle|undefined;
  readonly inventory:(limits:PlaceActBudget)=>{readonly names:readonly string[];readonly bytes:number};
  readonly heads:(trust:PlaceActTrust,limits:PlaceActBudget)=>readonly PlaceActHead[];
- readonly publish:(identity:string,files:Readonly<Record<string,string>>)=>void;
+ readonly publish:(identity:string,files:Readonly<Record<string,string>>)=>void|Promise<void>;
 }
 export type PlaceActReceiptSource=readonly PlaceReceipt[]|(()=>Promise<readonly PlaceReceipt[]>);
 /** The visibility point may have happened. Only an authenticated result query
@@ -65,7 +64,7 @@ export async function transactPlaceAct(encoded:string,source:PlaceActReceiptSour
   const files={'context.json':encoded,'receipts.json':JSON.stringify(receipts)+'\n','originals.json':JSON.stringify(originals)+'\n'};
   capacity(sizeOf(files));
   assertCurrent();cancelled(signal);
-  try{persistence.publish(id,files)}catch(error){throw new ActCommitUnknown(id,error)}
+  try{await persistence.publish(id,files)}catch(error){throw new ActCommitUnknown(id,error)}
   return {context:encoded,receipts,originals,identity:id,kind:'landed'};
  });
 }

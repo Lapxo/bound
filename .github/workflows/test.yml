@@ -26,16 +26,31 @@ jobs:
         run: |
           set -euo pipefail
           node --import ./test/setup.ts --test --test-concurrency=1 test/*.test.ts 2>&1 | tee "$RUNNER_TEMP/bound-tests.log"
+      - name: Form package from clean PR checkout
+        if: matrix.node == 24 && github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/pr-package"
+          npm pack --offline --ignore-scripts --pack-destination "$RUNNER_TEMP"
+          npm run compact-archive -- "$RUNNER_TEMP/lapxo-bound-0.2.9.tgz" "$RUNNER_TEMP/pr-package/lapxo-bound-0.2.9.tgz"
+          cd "$RUNNER_TEMP/pr-package"
+          sha256sum lapxo-bound-0.2.9.tgz > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 24 && github.event_name == 'pull_request'
+        with:
+          name: bound-pr-package
+          path: ${{ runner.temp }}/pr-package/
+          if-no-files-found: error
       - name: Form exact archive once
-        if: matrix.node == 24
+        if: matrix.node == 24 && github.event_name == 'push'
         run: |
           mkdir "$RUNNER_TEMP/exact"
-          npm run compact-archive -- --from-place . "$RUNNER_TEMP/exact/lapxo-bound-0.2.8.tgz"
+          npm run compact-archive -- --from-place . "$RUNNER_TEMP/exact/lapxo-bound-0.2.9.tgz"
       - uses: actions/upload-artifact@v4
-        if: matrix.node == 24
+        if: matrix.node == 24 && github.event_name == 'push'
         with:
           name: bound-exact-archive
-          path: ${{ runner.temp }}/exact/lapxo-bound-0.2.8.tgz
+          path: ${{ runner.temp }}/exact/lapxo-bound-0.2.9.tgz
           if-no-files-found: error
       - name: Preserve test logs
         if: always()
@@ -44,7 +59,30 @@ jobs:
           name: bound-node-${{ matrix.node }}
           path: ${{ runner.temp }}/bound-tests.log
           if-no-files-found: ignore
+  pr-package-portability:
+    if: github.event_name == 'pull_request'
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: bound-pr-package
+          path: .pr-package
+      - name: Verify and install the same PR package
+        run: node --experimental-strip-types test/check-clean-clone-package.ts .pr-package
   exact_archive:
+    if: github.event_name == 'push'
     needs: test
     runs-on: ubuntu-24.04
     outputs:
@@ -55,7 +93,7 @@ jobs:
           name: bound-exact-archive
           path: .exact-input
       - id: identity
-        run: printf 'archive_digest=sha256:%s\n' "$(sha256sum .exact-input/lapxo-bound-0.2.8.tgz | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
+        run: printf 'archive_digest=sha256:%s\n' "$(sha256sum .exact-input/lapxo-bound-0.2.9.tgz | cut -d ' ' -f1)" >> "$GITHUB_OUTPUT"
   portability-ci:
     needs: exact_archive
     permissions:
@@ -83,7 +121,7 @@ jobs:
       - name: Check installed archive and native attestation
         run: node --experimental-strip-types --test test/portability-installed.test.ts
         env:
-          BOUND_PORTABILITY_ARCHIVE: .portability-input/lapxo-bound-0.2.8.tgz
+          BOUND_PORTABILITY_ARCHIVE: .portability-input/lapxo-bound-0.2.9.tgz
           BOUND_PORTABILITY_DIGEST: ${{ needs.exact_archive.outputs.archive_digest }}
           BOUND_PORTABILITY_CAPTURE: ${{ runner.temp }}/portability-evidence.json
       - uses: actions/upload-artifact@v4

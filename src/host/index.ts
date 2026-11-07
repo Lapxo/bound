@@ -2,14 +2,14 @@
 export {readRootStandingInProcess} from './in-process.ts';
 export type {RootStandingHostContext,RootStandingHostResult} from './in-process.ts';
 export {readContextualStandingInProcess} from './in-process-context.ts';
-export {landPlaceActInProcess,recoverPlaceActInProcess} from './in-process-act.ts';
+export {landPlaceActInProcess,recoverPlaceActInProcess,recoverPlaceActInWorker} from './in-process-act.ts';
 export type {PlaceActHostContext,PlaceActHostPorts} from './in-process-act.ts';
-export {landRootLotInProcess,recoverRootActInProcess,rootLotSnapshot} from './in-process-root.ts';
+export {landRootLotInProcess,recoverRootActInProcess,recoverRootActInWorker,rootLotSnapshot} from './in-process-root.ts';
 export type {RootLotContext,RootLotPorts} from './in-process-root.ts';
 export {nativeHostInstrument,installedHostInstrument,nativePlaceActReceiver} from './native-receiver.ts';
 export type {NativeHostInstrument} from './native-receiver.ts';
 export type {HostInstrumentRuntime} from './call-context.ts';
-export {nativePlaceActPersistence} from './ports/place-act.ts';
+export {nativePlaceActPersistence,nativePlaceActWorkerPersistence} from './ports/place-act.ts';
 export type {PlaceActTrust,PlaceActBudget} from './ports/place-act.ts';
 export type {PlaceActPersistence} from './place-act-transaction.ts';
 export type {PublicationStorage} from './ports/publication.ts';
@@ -31,3 +31,18 @@ export {startNativeHost,nativeHostEnvironment} from './persistent-host.ts';
 export type {NativeCommandHost,NativeHostOptions,NativeHostLimits,NativeCommand,NativeCommandResult} from './persistent-host.ts';
 
 export type {HTTPReceiverPolicy,HTTPHop} from './adapters/transport/http.ts';
+
+export {evaluateBoundCoreInWorker,evaluateBoundCapsuleInWorker,evaluateInstalledBoundCoreInWorker} from './worker-host.ts';
+export type {BoundWorkerOptions} from './worker-host.ts';
+export type {RustCoreRequest} from '../wasm/rust-core.ts';
+export {readRootStandingInWorker,readContextualStandingInWorker} from './worker-standing.ts';
+export {dispatchPublishedCapsuleInWorker,dispatchSelectedCapsuleInWorker} from './worker-capsule.ts';
+export type {PublishedCapsuleSelection,SelectedWorkerCapsuleContext} from './worker-capsule.ts';
+export {dispatchNativeCapsuleInWorker} from './native-worker-capsule.ts';
+export type {NativeWorkerCapsuleContext} from './native-worker-capsule.ts';
+
+export {inspectBoundAdmissionInWorker,inspectBoundAdmissionHistoryInWorker} from './act-worker-port.ts';
+export type {WorkerAdmissionContext} from './act-rust-ports.ts';
+
+export {withSynchronousCapsuleWorkers} from './capsule-sync-worker.ts';
+export type {CapsuleWorkerSelections} from './capsule-sync-worker.ts';
